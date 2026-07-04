@@ -4,10 +4,10 @@
 
 | 이름 | 역할 | 담당 기능 |
 | --- | --- | --- |
-| 하연탄 | Front-End | 카메라, 인증 |
-| 시온 | Front-End | 챌린지 |
-| 조나단 | Front-End | 로그인, 회원가입, 홈 |
-| 구민 | Front-End | 마이페이지, 파티 |
+| 하연탄 | Front-End | 카메라, 인증, 챌린지 참여 |
+| 시온 | Front-End | 챌린지페이지, 알림 |
+| 조나단 | Front-End | 로그인, 회원가입, 마이페이지 |
+| 구민 | Front-End | 홈, 파티|
 
 ## 🛠 기술 스택
 
@@ -44,6 +44,7 @@ app
 
 - `main` : 배포 브랜치
 - `develop` : 개발 브랜치
+- `feature/{기능명}` : 새로운 기능 개발을 위한 브랜치
 
 ### 💬 Commit Message
 
@@ -63,18 +64,18 @@ app
 | --- | --- | --- |
 | 로그인 | LoginScreen | 조나단 |
 | 회원가입 | SignUpScreen | 조나단 |
-| 인증 메일 발송 | EmailScreen | 하연탄 |
-| 홈  | HomeScreen | 조나단 |
+| 인증 메일 발송 | EmailScreen | 조나단 |
+| 홈  | HomeScreen | 구민 |
 | 챌린지  | ChallengeScreen | 시온 |
 | 인증 | ChallengeVerificationScreen | 하연탄 |
-| 마이페이지 | MyPageScreen | 구민 |
+| 마이페이지 | MyPageScreen | 조나 |
 | 파티 | PartyScreen | 구민 |
 
 ## 🔀 Pull Request
 
 - PR 생성 전 `develop` 브랜치의 최신 내용을 반영합니다.
 - PR 제목은 작업 내용을 명확하게 작성합니다.
-- 최소 1명 이상의 팀원 리뷰를 받은 후 머지합니다.
+- 최소 2명 이상의 팀원 리뷰를 받은 후 머지합니다.
 - 충돌(Conflict)이 없는 상태에서 머지를 진행합니다.
 - PR 본문에는 작업 내용 및 변경 사항을 작성합니다.
 
