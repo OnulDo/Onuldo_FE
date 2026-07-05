@@ -34,7 +34,7 @@ app
 └── utils              # 공통 유틸리티
 ```
 
-- 빌드 및 실행 방법
+## 빌드 및 실행 방법
 
 에뮬레이터 또는 Android 기기를 연결한 후 **Run** 버튼을 눌러 실행합니다.
 
@@ -58,7 +58,8 @@ app
 | `docs` | 문서 수정 |
 | `chore` | 빌드 및 설정 변경 |
 | `test` | 테스트 코드 작성 |
-- 화면 목록 & 플로우 정리
+
+## 화면 목록 & 플로우 정리
 
 | 화면이름 | 스크린 ID | 담당자 |
 | --- | --- | --- |
@@ -68,7 +69,7 @@ app
 | 홈  | HomeScreen | 구민 |
 | 챌린지  | ChallengeScreen | 시온 |
 | 인증 | ChallengeVerificationScreen | 하연탄 |
-| 마이페이지 | MyPageScreen | 조나 |
+| 마이페이지 | MyPageScreen | 조나단 |
 | 파티 | PartyScreen | 구민 |
 
 ## 🔀 Pull Request
