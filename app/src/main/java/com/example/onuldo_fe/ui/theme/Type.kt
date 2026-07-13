@@ -2,33 +2,80 @@ package com.example.onuldo_fe.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.R
 
-// Set of Material typography styles to start with
-val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
+val Pretendard = FontFamily(
+    Font(
+        resId = R.font.pretendard_regular,
+        weight = FontWeight.Normal
     ),
-    labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+    Font(
+        resId = R.font.pretendard_bold,
+        weight = FontWeight.Bold
+    ),
+    Font(
+        resId = R.font.pretendard_extrabold,
+        weight = FontWeight.ExtraBold
     )
-    */
+)
+val Typography = Typography(
+    //Header1 - 28sp ExtraBold
+    headlineLarge = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 28.sp
+    ),
+
+    //Subtitle1 - 26sp Bold
+    headlineMedium = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.Bold,
+        fontSize = 26.sp
+    ),
+
+    // Body1 - 22sp Bold
+    titleLarge = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.Bold,
+        fontSize = 22.sp
+    ),
+
+    // Body2-ExtraBold - 20sp ExtraBold
+    titleMedium = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 20.sp
+    ),
+
+    // Body2 - 17sp Bold
+    bodyLarge = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.Bold,
+        fontSize = 17.sp
+    ),
+
+    // Body3 - 14sp Regular
+    bodyMedium = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp
+    ),
+
+    // Caption1 - 13sp Regular
+    labelLarge = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.Normal,
+        fontSize = 13.sp
+    ),
+
+    // Caption2 - 12sp Regular
+    labelMedium = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp
+    )
 )

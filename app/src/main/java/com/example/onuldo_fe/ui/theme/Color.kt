@@ -2,10 +2,37 @@ package com.example.onuldo_fe.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+//Black & White
+val Black = Color(0xFF101010)
+val White = Color(0xFFFFFFFF)
+val BlackBrown = Color(0xFF1B130C)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+//Background
+val SourCream = Color(0xFFFFFDF7)
+
+//MainColor
+val Persimmon = Color(0xFFFC6B2B)
+val DarkBrown = Color(0xFF5C2C03)
+
+//SubColor1
+val Persimmon80 = Persimmon.copy(alpha = 0.8f)
+val Persimmon50 = Persimmon.copy(alpha = 0.5f)
+val Persimmon20 = Persimmon.copy(alpha = 0.2f)
+val Persimmon10 = Persimmon.copy(alpha = 0.1f)
+val SourCream70 = SourCream.copy(alpha = 0.7f)
+val DarkBrown80 = DarkBrown.copy(alpha = 0.8f)
+val DarkBrown70 = DarkBrown.copy(alpha = 0.7f)
+val DarkBrown50 = DarkBrown.copy(alpha = 0.5f)
+val DarkBrown40 = DarkBrown.copy(alpha = 0.4f)
+val DarkBrown30 = DarkBrown.copy(alpha = 0.3f) // Line
+val DarkBrown20 = DarkBrown.copy(alpha = 0.2f)
+val DarkBrown10 = DarkBrown.copy(alpha = 0.1f)
+
+//SubColor2
+val Green = Color(0xFF09AC6A)
+val Green2 = Color(0x3361F0B6)
+val Green3 = Color(0x2661F0B6)
+val Red = Color(0xFFCE352A)
+val Red2 = Color(0x33FBA49D)
+val Red3 = Color(0x26FBA49D)
+
