@@ -1,6 +1,5 @@
 package com.example.onuldo_fe.ui.screen.home
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,9 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -71,7 +67,7 @@ fun HomeScreen() {
 }
 
 @Composable
-private fun HomeHeader(modifier: Modifier = Modifier) {
+fun HomeHeader(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -84,7 +80,12 @@ private fun HomeHeader(modifier: Modifier = Modifier) {
                     .background(Persimmon20, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                MiniMascot(modifier = Modifier.size(27.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.ic_home_fire_2),
+                    contentDescription = null,
+                    modifier = Modifier.size(27.dp),
+                    contentScale = ContentScale.Fit
+                )
             }
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -136,7 +137,7 @@ private fun EmptyChallengeContent(modifier: Modifier = Modifier) {
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_home_fire),
+                painter = painterResource(id = R.drawable.ic_home_fire_1),
                 contentDescription = null,
                 modifier = Modifier.size(72.dp),
                 contentScale = ContentScale.Fit
@@ -188,30 +189,6 @@ private fun EmptyChallengeContent(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-private fun MiniMascot(modifier: Modifier = Modifier) {
-    Canvas(modifier = modifier) {
-        val orange = Persimmon
-        val face = Color(0xFFFFB64E)
-        val blush = Color(0xFFFF7E62)
-
-        drawOval(
-            color = orange,
-            topLeft = Offset(size.width * 0.20f, size.height * 0.10f),
-            size = Size(size.width * 0.60f, size.height * 0.70f)
-        )
-        drawCircle(
-            color = face,
-            radius = size.width * 0.23f,
-            center = Offset(size.width * 0.50f, size.height * 0.47f)
-        )
-        drawCircle(BlackBrown, size.width * 0.025f, Offset(size.width * 0.42f, size.height * 0.45f))
-        drawCircle(BlackBrown, size.width * 0.025f, Offset(size.width * 0.58f, size.height * 0.45f))
-        drawCircle(blush, size.width * 0.04f, Offset(size.width * 0.36f, size.height * 0.53f))
-        drawCircle(blush, size.width * 0.04f, Offset(size.width * 0.64f, size.height * 0.53f))
-    }
-}
-
 @Preview(
     name = "Home Empty Challenge",
     showBackground = true,
@@ -225,4 +202,3 @@ private fun HomeScreenPreview() {
         HomeScreen()
     }
 }
-
