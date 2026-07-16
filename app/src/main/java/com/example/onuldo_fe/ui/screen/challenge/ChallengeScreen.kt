@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.sceen.challenge
+package com.example.onuldo_fe.ui.screen.challenge
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -23,6 +24,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,16 +38,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.ui.screen.challenge.component.ChallengeFilterButton
+import com.example.onuldo_fe.ui.screen.challenge.component.ChallengeFilterChips
+import com.example.onuldo_fe.ui.screen.challenge.component.ChallengeSearchBar
 import com.example.onuldo_fe.ui.theme.DarkBrown10
 import com.example.onuldo_fe.ui.theme.DarkBrown20
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
 
 /**
- * 챌린지 탐색 화면의 가운데 스크롤 영역 (챌린지 카드 2열 그리드).
- * 상단 검색바/제목, 하단 네비게이션바는 아직 제외.
+ * 챌린지 탐색 화면
  */
 data class Challenge(
     val id: Int,
@@ -50,22 +58,80 @@ data class Challenge(
     val participantCount: Int
 )
 
+// 더미 카테고리 —DB(서버 API) 연결하면 교체 예정
+private val sampleCategories = listOf("피트니스", "취미", "자기계발", "생활루틴", "식습관")
+
 @Composable
 fun ChallengeScreen(
     challenges: List<Challenge> = sampleChallenges,
     modifier: Modifier = Modifier
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+    var query by remember { mutableStateOf("") }
+    var filterSelected by remember { mutableStateOf(false) }
+
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .background(SourCream),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+            .background(SourCream)
+            .statusBarsPadding()
     ) {
-        items(challenges, key = { it.id }) { challenge ->
-            ChallengeCard(challenge = challenge)
+        // ── 헤더 (제목 / 부제 / 검색 — 고정) ──
+        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+            Spacer(Modifier.height(23.dp)) // 상단 여백(상태바 아래)
+            Text(
+                text = "챌린지",
+                style = MaterialTheme.typography.headlineLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(Modifier.height(2.dp)) // 제목
+            Text(
+                text = "나에게 맞는 챌린지를 찾아보세요",
+                style = MaterialTheme.typography.bodyMedium,
+                color = DarkBrown50
+            )
+            Spacer(Modifier.height(17.dp)) // 부제
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                ChallengeSearchBar(
+                    value = query,
+                    onValueChange = { query = it },
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(Modifier.width(9.dp)) // 검색창
+                ChallengeFilterButton(
+                    onClick = { filterSelected = !filterSelected }, // TODO: 필터 열기
+                    selected = filterSelected
+                )
+            }
+        }
+
+        // ++ 필터 카테고리 칩 (필터 버튼 눌렀을 때만 노출) TODO: 추후 수정!!( 디자인 확정 x)
+//        if (filterSelected) {
+//            Spacer(Modifier.height(13.dp)) // 검색창
+//            ChallengeFilterChips(
+//                categories = sampleCategories,
+//                onCategoryClick = { /* TODO: 카테고리 필터 적용 */ }
+//            )
+//            Spacer(Modifier.height(14.dp)) // 칩
+//        } else {
+//            Spacer(Modifier.height(21.dp)) // 검색창
+//        }
+
+        //임시
+        Spacer(Modifier.height(21.dp)) // 검색창
+
+        // 챌린지 카드 그리드 (스크롤)
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            items(challenges, key = { it.id }) { challenge ->
+                ChallengeCard(challenge = challenge)
+            }
         }
     }
 }
@@ -75,7 +141,7 @@ private fun ChallengeCard(
     challenge: Challenge,
     modifier: Modifier = Modifier
 ) {
-    // 카드 전체: 169 x 180, 배경 #FFFFFF, 테두리 1px #5C2C0333, 라운드 16
+    // 카드 전체
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -83,7 +149,7 @@ private fun ChallengeCard(
             .background(White)
             .border(1.dp, DarkBrown20, RoundedCornerShape(16.dp))
     ) {
-        // 사진 169 x 153 (top -23 크롭) → 카드 내 노출 169 x 130. Glide 연결 시 ContentScale.Crop
+        // 사진 169 x 153 (top -23 크롭) → 카드 내 노출 169 x 130
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -96,7 +162,7 @@ private fun ChallengeCard(
                 .fillMaxWidth()
                 .padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 10.dp)
         ) {
-            // 챌린지 제목: Pretendard Bold 13sp, line-height 100%
+            // 챌린지 제목
             Text(
                 text = challenge.title,
                 style = MaterialTheme.typography.labelLarge.copy(
@@ -110,10 +176,10 @@ private fun ChallengeCard(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // 인원수: Pretendard Medium 10sp, line-height 100%
+            // 인원수
             Row(verticalAlignment = Alignment.CenterVertically) {
                 PersonIcon(
-                    color = DarkBrown50,
+                    color = Persimmon,
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -133,8 +199,7 @@ private fun ChallengeCard(
 }
 
 /**
- * 사람 실루엣 아이콘 (머리 + 어깨) — Canvas로 임시로 그린 근사 아이콘.
- * TODO: 나중에 피그마 실제 아이콘(벡터 드로어블/에셋)으로 교체 예정.
+ * TODO: 나중에 피그마 실제 아이콘(벡터 드로어블/에셋) 교체??? (이름이 다 백터라서 보류함(충돌날까바))
  */
 @Composable
 private fun PersonIcon(

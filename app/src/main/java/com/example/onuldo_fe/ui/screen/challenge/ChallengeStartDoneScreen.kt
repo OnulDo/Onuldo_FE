@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.sceen.challenge
+package com.example.onuldo_fe.ui.screen.challenge
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
