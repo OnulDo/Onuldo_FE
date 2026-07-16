@@ -1,0 +1,57 @@
+package com.example.onuldo_fe.ui.component
+
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.Pretendard
+
+@Composable
+fun OnulDoButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .padding(horizontal = 20.dp)
+            .fillMaxWidth()
+            .height(56.dp),
+        enabled = enabled,
+        shape = RoundedCornerShape(14.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Persimmon
+        )
+    ) {
+        Text(
+            text = text,
+            fontSize = 16.sp,
+            fontFamily = Pretendard,
+            fontWeight = FontWeight.ExtraBold
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 390)
+@Composable
+private fun OnulDoButtonPreview() {
+    OnulDo_FETheme {
+        OnulDoButton(
+            text = "클릭하세요",
+            onClick = {},
+        )
+    }
+}
