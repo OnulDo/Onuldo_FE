@@ -1,6 +1,8 @@
 package com.example.onuldo_fe.ui.screen.home.data.dummy
 
 import com.example.onuldo_fe.ui.screen.home.data.dto.HomeChallengeDto
+import com.example.onuldo_fe.ui.screen.home.data.dto.HomeCompletedChallengeDto
+import com.example.onuldo_fe.ui.screen.home.data.dto.HomePartyChallengeDto
 import com.example.onuldo_fe.ui.screen.home.data.dto.HomeResponseDto
 import com.example.onuldo_fe.ui.screen.home.data.dto.TodayChallengeDto
 
@@ -12,6 +14,26 @@ object HomeDummyData {
             title = "오늘의 챌린지",
             completedCount = 1,
             totalCount = 4
+        ),
+        partyChallenges = listOf(
+            HomePartyChallengeDto(
+                title = "새벽 러닝 파티",
+                subtitle = "30분 러닝",
+                dDay = "D-12",
+                deadline = "7:00 마감",
+                timeLeft = "1시간 30분 남음",
+                completedMemberCount = 2,
+                totalMemberCount = 5
+            ),
+            HomePartyChallengeDto(
+                title = "러너 파티",
+                subtitle = "2시간 러닝",
+                dDay = "D-12",
+                deadline = "9:00 마감",
+                timeLeft = "",
+                completedMemberCount = 4,
+                totalMemberCount = 5
+            )
         ),
         challenges = listOf(
             HomeChallengeDto(
@@ -46,11 +68,45 @@ object HomeDummyData {
                 actionText = "성공",
                 status = "SUCCESS"
             )
+        ),
+        completedChallenges = listOf(
+            HomeCompletedChallengeDto(
+                time = "06:30",
+                title = "새벽 러너 파티",
+                resultText = "3/3 인증"
+            ),
+            HomeCompletedChallengeDto(
+                time = "23:00",
+                title = "밤샘 공부단",
+                resultText = "4/4 인증"
+            ),
+            HomeCompletedChallengeDto(
+                time = "06:30",
+                title = "새벽 기상",
+                resultText = "15일 연속"
+            ),
+            HomeCompletedChallengeDto(
+                time = "07:00",
+                title = "30분 러닝",
+                resultText = "12일 연속"
+            ),
+            HomeCompletedChallengeDto(
+                time = "자율",
+                title = "독서 30분",
+                resultText = "8일 연속"
+            ),
+            HomeCompletedChallengeDto(
+                time = "자율",
+                title = "1만보 걷기",
+                resultText = "5일 연속"
+            )
         )
     )
 
     val empty = HomeResponseDto(
         todayChallenge = null,
-        challenges = emptyList()
+        partyChallenges = emptyList(),
+        challenges = emptyList(),
+        completedChallenges = emptyList()
     )
 }

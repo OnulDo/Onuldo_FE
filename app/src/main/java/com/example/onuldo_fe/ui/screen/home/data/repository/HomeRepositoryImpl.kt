@@ -1,10 +1,14 @@
 package com.example.onuldo_fe.ui.screen.home.data.repository
 
 import com.example.onuldo_fe.ui.screen.home.data.dto.HomeChallengeDto
+import com.example.onuldo_fe.ui.screen.home.data.dto.HomeCompletedChallengeDto
+import com.example.onuldo_fe.ui.screen.home.data.dto.HomePartyChallengeDto
 import com.example.onuldo_fe.ui.screen.home.data.dto.HomeResponseDto
 import com.example.onuldo_fe.ui.screen.home.data.dto.TodayChallengeDto
 import com.example.onuldo_fe.ui.screen.home.model.ChallengeStatus
 import com.example.onuldo_fe.ui.screen.home.model.HomeChallenge
+import com.example.onuldo_fe.ui.screen.home.model.HomeCompletedChallenge
+import com.example.onuldo_fe.ui.screen.home.model.HomePartyChallenge
 import com.example.onuldo_fe.ui.screen.home.model.TodayChallenge
 
 class HomeRepositoryImpl(
@@ -14,8 +18,16 @@ class HomeRepositoryImpl(
         return homeResponse.todayChallenge?.toModel()
     }
 
+    override fun getPartyChallenges(): List<HomePartyChallenge> {
+        return homeResponse.partyChallenges.map { it.toModel() }
+    }
+
     override fun getChallenges(): List<HomeChallenge> {
         return homeResponse.challenges.map { it.toModel() }
+    }
+
+    override fun getCompletedChallenges(): List<HomeCompletedChallenge> {
+        return homeResponse.completedChallenges.map { it.toModel() }
     }
 }
 
@@ -46,5 +58,25 @@ private fun HomeChallengeDto.toModel(): HomeChallenge {
             "SUCCESS" -> ChallengeStatus.Success
             else -> ChallengeStatus.NeedCertification
         }
+    )
+}
+
+private fun HomePartyChallengeDto.toModel(): HomePartyChallenge {
+    return HomePartyChallenge(
+        title = title,
+        subtitle = subtitle,
+        dDay = dDay,
+        deadline = deadline,
+        timeLeft = timeLeft,
+        completedMemberCount = completedMemberCount,
+        totalMemberCount = totalMemberCount
+    )
+}
+
+private fun HomeCompletedChallengeDto.toModel(): HomeCompletedChallenge {
+    return HomeCompletedChallenge(
+        time = time,
+        title = title,
+        resultText = resultText
     )
 }

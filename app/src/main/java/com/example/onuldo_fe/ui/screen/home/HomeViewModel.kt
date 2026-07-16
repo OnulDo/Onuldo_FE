@@ -21,7 +21,9 @@ class HomeViewModel(
         // Repository 데이터를 Compose가 관찰할 수 있는 화면 상태로 저장
         uiState = HomeUiState(
             todayChallenge = repository.getTodayChallenge(),
-            challenges = repository.getChallenges()
+            partyChallenges = repository.getPartyChallenges(),
+            challenges = repository.getChallenges(),
+            completedChallenges = repository.getCompletedChallenges()
         )
     }
 }

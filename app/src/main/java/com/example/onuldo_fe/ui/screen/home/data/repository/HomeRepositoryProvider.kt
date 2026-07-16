@@ -18,6 +18,10 @@ object HomeRepositoryProvider {
 }
 
 private fun HomeResponseDto?.hasHomeData(): Boolean {
-    // 홈 화면을 채울 최소 데이터가 있을 때만 real 응답으로 인정
-    return this != null && todayChallenge != null && challenges.isNotEmpty()
+    // 홈 화면에 표시할 데이터가 하나라도 있으면 real 응답으로 인정
+    return this != null &&
+        (todayChallenge != null ||
+            partyChallenges.isNotEmpty() ||
+            challenges.isNotEmpty() ||
+            completedChallenges.isNotEmpty())
 }
