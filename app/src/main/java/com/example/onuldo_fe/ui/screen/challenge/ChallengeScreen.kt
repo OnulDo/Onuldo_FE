@@ -106,14 +106,14 @@ fun ChallengeScreen(
 
         // ++ 필터 카테고리 칩 (필터 버튼 눌렀을 때만 노출) TODO: 추후 수정!!( 디자인 확정 x)
 //        if (filterSelected) {
-//            Spacer(Modifier.height(13.dp)) // 검색창
+//            Spacer(Modifier.height(13.dp)) // 검색창 거리
 //            ChallengeFilterChips(
 //                categories = sampleCategories,
 //                onCategoryClick = { /* TODO: 카테고리 필터 적용 */ }
 //            )
 //            Spacer(Modifier.height(14.dp)) // 칩
 //        } else {
-//            Spacer(Modifier.height(21.dp)) // 검색창
+//            Spacer(Modifier.height(21.dp)) // 검색창 거리
 //        }
 
         //임시
