@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.screen.challenge.component
+package com.example.onuldo_fe.ui.screen.challenge.gallery.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,19 +38,18 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.SourCream
 
-//탐색 화면
-
+//검색창 (특징: 검색 바를위해 제작)
 @Composable
-fun ChallengeSearchBar(
+fun GallerySearchBar(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "생활루틴" // 예시?
+    placeholder: String = "생활루틴"
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     val borderColor = if (focused) Persimmon.copy(alpha = 0.4f) else DarkBrown40
-    val iconColor = if (focused) Persimmon else DarkBrown // 포커스 시 돋보기도 주황
+    val iconColor = if (focused) Persimmon else DarkBrown
 
     val textStyle = MaterialTheme.typography.labelLarge.copy(
         fontSize = 13.sp,
@@ -66,14 +65,14 @@ fun ChallengeSearchBar(
             .padding(top = 6.dp, bottom = 6.dp, start = 11.dp, end = 11.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 돋보기 아이콘 (피그마 export, ic_search) — tint로 색 제어
+        // 돋보기 아이콘 — tint로 색 제어
         Icon(
-            painter = painterResource(R.drawable.ic_search),
+            painter = painterResource(R.drawable.ic_challenge_search),
             contentDescription = null,
             tint = iconColor,
             modifier = Modifier.size(12.dp)
         )
-        Spacer(Modifier.width(11.dp)) // gap 11
+        Spacer(Modifier.width(11.dp))
 
         Box(modifier = Modifier.weight(1f)) {
             if (value.isEmpty()) {
@@ -106,7 +105,7 @@ private fun ChallengeSearchBarPreview() {
                 .background(SourCream)
                 .padding(20.dp)
         ) {
-            ChallengeSearchBar(value = query, onValueChange = { query = it })
+            GallerySearchBar(value = query, onValueChange = { query = it })
         }
     }
 }
