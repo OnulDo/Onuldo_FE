@@ -17,4 +17,10 @@ data class HomeUiState(
             partyChallenges.isNotEmpty() ||
             challenges.isNotEmpty() ||
             completedChallenges.isNotEmpty()
+
+    val isAllCompleted: Boolean
+        get() = todayChallenge != null &&
+            partyChallenges.isEmpty() &&
+            challenges.isEmpty() &&
+            completedChallenges.isNotEmpty()
 }

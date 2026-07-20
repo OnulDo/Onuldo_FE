@@ -33,7 +33,7 @@ import com.example.onuldo_fe.ui.screen.home.model.HomeChallenge
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
-import com.example.onuldo_fe.ui.theme.DarkBrown30
+import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
@@ -53,10 +53,11 @@ fun HomeChallengeCard(
 
     Column(
         modifier = modifier
-            .background(White, RoundedCornerShape(10.dp))
+            .height(111.dp)
+            .background(White, RoundedCornerShape(14.dp))
             .border(
-                border = BorderStroke(1.dp, DarkBrown30),
-                shape = RoundedCornerShape(10.dp)
+                border = BorderStroke(1.dp, DarkBrown40),
+                shape = RoundedCornerShape(14.dp)
             )
             .padding(horizontal = 14.dp, vertical = 12.dp)
     ) {
@@ -72,30 +73,30 @@ fun HomeChallengeCard(
                 Text(
                     text = challenge.title,
                     color = BlackBrown,
-                    fontSize = 16.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.ExtraBold
+                    fontSize = 18.sp,
+                    lineHeight = 21.sp,
+                    fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = challenge.subtitle,
                     color = DarkBrown50,
-                    fontSize = 9.sp,
-                    lineHeight = 12.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 12.sp,
+                    lineHeight = 14.sp,
+                    fontWeight = FontWeight.Normal
                 )
             }
 
             Text(
                 text = challenge.dDay,
                 color = DarkBrown,
-                fontSize = 9.sp,
-                lineHeight = 12.sp,
-                fontWeight = FontWeight.ExtraBold
+                fontSize = 12.sp,
+                lineHeight = 14.sp,
+                fontWeight = FontWeight.Bold
             )
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -105,9 +106,9 @@ fun HomeChallengeCard(
             Text(
                 text = challenge.deadline,
                 color = actionColors.text,
-                fontSize = 10.sp,
-                lineHeight = 13.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = 13.sp,
+                lineHeight = 16.sp,
+                fontWeight = FontWeight.Normal
             )
 
             Box(
@@ -120,7 +121,8 @@ fun HomeChallengeCard(
                         ),
                         shape = RoundedCornerShape(50)
                     )
-                    .padding(horizontal = 14.dp, vertical = 7.dp),
+                    .height(26.dp)
+                    .padding(horizontal = 12.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -136,9 +138,9 @@ fun HomeChallengeCard(
                     Text(
                         text = challenge.actionText,
                         color = actionColors.text,
-                        fontSize = 9.sp,
-                        lineHeight = 11.sp,
-                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 10.sp,
+                        lineHeight = 12.sp,
+                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
                 }

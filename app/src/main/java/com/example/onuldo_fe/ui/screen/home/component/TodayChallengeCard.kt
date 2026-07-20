@@ -36,23 +36,24 @@ fun TodayChallengeCard(
         modifier = modifier
             .background(
                 color = Persimmon10,
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(14.dp)
             )
             .border(
                 border = BorderStroke(1.dp, Persimmon.copy(alpha = 0.55f)),
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(14.dp)
             )
-            .padding(horizontal = 14.dp, vertical = 16.dp)
+            .height(148.dp)
+            .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
         Text(
             text = todayChallenge.date,
             color = Persimmon,
-            fontSize = 17.sp,
-            lineHeight = 22.sp,
+            fontSize = 20.sp,
+            lineHeight = 24.sp,
             fontWeight = FontWeight.ExtraBold
         )
 
-        Spacer(modifier = Modifier.height(34.dp))
+        Spacer(modifier = Modifier.height(38.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -62,31 +63,31 @@ fun TodayChallengeCard(
             Text(
                 text = todayChallenge.title,
                 color = Persimmon,
-                fontSize = 12.sp,
-                lineHeight = 16.sp,
-                fontWeight = FontWeight.ExtraBold
+                fontSize = 16.sp,
+                lineHeight = 19.sp,
+                fontWeight = FontWeight.Bold
             )
             Text(
                 text = todayChallenge.progressText,
                 color = Persimmon,
-                fontSize = 9.sp,
-                lineHeight = 12.sp,
-                fontWeight = FontWeight.ExtraBold
+                fontSize = 12.sp,
+                lineHeight = 14.sp,
+                fontWeight = FontWeight.Bold
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(5.dp)
+                .height(8.dp)
                 .background(White, RoundedCornerShape(50))
         ) {
             Box(
                 modifier = Modifier
                     .weight(todayChallenge.progress.coerceIn(0.001f, 1f))
-                    .height(5.dp)
+                    .height(8.dp)
                     .background(Persimmon, RoundedCornerShape(50))
             )
             Spacer(
