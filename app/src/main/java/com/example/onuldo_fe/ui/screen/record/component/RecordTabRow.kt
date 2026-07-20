@@ -28,13 +28,13 @@
                 .fillMaxWidth()
                 .height(44.dp)
                 .padding(horizontal = 20.dp),
-            shape = RoundedCornerShape(100.dp),
+            shape = RoundedCornerShape(4.dp),
             color = Persimmon10
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(2.dp),
+                    .padding(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(modifier = Modifier.weight(1f)) {
