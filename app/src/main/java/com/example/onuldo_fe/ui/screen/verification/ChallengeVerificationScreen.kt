@@ -296,7 +296,7 @@ private fun VerificationFailureContent() {
                         )
                     }
                     Spacer(modifier = Modifier.height(11.dp))
-
+                    //실패사유 목데이터 연결하기.
                     Text(
                         text = "사진에서 사람을 감지할 수 없어요",
                         color = BlackBrown,
@@ -528,7 +528,7 @@ private fun VerificationWaitingContent() {
 private fun VerificationReviewingContentPreview() {
     OnulDo_FETheme {
         ChallengeVerificationScreen(
-            status = VerificationStatus.WAITING
+            status = VerificationStatus.FAILURE
         )
     }
 }
