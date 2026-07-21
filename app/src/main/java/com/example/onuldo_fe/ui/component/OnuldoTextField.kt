@@ -12,15 +12,18 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.White
 
@@ -54,9 +57,12 @@ fun OnuldoTextField(
             .padding(horizontal = 20.dp)
             .fillMaxWidth()
     ) {
+        // Figma input 라벨 = Pretendard Bold 13px.
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyLarge,
+            fontFamily = Pretendard,
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp,
             color = MaterialTheme.colorScheme.onBackground,
         )
         OutlinedTextField(
@@ -65,13 +71,21 @@ fun OnuldoTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
-            placeholder = { Text(placeholder, color = DarkBrown40) },
+            // Figma input 텍스트/placeholder = 14px Regular.
+            textStyle = MaterialTheme.typography.bodyMedium,
+            placeholder = {
+                Text(
+                    placeholder,
+                    color = DarkBrown40,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            },
             singleLine = true,
             isError = isError,
             visualTransformation =
                 if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = if (isSuccess) Green else Persimmon,
                 // Figma input/default 테두리 = DarkBrown40(5C2C03 40%).

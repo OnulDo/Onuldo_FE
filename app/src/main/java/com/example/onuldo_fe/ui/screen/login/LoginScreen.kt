@@ -40,8 +40,8 @@ import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.component.OnuldoTextField
 import com.example.onuldo_fe.ui.component.SocialLoginButton
-import com.example.onuldo_fe.ui.theme.DarkBrown30
 import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.KakaoLabel
 import com.example.onuldo_fe.ui.theme.KakaoYellow
 import com.example.onuldo_fe.ui.theme.NaverGreen
@@ -83,11 +83,10 @@ fun LoginScreen(
         )
 
         Spacer(Modifier.height(16.dp))
+        // Figma(RFD) 타이틀 = Pretendard ExtraBold 28px (headlineLarge 토큰과 동일).
         Text(
             text = "로그인",
-            fontFamily = MaterialTheme.typography.headlineLarge.fontFamily,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 26.sp,
+            style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = gutter,
         )
@@ -136,7 +135,7 @@ fun LoginScreen(
         Text(
             text = "비밀번호 찾기",
             style = MaterialTheme.typography.labelLarge,
-            color = DarkBrown50,
+            color = DarkBrown70,
             textDecoration = TextDecoration.Underline,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -152,6 +151,7 @@ fun LoginScreen(
             containerColor = KakaoYellow,
             contentColor = KakaoLabel,
             leadingIcon = R.drawable.ic_kakao,
+            iconSize = 28.dp,
             onClick = { /* TODO: 카카오 OAuth */ },
         )
         Spacer(Modifier.height(12.dp))
@@ -160,6 +160,7 @@ fun LoginScreen(
             containerColor = NaverGreen,
             contentColor = Color.White,
             leadingIcon = R.drawable.ic_naver,
+            iconSize = 38.dp,
             onClick = { /* TODO: 네이버 OAuth */ },
         )
 
@@ -174,7 +175,7 @@ fun LoginScreen(
             Text(
                 text = "아직 계정이 없으신가요? ",
                 style = MaterialTheme.typography.labelLarge,
-                color = DarkBrown50,
+                color = DarkBrown70,
             )
             Text(
                 text = "회원가입",
@@ -194,14 +195,14 @@ private fun OrDivider(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        HorizontalDivider(modifier = Modifier.weight(1f), color = DarkBrown30)
+        HorizontalDivider(modifier = Modifier.weight(1f), color = DarkBrown50)
         Text(
             text = "또는",
             style = MaterialTheme.typography.labelMedium,
-            color = DarkBrown50,
+            color = DarkBrown70,
             modifier = Modifier.padding(horizontal = 12.dp),
         )
-        HorizontalDivider(modifier = Modifier.weight(1f), color = DarkBrown30)
+        HorizontalDivider(modifier = Modifier.weight(1f), color = DarkBrown50)
     }
 }
 

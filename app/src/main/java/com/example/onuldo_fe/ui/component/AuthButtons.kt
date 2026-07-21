@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.theme.Persimmon
@@ -69,6 +70,7 @@ fun SocialLoginButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     @DrawableRes leadingIcon: Int? = null,
+    iconSize: Dp = 24.dp,
 ) {
     Button(
         onClick = onClick,
@@ -88,15 +90,16 @@ fun SocialLoginButton(
                     painter = painterResource(leadingIcon),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(22.dp)
+                        .size(iconSize)
                         .align(Alignment.CenterStart),
                 )
             }
+            // Figma(RFD) 소셜 버튼 텍스트 = Pretendard Bold 15px.
             Text(
                 text = text,
-                fontSize = 16.sp,
+                fontSize = 15.sp,
                 fontFamily = Pretendard,
-                fontWeight = FontWeight.ExtraBold,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.Center),
             )
         }

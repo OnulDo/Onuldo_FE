@@ -34,7 +34,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.onuldo_fe.ui.component.OnboardingProgressHeader
+import com.example.onuldo_fe.ui.component.OnboardingBackHeader
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.component.OnuldoTextField
 import com.example.onuldo_fe.ui.theme.DarkBrown40
@@ -65,7 +65,7 @@ fun ProfileSetupScreen(
             .statusBarsPadding()
             .navigationBarsPadding(),
     ) {
-        OnboardingProgressHeader(currentStep = 4, totalSteps = 4, onBack = onBack)
+        OnboardingBackHeader(onBack = onBack)
 
         Spacer(Modifier.height(24.dp))
         Text(

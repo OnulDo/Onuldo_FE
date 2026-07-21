@@ -37,7 +37,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.onuldo_fe.ui.component.OnboardingProgressHeader
+import com.example.onuldo_fe.ui.component.OnboardingBackHeader
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.component.OnuldoTextField
 import com.example.onuldo_fe.ui.theme.DarkBrown40
@@ -69,14 +69,13 @@ fun SignupScreen(
             .statusBarsPadding()
             .navigationBarsPadding(),
     ) {
-        OnboardingProgressHeader(currentStep = 1, totalSteps = 4, onBack = onBack)
+        OnboardingBackHeader(onBack = onBack)
 
         Spacer(Modifier.height(24.dp))
+        // Figma(RFD) 타이틀 = Pretendard ExtraBold 28px (headlineLarge 토큰과 동일).
         Text(
             text = "계정 만들기",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 26.sp,
+            style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = gutter,
         )
@@ -191,11 +190,11 @@ private fun AgreeAllCard(
 
 private fun termsLinkText() = buildAnnotatedString {
     withStyle(SpanStyle(color = Persimmon, textDecoration = TextDecoration.Underline)) {
-        append("서비스 이용약관")
+        append("서비스 이용약관 ›")
     }
     append("   ")
     withStyle(SpanStyle(color = Persimmon, textDecoration = TextDecoration.Underline)) {
-        append("개인정보 처리방침")
+        append("개인정보 처리방침 ›")
     }
     append("   만 14세 이상")
 }

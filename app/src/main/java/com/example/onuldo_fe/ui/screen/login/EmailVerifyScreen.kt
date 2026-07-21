@@ -33,7 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
-import com.example.onuldo_fe.ui.component.OnboardingProgressHeader
+import com.example.onuldo_fe.ui.component.OnboardingBackHeader
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown10
 import com.example.onuldo_fe.ui.theme.DarkBrown40
@@ -73,7 +73,7 @@ fun EmailVerifyScreen(
             .statusBarsPadding()
             .navigationBarsPadding(),
     ) {
-        OnboardingProgressHeader(currentStep = 2, totalSteps = 4, onBack = onBack)
+        OnboardingBackHeader(onBack = onBack)
 
         Spacer(Modifier.height(40.dp))
 
