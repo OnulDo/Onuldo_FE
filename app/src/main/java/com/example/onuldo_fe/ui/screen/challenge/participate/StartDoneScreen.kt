@@ -78,7 +78,7 @@ fun StartDoneScreen(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(R.drawable.ic_challenge_success_icon),
+                painter = painterResource(R.drawable.challenge_success_icon),
                 contentDescription = null,
                 modifier = Modifier.size(width = 101.dp, height = 129.dp)
             )

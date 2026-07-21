@@ -171,13 +171,13 @@ private fun ConditionBox(
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (isSuccess) {
                 Image(
-                    painter = painterResource(R.drawable.ic_challenge_check),
+                    painter = painterResource(R.drawable.challenge_check_icon),
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )
             } else {
                 Image(
-                    painter = painterResource(R.drawable.ic_challenge_x),
+                    painter = painterResource(R.drawable.challenge_x_icon),
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )

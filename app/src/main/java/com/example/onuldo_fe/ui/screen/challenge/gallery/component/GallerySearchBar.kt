@@ -67,7 +67,7 @@ fun GallerySearchBar(
     ) {
         // 돋보기 아이콘 — tint로 색 제어
         Icon(
-            painter = painterResource(R.drawable.ic_challenge_search),
+            painter = painterResource(R.drawable.challenge_search),
             contentDescription = null,
             tint = iconColor,
             modifier = Modifier.size(12.dp)
