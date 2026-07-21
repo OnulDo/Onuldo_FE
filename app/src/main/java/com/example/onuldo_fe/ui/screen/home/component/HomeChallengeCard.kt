@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,8 +34,10 @@ import com.example.onuldo_fe.ui.screen.home.model.HomeChallenge
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown10
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.DarkBrown80
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.Persimmon
@@ -43,6 +46,8 @@ import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun HomeChallengeCard(
@@ -79,24 +84,25 @@ fun HomeChallengeCard(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = challenge.subtitle,
+                    // 서버의 상태와 연속 성공 일수로 카드 보조 문구 구성
+                    text = challenge.subtitleText(),
                     color = DarkBrown50,
                     fontSize = 12.sp,
-                    lineHeight = 14.sp,
-                    fontWeight = FontWeight.Normal
+                    lineHeight = 16.sp,
+                    maxLines = 1
                 )
             }
 
             Text(
-                text = challenge.dDay,
-                color = DarkBrown,
+                text = stringResource(R.string.home_challenge_d_day, challenge.remainingDays),
+                color = DarkBrown80,
                 fontSize = 12.sp,
                 lineHeight = 14.sp,
                 fontWeight = FontWeight.Bold
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(35.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -105,12 +111,15 @@ fun HomeChallengeCard(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = challenge.verifiedAt?.let { "$it 인증 완료" } ?: challenge.deadline,
-                    color = actionColors.text,
+                    text = challenge.verifiedAt?.let {
+                        stringResource(R.string.home_challenge_verified_at, it.toDisplayText())
+                    } ?: stringResource(R.string.home_challenge_deadline, challenge.deadlineAt.toDisplayText()),
+                    color = challenge.deadlineColor(),
                     fontSize = 13.sp,
                     lineHeight = 16.sp,
                     fontWeight = FontWeight.Normal
                 )
+                //인증 마감 1시간 전부터 표시
                 challenge.remainingMinutes?.takeIf { it in 0..60 }?.let { minutes ->
                     Spacer(modifier = Modifier.width(10.dp))
                     Box(
@@ -118,7 +127,7 @@ fun HomeChallengeCard(
                             .background(Persimmon10, RoundedCornerShape(10.dp))
                             .padding(horizontal = 10.dp, vertical = 2.dp)
                     ) {
-                        Text("${minutes}분 남음", color = Persimmon, fontSize = 13.sp, lineHeight = 16.sp)
+                        Text(minutes.toRemainingTimeText(), color = Persimmon, fontSize = 13.sp, lineHeight = 16.sp)
                     }
                 }
             }
@@ -133,8 +142,8 @@ fun HomeChallengeCard(
                         ),
                         shape = RoundedCornerShape(50)
                     )
-                    .height(26.dp)
-                    .padding(horizontal = 12.dp),
+                    .width(78.dp)
+                    .height(26.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -148,7 +157,7 @@ fun HomeChallengeCard(
                         Spacer(modifier = Modifier.width(4.dp))
                     }
                     Text(
-                        text = challenge.actionText,
+                        text = stringResource(challenge.status.actionTextRes()),
                         color = actionColors.text,
                         fontSize = 10.sp,
                         lineHeight = 12.sp,
@@ -173,7 +182,11 @@ private fun HomeChallenge.actionColors(): ChallengeActionColors {
             text = Persimmon
         )
 
-        ChallengeStatus.WaitingReview,
+        ChallengeStatus.WaitingReview -> ChallengeActionColors(
+            background = DarkBrown10,
+            text = DarkBrown
+        )
+
         ChallengeStatus.Failed -> ChallengeActionColors(
             background = Red2,
             text = Red
@@ -185,6 +198,43 @@ private fun HomeChallenge.actionColors(): ChallengeActionColors {
         )
     }
 }
+
+private fun HomeChallenge.deadlineColor(): Color = when (status) {
+    ChallengeStatus.NeedCertification -> Persimmon.copy(alpha = 0.8f)
+    ChallengeStatus.WaitingReview,
+    ChallengeStatus.Failed -> Red.copy(alpha = 0.8f)
+    ChallengeStatus.Success -> Green
+}
+
+@Composable
+private fun Int.toRemainingTimeText(): String {
+    val hours = this / 60
+    val minutes = this % 60
+    return when {
+        hours > 0 && minutes > 0 -> stringResource(R.string.home_challenge_hours_minutes_left, hours, minutes)
+        hours > 0 -> stringResource(R.string.home_challenge_hours_left, hours)
+        else -> stringResource(R.string.home_challenge_minutes_left, minutes)
+    }
+}
+
+private fun ChallengeStatus.actionTextRes(): Int = when (this) {
+    ChallengeStatus.NeedCertification -> R.string.home_challenge_action_verify
+    ChallengeStatus.WaitingReview -> R.string.home_challenge_action_waiting_review
+    ChallengeStatus.Failed -> R.string.home_challenge_action_failed
+    ChallengeStatus.Success -> R.string.home_challenge_action_success
+}
+
+@Composable
+private fun HomeChallenge.subtitleText(): String = when (status) {
+    ChallengeStatus.NeedCertification,
+    ChallengeStatus.Success -> stringResource(R.string.home_challenge_streak, streakDays)
+    ChallengeStatus.WaitingReview -> stringResource(R.string.home_challenge_waiting)
+    ChallengeStatus.Failed -> stringResource(R.string.home_challenge_streak_broken)
+}
+
+private val homeTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
+private fun LocalTime.toDisplayText(): String = format(homeTimeFormatter)
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFDF7, widthDp = 360)
 @Composable
@@ -199,10 +249,9 @@ private fun HomeChallengeCardPreview() {
             HomeChallengeCard(
                 challenge = HomeChallenge(
                     title = "30분 러닝",
-                    subtitle = "12일 연속 성공",
-                    dDay = "D-12",
-                    deadline = "7:00 마감",
-                    actionText = "인증하기",
+                    streakDays = 12,
+                    remainingDays = 12,
+                    deadlineAt = LocalTime.of(7, 0),
                     status = ChallengeStatus.NeedCertification
                 ),
                 modifier = Modifier.fillMaxWidth()

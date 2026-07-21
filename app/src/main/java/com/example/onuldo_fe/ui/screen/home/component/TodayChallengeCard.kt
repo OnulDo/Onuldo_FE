@@ -16,16 +16,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.screen.home.model.TodayChallenge
+import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.SourCream
-import com.example.onuldo_fe.ui.theme.White
 
 @Composable
 fun TodayChallengeCard(
@@ -47,7 +52,7 @@ fun TodayChallengeCard(
     ) {
         Text(
             text = todayChallenge.date,
-            color = Persimmon,
+            color = BlackBrown,
             fontSize = 20.sp,
             lineHeight = 24.sp,
             fontWeight = FontWeight.ExtraBold
@@ -61,18 +66,23 @@ fun TodayChallengeCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = todayChallenge.title,
-                color = Persimmon,
+                text = stringResource(R.string.home_today_challenge_title),
+                color = BlackBrown,
                 fontSize = 16.sp,
                 lineHeight = 19.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = todayChallenge.progressText,
-                color = Persimmon,
+                text = buildAnnotatedString {
+                    withStyle(SpanStyle(color = Persimmon, fontWeight = FontWeight.ExtraBold)) {
+                        append(todayChallenge.completedCount.toString())
+                    }
+                    withStyle(SpanStyle(color = BlackBrown, fontWeight = FontWeight.Normal)) {
+                        append("/${todayChallenge.totalCount} 완료")
+                    }
+                },
                 fontSize = 12.sp,
                 lineHeight = 14.sp,
-                fontWeight = FontWeight.Bold
             )
         }
 
@@ -82,7 +92,11 @@ fun TodayChallengeCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp)
-                .background(White, RoundedCornerShape(50))
+                .background(SourCream, RoundedCornerShape(50))
+                .border(
+                    BorderStroke(1.dp, Persimmon.copy(alpha = 0.2f)),
+                    RoundedCornerShape(50)
+                )
         ) {
             Box(
                 modifier = Modifier
@@ -110,9 +124,9 @@ private fun TodayChallengeCardPreview() {
             TodayChallengeCard(
                 todayChallenge = TodayChallenge(
                     date = "5월 20일 (수)",
-                    title = "오늘의 챌린지",
-                    progressText = "1/4 완료",
-                    progress = 0.25f
+                    progress = 0.25f,
+                    completedCount = 1,
+                    totalCount = 4
                 ),
                 modifier = Modifier.fillMaxWidth()
             )

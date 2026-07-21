@@ -22,9 +22,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.screen.home.component.EmptyChallengeContent
 import com.example.onuldo_fe.ui.screen.home.component.HomeChallengeCard
 import com.example.onuldo_fe.ui.screen.home.component.HomeCompletedChallengeCard
@@ -32,7 +34,9 @@ import com.example.onuldo_fe.ui.screen.home.component.HomeHeader
 import com.example.onuldo_fe.ui.screen.home.component.HomePartyCard
 import com.example.onuldo_fe.ui.screen.home.component.SettlementCompleteCard
 import com.example.onuldo_fe.ui.screen.home.component.TodayChallengeCard
-import com.example.onuldo_fe.ui.screen.home.data.repository.FakeHomeRepository
+import com.example.onuldo_fe.ui.screen.home.data.api.FakeHomeApi
+import com.example.onuldo_fe.ui.screen.home.data.api.FakeHomeScenario
+import com.example.onuldo_fe.ui.screen.home.data.repository.HomeRepositoryImpl
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
@@ -53,6 +57,7 @@ fun HomeScreen(
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
+        // 홈 API 상태에 따라 기본 홈과 빈 홈 분기
         if (uiState.hasHomeContent) {
             HomeContent(uiState, onNotificationClick, onSettlementResultClick)
         } else {
@@ -107,30 +112,16 @@ private fun HomeContent(
             .verticalScroll(rememberScrollState())
             .padding(bottom = 24.dp)
     ) {
-        if (isAllCompleted) {
-            Spacer(modifier = Modifier.height(51.dp))
-        } else {
-            HomeHeader(
-                userName = uiState.userName,
-                onNotificationClick = onNotificationClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, top = 34.dp, bottom = 17.dp)
-            )
-        }
+        // 모든 홈 상태에서 공통 헤더 유지
+        HomeHeader(
+            userName = uiState.userName,
+            onNotificationClick = onNotificationClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 34.dp, bottom = 17.dp)
+        )
 
-        uiState.settlementBanner?.let { banner ->
-            SettlementCompleteCard(
-                title = banner.title,
-                partyName = banner.partyName,
-                onClick = { onSettlementResultClick(banner.resultId) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-            )
-            Spacer(modifier = Modifier.height(14.dp))
-        }
-
+        // 오늘 집계 데이터가 있을 때 오늘의 챌린지 카드 노출
         uiState.todayChallenge?.let { todayChallenge ->
             TodayChallengeCard(
                 todayChallenge = todayChallenge,
@@ -140,27 +131,49 @@ private fun HomeContent(
             )
         }
 
+        // 확인하지 않은 파티 정산 결과가 있을 때 배너 노출
+        uiState.settlementBanner?.let { banner ->
+            Spacer(modifier = Modifier.height(18.dp))
+            SettlementCompleteCard(
+                partyName = banner.partyName,
+                onClick = { onSettlementResultClick(banner.resultId) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            )
+        }
+
+        // 진행 중인 파티 챌린지가 있을 때 파티 목록 노출
         ChallengeSection(
-            title = "함께하는 파티 ${uiState.partyChallenges.size}",
-            visible = !isAllCompleted && uiState.partyChallenges.isNotEmpty()
+            title = "함께하는 파티",
+            visible = !isAllCompleted && uiState.partyChallenges.isNotEmpty(),
+            topSpacing = if (uiState.settlementBanner != null) 18.dp else 28.dp
         ) {
             uiState.partyChallenges.forEach { partyChallenge ->
                 HomePartyCard(partyChallenge, Modifier.fillMaxWidth())
             }
         }
 
+        // 진행 중인 개인 챌린지가 있을 때 개인 목록 노출
         ChallengeSection(
             title = "나의 챌린지",
-            visible = !isAllCompleted && uiState.challenges.isNotEmpty()
+            visible = !isAllCompleted && uiState.challenges.isNotEmpty(),
+            topSpacing = if (uiState.partyChallenges.isNotEmpty()) 18.dp else 28.dp
         ) {
             uiState.challenges.forEach { challenge ->
                 HomeChallengeCard(challenge, Modifier.fillMaxWidth())
             }
         }
 
+        // 완료 상태일 때 완료 챌린지 목록 노출
         ChallengeSection(
-            title = "완료한 챌린지 ${uiState.completedChallenges.size}개",
-            visible = isAllCompleted
+            title = stringResource(
+                R.string.home_completed_challenge_count,
+                uiState.completedChallenges.size
+            ),
+            visible = isAllCompleted,
+            topSpacing = 26.dp,
+            itemSpacing = 8.dp
         ) {
             uiState.completedChallenges.forEach { completedChallenge ->
                 HomeCompletedChallengeCard(completedChallenge, Modifier.fillMaxWidth())
@@ -173,16 +186,18 @@ private fun HomeContent(
 private fun ChallengeSection(
     title: String,
     visible: Boolean,
+    topSpacing: androidx.compose.ui.unit.Dp = 28.dp,
+    itemSpacing: androidx.compose.ui.unit.Dp = 12.dp,
     content: @Composable ColumnScope.() -> Unit
 ) {
     if (!visible) return
 
-    Spacer(modifier = Modifier.height(24.dp))
+    Spacer(modifier = Modifier.height(topSpacing))
     SectionTitle(text = title, modifier = Modifier.padding(horizontal = 20.dp))
     Spacer(modifier = Modifier.height(14.dp))
     Column(
         modifier = Modifier.padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(itemSpacing),
         content = content
     )
 }
@@ -210,21 +225,23 @@ private fun SectionTitle(text: String, modifier: Modifier = Modifier) {
 @Preview(name = "Home With Content", showBackground = true, showSystemUi = true, widthDp = 390, heightDp = 938)
 @Composable
 private fun HomeScreenPreview() {
-    val repository = FakeHomeRepository()
-    OnulDo_FETheme {
-        HomeScreen(
-            uiState = HomeUiState(
-                todayChallenge = repository.getTodayChallenge(),
-                partyChallenges = repository.getPartyChallenges(),
-                challenges = repository.getChallenges(),
-                completedChallenges = repository.getCompletedChallenges()
-            )
-        )
-    }
+    HomeScenarioPreview(FakeHomeScenario.Default)
 }
 
 @Preview(name = "Home Empty", showBackground = true, showSystemUi = true, widthDp = 390, heightDp = 844)
 @Composable
 private fun HomeScreenEmptyPreview() {
-    OnulDo_FETheme { HomeScreen(uiState = HomeUiState()) }
+    HomeScenarioPreview(FakeHomeScenario.Empty)
+}
+
+@Preview(name = "Home All Completed", showBackground = true, showSystemUi = true, widthDp = 390, heightDp = 938)
+@Composable
+private fun HomeScreenAllCompletedPreview() {
+    HomeScenarioPreview(FakeHomeScenario.AllCompleted)
+}
+
+@Composable
+private fun HomeScenarioPreview(scenario: FakeHomeScenario) {
+    val repository = HomeRepositoryImpl(FakeHomeApi(scenario))
+    OnulDo_FETheme { HomeScreen(uiState = repository.getHome().toUiState()) }
 }

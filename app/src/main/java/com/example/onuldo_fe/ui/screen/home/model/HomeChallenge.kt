@@ -1,13 +1,14 @@
 package com.example.onuldo_fe.ui.screen.home.model
 
+import java.time.LocalTime
+
 data class HomeChallenge(
     val title: String,
-    val subtitle: String,
-    val dDay: String,
-    val deadline: String,
-    val actionText: String,
+    val streakDays: Int,
+    val remainingDays: Int,
+    val deadlineAt: LocalTime,
     val status: ChallengeStatus,
-    val verifiedAt: String? = null,
+    val verifiedAt: LocalTime? = null,
     val remainingMinutes: Int? = null,
     val canVerify: Boolean = true
 )

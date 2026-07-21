@@ -1,10 +1,19 @@
 package com.example.onuldo_fe.ui.screen.home.model
 
-enum class CompletedChallengeType { Party, Personal }
+sealed interface HomeCompletedChallenge {
+    val time: String
+    val title: String
 
-data class HomeCompletedChallenge(
-    val time: String,
-    val title: String,
-    val resultText: String,
-    val type: CompletedChallengeType = CompletedChallengeType.Personal
-)
+    data class Party(
+        override val time: String,
+        override val title: String,
+        val completedMemberCount: Int,
+        val totalMemberCount: Int
+    ) : HomeCompletedChallenge
+
+    data class Personal(
+        override val time: String,
+        override val title: String,
+        val streakDays: Int
+    ) : HomeCompletedChallenge
+}

@@ -1,16 +1,8 @@
 package com.example.onuldo_fe.ui.screen.home.data.repository
 
-import com.example.onuldo_fe.ui.screen.home.model.HomeChallenge
-import com.example.onuldo_fe.ui.screen.home.model.HomeCompletedChallenge
-import com.example.onuldo_fe.ui.screen.home.model.HomePartyChallenge
-import com.example.onuldo_fe.ui.screen.home.model.TodayChallenge
-import com.example.onuldo_fe.ui.screen.home.model.SettlementBanner
+import com.example.onuldo_fe.ui.screen.home.model.HomeData
 
 interface HomeRepository {
-    fun getUserName(): String
-    fun getTodayChallenge(): TodayChallenge?
-    fun getPartyChallenges(): List<HomePartyChallenge>
-    fun getChallenges(): List<HomeChallenge>
-    fun getCompletedChallenges(): List<HomeCompletedChallenge>
-    fun getSettlementBanner(): SettlementBanner?
+    // 홈 API 한 번의 응답을 단일 데이터로 전달
+    fun getHome(): HomeData
 }

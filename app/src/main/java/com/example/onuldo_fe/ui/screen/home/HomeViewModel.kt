@@ -16,17 +16,13 @@ class HomeViewModel(
     init { loadHome() }
 
     fun loadHome() {
-        uiState = HomeUiState(
-            userName = repository.getUserName(),
-            todayChallenge = repository.getTodayChallenge(),
-            partyChallenges = repository.getPartyChallenges(),
-            challenges = repository.getChallenges(),
-            completedChallenges = repository.getCompletedChallenges(),
-            settlementBanner = repository.getSettlementBanner()
-        )
+        // 홈 응답 전체로 동일 시점의 UI 상태 생성
+        uiState = repository.getHome().toUiState()
     }
 
-    fun markSettlementResultChecked() {
+    fun confirmSettlementResult() {
+        // 정산 결과 화면 진입이 확인된 뒤 배너 제거
+        if (uiState.settlementBanner == null) return
         uiState = uiState.copy(settlementBanner = null)
     }
 }

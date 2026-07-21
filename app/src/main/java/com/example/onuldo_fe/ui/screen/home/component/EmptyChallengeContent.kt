@@ -9,9 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,13 +21,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
-import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.SourCream
-import com.example.onuldo_fe.ui.theme.White
 
 @Composable
 fun EmptyChallengeContent(
@@ -41,7 +37,7 @@ fun EmptyChallengeContent(
         Box(
             modifier = Modifier
                 .size(120.dp)
-                .background(Persimmon20.copy(alpha = 0.75f), CircleShape),
+                .background(Persimmon.copy(alpha = 0.15f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Image(
@@ -71,15 +67,11 @@ fun EmptyChallengeContent(
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(47.dp))
-        Button(
+        OnulDoButton(
+            text = "챌린지 둘러보기",
             onClick = onBrowseChallengesClick,
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Persimmon, contentColor = White),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-        ) {
-            Text("챌린지 둘러보기", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-        }
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

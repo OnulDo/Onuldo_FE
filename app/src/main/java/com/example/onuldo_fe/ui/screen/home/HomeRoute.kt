@@ -16,7 +16,8 @@ private enum class HomeRouteScreen {
 
 @Composable
 fun HomeRoute(
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel = viewModel(),
+    onSettlementResultClick: (String) -> Unit = {}
 ) {
     var currentScreen by remember { mutableStateOf(HomeRouteScreen.Home) }
 
@@ -26,7 +27,8 @@ fun HomeRoute(
             onNotificationClick = {
                 currentScreen = HomeRouteScreen.Notification
             },
-            onSettlementResultClick = { viewModel.markSettlementResultChecked() }
+            // 정산 결과 화면 연결 지점에 결과 식별자 전달
+            onSettlementResultClick = onSettlementResultClick
         )
 
         HomeRouteScreen.Notification -> NotificationScreen(

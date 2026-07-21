@@ -1,44 +1,51 @@
 package com.example.onuldo_fe.ui.screen.home.data.repository
 
+import com.example.onuldo_fe.ui.screen.home.data.api.HomeApi
 import com.example.onuldo_fe.ui.screen.home.data.dto.HomeChallengeDto
 import com.example.onuldo_fe.ui.screen.home.data.dto.HomeCompletedChallengeDto
 import com.example.onuldo_fe.ui.screen.home.data.dto.HomePartyChallengeDto
 import com.example.onuldo_fe.ui.screen.home.data.dto.HomeResponseDto
 import com.example.onuldo_fe.ui.screen.home.model.ChallengeStatus
-import com.example.onuldo_fe.ui.screen.home.model.CompletedChallengeType
 import com.example.onuldo_fe.ui.screen.home.model.HomeChallenge
 import com.example.onuldo_fe.ui.screen.home.model.HomeCompletedChallenge
+import com.example.onuldo_fe.ui.screen.home.model.HomeData
 import com.example.onuldo_fe.ui.screen.home.model.HomePartyChallenge
 import com.example.onuldo_fe.ui.screen.home.model.SettlementBanner
 import com.example.onuldo_fe.ui.screen.home.model.TodayChallenge
+import java.time.LocalTime
 
-class HomeRepositoryImpl(private val homeResponse: HomeResponseDto) : HomeRepository {
-    private val partyModels by lazy { homeResponse.partyChallenges.map { it.toModel() } }
-    private val challengeModels by lazy { homeResponse.challenges.map { it.toModel() } }
-    private val completedModels by lazy { homeResponse.completedChallenges.map { it.toModel() } }
+class HomeRepositoryImpl(
+    private val homeApi: HomeApi
+) : HomeRepository {
+    override fun getHome(): HomeData {
+        // API 응답 전체를 동일 시점의 홈 데이터로 변환
+        return homeApi.getHome().toModel()
+    }
+}
 
-    override fun getUserName() = homeResponse.userName
+private fun HomeResponseDto.toModel(): HomeData {
+    val partyModels = partyChallenges.map { it.toModel() }
+    val challengeModels = challenges.map { it.toModel() }
+    val completedModels = completedChallenges.map { it.toModel() }
 
-    override fun getTodayChallenge(): TodayChallenge? {
-        val source = homeResponse.todayChallenge ?: return null
-        val activeTargets = partyModels.map { it.status } + challengeModels.map { it.status }
-        val totalCount = if (activeTargets.isNotEmpty()) activeTargets.size else completedModels.size
-        val completedCount = if (activeTargets.isNotEmpty()) {
-            activeTargets.count { it == ChallengeStatus.Success }
-        } else {
-            completedModels.size
-        }
+    val todayModel = todayChallenge?.let { source ->
+        // 완료 수를 전체 수로 나눠 진행 바 비율 계산
+        val totalCount = source.totalCount
+        val completedCount = source.completedCount
         val progress = if (totalCount == 0) 0f else completedCount.toFloat() / totalCount
-        return TodayChallenge(source.date, source.title, "$completedCount/$totalCount 완료", progress, completedCount, totalCount)
+        TodayChallenge(source.date, progress, completedCount, totalCount)
     }
 
-    override fun getPartyChallenges() = partyModels
-    override fun getChallenges() = challengeModels
-    override fun getCompletedChallenges() = completedModels
-
-    override fun getSettlementBanner(): SettlementBanner? = homeResponse.settlementBanner
-        ?.takeUnless { it.isChecked }
-        ?.let { SettlementBanner(it.title, it.partyName, it.resultId) }
+    return HomeData(
+        userName = userName,
+        todayChallenge = todayModel,
+        partyChallenges = partyModels,
+        challenges = challengeModels,
+        completedChallenges = completedModels,
+        settlementBanner = settlementBanner
+            ?.takeUnless { it.isChecked }
+            ?.let { SettlementBanner(it.partyName, it.resultId) }
+    )
 }
 
 private fun String.toChallengeStatus() = when (this) {
@@ -50,12 +57,11 @@ private fun String.toChallengeStatus() = when (this) {
 
 private fun HomeChallengeDto.toModel() = HomeChallenge(
     title = title,
-    subtitle = subtitle,
-    dDay = dDay,
-    deadline = deadline,
-    actionText = actionText,
+    streakDays = streakDays,
+    remainingDays = remainingDays,
+    deadlineAt = LocalTime.parse(deadlineAt),
     status = status.toChallengeStatus(),
-    verifiedAt = verifiedAt,
+    verifiedAt = verifiedAt?.let(LocalTime::parse),
     remainingMinutes = remainingMinutes,
     canVerify = canVerify
 )
@@ -63,21 +69,29 @@ private fun HomeChallengeDto.toModel() = HomeChallenge(
 private fun HomePartyChallengeDto.toModel() = HomePartyChallenge(
     title = title,
     subtitle = subtitle,
-    dDay = dDay,
-    deadline = deadline,
-    timeLeft = timeLeft,
+    remainingDays = remainingDays,
+    deadlineAt = LocalTime.parse(deadlineAt),
     completedMemberCount = completedMemberCount,
     totalMemberCount = totalMemberCount,
     status = status.toChallengeStatus(),
-    actionText = actionText,
-    verifiedAt = verifiedAt,
+    verifiedAt = verifiedAt?.let(LocalTime::parse),
     remainingMinutes = remainingMinutes,
     canVerify = canVerify
 )
 
-private fun HomeCompletedChallengeDto.toModel() = HomeCompletedChallenge(
-    time = time,
-    title = title,
-    resultText = resultText,
-    type = if (resultText.contains('/')) CompletedChallengeType.Party else CompletedChallengeType.Personal
-)
+private fun HomeCompletedChallengeDto.toModel(): HomeCompletedChallenge = when (type) {
+    "PARTY" -> HomeCompletedChallenge.Party(
+        time = time,
+        title = title,
+        completedMemberCount = requireNotNull(completedMemberCount),
+        totalMemberCount = requireNotNull(totalMemberCount)
+    )
+
+    "PERSONAL" -> HomeCompletedChallenge.Personal(
+        time = time,
+        title = title,
+        streakDays = requireNotNull(streakDays)
+    )
+
+    else -> error("Unsupported completed challenge type: $type")
+}
