@@ -187,7 +187,7 @@ private fun ChallengeCard(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_challenge_person),
+                    painter = painterResource(R.drawable.challenge_person),
                     contentDescription = null,
                     tint = Persimmon,
                     modifier = Modifier.size(12.dp)

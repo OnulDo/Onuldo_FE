@@ -42,7 +42,7 @@ fun OptionChip(
         modifier = modifier
             .size(width = 85.dp, height = 40.dp)
             .clip(RoundedCornerShape(14.dp))
-            .background(if (selected) Persimmon10 else White)
+            .background(if (selected) Persimmon else White)
             .border(
                 width = 1.dp,
                 color = if (selected) Persimmon else DarkBrown40,
@@ -57,7 +57,7 @@ fun OptionChip(
             fontWeight = FontWeight.Bold,
             fontSize = 13.sp,
             lineHeight = 13.sp,
-            color = if (selected) Persimmon else BlackBrown
+            color = if (selected) White else BlackBrown
         )
     }
 }

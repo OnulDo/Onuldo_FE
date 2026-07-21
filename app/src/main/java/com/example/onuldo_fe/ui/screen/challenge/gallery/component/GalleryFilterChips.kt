@@ -81,7 +81,7 @@ private fun CategoryChip(
         ) {
             if (selected) {
                 Image(
-                    painter = painterResource(R.drawable.ic_challenge_close),
+                    painter = painterResource(R.drawable.challenge_close),
                     contentDescription = null,
                     modifier = Modifier.size(8.dp) // 피그마 크기에 맞게 조절
                 )
