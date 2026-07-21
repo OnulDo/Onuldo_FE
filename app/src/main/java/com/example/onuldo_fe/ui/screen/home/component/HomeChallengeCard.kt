@@ -103,15 +103,27 @@ fun HomeChallengeCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = challenge.deadline,
-                color = actionColors.text,
-                fontSize = 13.sp,
-                lineHeight = 16.sp,
-                fontWeight = FontWeight.Normal
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = challenge.verifiedAt?.let { "$it 인증 완료" } ?: challenge.deadline,
+                    color = actionColors.text,
+                    fontSize = 13.sp,
+                    lineHeight = 16.sp,
+                    fontWeight = FontWeight.Normal
+                )
+                challenge.remainingMinutes?.takeIf { it in 0..60 }?.let { minutes ->
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Box(
+                        modifier = Modifier
+                            .background(Persimmon10, RoundedCornerShape(10.dp))
+                            .padding(horizontal = 10.dp, vertical = 2.dp)
+                    ) {
+                        Text("${minutes}분 남음", color = Persimmon, fontSize = 13.sp, lineHeight = 16.sp)
+                    }
+                }
+            }
 
-            Box(
+            if (challenge.status != ChallengeStatus.NeedCertification || challenge.canVerify) Box(
                 modifier = Modifier
                     .background(actionColors.background, RoundedCornerShape(50))
                     .border(

@@ -34,6 +34,7 @@ import com.example.onuldo_fe.ui.theme.White
 
 @Composable
 fun HomeHeader(
+    userName: String,
     modifier: Modifier = Modifier,
     onNotificationClick: () -> Unit = {}
 ) {
@@ -62,7 +63,7 @@ fun HomeHeader(
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "김민지",
+                text = userName,
                 color = BlackBrown,
                 fontSize = 18.sp,
                 lineHeight = 21.sp,
@@ -93,6 +94,7 @@ fun HomeHeader(
 private fun HomeHeaderPreview() {
     OnulDo_FETheme {
         HomeHeader(
+            userName = "김민지",
             modifier = Modifier
                 .fillMaxWidth()
                 .background(SourCream)

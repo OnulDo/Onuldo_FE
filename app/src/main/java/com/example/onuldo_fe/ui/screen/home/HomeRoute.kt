@@ -25,7 +25,8 @@ fun HomeRoute(
             uiState = viewModel.uiState,
             onNotificationClick = {
                 currentScreen = HomeRouteScreen.Notification
-            }
+            },
+            onSettlementResultClick = { viewModel.markSettlementResultChecked() }
         )
 
         HomeRouteScreen.Notification -> NotificationScreen(

@@ -3,24 +3,26 @@ package com.example.onuldo_fe.ui.screen.home
 import com.example.onuldo_fe.ui.screen.home.model.HomeChallenge
 import com.example.onuldo_fe.ui.screen.home.model.HomeCompletedChallenge
 import com.example.onuldo_fe.ui.screen.home.model.HomePartyChallenge
+import com.example.onuldo_fe.ui.screen.home.model.SettlementBanner
 import com.example.onuldo_fe.ui.screen.home.model.TodayChallenge
 
+enum class HomeContentMode { Empty, Default, AllCompleted }
+
 data class HomeUiState(
+    val userName: String = "",
     val todayChallenge: TodayChallenge? = null,
     val partyChallenges: List<HomePartyChallenge> = emptyList(),
     val challenges: List<HomeChallenge> = emptyList(),
-    val completedChallenges: List<HomeCompletedChallenge> = emptyList()
+    val completedChallenges: List<HomeCompletedChallenge> = emptyList(),
+    val settlementBanner: SettlementBanner? = null
 ) {
-    val hasHomeContent: Boolean
-        // 홈에 표시할 데이터가 하나라도 있으면 데이터 있는 홈으로 판단
-        get() = todayChallenge != null ||
-            partyChallenges.isNotEmpty() ||
-            challenges.isNotEmpty() ||
-            completedChallenges.isNotEmpty()
+    val contentMode: HomeContentMode
+        get() = when {
+            todayChallenge?.let { it.totalCount > 0 && it.completedCount == it.totalCount } == true -> HomeContentMode.AllCompleted
+            partyChallenges.isEmpty() && challenges.isEmpty() && completedChallenges.isEmpty() -> HomeContentMode.Empty
+            else -> HomeContentMode.Default
+        }
 
-    val isAllCompleted: Boolean
-        get() = todayChallenge != null &&
-            partyChallenges.isEmpty() &&
-            challenges.isEmpty() &&
-            completedChallenges.isNotEmpty()
+    val hasHomeContent get() = contentMode != HomeContentMode.Empty
+    val isAllCompleted get() = contentMode == HomeContentMode.AllCompleted
 }

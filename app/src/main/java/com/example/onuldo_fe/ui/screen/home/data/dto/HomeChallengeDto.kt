@@ -6,5 +6,8 @@ data class HomeChallengeDto(
     val dDay: String,
     val deadline: String,
     val actionText: String,
-    val status: String
+    val status: String,
+    val verifiedAt: String? = null,
+    val remainingMinutes: Int? = null,
+    val canVerify: Boolean = true
 )

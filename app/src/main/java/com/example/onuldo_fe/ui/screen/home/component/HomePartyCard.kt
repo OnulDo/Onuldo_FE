@@ -20,6 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,15 +30,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.screen.home.model.ChallengeStatus
 import com.example.onuldo_fe.ui.screen.home.model.HomePartyChallenge
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.Green
+import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
-import com.example.onuldo_fe.ui.theme.Persimmon20
+import com.example.onuldo_fe.ui.theme.Red
+import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.White
 
 @Composable
@@ -48,7 +54,7 @@ fun HomePartyCard(partyChallenge: HomePartyChallenge, modifier: Modifier = Modif
             .border(BorderStroke(1.dp, DarkBrown40), RoundedCornerShape(14.dp))
             .padding(horizontal = 14.dp, vertical = 12.dp)
     ) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                 Text(partyChallenge.title, color = BlackBrown, fontSize = 16.sp, lineHeight = 19.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.width(7.dp))
@@ -59,8 +65,9 @@ fun HomePartyCard(partyChallenge: HomePartyChallenge, modifier: Modifier = Modif
 
         Spacer(Modifier.height(10.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(partyChallenge.deadline, color = Persimmon.copy(alpha = 0.8f), fontSize = 13.sp, lineHeight = 16.sp)
-            if (partyChallenge.timeLeft.isNotBlank()) {
+            val deadlineText = partyChallenge.verifiedAt?.let { "$it 인증 완료" } ?: partyChallenge.deadline
+            Text(deadlineText, color = partyChallenge.status.statusColor(), fontSize = 13.sp, lineHeight = 16.sp)
+            if (partyChallenge.remainingMinutes?.let { it in 0..60 } == true && partyChallenge.timeLeft.isNotBlank()) {
                 Spacer(Modifier.width(10.dp))
                 Box(Modifier.background(Persimmon10, RoundedCornerShape(10.dp)).padding(horizontal = 10.dp, vertical = 2.dp)) {
                     Text(partyChallenge.timeLeft, color = Persimmon, fontSize = 13.sp, lineHeight = 16.sp)
@@ -76,30 +83,54 @@ fun HomePartyCard(partyChallenge: HomePartyChallenge, modifier: Modifier = Modif
                     Box(
                         Modifier
                             .size(33.dp)
-                            .background(if (completed) Persimmon10 else Persimmon20, CircleShape)
-                            .border(if (completed) BorderStroke(1.dp, Persimmon) else BorderStroke(0.dp, Persimmon10), CircleShape),
+                            .alpha(if (completed) 1f else 0.5f)
+                            .background(Persimmon10, CircleShape)
+                            .then(if (completed) Modifier.border(BorderStroke(1.dp, Persimmon), CircleShape) else Modifier),
                         contentAlignment = Alignment.Center
                     ) {
-                        Image(
-                            painterResource(if (completed) R.drawable.home_run_light_icon else R.drawable.home_run_dark_icon),
-                            null,
-                            Modifier.size(31.dp),
-                            contentScale = ContentScale.Fit
-                        )
+                        Image(painterResource(R.drawable.home_run_light_icon), null, Modifier.size(31.dp), contentScale = ContentScale.Fit)
                     }
                 }
             }
-            Row(
-                Modifier.size(width = 96.dp, height = 32.dp).border(BorderStroke(1.dp, Persimmon), RoundedCornerShape(16.dp)),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Image(painterResource(R.drawable.home_camera_icon), null, Modifier.size(16.dp))
-                Spacer(Modifier.width(5.dp))
-                Text("인증하기", color = Persimmon, fontSize = 13.sp, lineHeight = 16.sp, fontWeight = FontWeight.Bold)
-            }
+            PartyAction(partyChallenge)
         }
     }
+}
+
+@Composable
+private fun PartyAction(party: HomePartyChallenge) {
+    if (party.status == ChallengeStatus.NeedCertification && party.canVerify) {
+        Row(
+            Modifier.size(width = 96.dp, height = 32.dp).border(BorderStroke(1.dp, Persimmon), RoundedCornerShape(16.dp)),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(painterResource(R.drawable.home_camera_icon), null, Modifier.size(16.dp))
+            Spacer(Modifier.width(5.dp))
+            Text("인증하기", color = Persimmon, fontSize = 13.sp, lineHeight = 16.sp, fontWeight = FontWeight.Bold)
+        }
+        return
+    }
+
+    if (party.status != ChallengeStatus.NeedCertification) {
+        val (background, textColor) = when (party.status) {
+            ChallengeStatus.Success -> Green2 to Green
+            ChallengeStatus.WaitingReview, ChallengeStatus.Failed -> Red2 to Red
+            ChallengeStatus.NeedCertification -> Color.Transparent to Persimmon
+        }
+        Box(
+            Modifier.size(width = 78.dp, height = 26.dp).background(background, RoundedCornerShape(13.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(party.actionText, color = textColor, fontSize = 10.sp, lineHeight = 12.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+private fun ChallengeStatus.statusColor() = when (this) {
+    ChallengeStatus.Success -> Green
+    ChallengeStatus.WaitingReview, ChallengeStatus.Failed -> Red
+    ChallengeStatus.NeedCertification -> Persimmon.copy(alpha = 0.8f)
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFDF7, widthDp = 390)
@@ -107,7 +138,7 @@ fun HomePartyCard(partyChallenge: HomePartyChallenge, modifier: Modifier = Modif
 private fun HomePartyCardPreview() {
     OnulDo_FETheme {
         HomePartyCard(
-            HomePartyChallenge("새벽 러너 파티", "30분 러닝", "D-12", "7:00 마감", "1시간 30분 남음", 2, 5),
+            HomePartyChallenge("새벽 러너 파티", "30분 러닝", "D-12", "7:00 마감", "45분 남음", 2, 5, remainingMinutes = 45),
             Modifier.fillMaxWidth().padding(horizontal = 20.dp)
         )
     }

@@ -23,5 +23,6 @@ private fun HomeResponseDto?.hasHomeData(): Boolean {
         (todayChallenge != null ||
             partyChallenges.isNotEmpty() ||
             challenges.isNotEmpty() ||
-            completedChallenges.isNotEmpty())
+            completedChallenges.isNotEmpty() ||
+            settlementBanner != null)
 }

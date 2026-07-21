@@ -43,6 +43,7 @@ fun HomeScreen(
     uiState: HomeUiState,
     onNotificationClick: () -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
+    onSettlementResultClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -53,9 +54,10 @@ fun HomeScreen(
             .navigationBarsPadding()
     ) {
         if (uiState.hasHomeContent) {
-            HomeContent(uiState, onNotificationClick)
+            HomeContent(uiState, onNotificationClick, onSettlementResultClick)
         } else {
             EmptyHomeContent(
+                userName = uiState.userName,
                 onNotificationClick = onNotificationClick,
                 onBrowseChallengesClick = onBrowseChallengesClick,
                 modifier = Modifier.fillMaxSize()
@@ -66,12 +68,14 @@ fun HomeScreen(
 
 @Composable
 private fun EmptyHomeContent(
+    userName: String,
     onNotificationClick: () -> Unit,
     onBrowseChallengesClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier) {
         HomeHeader(
+            userName = userName,
             onNotificationClick = onNotificationClick,
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -92,7 +96,8 @@ private fun EmptyHomeContent(
 @Composable
 private fun HomeContent(
     uiState: HomeUiState,
-    onNotificationClick: () -> Unit
+    onNotificationClick: () -> Unit,
+    onSettlementResultClick: (String) -> Unit
 ) {
     val isAllCompleted = uiState.isAllCompleted
 
@@ -106,11 +111,24 @@ private fun HomeContent(
             Spacer(modifier = Modifier.height(51.dp))
         } else {
             HomeHeader(
+                userName = uiState.userName,
                 onNotificationClick = onNotificationClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 20.dp, end = 20.dp, top = 34.dp, bottom = 17.dp)
             )
+        }
+
+        uiState.settlementBanner?.let { banner ->
+            SettlementCompleteCard(
+                title = banner.title,
+                partyName = banner.partyName,
+                onClick = { onSettlementResultClick(banner.resultId) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            )
+            Spacer(modifier = Modifier.height(14.dp))
         }
 
         uiState.todayChallenge?.let { todayChallenge ->
@@ -122,17 +140,8 @@ private fun HomeContent(
             )
         }
 
-        if (!isAllCompleted && uiState.completedChallenges.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(14.dp))
-            SettlementCompleteCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-            )
-        }
-
         ChallengeSection(
-            title = "함께하는 파티",
+            title = "함께하는 파티 ${uiState.partyChallenges.size}",
             visible = !isAllCompleted && uiState.partyChallenges.isNotEmpty()
         ) {
             uiState.partyChallenges.forEach { partyChallenge ->
@@ -150,7 +159,7 @@ private fun HomeContent(
         }
 
         ChallengeSection(
-            title = "완료한 챌린지",
+            title = "완료한 챌린지 ${uiState.completedChallenges.size}개",
             visible = isAllCompleted
         ) {
             uiState.completedChallenges.forEach { completedChallenge ->
