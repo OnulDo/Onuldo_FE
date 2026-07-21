@@ -51,11 +51,11 @@ data class NotificationItem(
 
 // 더미 데이터 — API 연동 시 교체
 private val dummyNotifications = listOf( //TODO: 아이콘 다운 받아서 수정하기!
-    NotificationItem("인증 마감 30분 전이에요", "30분 러닝 챌린지 인증을 잊지 마세요", "방금", R.drawable.verification_check_icon),
+    NotificationItem("인증 마감 30분 전이에요", "30분 러닝 챌린지 인증을 잊지 마세요", "방금", R.drawable.notification_deadline_icon),
     NotificationItem("인증이 완료되었어요", "새벽 기상 챌린지 인증 성공 (+850P)", "5시간 전", R.drawable.verification_check_icon),
-    NotificationItem("새 챌린지가 시작되었어요", "오늘부터 러닝 챌린지가 시작됐어요", "어제", R.drawable.verification_check_icon),
+    NotificationItem("새 챌린지가 시작되었어요", "오늘부터 러닝 챌린지가 시작됐어요", "어제", R.drawable.notification_challenge_icon),
     NotificationItem("환급이 완료되었어요", "독서 30분 챌린지 환급 18,400P 지급", "2월 3일", R.drawable.verification_check_icon),
-    NotificationItem("인증 실패로 차감되었어요", "5/17 새벽 기상 인증 미수행 (-850P)", "3일 전", R.drawable.verification_check_icon)
+    NotificationItem("인증 실패로 차감되었어요", "5/17 새벽 기상 인증 미수행 (-850P)", "3일 전", R.drawable.notification_fail_icon)
 )
 
 // 알림 화면 — 알림 목록
@@ -123,7 +123,7 @@ private fun ColumnScope.NotificationEmpty() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(R.drawable.ic_notification_empty),
+            painter = painterResource(R.drawable.notification_empty_icon),
             contentDescription = null,
             modifier = Modifier.size(width = 60.dp, height = 75.dp)
         )
