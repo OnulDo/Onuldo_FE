@@ -42,10 +42,11 @@ fun LandingScreen(
     ) {
         Spacer(Modifier.weight(1f))
 
+        // Figma 랜딩(4771:370)의 달리기 캐릭터(4771:383) = 248×248. 원본 에셋은 불꽃 상단까지 온전.
         Image(
             painter = painterResource(R.drawable.img_onuldo_character),
             contentDescription = "오늘두 캐릭터",
-            modifier = Modifier.size(200.dp),
+            modifier = Modifier.size(248.dp),
         )
         Spacer(Modifier.height(12.dp))
         Text(
