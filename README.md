@@ -4,10 +4,10 @@
 
 | 이름 | 역할 | 담당 기능 |
 | --- | --- | --- |
-| 하연탄 | Front-End | 카메라, 인증 |
-| 시온 | Front-End | 챌린지 |
-| 조나단 | Front-End | 로그인, 회원가입, 홈 |
-| 구민 | Front-End | 마이페이지, 파티 |
+| 하연탄 | Front-End | 카메라, 인증, 챌린지 참여 |
+| 시온 | Front-End | 챌린지페이지, 알림 |
+| 조나단 | Front-End | 로그인, 회원가입, 마이페이지 |
+| 구민 | Front-End | 홈, 파티|
 
 ## 🛠 기술 스택
 
@@ -34,7 +34,7 @@ app
 └── utils              # 공통 유틸리티
 ```
 
-- 빌드 및 실행 방법
+## 빌드 및 실행 방법
 
 에뮬레이터 또는 Android 기기를 연결한 후 **Run** 버튼을 눌러 실행합니다.
 
@@ -44,6 +44,7 @@ app
 
 - `main` : 배포 브랜치
 - `develop` : 개발 브랜치
+- `feature/{기능명}` : 새로운 기능 개발을 위한 브랜치
 
 ### 💬 Commit Message
 
@@ -57,26 +58,29 @@ app
 | `docs` | 문서 수정 |
 | `chore` | 빌드 및 설정 변경 |
 | `test` | 테스트 코드 작성 |
-- 화면 목록 & 플로우 정리
+
+## 화면 목록 & 플로우 정리
 
 | 화면이름 | 스크린 ID | 담당자 |
 | --- | --- | --- |
 | 로그인 | LoginScreen | 조나단 |
 | 회원가입 | SignUpScreen | 조나단 |
-| 인증 메일 발송 | EmailScreen | 하연탄 |
-| 홈  | HomeScreen | 조나단 |
+| 인증 메일 발송 | EmailScreen | 조나단 |
+| 홈  | HomeScreen | 구민 |
 | 챌린지  | ChallengeScreen | 시온 |
 | 인증 | ChallengeVerificationScreen | 하연탄 |
-| 마이페이지 | MyPageScreen | 구민 |
+| 마이페이지 | MyPageScreen | 조나단 |
 | 파티 | PartyScreen | 구민 |
 
 ## 🔀 Pull Request
 
 - PR 생성 전 `develop` 브랜치의 최신 내용을 반영합니다.
 - PR 제목은 작업 내용을 명확하게 작성합니다.
-- 최소 1명 이상의 팀원 리뷰를 받은 후 머지합니다.
-- 충돌(Conflict)이 없는 상태에서 머지를 진행합니다.
 - PR 본문에는 작업 내용 및 변경 사항을 작성합니다.
+- 모든 PR은 최소 1명 이상의 팀원에게 코드 리뷰를 받은 후 Merge합니다.
+- 공통 컴포넌트, 아키텍처 변경, 대규모 리팩토링 등 프로젝트 전반에 영향을 주는 변경사항은 2명 이상의 리뷰를 권장합니다.
+- PR 작성자는 본인의 PR을 직접 Merge하지 않고, 리뷰어가 Merge합니다.
+- 충돌(Conflict)이 없는 상태에서 Merge를 진행합니다.
 
 ## 📝 Code Naming
 
