@@ -129,7 +129,7 @@ fun VerificationMethodCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_challenge_info),
+                        painter = painterResource(R.drawable.challenge_info),
                         contentDescription = null,
                         tint = Persimmon,
                         modifier = Modifier.size(13.dp)
