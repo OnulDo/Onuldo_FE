@@ -25,15 +25,15 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 
-/** BottomNav 배경 (#FFFDF7) · 상단 보더 (DarkBrown 20%). Figma `5042:1678` 기준. */
+/** BottomNav 배경 (#FFFDF7) · 상단 보더 (DarkBrown 20%). Figma BottomNav `5042:1511` 기준. */
 private val BottomBarBackground = Color(0xFFFFFDF7)
 private val BottomBarBorder = Color(0x335C2C03)
 private val UnselectedTint = BlackBrown.copy(alpha = 0.5f)
 
 /**
- * 하단 내비게이션 바 — Figma BottomNav(`5042:1678`).
+ * 하단 내비게이션 바 — Figma BottomNav(`5042:1511`), 아이콘(`4353:73393`).
  * 5탭(홈·챌린지·파티·기록·마이). 선택 = Persimmon, 미선택 = BlackBrown 50%.
- * 선택 표시는 pill 없이 아이콘·라벨 색상만 변경한다.
+ * 라벨 = Pretendard Bold 12px. 선택 표시는 pill 없이 아이콘·라벨 색상만 변경한다.
  */
 @Composable
 fun OnuldoBottomBar(navController: NavController) {
