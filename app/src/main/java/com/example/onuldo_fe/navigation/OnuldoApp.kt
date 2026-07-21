@@ -22,7 +22,8 @@ import com.example.onuldo_fe.ui.screen.mypage.PointWithdrawScreen
 import com.example.onuldo_fe.ui.screen.mypage.ProfileSettingsScreen
 import com.example.onuldo_fe.ui.screen.mypage.WithdrawAccountScreen
 
-/** 앱 전체 내비게이션 그래프. 랜딩 → 로그인/회원가입 → 이메일 인증 → 권한 → 프로필 → 메인(탭). */
+/** 앱 전체 내비게이션 그래프. 랜딩 → 로그인/회원가입 → 이메일 인증 → 권한 → 프로필 → 메인(탭).
+ *  (스플래시는 별도 화면이 아니라 시스템 스플래시로 처리 — [MainActivity]) */
 @Composable
 fun OnuldoApp() {
     val navController = rememberNavController()

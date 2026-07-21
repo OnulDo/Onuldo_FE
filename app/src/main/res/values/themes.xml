@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.OnulDo_FE" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- 앱 기본 테마. 런치 시 흰색 깜빡임을 막기 위해 윈도우 배경을 스플래시와 같은 Persimmon으로 둔다. -->
+    <style name="Theme.OnulDo_FE" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/persimmon</item>
+    </style>
+
+    <!-- 런처 스플래시 테마 (Android 12+ 시스템 스플래시 + core-splashscreen 하위호환).
+         배경 = Persimmon, 아이콘 = "오늘DO" 워드마크. 준비되면 postSplashScreenTheme로 전환. -->
+    <style name="Theme.OnulDo_FE.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/persimmon</item>
+        <!-- 워드마크가 시스템 스플래시 안전원(지름 72/108) 안에 들어가도록 축소한 전용 아이콘 사용. -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.OnulDo_FE</item>
+    </style>
 </resources>
