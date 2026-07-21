@@ -33,8 +33,8 @@ fun GalleryFilterButton(
 
     Image(
         painter = painterResource(
-            if (active) R.drawable.ic_challenge_filter_pressed
-            else R.drawable.ic_challenge_filter_default
+            if (active) R.drawable.challenge_filter_pressed
+            else R.drawable.challenge_filter_default
         ),
         contentDescription = "필터",
         modifier = modifier

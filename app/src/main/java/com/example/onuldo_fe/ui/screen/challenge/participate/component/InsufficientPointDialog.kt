@@ -82,7 +82,7 @@ fun InsufficientPointDialog(
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(R.drawable.ic_challenge_sad_icon),
+                    painter = painterResource(R.drawable.challenge_sad_icon),
                     contentDescription = null,
                     modifier = Modifier.size(width = 58.dp, height = 76.dp)
                 )
