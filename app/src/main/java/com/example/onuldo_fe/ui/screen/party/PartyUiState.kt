@@ -1,5 +1,7 @@
 package com.example.onuldo_fe.ui.screen.party
 
+import androidx.annotation.DrawableRes
+
 enum class PartyMemberRole { Leader, Member }
 enum class PartyReadyStatus { NotApplicable, Waiting, Ready }
 enum class InviteCodeError(val message: String) {
@@ -23,6 +25,13 @@ data class PartyCardUi(
 )
 
 data class PartyChallengeUi(val id: String, val title: String, val period: String, val deposit: Int)
+
+data class PartyChallengeCardUi(
+    val challenge: PartyChallengeUi,
+    val participantCount: Int,
+    val imageUrl: String? = null,
+    @param:DrawableRes val fallbackImageRes: Int
+)
 
 data class PartyWaitingRoomUi(
     val partyName: String = "갓생팟",

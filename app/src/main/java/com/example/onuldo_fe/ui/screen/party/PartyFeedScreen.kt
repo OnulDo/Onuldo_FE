@@ -101,6 +101,16 @@ private fun TeamProgressCard(modifier: Modifier = Modifier) {
     }
 }
 
+@Preview(name = "파티 팀 진행률", showBackground = true, widthDp = 390)
+@Composable
+private fun TeamProgressCardPreview() {
+    OnulDo_FETheme {
+        Box(Modifier.background(SourCream).padding(20.dp)) {
+            TeamProgressCard()
+        }
+    }
+}
+
 @Preview(name = "파티 인증 피드", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 private fun PartyFeedScreenPreview() {

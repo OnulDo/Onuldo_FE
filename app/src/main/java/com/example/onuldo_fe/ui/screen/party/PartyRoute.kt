@@ -6,23 +6,34 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.viewmodel.party.PartyChallengeSelectViewModel
 import com.example.onuldo_fe.ui.screen.party.component.InviteCodeDialog
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 
 private enum class PartyScreen { List, Create, ChallengeSelect, ChallengeDetail, WaitingLeader, WaitingMember, Feed, Settlement }
 
 @Composable
-fun PartyRoute() {
+fun PartyRoute(
+    challengeSelectViewModel: PartyChallengeSelectViewModel = viewModel()
+) {
     var screen by remember { mutableStateOf(PartyScreen.List) }
     var showInviteDialog by remember { mutableStateOf(false) }
     var inviteError by remember { mutableStateOf<InviteCodeError?>(null) }
     var selectedChallenge by remember { mutableStateOf<PartyChallengeUi?>(null) }
     var partyName by remember { mutableStateOf("") }
-    var capacity by remember { mutableIntStateOf(5) }
+    var capacity by remember { mutableIntStateOf(4) }
 
     when (screen) {
         PartyScreen.List -> PartyListScreen(
             parties = samplePartyCards,
-            onCreateClick = { screen = PartyScreen.Create },
+            onCreateClick = {
+                partyName = ""
+                selectedChallenge = null
+                capacity = 4
+                screen = PartyScreen.Create
+            },
             onInviteCodeClick = { showInviteDialog = true },
             onPartyClick = { screen = PartyScreen.Feed }
         )
@@ -37,10 +48,8 @@ fun PartyRoute() {
             onCreate = { screen = PartyScreen.WaitingLeader }
         )
         PartyScreen.ChallengeSelect -> PartyChallengeSelectScreen(
-            challenges = samplePartyChallenges,
-            selectedId = selectedChallenge?.id,
+            challenges = challengeSelectViewModel.uiState.challenges,
             onSelect = { selectedChallenge = it },
-            onBack = { screen = PartyScreen.Create },
             onConfirm = { screen = PartyScreen.ChallengeDetail }
         )
         PartyScreen.ChallengeDetail -> PartyChallengeDetailScreen(
@@ -82,4 +91,10 @@ fun PartyRoute() {
             }
         )
     }
+}
+
+@Preview(name = "파티 전체 플로우", showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun PartyRoutePreview() {
+    OnulDo_FETheme { PartyRoute() }
 }

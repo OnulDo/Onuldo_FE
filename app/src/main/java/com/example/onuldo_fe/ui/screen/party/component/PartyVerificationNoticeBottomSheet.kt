@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
@@ -42,6 +43,7 @@ import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.SourCream
+import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import kotlinx.coroutines.launch
 
 private val partySuccessConditions = listOf(
@@ -166,6 +168,19 @@ private fun PartyNoticeConditionCard(
             conditions.forEach { condition ->
                 Text(condition, color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 20.sp)
             }
+        }
+    }
+}
+
+@Preview(name = "파티 인증 유의사항 바텀시트", showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun PartyVerificationNoticeBottomSheetPreview() {
+    OnulDo_FETheme {
+        Box(Modifier.fillMaxWidth().height(844.dp).background(SourCream)) {
+            PartyVerificationNoticeBottomSheet(
+                challengeTitle = "새벽 6시 기상",
+                onDismiss = {}
+            )
         }
     }
 }

@@ -149,6 +149,7 @@ private fun PartyListEmptyContent(modifier: Modifier = Modifier) {
     }
 }
 
+// HomePartyCard 컴포넌트로 교체 예정
 @Composable
 private fun PartyListCard(party: PartyCardUi, onClick: () -> Unit) {
     Column(
@@ -195,6 +196,16 @@ private fun PartyListCard(party: PartyCardUi, onClick: () -> Unit) {
             OutlinedButton(onClick = {}, modifier = Modifier.size(width = 96.dp, height = 32.dp), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, Persimmon)) {
                 Text("인증하기", color = Persimmon, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
+        }
+    }
+}
+
+@Preview(name = "파티 목록 카드", showBackground = true, widthDp = 390)
+@Composable
+private fun PartyListCardPreview() {
+    OnulDo_FETheme {
+        Box(Modifier.background(SourCream).padding(20.dp)) {
+            PartyListCard(samplePartyCards.first(), onClick = {})
         }
     }
 }
