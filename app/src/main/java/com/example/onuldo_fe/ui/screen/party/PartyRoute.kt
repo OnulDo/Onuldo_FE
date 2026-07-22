@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.example.onuldo_fe.ui.screen.party.component.InviteCodeDialog
 
-private enum class PartyScreen { List, Create, ChallengeSelect, WaitingLeader, WaitingMember, Feed, Settlement }
+private enum class PartyScreen { List, Create, ChallengeSelect, ChallengeDetail, WaitingLeader, WaitingMember, Feed, Settlement }
 
 @Composable
 fun PartyRoute() {
@@ -41,7 +41,12 @@ fun PartyRoute() {
             selectedId = selectedChallenge?.id,
             onSelect = { selectedChallenge = it },
             onBack = { screen = PartyScreen.Create },
-            onConfirm = { screen = PartyScreen.Create }
+            onConfirm = { screen = PartyScreen.ChallengeDetail }
+        )
+        PartyScreen.ChallengeDetail -> PartyChallengeDetailScreen(
+            challenge = selectedChallenge ?: samplePartyChallenges.first(),
+            onBack = { screen = PartyScreen.ChallengeSelect },
+            onParticipate = { screen = PartyScreen.Create }
         )
         PartyScreen.WaitingLeader -> PartyWaitingRoomScreen(
             ui = PartyWaitingRoomUi(),

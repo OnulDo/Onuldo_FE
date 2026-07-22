@@ -2,6 +2,7 @@ package com.example.onuldo_fe.ui.screen.party
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -39,10 +40,7 @@ fun PartyFeedScreen(onBack: () -> Unit, onSettlementClick: () -> Unit) {
             TextButton(onClick = onSettlementClick, modifier = Modifier.align(Alignment.CenterEnd).padding(end = 8.dp)) { Text("정산", color = Persimmon) }
         }
         Text("30분 러닝", Modifier.padding(horizontal = 20.dp), color = DarkBrown50)
-        Column(Modifier.fillMaxWidth().padding(20.dp).background(White, RoundedCornerShape(14.dp)).padding(16.dp)) {
-            Row { Text("오늘의 인증", Modifier.weight(1f), fontWeight = FontWeight.Bold); Text("5명 중 4명", color = Persimmon, fontWeight = FontWeight.Bold) }
-            LinearProgressIndicator(progress = { .8f }, modifier = Modifier.fillMaxWidth().padding(top = 14.dp).height(8.dp).clip(CircleShape), color = Persimmon, trackColor = Persimmon10)
-        }
+        TeamProgressCard(Modifier.padding(horizontal = 20.dp, vertical = 17.dp))
         Text("파티 인증 피드", Modifier.padding(horizontal = 20.dp).padding(bottom = 12.dp), fontSize = 18.sp, fontWeight = FontWeight.Bold)
         LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.weight(1f), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             items(partyFeedItems) { item ->
@@ -56,6 +54,49 @@ fun PartyFeedScreen(onBack: () -> Unit, onSettlementClick: () -> Unit) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TeamProgressCard(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(88.dp)
+            .background(Persimmon10, RoundedCornerShape(14.dp))
+            .border(1.dp, Persimmon.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+            .padding(horizontal = 20.dp, vertical = 14.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "팀 진행률",
+                color = Persimmon,
+                fontFamily = Pretendard,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.44.sp
+            )
+            Text(
+                "5명 중 4명 오늘 인증 완료",
+                modifier = Modifier.padding(start = 8.dp),
+                color = DarkBrown50,
+                fontFamily = Pretendard,
+                fontSize = 8.sp
+            )
+        }
+        Text(
+            "72%",
+            color = BlackBrown,
+            fontFamily = Pretendard,
+            fontSize = 24.sp,
+            lineHeight = 28.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = (-0.48).sp
+        )
+        Spacer(Modifier.height(10.dp))
+        Box(Modifier.fillMaxWidth().height(8.dp).background(White, CircleShape)) {
+            Box(Modifier.fillMaxWidth(0.64f).height(8.dp).background(Persimmon, CircleShape))
         }
     }
 }

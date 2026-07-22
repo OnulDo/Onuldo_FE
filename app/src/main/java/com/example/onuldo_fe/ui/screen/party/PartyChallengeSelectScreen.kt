@@ -8,9 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,6 +26,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.screen.party.component.PartyChallengeFilterButton
+import com.example.onuldo_fe.ui.screen.party.component.PartyChallengeSearchBar
 import com.example.onuldo_fe.ui.theme.*
 
 private data class PartyChallengeGalleryItem(
@@ -57,34 +57,20 @@ fun PartyChallengeSelectScreen(
     val items = partyChallengeGalleryItems.filter { searchText.isBlank() || it.challenge.title.contains(searchText, ignoreCase = true) }
 
     Column(Modifier.fillMaxSize().background(SourCream).systemBarsPadding()) {
-        Text("챌린지", Modifier.padding(start = 20.dp, top = 17.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-        Text("나에게 맞는 챌린지를 찾아보세요", Modifier.padding(start = 20.dp, top = 3.dp), color = DarkBrown50, fontFamily = Pretendard, fontSize = 12.sp)
+        Text("챌린지", Modifier.padding(start = 20.dp, top = 23.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Text("나에게 맞는 챌린지를 찾아보세요", Modifier.padding(start = 20.dp, top = 2.dp), color = BlackBrown.copy(alpha = 0.7f), fontFamily = Pretendard, fontSize = 13.sp, fontWeight = FontWeight.Normal)
 
         Row(Modifier.padding(start = 20.dp, end = 26.dp, top = 17.dp), verticalAlignment = Alignment.CenterVertically) {
-            BasicTextField(
+            PartyChallengeSearchBar(
                 value = searchText,
                 onValueChange = { searchText = it },
-                singleLine = true,
-                textStyle = androidx.compose.ui.text.TextStyle(color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp),
-                cursorBrush = SolidColor(Persimmon),
-                modifier = Modifier.weight(1f).height(27.dp),
-                decorationBox = { inner ->
-                    Row(Modifier.fillMaxSize().background(DarkBrown10, RoundedCornerShape(14.dp)).padding(horizontal = 11.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text("⌕", color = DarkBrown50, fontSize = 15.sp)
-                        Box(Modifier.weight(1f).padding(start = 8.dp)) {
-                            if (searchText.isEmpty()) Text("생활루틴", color = DarkBrown70, fontFamily = Pretendard, fontSize = 12.sp)
-                            inner()
-                        }
-                    }
-                }
+                modifier = Modifier
+                    .weight(1f)
+                    .background(White, RoundedCornerShape(14.dp)),
+                placeholder = "생활루틴"
             )
-            Box(Modifier.padding(start = 9.dp).size(27.dp).background(DarkBrown, CircleShape), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Box(Modifier.width(11.dp).height(1.dp).background(SourCream))
-                    Box(Modifier.width(7.dp).height(1.dp).background(SourCream))
-                    Box(Modifier.width(4.dp).height(1.dp).background(SourCream))
-                }
-            }
+            Spacer(Modifier.width(9.dp))
+            PartyChallengeFilterButton(onClick = {})
         }
 
         LazyVerticalGrid(
@@ -110,10 +96,15 @@ private fun PartyChallengeGalleryCard(item: PartyChallengeGalleryItem, selected:
         Modifier.fillMaxWidth().height(180.dp).background(White, RoundedCornerShape(16.dp)).border(if (selected) 1.5.dp else 1.dp, if (selected) Persimmon else DarkBrown20, RoundedCornerShape(16.dp)).clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick)
     ) {
         Image(painterResource(item.imageRes), null, Modifier.fillMaxWidth().height(130.dp), contentScale = ContentScale.Crop)
-        Text(item.challenge.title, Modifier.padding(start = 12.dp, top = 7.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        Text(item.challenge.title, Modifier.padding(start = 11.dp, top = 7.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
         Row(Modifier.padding(start = 12.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("♟", color = BlackBrown.copy(alpha = .6f), fontSize = 10.sp)
-            Text(item.participantCount, Modifier.padding(start = 5.dp), color = BlackBrown.copy(alpha = .6f), fontFamily = Pretendard, fontSize = 10.sp)
+            Icon(
+                painter = painterResource(R.drawable.party_challenge_person),
+                contentDescription = null,
+                tint = Persimmon,
+                modifier = Modifier.size(12.dp)
+            )
+            Text(item.participantCount, Modifier.padding(start = 4.dp), color = BlackBrown.copy(alpha = .6f), fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Medium)
         }
     }
 }
