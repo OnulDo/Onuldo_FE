@@ -33,7 +33,7 @@ fun PartyCreateScreen(
     selectedChallenge: PartyChallengeUi?,
     onChallengeClick: () -> Unit,
     onBack: () -> Unit,
-    onCreate: () -> Unit
+    onCreate: (period: String, deposit: Int) -> Unit
 ) {
     val periods = listOf("2주", "4주", "8주", "12주")
     val deposits = listOf(10_000, 20_000, 30_000, 50_000)
@@ -77,7 +77,7 @@ fun PartyCreateScreen(
             PartyCapacitySelector(capacity = capacity, onCapacityChange = onCapacityChange)
         }
         Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
-            Button(onClick = onCreate, enabled = enabled, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 40.dp).height(52.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = Persimmon, contentColor = SourCream, disabledContainerColor = DarkBrown10, disabledContentColor = DarkBrown)) {
+            Button(onClick = { onCreate(periods[selectedPeriod], deposits[selectedDeposit]) }, enabled = enabled, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 40.dp).height(52.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = Persimmon, contentColor = SourCream, disabledContainerColor = DarkBrown10, disabledContentColor = DarkBrown)) {
                 Text("파티 만들기", fontFamily = Pretendard, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
         }
@@ -87,7 +87,7 @@ fun PartyCreateScreen(
 @Composable private fun SectionTitle(text: String, size: Int) = Text(text, color = BlackBrown, fontFamily = Pretendard, fontSize = size.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.13).sp)
 
 @Preview(name = "파티 생성 - 챌린지 미선택", showBackground = true, widthDp = 390, heightDp = 844)
-@Composable private fun PartyCreateEmptyPreview() { OnulDo_FETheme { PartyCreateScreen("", {}, 4, {}, null, {}, {}, {}) } }
+@Composable private fun PartyCreateEmptyPreview() { OnulDo_FETheme { PartyCreateScreen("", {}, 4, {}, null, {}, {}, { _, _ -> }) } }
 
 @Preview(name = "파티 생성 - 챌린지 선택", showBackground = true, widthDp = 390, heightDp = 844)
-@Composable private fun PartyCreateSelectedPreview() { OnulDo_FETheme { PartyCreateScreen("갓생팟", {}, 4, {}, PartyChallengeUi("preview", "30일 헬스 챌린지", "4주", 10_000), {}, {}, {}) } }
+@Composable private fun PartyCreateSelectedPreview() { OnulDo_FETheme { PartyCreateScreen("갓생팟", {}, 4, {}, PartyChallengeUi("preview", "30일 헬스 챌린지", "4주", 10_000), {}, {}, { _, _ -> }) } }

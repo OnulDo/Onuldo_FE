@@ -24,6 +24,9 @@ fun PartyRoute(
     var selectedChallenge by remember { mutableStateOf<PartyChallengeUi?>(null) }
     var partyName by remember { mutableStateOf("") }
     var capacity by remember { mutableIntStateOf(4) }
+    var waitingMemberReady by remember { mutableStateOf(false) }
+    var createdPeriod by remember { mutableStateOf("") }
+    var createdDeposit by remember { mutableIntStateOf(0) }
 
     when (screen) {
         PartyScreen.List -> PartyListScreen(
@@ -45,7 +48,11 @@ fun PartyRoute(
             selectedChallenge = selectedChallenge,
             onChallengeClick = { screen = PartyScreen.ChallengeSelect },
             onBack = { screen = PartyScreen.List },
-            onCreate = { screen = PartyScreen.WaitingLeader }
+            onCreate = { period, deposit ->
+                createdPeriod = period
+                createdDeposit = deposit
+                screen = PartyScreen.WaitingLeader
+            }
         )
         PartyScreen.ChallengeSelect -> PartyChallengeSelectScreen(
             challenges = challengeSelectViewModel.uiState.challenges,
@@ -58,16 +65,35 @@ fun PartyRoute(
             onParticipate = { screen = PartyScreen.Create }
         )
         PartyScreen.WaitingLeader -> PartyWaitingRoomScreen(
-            ui = PartyWaitingRoomUi(),
+            ui = PartyWaitingRoomUi(
+                partyName = partyName,
+                challengeName = selectedChallenge?.title.orEmpty(),
+                period = createdPeriod,
+                deposit = createdDeposit,
+                capacity = capacity
+            ),
             isLeader = true,
             onBack = { screen = PartyScreen.List },
-            onPrimaryClick = { screen = PartyScreen.Feed }
+            onStartClick = { screen = PartyScreen.Feed }
         )
         PartyScreen.WaitingMember -> PartyWaitingRoomScreen(
-            ui = PartyWaitingRoomUi(),
+            ui = PartyWaitingRoomUi().let { waitingRoom ->
+                waitingRoom.copy(
+                    members = waitingRoom.members.mapIndexed { index, member ->
+                        if (index == waitingRoom.members.lastIndex) {
+                            member.copy(readyStatus = if (waitingMemberReady) PartyReadyStatus.Ready else PartyReadyStatus.Waiting)
+                        } else member
+                    }
+                )
+            },
             isLeader = false,
+            availablePoint = 50_000,
+            isCurrentUserReady = waitingMemberReady,
             onBack = { screen = PartyScreen.List },
-            onPrimaryClick = {}
+            onReadyClick = {
+                // TODO 준비완료 API 연동 후 성공 응답 시 해당 파티원의 준비 상태 갱신
+                waitingMemberReady = true
+            }
         )
         PartyScreen.Feed -> PartyFeedScreen(
             onBack = { screen = PartyScreen.List },
