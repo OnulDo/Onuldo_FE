@@ -272,7 +272,7 @@ private fun VerificationFailureContent() {
             Text(
                 text = "AI 검증에서 미션 조건을 확인하지 못했어요",
                 color = DarkBrown70,
-                fontSize = 13.sp,
+                style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.padding(top = 8.dp),
                 textAlign = TextAlign.Center
             )
