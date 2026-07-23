@@ -32,9 +32,14 @@ fun PartyFeedCard(item: PartyFeedItemUi, modifier: Modifier = Modifier) {
             .clip(RoundedCornerShape(16.dp))
     ) {
         Box(Modifier.fillMaxWidth().height(225.dp).background(Persimmon.copy(alpha = .15f)), contentAlignment = Alignment.Center) {
-            // TODO API 연동 시 verificationImageUrl을 네트워크 이미지 로더에 전달하고 imageRes는 fallback으로 사용
-            if (item.imageRes != null) {
-                Image(painterResource(item.imageRes), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+            if (item.verificationImageUrl != null || item.imageRes != null) {
+                PartyNetworkImage(
+                    imageUrl = item.verificationImageUrl,
+                    fallbackImageRes = item.imageRes ?: R.drawable.party_feed_unverified_icon,
+                    contentDescription = "${item.name} 인증 사진",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
             } else {
                 Image(
                     painterResource(R.drawable.party_feed_unverified_icon),
@@ -47,7 +52,12 @@ fun PartyFeedCard(item: PartyFeedItemUi, modifier: Modifier = Modifier) {
         }
         Row(Modifier.fillMaxWidth().height(50.dp).padding(start = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(28.dp).background(Persimmon10, CircleShape).border(1.dp, Persimmon, CircleShape), contentAlignment = Alignment.Center) {
-                Image(painterResource(R.drawable.party_member_avatar), null, Modifier.size(26.dp).clip(CircleShape))
+                PartyNetworkImage(
+                    imageUrl = item.profileImageUrl,
+                    fallbackImageRes = R.drawable.party_member_avatar,
+                    contentDescription = "${item.name} 프로필",
+                    modifier = Modifier.size(26.dp).clip(CircleShape)
+                )
             }
             Column(Modifier.padding(start = 8.dp)) {
                 Text(item.name, color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Bold)

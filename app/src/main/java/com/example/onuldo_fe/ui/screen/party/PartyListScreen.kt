@@ -26,6 +26,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +55,9 @@ fun PartyListScreen(
     onCreateClick: () -> Unit,
     onInviteCodeClick: () -> Unit,
     onPartyClick: (String) -> Unit,
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
+    onRetry: () -> Unit = {},
     modifier: Modifier = Modifier,
     partyCardContent: @Composable (PartyCardUi, () -> Unit) -> Unit = { party, onClick ->
         PartyListCard(party = party, onClick = onClick)
@@ -93,7 +98,20 @@ fun PartyListScreen(
             Text("나의 파티", color = BlackBrown, fontFamily = Pretendard, fontSize = 17.sp, lineHeight = 20.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(Modifier.height(14.dp))
-        if (parties.isEmpty()) {
+        if (isLoading) {
+            Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Persimmon)
+            }
+        } else if (errorMessage != null) {
+            Column(
+                Modifier.fillMaxWidth().weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(errorMessage, color = DarkBrown50, fontFamily = Pretendard, fontSize = 13.sp)
+                TextButton(onClick = onRetry) { Text("다시 시도", color = Persimmon) }
+            }
+        } else if (parties.isEmpty()) {
             PartyListEmptyContent(Modifier.fillMaxWidth().weight(1f))
         } else {
             LazyColumn(

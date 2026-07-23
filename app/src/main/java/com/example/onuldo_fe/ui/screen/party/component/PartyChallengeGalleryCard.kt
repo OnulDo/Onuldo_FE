@@ -43,8 +43,13 @@ fun PartyChallengeGalleryCard(
             .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
     ) {
-        // TODO API 연동 시 imageUrl을 네트워크 이미지 로더에 전달하고 이 리소스는 fallback으로 사용
-        Image(painterResource(item.fallbackImageRes), null, Modifier.fillMaxWidth().height(130.dp), contentScale = ContentScale.Crop)
+        PartyNetworkImage(
+            imageUrl = item.imageUrl,
+            fallbackImageRes = item.fallbackImageRes,
+            contentDescription = item.challenge.title,
+            modifier = Modifier.fillMaxWidth().height(130.dp),
+            contentScale = ContentScale.Crop
+        )
         Text(item.challenge.title, Modifier.padding(start = 11.dp, top = 7.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
         Row(Modifier.padding(start = 12.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(painterResource(R.drawable.party_challenge_person), null, Modifier.size(12.dp), tint = Persimmon)
@@ -59,7 +64,7 @@ private fun PartyChallengeGalleryCardPreview() {
     OnulDo_FETheme {
         PartyChallengeGalleryCard(
             item = PartyChallengeCardUi(
-                challenge = PartyChallengeUi("preview", "새벽 6시 기상", "4주", 10_000),
+                challenge = PartyChallengeUi("preview", "새벽 6시 기상", "생활루틴"),
                 participantCount = 1_234,
                 fallbackImageRes = R.drawable.party_challenge_morning
             ),

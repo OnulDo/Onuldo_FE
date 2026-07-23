@@ -52,7 +52,9 @@ fun InviteCodeDialog(
     onDismiss: () -> Unit,
     onRetry: () -> Unit,
     onSubmit: (String) -> Unit,
-    initialCode: String = ""
+    initialCode: String = "",
+    isSubmitting: Boolean = false,
+    networkErrorMessage: String? = null
 ) {
     var code by remember { mutableStateOf(initialCode) }
     val isError = error != null
@@ -79,8 +81,8 @@ fun InviteCodeDialog(
             )
             Spacer(Modifier.height(10.dp))
             Text(
-                text = error?.message ?: "파티장에게 받은 6자리 코드를 입력하세요",
-                color = if (isError) Red else DarkBrown,
+                text = error?.message ?: networkErrorMessage ?: "파티장에게 받은 6자리 코드를 입력하세요",
+                color = if (isError || networkErrorMessage != null) Red else DarkBrown,
                 fontFamily = Pretendard,
                 fontSize = 12.sp,
                 fontWeight = if (isError) FontWeight.Bold else FontWeight.Normal,
@@ -141,7 +143,7 @@ fun InviteCodeDialog(
                         onSubmit(code)
                     }
                 },
-                enabled = isError || code.length == 6,
+                enabled = !isSubmitting && (isError || networkErrorMessage != null || code.length == 6),
                 modifier = Modifier.width(278.dp).height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -152,7 +154,11 @@ fun InviteCodeDialog(
                 )
             ) {
                 Text(
-                    text = if (isError) "다시 입력" else "참가하기",
+                    text = when {
+                        isSubmitting -> "확인 중..."
+                        isError || networkErrorMessage != null -> "다시 입력"
+                        else -> "참가하기"
+                    },
                     fontFamily = Pretendard,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold

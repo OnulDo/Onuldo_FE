@@ -6,6 +6,10 @@ data class PartyChallenge(
     val imageUrl: String,           // 챌린지 대표 이미지 URL
     val title: String,              // 챌린지명
     val participantCount: Int,      // 총 참여 인원
-    val period: String,             // 진행 기간
-    val deposit: Int                // 1인 도전금
+    val category: String,           // 챌린지 카테고리
+    val summary: String,
+    val benefits: List<String>,
+    val recommendations: List<String>,
+    val verificationInstruction: String,
+    val verificationImageUrl: String?
 )

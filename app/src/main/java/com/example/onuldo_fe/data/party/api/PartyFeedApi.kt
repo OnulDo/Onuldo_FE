@@ -1,9 +1,7 @@
 package com.example.onuldo_fe.data.party.api
 
-import com.example.onuldo_fe.data.party.dto.PartyProgressDto
-import com.example.onuldo_fe.data.party.dto.PartyFeedItemDto
+import com.example.onuldo_fe.data.party.dto.PartyFeedDto
 
 interface PartyFeedApi {
-    fun getPartyProgress(partyId: String): PartyProgressDto
-    fun getPartyFeedItems(partyId: String): List<PartyFeedItemDto>
+    suspend fun getPartyFeed(partyId: String): PartyFeedDto
 }

@@ -33,7 +33,12 @@ fun PartyWaitingMemberCard(member: PartyMemberUi, modifier: Modifier = Modifier)
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(Modifier.size(40.dp).background(Persimmon10, CircleShape).border(1.dp, Persimmon, CircleShape), contentAlignment = Alignment.Center) {
-            Image(painterResource(R.drawable.party_member_avatar), null, Modifier.width(38.dp).height(37.dp).clip(CircleShape))
+            PartyNetworkImage(
+                imageUrl = member.profileImageUrl,
+                fallbackImageRes = R.drawable.party_member_avatar,
+                contentDescription = "${member.name} 프로필",
+                modifier = Modifier.width(38.dp).height(37.dp).clip(CircleShape)
+            )
         }
         Text(member.name, Modifier.weight(1f).padding(start = 12.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         when {

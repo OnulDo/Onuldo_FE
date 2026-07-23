@@ -17,7 +17,8 @@ data class PartyMemberUi(
     val role: PartyMemberRole,
     val readyStatus: PartyReadyStatus,
     val id: String = name,
-    val joinedOrder: Int = 0
+    val joinedOrder: Int = 0,
+    val profileImageUrl: String? = null
 )
 
 data class PartyCardUi(
@@ -32,7 +33,17 @@ data class PartyCardUi(
     val status: PartyStatus = PartyStatus.InProgress
 )
 
-data class PartyChallengeUi(val id: String, val title: String, val period: String, val deposit: Int)
+data class PartyChallengeUi(
+    val id: String,
+    val title: String,
+    val category: String,
+    val participantCount: Int = 0,
+    val summary: String = "",
+    val benefits: List<String> = emptyList(),
+    val recommendations: List<String> = emptyList(),
+    val verificationInstruction: String = "",
+    val verificationImageUrl: String? = null
+)
 
 data class PartyChallengeCardUi(
     val challenge: PartyChallengeUi,
@@ -46,7 +57,8 @@ data class PartyFeedItemUi(
     val time: String,
     val profileImageUrl: String? = null,
     val verificationImageUrl: String? = null,
-    @param:DrawableRes val imageRes: Int? = null
+    @param:DrawableRes val imageRes: Int? = null,
+    val memberId: String = name
 )
 
 data class PartyWaitingRoomUi(
@@ -70,10 +82,4 @@ data class PartyWaitingRoomUi(
 val samplePartyCards = listOf(
     PartyCardUi("party-1", "새벽 러너 파티", "30분 러닝", "D-12", "7:00 마감", "45분 남음", 2, 5),
     PartyCardUi("party-2", "책상 공부 인증 파티", "5시간 집중", "D-20", "6:00 마감", "1시간 남음", 3, 5)
-)
-
-val samplePartyChallenges = listOf(
-    PartyChallengeUi("challenge-1", "30일 헬스 챌린지", "4주", 10_000),
-    PartyChallengeUi("challenge-2", "30분 러닝", "2주", 10_000),
-    PartyChallengeUi("challenge-3", "하루 독서 30분", "8주", 20_000)
 )

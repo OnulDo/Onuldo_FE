@@ -4,6 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.model.party.PartyChallenge
 import com.example.onuldo_fe.repository.party.PartyChallengeRepository
@@ -22,14 +24,36 @@ class PartyChallengeSelectViewModel(
     }
 
     fun loadPartyChallenges() {
-        uiState = PartyChallengeSelectUiState(
-            challenges = repository.getPartyChallenges().map { it.toUiModel() }
-        )
+        uiState = uiState.copy(isLoading = true, errorMessage = null)
+        viewModelScope.launch {
+            runCatching { repository.getPartyChallenges() }
+                .onSuccess { challenges ->
+                    uiState = PartyChallengeSelectUiState(
+                        challenges = challenges.map { it.toUiModel() }
+                    )
+                }
+                .onFailure {
+                    uiState = uiState.copy(
+                        isLoading = false,
+                        errorMessage = "챌린지를 불러오지 못했어요."
+                    )
+                }
+        }
     }
 }
 
 private fun PartyChallenge.toUiModel() = PartyChallengeCardUi(
-    challenge = PartyChallengeUi(id, title, period, deposit),
+    challenge = PartyChallengeUi(
+        id = id,
+        title = title,
+        category = category,
+        participantCount = participantCount,
+        summary = summary,
+        benefits = benefits,
+        recommendations = recommendations,
+        verificationInstruction = verificationInstruction,
+        verificationImageUrl = verificationImageUrl
+    ),
     participantCount = participantCount,
     imageUrl = imageUrl,
     fallbackImageRes = when (id) {

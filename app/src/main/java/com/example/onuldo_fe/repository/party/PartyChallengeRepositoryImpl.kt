@@ -7,7 +7,7 @@ import com.example.onuldo_fe.model.party.PartyChallenge
 class PartyChallengeRepositoryImpl(
     private val api: PartyChallengeApi
 ) : PartyChallengeRepository {
-    override fun getPartyChallenges(): List<PartyChallenge> =
+    override suspend fun getPartyChallenges(): List<PartyChallenge> =
         api.getPartyChallenges().map(PartyChallengeDto::toModel)
 }
 
@@ -16,6 +16,10 @@ private fun PartyChallengeDto.toModel() = PartyChallenge(
     imageUrl = imageUrl,
     title = title,
     participantCount = participantCount,
-    period = period,
-    deposit = deposit
+    category = category,
+    summary = summary,
+    benefits = benefits,
+    recommendations = recommendations,
+    verificationInstruction = verificationInstruction,
+    verificationImageUrl = verificationImageUrl
 )

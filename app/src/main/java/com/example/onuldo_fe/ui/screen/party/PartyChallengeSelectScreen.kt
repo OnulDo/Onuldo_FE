@@ -17,6 +17,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,14 +44,23 @@ fun PartyChallengeSelectScreen(
     challenges: List<PartyChallengeCardUi>,
     onSelect: (PartyChallengeUi) -> Unit,
     onConfirm: () -> Unit,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
+    onRetry: () -> Unit = {}
 ) {
     var searchText by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+    var showCategoryMenu by remember { mutableStateOf(false) }
     val searchInteractionSource = remember { MutableInteractionSource() }
     val isSearchFocused by searchInteractionSource.collectIsFocusedAsState()
     val filterInteractionSource = remember { MutableInteractionSource() }
     val isFilterPressed by filterInteractionSource.collectIsPressedAsState()
-    val items = challenges.filter { searchText.isBlank() || it.challenge.title.contains(searchText, ignoreCase = true) }
+    val categories = challenges.map { it.challenge.category }.distinct()
+    val items = challenges.filter {
+        (searchText.isBlank() || it.challenge.title.contains(searchText, ignoreCase = true)) &&
+            (selectedCategory == null || it.challenge.category == selectedCategory)
+    }
 
     // 탐색을 취소하면 Route에서 임시 선택값을 제거하고 파티 만들기 화면으로 돌아갑니다.
     BackHandler(onBack = onBack)
@@ -98,23 +111,59 @@ fun PartyChallengeSelectScreen(
                 }
             }
             Spacer(Modifier.width(9.dp))
-            Image(
-                painter = painterResource(
-                    if (isFilterPressed) R.drawable.party_challenge_filter_pressed
-                    else R.drawable.party_challenge_filter_default
-                ),
-                contentDescription = "필터",
-                modifier = Modifier
-                    .size(27.dp)
-                    .clickable(
-                        interactionSource = filterInteractionSource,
-                        indication = null,
-                        onClick = {}
+            Box {
+                Image(
+                    painter = painterResource(
+                        if (isFilterPressed || selectedCategory != null) R.drawable.party_challenge_filter_pressed
+                        else R.drawable.party_challenge_filter_default
+                    ),
+                    contentDescription = "필터",
+                    modifier = Modifier
+                        .size(27.dp)
+                        .clickable(
+                            interactionSource = filterInteractionSource,
+                            indication = null,
+                            onClick = { showCategoryMenu = true }
+                        )
+                )
+                DropdownMenu(
+                    expanded = showCategoryMenu,
+                    onDismissRequest = { showCategoryMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("전체") },
+                        onClick = {
+                            selectedCategory = null
+                            showCategoryMenu = false
+                        }
                     )
-            )
+                    categories.forEach { category ->
+                        DropdownMenuItem(
+                            text = { Text(category) },
+                            onClick = {
+                                selectedCategory = category
+                                showCategoryMenu = false
+                            }
+                        )
+                    }
+                }
+            }
         }
 
-        LazyVerticalGrid(
+        if (isLoading) {
+            Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Persimmon)
+            }
+        } else if (errorMessage != null) {
+            Column(
+                Modifier.fillMaxWidth().weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(errorMessage, color = DarkBrown, fontFamily = Pretendard, fontSize = 13.sp)
+                TextButton(onClick = onRetry) { Text("다시 시도", color = Persimmon) }
+            }
+        } else LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier.weight(1f).padding(top = 21.dp),
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
@@ -136,12 +185,12 @@ fun PartyChallengeSelectScreen(
 
 private val previewPartyChallengeCards = listOf(
     PartyChallengeCardUi(
-        challenge = PartyChallengeUi("preview-1", "새벽 6시 기상", "4주", 10_000),
+        challenge = PartyChallengeUi("preview-1", "새벽 6시 기상", "생활루틴"),
         participantCount = 1_234,
         fallbackImageRes = R.drawable.party_challenge_morning
     ),
     PartyChallengeCardUi(
-        challenge = PartyChallengeUi("preview-2", "30분 러닝", "4주", 10_000),
+        challenge = PartyChallengeUi("preview-2", "30분 러닝", "피트니스"),
         participantCount = 682,
         fallbackImageRes = R.drawable.party_challenge_running
     )

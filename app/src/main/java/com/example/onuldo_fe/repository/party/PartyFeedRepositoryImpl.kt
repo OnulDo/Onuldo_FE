@@ -3,18 +3,25 @@ package com.example.onuldo_fe.repository.party
 import com.example.onuldo_fe.data.party.api.PartyFeedApi
 import com.example.onuldo_fe.data.party.dto.PartyProgressDto
 import com.example.onuldo_fe.data.party.dto.PartyFeedItemDto
+import com.example.onuldo_fe.data.party.dto.PartyFeedDto
+import com.example.onuldo_fe.model.party.PartyFeed
 import com.example.onuldo_fe.model.party.PartyFeedItem
 import com.example.onuldo_fe.model.party.PartyProgress
 
 class PartyFeedRepositoryImpl(
     private val api: PartyFeedApi
 ) : PartyFeedRepository {
-    override fun getPartyProgress(partyId: String): PartyProgress =
-        api.getPartyProgress(partyId).toModel()
-
-    override fun getPartyFeedItems(partyId: String): List<PartyFeedItem> =
-        api.getPartyFeedItems(partyId).map(PartyFeedItemDto::toModel)
+    override suspend fun getPartyFeed(partyId: String): PartyFeed =
+        api.getPartyFeed(partyId).toModel()
 }
+
+private fun PartyFeedDto.toModel() = PartyFeed(
+    partyId = partyId,
+    partyName = partyName,
+    challengeName = challengeName,
+    progress = progress.toModel(),
+    items = items.map(PartyFeedItemDto::toModel)
+)
 
 private fun PartyProgressDto.toModel() = PartyProgress(
     completedMemberCount = completedMemberCount,

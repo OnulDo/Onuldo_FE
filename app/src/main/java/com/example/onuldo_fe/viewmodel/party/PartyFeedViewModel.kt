@@ -4,6 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import com.example.onuldo_fe.model.party.PartyProgress
 import com.example.onuldo_fe.model.party.PartyFeedItem
 import com.example.onuldo_fe.R
@@ -18,8 +20,12 @@ data class PartyProgressUiState(
 )
 
 data class PartyFeedUiState(
+    val partyName: String = "",
+    val challengeName: String = "",
     val progress: PartyProgressUiState = PartyProgressUiState(),
-    val feedItems: List<PartyFeedItemUi> = emptyList()
+    val feedItems: List<PartyFeedItemUi> = emptyList(),
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
 )
 
 class PartyFeedViewModel(
@@ -28,16 +34,25 @@ class PartyFeedViewModel(
     var uiState by mutableStateOf(PartyFeedUiState())
         private set
 
-    init {
-        loadPartyFeed("party-001")
-    }
-
     fun loadPartyFeed(partyId: String) {
-        // TODO 실제 API 연동 시 선택한 partyId의 팀 진행률 요청
-        uiState = PartyFeedUiState(
-            progress = repository.getPartyProgress(partyId).toUiState(),
-            feedItems = repository.getPartyFeedItems(partyId).map { it.toUiState() }
-        )
+        uiState = uiState.copy(isLoading = true, errorMessage = null)
+        viewModelScope.launch {
+            runCatching { repository.getPartyFeed(partyId) }
+                .onSuccess { feed ->
+                    uiState = PartyFeedUiState(
+                        partyName = feed.partyName,
+                        challengeName = feed.challengeName,
+                        progress = feed.progress.toUiState(),
+                        feedItems = feed.items.map { it.toUiState() }
+                    )
+                }
+                .onFailure {
+                    uiState = uiState.copy(
+                        isLoading = false,
+                        errorMessage = "파티 피드를 불러오지 못했어요."
+                    )
+                }
+        }
     }
 }
 
@@ -52,8 +67,9 @@ private fun PartyProgress.toUiState() = PartyProgressUiState(
 )
 
 private fun PartyFeedItem.toUiState() = PartyFeedItemUi(
+    memberId = memberId,
     name = nickname,
-    time = verifiedElapsedMinutes?.let { "${it / 60}시간 전" } ?: "미인증",
+    time = verifiedElapsedMinutes?.toElapsedTimeText() ?: "미인증",
     profileImageUrl = profileImageUrl,
     verificationImageUrl = verificationImageUrl,
     imageRes = if (verificationImageUrl == null) {
@@ -68,3 +84,10 @@ private fun PartyFeedItem.toUiState() = PartyFeedItemUi(
         }
     }
 )
+
+private fun Int.toElapsedTimeText(): String = when {
+    this < 1 -> "방금 전"
+    this < 60 -> "${this}분 전"
+    this < 24 * 60 -> "${this / 60}시간 전"
+    else -> "${this / (24 * 60)}일 전"
+}

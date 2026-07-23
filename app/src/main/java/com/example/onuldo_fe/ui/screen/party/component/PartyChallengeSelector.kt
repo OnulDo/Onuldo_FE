@@ -37,8 +37,7 @@ import com.example.onuldo_fe.ui.theme.SourCream
 fun PartyChallengeSelector(
     challenge: PartyChallengeUi?,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    category: String = "피트니스"
+    modifier: Modifier = Modifier
 ) {
     if (challenge == null) {
         Box(
@@ -64,7 +63,7 @@ fun PartyChallengeSelector(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(Modifier.width(56.dp).height(24.dp).background(Persimmon10, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
-            Text(category, color = Persimmon, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+            Text(challenge.category, color = Persimmon, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Bold)
         }
         Text(challenge.title, Modifier.weight(1f).padding(start = 8.dp), color = Persimmon, fontFamily = Pretendard, fontSize = 15.sp, fontWeight = FontWeight.Bold)
         Row(Modifier.clickable(onClick = onClick), verticalAlignment = Alignment.CenterVertically) {
@@ -101,7 +100,7 @@ private fun PartyChallengeSelectorSelectedPreview() {
     OnulDo_FETheme {
         Box(Modifier.background(SourCream).padding(20.dp)) {
             PartyChallengeSelector(
-                challenge = PartyChallengeUi("preview", "30일 헬스 챌린지", "4주", 10_000),
+                challenge = PartyChallengeUi("preview", "30일 헬스 챌린지", "피트니스"),
                 onClick = {}
             )
         }

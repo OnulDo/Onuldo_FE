@@ -28,6 +28,9 @@ fun PartyFeedScreen(
     challengeName: String,
     progress: PartyProgressUiState,
     feedItems: List<PartyFeedItemUi>,
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
+    onRetry: () -> Unit = {},
     onBack: () -> Unit
 ) {
     Column(Modifier.fillMaxSize().background(SourCream).systemBarsPadding()) {
@@ -40,15 +43,28 @@ fun PartyFeedScreen(
             totalMemberCount = progress.totalMemberCount,
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
         )
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(feedItems, key = { it.name }) { item ->
-                PartyFeedCard(item)
+        when {
+            isLoading -> Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Persimmon)
+            }
+            errorMessage != null -> Column(
+                Modifier.fillMaxWidth().weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(errorMessage, color = DarkBrown, fontFamily = Pretendard, fontSize = 13.sp)
+                TextButton(onClick = onRetry) { Text("다시 시도", color = Persimmon) }
+            }
+            else -> LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(feedItems, key = { it.name }) { item ->
+                    PartyFeedCard(item)
+                }
             }
         }
     }

@@ -37,7 +37,9 @@ fun PartyWaitingRoomScreen(
     onBack: () -> Unit,
     onStartClick: () -> Unit = {},
     onReadyClick: () -> Unit = {},
-    onChargePoint: () -> Unit = {}
+    onChargePoint: () -> Unit = {},
+    isActionInProgress: Boolean = false,
+    errorMessage: String? = null
 ) {
     val clipboard = LocalClipboardManager.current
     var showPointDialog by remember { mutableStateOf(false) }
@@ -73,6 +75,16 @@ fun PartyWaitingRoomScreen(
                 "전원이 모이면 파티장이 시작할 수 있어요",
                 Modifier.fillMaxWidth().padding(top = 8.dp), color = DarkBrown50, fontFamily = Pretendard, fontSize = 11.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
+            errorMessage?.let {
+                Text(
+                    it,
+                    Modifier.fillMaxWidth().padding(top = 8.dp),
+                    color = Persimmon,
+                    fontFamily = Pretendard,
+                    fontSize = 11.sp,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+            }
         }
 
         Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
@@ -84,11 +96,18 @@ fun PartyWaitingRoomScreen(
                         else -> onReadyClick()
                     }
                 },
-                enabled = if (isLeader) ui.canStart else !isCurrentUserReady,
+                enabled = !isActionInProgress && if (isLeader) ui.canStart else !isCurrentUserReady,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 40.dp).height(52.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Persimmon, contentColor = SourCream, disabledContainerColor = DarkBrown10, disabledContentColor = DarkBrown40)
-            ) { Text(if (isLeader) "시작하기" else "준비완료", fontFamily = Pretendard, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+            ) {
+                Text(
+                    if (isActionInProgress) "처리 중..." else if (isLeader) "시작하기" else "준비완료",
+                    fontFamily = Pretendard,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 
