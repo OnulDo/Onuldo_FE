@@ -14,10 +14,13 @@ import com.example.onuldo_fe.model.party.PartyRole
 import com.example.onuldo_fe.model.party.PartySummary
 import com.example.onuldo_fe.model.party.PartyWaitingRoom
 
+// API DTO를 앱 내부 도메인 모델로 변환해 ViewModel의 데이터 출처 의존 제거
 class PartyRepositoryImpl(private val api: PartyApi) : PartyRepository {
+    // 서버의 진행 중 파티 응답 목록을 도메인 요약 모델 목록으로 변환
     override suspend fun getParties(): List<PartySummary> = api.getParties().map(PartySummaryDto::toModel)
 
     override suspend fun createParty(command: CreatePartyCommand): CreatedParty {
+        // 화면에서 조합한 생성 명령을 서버 요청 DTO로 변환
         val response = api.createParty(
             CreatePartyRequestDto(
                 name = command.name,
@@ -28,6 +31,7 @@ class PartyRepositoryImpl(private val api: PartyApi) : PartyRepository {
                 capacity = command.capacity
             )
         )
+        // 화면 이동에 생성된 파티 ID와 초대코드만 노출
         return CreatedParty(response.partyId, response.inviteCode)
     }
 
@@ -43,6 +47,7 @@ class PartyRepositoryImpl(private val api: PartyApi) : PartyRepository {
         api.startParty(partyId).toModel()
 }
 
+// 대기방 응답과 중첩된 파티원 DTO를 도메인 모델로 함께 변환
 private fun PartyWaitingRoomDto.toModel() = PartyWaitingRoom(
     partyId = partyId,
     partyName = partyName,
@@ -54,6 +59,7 @@ private fun PartyWaitingRoomDto.toModel() = PartyWaitingRoom(
     members = members.map(PartyMemberDto::toModel)
 )
 
+// 서버의 역할·준비 상태 문자열을 앱 내부 enum으로 변환
 private fun PartyMemberDto.toModel() = PartyMember(
     id = id,
     nickname = nickname,
@@ -67,6 +73,7 @@ private fun PartyMemberDto.toModel() = PartyMember(
     joinedOrder = joinedOrder
 )
 
+// 알 수 없는 상태는 모집 중으로 처리하고 알려진 상태만 명시적으로 변환
 private fun PartySummaryDto.toModel() = PartySummary(
     partyId = partyId,
     partyName = partyName,

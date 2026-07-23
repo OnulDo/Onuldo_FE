@@ -13,6 +13,7 @@ import com.example.onuldo_fe.repository.party.PartyChallengeRepositoryProvider
 import com.example.onuldo_fe.ui.screen.party.PartyChallengeCardUi
 import com.example.onuldo_fe.ui.screen.party.PartyChallengeUi
 
+// 파티에 연계할 챌린지 목록의 조회 상태와 UI 데이터 관리
 class PartyChallengeSelectViewModel(
     private val repository: PartyChallengeRepository = PartyChallengeRepositoryProvider.provide()
 ) : ViewModel() {
@@ -20,10 +21,12 @@ class PartyChallengeSelectViewModel(
         private set
 
     init {
+        // 챌린지 선택 화면 최초 진입 시 fake 또는 실제 API 목록 조회
         loadPartyChallenges()
     }
 
     fun loadPartyChallenges() {
+        // 재시도 시 이전 오류를 지우고 로딩 상태로 전환
         uiState = uiState.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
             runCatching { repository.getPartyChallenges() }
@@ -42,6 +45,7 @@ class PartyChallengeSelectViewModel(
     }
 }
 
+// 챌린지 도메인 모델을 목록 카드와 상세 화면이 공유하는 UI 모델로 변환
 private fun PartyChallenge.toUiModel() = PartyChallengeCardUi(
     challenge = PartyChallengeUi(
         id = id,
@@ -56,6 +60,7 @@ private fun PartyChallenge.toUiModel() = PartyChallengeCardUi(
     ),
     participantCount = participantCount,
     imageUrl = imageUrl,
+    // TODO 실제 API 이미지 로딩 실패 시에만 fallback 리소스 표시
     fallbackImageRes = when (id) {
         "challenge-1" -> R.drawable.party_challenge_morning
         "challenge-2" -> R.drawable.party_challenge_running

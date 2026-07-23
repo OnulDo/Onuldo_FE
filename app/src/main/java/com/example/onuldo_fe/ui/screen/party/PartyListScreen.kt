@@ -3,7 +3,6 @@ package com.example.onuldo_fe.ui.screen.party
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,7 +30,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,15 +37,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.model.home.HomePartyChallenge
+import com.example.onuldo_fe.ui.component.home.HomePartyCard
 import com.example.onuldo_fe.ui.theme.BlackBrown
-import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
-import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
+import java.time.LocalTime
 
 @Composable
 fun PartyListScreen(
@@ -60,7 +59,12 @@ fun PartyListScreen(
     onRetry: () -> Unit = {},
     modifier: Modifier = Modifier,
     partyCardContent: @Composable (PartyCardUi, () -> Unit) -> Unit = { party, onClick ->
-        PartyListCard(party = party, onClick = onClick)
+        HomePartyCard(
+            partyChallenge = party.toHomePartyChallenge(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+        )
     }
 ) {
     Column(modifier.fillMaxSize().background(SourCream).statusBarsPadding()) {
@@ -167,65 +171,29 @@ private fun PartyListEmptyContent(modifier: Modifier = Modifier) {
     }
 }
 
-// HomePartyCard 컴포넌트로 교체 예정
-@Composable
-private fun PartyListCard(party: PartyCardUi, onClick: () -> Unit) {
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .height(140.dp)
-            .background(White, RoundedCornerShape(14.dp))
-            .border(1.dp, DarkBrown40, RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
-            .padding(14.dp)
-    ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(party.partyName, color = BlackBrown, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.width(7.dp))
-            Text(party.challengeName, color = DarkBrown50, fontSize = 13.sp)
-            Spacer(Modifier.weight(1f))
-            Text(party.dDay, color = DarkBrown50, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-        }
-        Spacer(Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(party.deadline, color = Persimmon.copy(alpha = .8f), fontSize = 13.sp)
-            party.remainingText?.let {
-                Spacer(Modifier.width(10.dp))
-                Text(it, modifier = Modifier.background(Persimmon10, RoundedCornerShape(10.dp)).padding(horizontal = 10.dp, vertical = 2.dp), color = Persimmon, fontSize = 13.sp)
-            }
-        }
-        Spacer(Modifier.weight(1f))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            repeat(party.totalMemberCount) { index ->
-                val completed = index < party.completedMemberCount
-                Box(
-                    Modifier
-                        .padding(end = 5.dp)
-                        .size(33.dp)
-                        .alpha(if (completed) 1f else .5f)
-                        .background(Persimmon10, CircleShape)
-                        .then(if (completed) Modifier.border(1.dp, Persimmon, CircleShape) else Modifier),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(painterResource(R.drawable.party_member_avatar), null, Modifier.size(31.dp), contentScale = ContentScale.Fit)
-                }
-            }
-            Spacer(Modifier.weight(1f))
-            OutlinedButton(onClick = {}, modifier = Modifier.size(width = 96.dp, height = 32.dp), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, Persimmon)) {
-                Text("인증하기", color = Persimmon, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            }
-        }
-    }
+// API에서 남은 일수와 시간을 숫자 타입으로 제공하면 문자열 파싱 대신 응답 값을 직접 전달
+private fun PartyCardUi.toHomePartyChallenge() = HomePartyChallenge(
+    title = partyName,
+    subtitle = challengeName,
+    remainingDays = dDay.filter(Char::isDigit).toIntOrNull() ?: 0,
+    deadlineAt = deadline.toLocalTimeOrDefault(),
+    completedMemberCount = completedMemberCount,
+    totalMemberCount = totalMemberCount,
+    remainingMinutes = remainingText.toRemainingMinutes()
+)
+
+private fun String.toLocalTimeOrDefault(): LocalTime {
+    val match = Regex("""(\d{1,2}):(\d{2})""").find(this) ?: return LocalTime.MIDNIGHT
+    return runCatching {
+        LocalTime.of(match.groupValues[1].toInt(), match.groupValues[2].toInt())
+    }.getOrDefault(LocalTime.MIDNIGHT)
 }
 
-@Preview(name = "파티 목록 카드", showBackground = true, widthDp = 390)
-@Composable
-private fun PartyListCardPreview() {
-    OnulDo_FETheme {
-        Box(Modifier.background(SourCream).padding(20.dp)) {
-            PartyListCard(samplePartyCards.first(), onClick = {})
-        }
-    }
+private fun String?.toRemainingMinutes(): Int? {
+    if (this == null) return null
+    val hours = Regex("""(\d+)\s*시간""").find(this)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+    val minutes = Regex("""(\d+)\s*분""").find(this)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+    return (hours * 60 + minutes).takeIf { it > 0 }
 }
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
