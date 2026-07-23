@@ -5,9 +5,6 @@ object Routes {
     const val LANDING = "landing"
     const val LOGIN = "login"
     const val SIGNUP = "signup"
-    const val EMAIL_VERIFY = "email_verify"
-    const val EMAIL_VERIFY_ARG = "email"
-    const val PERMISSION = "permission"
     const val PROFILE_SETUP = "profile_setup"
     const val WELCOME = "welcome"
     const val MAIN = "main"
@@ -21,7 +18,4 @@ object Routes {
     const val MYPAGE_WITHDRAW = "mypage_withdraw"
     const val MYPAGE_ACCOUNT = "mypage_account"
     // 추후: PASSWORD_RESET, 알림 설정, 약관 3종 등
-
-    /** 이메일 인증 화면으로 이동할 경로. 이메일은 URL 인코딩해서 전달한다. */
-    fun emailVerify(email: String): String = "$EMAIL_VERIFY/${android.net.Uri.encode(email)}"
 }

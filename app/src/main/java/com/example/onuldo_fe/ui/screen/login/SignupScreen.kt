@@ -49,14 +49,14 @@ import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.viewmodel.SignupViewModel
 
 /**
- * 회원가입(계정 만들기) — WF ver.2.2, 4단계 온보딩 1/4 (Figma node 4353:3101).
- * 진행 헤더 → 이메일/비밀번호/비밀번호 확인(실시간 유효성) → 환영 보너스 안내
- *  → 전체 약관 동의 카드 → "계속".
+ * 회원가입(계정 만들기) — Figma Ready-for-Dev (node 5154:4298).
+ * 뒤로가기 헤더 → 이메일/비밀번호/비밀번호 확인(실시간 유효성) → 환영 보너스 안내
+ *  → 전체 약관 동의 카드 → "계속". 완료 시 프로필 설정으로 진행.
  */
 @Composable
 fun SignupScreen(
     onBack: () -> Unit,
-    onNext: (email: String) -> Unit,
+    onNext: () -> Unit,
     viewModel: SignupViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()

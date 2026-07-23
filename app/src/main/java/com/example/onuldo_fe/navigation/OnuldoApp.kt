@@ -1,15 +1,11 @@
 package com.example.onuldo_fe.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.example.onuldo_fe.ui.screen.login.EmailVerifyScreen
 import com.example.onuldo_fe.ui.screen.login.LandingScreen
 import com.example.onuldo_fe.ui.screen.login.LoginScreen
-import com.example.onuldo_fe.ui.screen.login.PermissionScreen
 import com.example.onuldo_fe.ui.screen.login.ProfileSetupScreen
 import com.example.onuldo_fe.ui.screen.login.SignupScreen
 import com.example.onuldo_fe.ui.screen.login.WelcomeScreen
@@ -22,7 +18,7 @@ import com.example.onuldo_fe.ui.screen.mypage.PointWithdrawScreen
 import com.example.onuldo_fe.ui.screen.mypage.ProfileSettingsScreen
 import com.example.onuldo_fe.ui.screen.mypage.WithdrawAccountScreen
 
-/** 앱 전체 내비게이션 그래프. 랜딩 → 로그인/회원가입 → 이메일 인증 → 권한 → 프로필 → 메인(탭).
+/** 앱 전체 내비게이션 그래프. 랜딩 → 로그인/회원가입 → 프로필 설정 → 환영 → 메인(탭).
  *  (스플래시는 별도 화면이 아니라 시스템 스플래시로 처리 — [MainActivity]) */
 @Composable
 fun OnuldoApp() {
@@ -49,24 +45,7 @@ fun OnuldoApp() {
         composable(Routes.SIGNUP) {
             SignupScreen(
                 onBack = { navController.popBackStack() },
-                onNext = { email -> navController.navigate(Routes.emailVerify(email)) },
-            )
-        }
-        composable(
-            route = "${Routes.EMAIL_VERIFY}/{${Routes.EMAIL_VERIFY_ARG}}",
-            arguments = listOf(navArgument(Routes.EMAIL_VERIFY_ARG) { type = NavType.StringType }),
-        ) { backStackEntry ->
-            val email = backStackEntry.arguments?.getString(Routes.EMAIL_VERIFY_ARG).orEmpty()
-            EmailVerifyScreen(
-                email = email,
-                onBack = { navController.popBackStack() },
-                // "확인" → 권한 요청(3/4)로 진행.
-                onConfirm = { navController.navigate(Routes.PERMISSION) },
-            )
-        }
-        composable(Routes.PERMISSION) {
-            PermissionScreen(
-                onBack = { navController.popBackStack() },
+                // 회원가입 완료 → 프로필 설정으로 바로 진행(이메일 인증·권한 화면 제거됨).
                 onNext = { navController.navigate(Routes.PROFILE_SETUP) },
             )
         }

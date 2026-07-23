@@ -59,11 +59,10 @@ class SignupViewModel : ViewModel() {
     fun toggleAgreeAll() = _uiState.update { it.copy(agreeAll = !it.agreeAll) }
 
     /**
-     * 다음 단계(이메일 인증)로 진행. 모든 필드 유효 + 약관 동의 시에만 입력한 이메일과 함께 [onNext] 호출.
-     * TODO: 서버 회원가입/중복확인 API 연동.
+     * 다음 단계(프로필 설정)로 진행. 모든 필드 유효 + 약관 동의 시에만 [onNext] 호출.
+     * TODO: 서버 회원가입/중복확인 API 연동(입력한 이메일은 상태에 보관됨).
      */
-    fun submit(onNext: (email: String) -> Unit) {
-        val state = _uiState.value
-        if (state.isContinueEnabled) onNext(state.email.trim())
+    fun submit(onNext: () -> Unit) {
+        if (_uiState.value.isContinueEnabled) onNext()
     }
 }
