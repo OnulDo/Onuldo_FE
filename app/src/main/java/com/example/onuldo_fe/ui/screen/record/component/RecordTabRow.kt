@@ -26,9 +26,8 @@
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(44.dp)
-                .padding(horizontal = 20.dp),
-            shape = RoundedCornerShape(4.dp),
+                .height(44.dp),
+            shape = RoundedCornerShape(14.dp),
             color = Persimmon10
         ) {
             Row(

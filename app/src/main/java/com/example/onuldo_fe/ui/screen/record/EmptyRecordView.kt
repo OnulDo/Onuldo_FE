@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.screen.record.component
+package com.example.onuldo_fe.ui.screen.record
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column

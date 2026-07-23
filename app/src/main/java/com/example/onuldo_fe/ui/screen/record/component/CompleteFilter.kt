@@ -17,6 +17,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.White
 
@@ -76,10 +77,10 @@ private fun CompleteFilterChip(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50.dp),
-        color = if (selected) BlackBrown else White,
+        color = if (selected) Persimmon else White,
         border = BorderStroke(
             width = 1.dp,
-            color = if (selected) BlackBrown else DarkBrown40
+            color = if (selected) Persimmon else DarkBrown40
         )
     ) {
         Text(
