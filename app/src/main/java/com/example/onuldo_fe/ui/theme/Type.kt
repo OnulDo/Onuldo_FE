@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.ui.theme
 
+import android.R.attr.fontFamily
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -51,6 +52,14 @@ val Typography = Typography(
         fontSize = 20.sp
     ),
 
+    //11sp Bold
+    titleSmall = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.Bold,
+        fontSize = 11.sp,
+        letterSpacing = 0.44.sp
+    ),
+
     // Body2 - 17sp Bold
     bodyLarge = TextStyle(
         fontFamily = Pretendard,
@@ -58,11 +67,19 @@ val Typography = Typography(
         fontSize = 17.sp
     ),
 
-    // Body3 - 14sp Regular
+    // Body3 - 14sp Bold
     bodyMedium = TextStyle(
         fontFamily = Pretendard,
-        fontWeight = FontWeight.Normal,
-        fontSize = 14.sp
+        fontWeight = FontWeight.Bold,
+        fontSize = 14.sp,
+        lineHeight = 22.sp
+    ),
+
+    // Body4 - 12sp Regular
+    bodySmall = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.Bold,
+        fontSize = 12.sp
     ),
 
     // Caption1 - 13sp Regular
@@ -77,5 +94,13 @@ val Typography = Typography(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp
+    ),
+
+    //11sp Regular
+    labelSmall = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.Normal,
+        fontSize = 11.sp
     )
+
 )

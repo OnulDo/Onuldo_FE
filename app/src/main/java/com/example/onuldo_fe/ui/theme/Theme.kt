@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 
 private val LightColorScheme = lightColorScheme(
@@ -22,15 +23,19 @@ private val LightColorScheme = lightColorScheme(
 fun OnulDo_FETheme(
     content: @Composable () -> Unit
 ) {
-    MaterialTheme(
-        colorScheme = LightColorScheme,
-        typography = Typography
+    CompositionLocalProvider(
+        LocalSpacing provides Spacing()
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+        MaterialTheme(
+            colorScheme = LightColorScheme,
+            typography = Typography
         ) {
-            content()
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                content()
+            }
         }
     }
 }
