@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.screen.party.component.PartyInsufficientPointDialog
 import com.example.onuldo_fe.ui.screen.party.component.PartyInviteCodeCard
+import com.example.onuldo_fe.ui.screen.party.component.PartyWaitingEmptySlotCard
 import com.example.onuldo_fe.ui.screen.party.component.PartyWaitingMemberCard
 import com.example.onuldo_fe.ui.theme.*
 
@@ -58,6 +59,10 @@ fun PartyWaitingRoomScreen(
             Spacer(Modifier.height(12.dp))
             ui.members.forEach { member ->
                 PartyWaitingMemberCard(member)
+                Spacer(Modifier.height(8.dp))
+            }
+            repeat((ui.capacity - ui.members.size).coerceAtLeast(0)) {
+                PartyWaitingEmptySlotCard()
                 Spacer(Modifier.height(8.dp))
             }
             Text(

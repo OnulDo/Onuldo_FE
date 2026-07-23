@@ -45,6 +45,33 @@ fun PartyWaitingMemberCard(member: PartyMemberUi, modifier: Modifier = Modifier)
 }
 
 @Composable
+fun PartyWaitingEmptySlotCard(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .background(White, RoundedCornerShape(12.dp))
+            .border(1.dp, DarkBrown20, RoundedCornerShape(12.dp))
+            .padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            Modifier
+                .size(40.dp)
+                .background(DarkBrown10, CircleShape)
+        )
+        Text(
+            text = "파티원 모집 중",
+            modifier = Modifier.padding(start = 12.dp),
+            color = DarkBrown50,
+            fontFamily = Pretendard,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
 private fun PartyWaitingStatusChip(text: String, background: Color, foreground: Color) {
     Box(Modifier.width(56.dp).height(22.dp).background(background, RoundedCornerShape(11.dp)), contentAlignment = Alignment.Center) {
         Text(text, color = foreground, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Bold)
@@ -63,6 +90,16 @@ private fun PartyWaitingMemberCardPreview() {
                     readyStatus = PartyReadyStatus.Ready
                 )
             )
+        }
+    }
+}
+
+@Preview(name = "대기방 빈 파티원 슬롯", showBackground = true, widthDp = 390)
+@Composable
+private fun PartyWaitingEmptySlotCardPreview() {
+    OnulDo_FETheme {
+        Box(Modifier.background(SourCream).padding(20.dp)) {
+            PartyWaitingEmptySlotCard()
         }
     }
 }

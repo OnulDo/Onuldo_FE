@@ -1,6 +1,7 @@
 package com.example.onuldo_fe.ui.screen.party
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -8,36 +9,47 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.viewmodel.party.PartyChallengeSelectViewModel
+import com.example.onuldo_fe.viewmodel.party.PartyInviteViewModel
 import com.example.onuldo_fe.ui.screen.party.component.InviteCodeDialog
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.data.party.dummy.FakePartyInviteState
 
 private enum class PartyScreen { List, Create, ChallengeSelect, ChallengeDetail, WaitingLeader, WaitingMember, Feed, Settlement }
 
 @Composable
 fun PartyRoute(
-    challengeSelectViewModel: PartyChallengeSelectViewModel = viewModel()
+    challengeSelectViewModel: PartyChallengeSelectViewModel = viewModel(),
+    inviteViewModel: PartyInviteViewModel = viewModel()
 ) {
     var screen by remember { mutableStateOf(PartyScreen.List) }
     var showInviteDialog by remember { mutableStateOf(false) }
-    var inviteError by remember { mutableStateOf<InviteCodeError?>(null) }
     var selectedChallenge by remember { mutableStateOf<PartyChallengeUi?>(null) }
     var partyName by remember { mutableStateOf("") }
     var capacity by remember { mutableIntStateOf(4) }
     var waitingMemberReady by remember { mutableStateOf(false) }
     var createdPeriod by remember { mutableStateOf("") }
     var createdDeposit by remember { mutableIntStateOf(0) }
+    var leaderMembers by remember {
+        mutableStateOf(
+            listOf(PartyMemberUi("민지", PartyMemberRole.Leader, PartyReadyStatus.NotApplicable, "leader-current", 0))
+        )
+    }
+    var joinedPartyMembers by remember { mutableStateOf(PartyWaitingRoomUi().members) }
 
     when (screen) {
         PartyScreen.List -> PartyListScreen(
-            parties = samplePartyCards,
+            parties = samplePartyCards.filter { it.status == PartyStatus.InProgress },
             onCreateClick = {
                 partyName = ""
                 selectedChallenge = null
                 capacity = 4
                 screen = PartyScreen.Create
             },
-            onInviteCodeClick = { showInviteDialog = true },
+            onInviteCodeClick = {
+                inviteViewModel.reset()
+                showInviteDialog = true
+            },
             onPartyClick = { screen = PartyScreen.Feed }
         )
         PartyScreen.Create -> PartyCreateScreen(
@@ -51,6 +63,10 @@ fun PartyRoute(
             onCreate = { period, deposit ->
                 createdPeriod = period
                 createdDeposit = deposit
+                leaderMembers = listOf(
+                    PartyMemberUi("민지", PartyMemberRole.Leader, PartyReadyStatus.NotApplicable, "leader-current", 0)
+                )
+                FakePartyInviteState.activate("82K3H9")
                 screen = PartyScreen.WaitingLeader
             }
         )
@@ -70,28 +86,37 @@ fun PartyRoute(
                 challengeName = selectedChallenge?.title.orEmpty(),
                 period = createdPeriod,
                 deposit = createdDeposit,
-                capacity = capacity
+                capacity = capacity,
+                members = leaderMembers
             ),
             isLeader = true,
-            onBack = { screen = PartyScreen.List },
-            onStartClick = { screen = PartyScreen.Feed }
+            onBack = {
+                // TODO 파티 탈퇴 API 연동 시 탈퇴 성공 후 목록 화면 이동
+                leaderMembers = leaveParty(leaderMembers, "leader-current")
+                if (leaderMembers.isEmpty()) FakePartyInviteState.markExpired("82K3H9")
+                screen = PartyScreen.List
+            },
+            onStartClick = {
+                FakePartyInviteState.markStarted("82K3H9")
+                screen = PartyScreen.Feed
+            }
         )
         PartyScreen.WaitingMember -> PartyWaitingRoomScreen(
-            ui = PartyWaitingRoomUi().let { waitingRoom ->
-                waitingRoom.copy(
-                    members = waitingRoom.members.mapIndexed { index, member ->
-                        if (index == waitingRoom.members.lastIndex) {
-                            member.copy(readyStatus = if (waitingMemberReady) PartyReadyStatus.Ready else PartyReadyStatus.Waiting)
-                        } else member
-                    }
-                )
-            },
+            ui = PartyWaitingRoomUi(members = joinedPartyMembers),
             isLeader = false,
             availablePoint = 50_000,
             isCurrentUserReady = waitingMemberReady,
-            onBack = { screen = PartyScreen.List },
+            onBack = {
+                // TODO 파티 탈퇴 API 연동 시 탈퇴 성공 후 빈 슬롯 상태 갱신
+                joinedPartyMembers = leaveParty(joinedPartyMembers, "member-current")
+                waitingMemberReady = false
+                screen = PartyScreen.List
+            },
             onReadyClick = {
                 // TODO 준비완료 API 연동 후 성공 응답 시 해당 파티원의 준비 상태 갱신
+                joinedPartyMembers = joinedPartyMembers.map { member ->
+                    if (member.id == "member-current") member.copy(readyStatus = PartyReadyStatus.Ready) else member
+                }
                 waitingMemberReady = true
             }
         )
@@ -104,18 +129,50 @@ fun PartyRoute(
 
     if (showInviteDialog) {
         InviteCodeDialog(
-            error = inviteError,
-            onDismiss = { showInviteDialog = false; inviteError = null },
-            onRetry = { inviteError = null },
-            onSubmit = { code ->
-                if (code.equals("82K3H9", ignoreCase = true)) {
-                    showInviteDialog = false
-                    screen = PartyScreen.WaitingMember
-                } else {
-                    inviteError = InviteCodeError.Invalid
+            error = inviteViewModel.uiState.error,
+            onDismiss = {
+                showInviteDialog = false
+                inviteViewModel.reset()
+            },
+            onRetry = inviteViewModel::reset,
+            onSubmit = inviteViewModel::joinParty
+        )
+    }
+
+    LaunchedEffect(inviteViewModel.uiState.joinedPartyId) {
+        if (inviteViewModel.uiState.joinedPartyId != null) {
+            showInviteDialog = false
+            waitingMemberReady = false
+            if (joinedPartyMembers.none { it.id == "member-current" }) {
+                val nextOrder = (joinedPartyMembers.maxOfOrNull { it.joinedOrder } ?: 0) + 1
+                joinedPartyMembers = joinedPartyMembers + PartyMemberUi(
+                    name = "준호",
+                    role = PartyMemberRole.Member,
+                    readyStatus = PartyReadyStatus.Waiting,
+                    id = "member-current",
+                    joinedOrder = nextOrder
+                )
+            } else {
+                joinedPartyMembers = joinedPartyMembers.map { member ->
+                    if (member.id == "member-current") member.copy(readyStatus = PartyReadyStatus.Waiting) else member
                 }
             }
-        )
+            screen = PartyScreen.WaitingMember
+            inviteViewModel.reset()
+        }
+    }
+}
+
+private fun leaveParty(members: List<PartyMemberUi>, leavingMemberId: String): List<PartyMemberUi> {
+    val leavingMember = members.firstOrNull { it.id == leavingMemberId } ?: return members
+    val remainingMembers = members.filterNot { it.id == leavingMemberId }
+    if (remainingMembers.isEmpty() || leavingMember.role != PartyMemberRole.Leader) return remainingMembers
+
+    val successorId = remainingMembers.minBy { it.joinedOrder }.id
+    return remainingMembers.map { member ->
+        if (member.id == successorId) {
+            member.copy(role = PartyMemberRole.Leader, readyStatus = PartyReadyStatus.NotApplicable)
+        } else member
     }
 }
 

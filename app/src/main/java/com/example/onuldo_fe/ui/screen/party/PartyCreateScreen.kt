@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import com.example.onuldo_fe.ui.screen.party.component.PartyCapacitySelector
 import com.example.onuldo_fe.ui.screen.party.component.PartyChallengeSelector
 import com.example.onuldo_fe.ui.screen.party.component.PartyNameTextField
 import com.example.onuldo_fe.ui.screen.party.component.PartyOptionSelector
+import com.example.onuldo_fe.ui.screen.party.component.PartyInsufficientPointDialog
 import com.example.onuldo_fe.ui.theme.*
 
 @Composable
@@ -33,12 +35,15 @@ fun PartyCreateScreen(
     selectedChallenge: PartyChallengeUi?,
     onChallengeClick: () -> Unit,
     onBack: () -> Unit,
-    onCreate: (period: String, deposit: Int) -> Unit
+    onCreate: (period: String, deposit: Int) -> Unit,
+    availablePoint: Int = 50_000,
+    onChargePoint: () -> Unit = {}
 ) {
     val periods = listOf("2주", "4주", "8주", "12주")
     val deposits = listOf(10_000, 20_000, 30_000, 50_000)
     var selectedPeriod by remember(selectedChallenge?.id) { mutableIntStateOf(-1) }
     var selectedDeposit by remember(selectedChallenge?.id) { mutableIntStateOf(-1) }
+    var showPointDialog by remember { mutableStateOf(false) }
     val enabled = partyName.length in 2..20 &&
         selectedChallenge != null &&
         selectedPeriod >= 0 &&
@@ -77,10 +82,36 @@ fun PartyCreateScreen(
             PartyCapacitySelector(capacity = capacity, onCapacityChange = onCapacityChange)
         }
         Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
-            Button(onClick = { onCreate(periods[selectedPeriod], deposits[selectedDeposit]) }, enabled = enabled, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 40.dp).height(52.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = Persimmon, contentColor = SourCream, disabledContainerColor = DarkBrown10, disabledContentColor = DarkBrown)) {
+            Button(
+                onClick = {
+                    val requiredDeposit = deposits[selectedDeposit]
+                    // TODO 파티 생성 API 연동 시 파티장 보유 포인트 검증 성공 후 파티 생성 요청
+                    if (availablePoint < requiredDeposit) {
+                        showPointDialog = true
+                    } else {
+                        onCreate(periods[selectedPeriod], requiredDeposit)
+                    }
+                },
+                enabled = enabled,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 40.dp).height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Persimmon, contentColor = SourCream, disabledContainerColor = DarkBrown10, disabledContentColor = DarkBrown)
+            ) {
                 Text("파티 만들기", fontFamily = Pretendard, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
         }
+    }
+
+    if (showPointDialog) {
+        PartyInsufficientPointDialog(
+            ownedPoint = availablePoint,
+            requiredPoint = deposits[selectedDeposit],
+            onDismiss = { showPointDialog = false },
+            onChargeClick = {
+                showPointDialog = false
+                onChargePoint()
+            }
+        )
     }
 }
 

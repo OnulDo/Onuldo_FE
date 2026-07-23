@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 
 enum class PartyMemberRole { Leader, Member }
 enum class PartyReadyStatus { NotApplicable, Waiting, Ready }
+enum class PartyStatus { Recruiting, InProgress, Disbanded }
 enum class InviteCodeError(val message: String) {
     Invalid("잘못된 초대코드예요. 코드를 다시 확인해주세요"),
     AlreadyStarted("이미 시작된 파티예요."),
@@ -11,7 +12,13 @@ enum class InviteCodeError(val message: String) {
     Expired("만료된 초대코드예요.")
 }
 
-data class PartyMemberUi(val name: String, val role: PartyMemberRole, val readyStatus: PartyReadyStatus)
+data class PartyMemberUi(
+    val name: String,
+    val role: PartyMemberRole,
+    val readyStatus: PartyReadyStatus,
+    val id: String = name,
+    val joinedOrder: Int = 0
+)
 
 data class PartyCardUi(
     val id: String,
@@ -21,7 +28,8 @@ data class PartyCardUi(
     val deadline: String,
     val remainingText: String? = null,
     val completedMemberCount: Int,
-    val totalMemberCount: Int
+    val totalMemberCount: Int,
+    val status: PartyStatus = PartyStatus.InProgress
 )
 
 data class PartyChallengeUi(val id: String, val title: String, val period: String, val deposit: Int)
@@ -34,6 +42,7 @@ data class PartyChallengeCardUi(
 )
 
 data class PartyWaitingRoomUi(
+    val partyId: String = "party-001",
     val partyName: String = "갓생팟",
     val challengeName: String = "30일 헬스 챌린지",
     val inviteCode: String = "82K3H9",
@@ -41,9 +50,9 @@ data class PartyWaitingRoomUi(
     val deposit: Int = 30_000,
     val capacity: Int = 5,
     val members: List<PartyMemberUi> = listOf(
-        PartyMemberUi("민지", PartyMemberRole.Leader, PartyReadyStatus.NotApplicable),
-        PartyMemberUi("서연", PartyMemberRole.Member, PartyReadyStatus.Ready),
-        PartyMemberUi("준호", PartyMemberRole.Member, PartyReadyStatus.Ready)
+        PartyMemberUi("민지", PartyMemberRole.Leader, PartyReadyStatus.NotApplicable, "leader-001", 0),
+        PartyMemberUi("서연", PartyMemberRole.Member, PartyReadyStatus.Ready, "member-001", 1),
+        PartyMemberUi("준호", PartyMemberRole.Member, PartyReadyStatus.Ready, "member-current", 2)
     )
 ) {
     val canStart: Boolean
