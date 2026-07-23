@@ -31,6 +31,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.model.home.notification.NotificationItem
+import com.example.onuldo_fe.model.home.notification.NotificationType
+import com.example.onuldo_fe.repository.notification.NotificationRepositoryImpl
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
@@ -41,30 +44,26 @@ import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.viewmodel.notification.NotificationUiState
+import com.example.onuldo_fe.viewmodel.notification.toUiState
 
-data class NotificationItem(
-    val title: String,
-    val content: String,
-    val time: String,        // TODO: 실제로는 시간 계산? "방금/어제/N일 전" 표기
-    val iconRes: Int
-)
-
-// 더미 데이터 — API 연동 시 교체
-private val dummyNotifications = listOf( //TODO: 아이콘 다운 받아서 수정하기!
-    NotificationItem("인증 마감 30분 전이에요", "30분 러닝 챌린지 인증을 잊지 마세요", "방금", R.drawable.notification_deadline_icon),
-    NotificationItem("인증이 완료되었어요", "새벽 기상 챌린지 인증 성공 (+850P)", "5시간 전", R.drawable.verification_check_icon),
-    NotificationItem("새 챌린지가 시작되었어요", "오늘부터 러닝 챌린지가 시작됐어요", "어제", R.drawable.notification_challenge_icon),
-    NotificationItem("환급이 완료되었어요", "독서 30분 챌린지 환급 18,400P 지급", "2월 3일", R.drawable.verification_check_icon),
-    NotificationItem("인증 실패로 차감되었어요", "5/17 새벽 기상 인증 미수행 (-850P)", "3일 전", R.drawable.notification_fail_icon)
-)
+// 알림 종류별 아이콘 매핑 — API 연동 후에도 UI에서만 관리
+private fun NotificationType.iconRes(): Int = when (this) {
+    NotificationType.Deadline -> R.drawable.notification_deadline_icon
+    NotificationType.VerificationSuccess -> R.drawable.verification_check_icon
+    NotificationType.ChallengeStart -> R.drawable.notification_challenge_icon
+    NotificationType.Refund -> R.drawable.verification_check_icon
+    NotificationType.VerificationFail -> R.drawable.notification_fail_icon
+}
 
 // 알림 화면 — 알림 목록
 @Composable
 fun NotificationScreen(
+    uiState: NotificationUiState,
     modifier: Modifier = Modifier,
-    notifications: List<NotificationItem> = dummyNotifications,
     onBackClick: () -> Unit = {}
 ) {
+    val notifications = uiState.notifications
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -151,7 +150,7 @@ private fun NotificationItemCard(item: NotificationItem) {
     ) {
         //아이콘
         Image(
-            painter = painterResource(item.iconRes),
+            painter = painterResource(item.type.iconRes()),
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.CenterStart)
@@ -198,10 +197,18 @@ private fun NotificationItemCard(item: NotificationItem) {
     }
 }
 
-@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Preview(name = "Notification With Content", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 private fun NotificationScreenPreview() {
     OnulDo_FETheme {
-        NotificationScreen()
+        NotificationScreen(uiState = NotificationRepositoryImpl().getNotifications().toUiState())
+    }
+}
+
+@Preview(name = "Notification Empty", showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun NotificationScreenEmptyPreview() {
+    OnulDo_FETheme {
+        NotificationScreen(uiState = NotificationUiState())
     }
 }
