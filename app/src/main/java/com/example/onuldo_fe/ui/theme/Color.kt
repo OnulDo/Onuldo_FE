@@ -9,6 +9,7 @@ val BlackBrown = Color(0xFF1B130C)
 
 //Background
 val SourCream = Color(0xFFFFFDF7)
+val HeaderCream = Color(0xFFFFFCF6)
 
 //MainColor
 val Persimmon = Color(0xFFFC6B2B)
