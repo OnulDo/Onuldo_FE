@@ -76,7 +76,7 @@ private fun CapacityControlIcon(isPlus: Boolean, enabled: Boolean, onClick: () -
 private fun PartyCapacitySelectorPreview() {
     OnulDo_FETheme {
         Box(Modifier.background(SourCream).padding(20.dp)) {
-            PartyCapacitySelector(capacity = 4, onCapacityChange = {})
+            PartyCapacitySelector(capacity = 5, onCapacityChange = {})
         }
     }
 }

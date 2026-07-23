@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.ui.screen.party
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -40,6 +41,9 @@ fun PartyWaitingRoomScreen(
 ) {
     val clipboard = LocalClipboardManager.current
     var showPointDialog by remember { mutableStateOf(false) }
+
+    // 상단 뒤로가기와 시스템 뒤로가기 모두 동일한 파티 탈퇴 로직을 실행합니다.
+    BackHandler(onBack = onBack)
 
     Column(Modifier.fillMaxSize().background(SourCream).systemBarsPadding()) {
         Row(Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically) {

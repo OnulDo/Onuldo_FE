@@ -38,11 +38,8 @@ fun PartyNameTextField(
 ) {
     BasicTextField(
         value = value,
-        onValueChange = { input ->
-            if (input.length <= 20 && input.all { it.isLetterOrDigit() || it in '가'..'힣' || it == ' ' }) {
-                onValueChange(input)
-            }
-        },
+        // 문자 규칙은 [파티 만들기] 클릭 시 검증하고 여기서는 최대 길이만 제한합니다.
+        onValueChange = { input -> onValueChange(input.take(20)) },
         modifier = modifier.fillMaxWidth(),
         singleLine = true,
         textStyle = TextStyle(color = BlackBrown, fontFamily = Pretendard, fontSize = 13.sp),

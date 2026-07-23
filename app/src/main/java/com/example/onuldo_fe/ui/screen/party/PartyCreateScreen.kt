@@ -44,7 +44,9 @@ fun PartyCreateScreen(
     var selectedPeriod by remember(selectedChallenge?.id) { mutableIntStateOf(-1) }
     var selectedDeposit by remember(selectedChallenge?.id) { mutableIntStateOf(-1) }
     var showPointDialog by remember { mutableStateOf(false) }
-    val enabled = partyName.length in 2..20 &&
+    var isPartyNameError by remember { mutableStateOf(false) }
+    val partyNamePattern = remember { Regex("^[가-힣A-Za-z0-9]{2,20}$") }
+    val enabled = partyName.isNotBlank() &&
         selectedChallenge != null &&
         selectedPeriod >= 0 &&
         selectedDeposit >= 0
@@ -60,8 +62,21 @@ fun PartyCreateScreen(
             Spacer(Modifier.height(10.dp))
             PartyNameTextField(
                 value = partyName,
-                onValueChange = onPartyNameChange
+                onValueChange = {
+                    isPartyNameError = false
+                    onPartyNameChange(it)
+                },
+                isError = isPartyNameError
             )
+            if (isPartyNameError) {
+                Text(
+                    "한글, 영문, 숫자 2~20자로 입력해주세요.",
+                    modifier = Modifier.padding(start = 4.dp, top = 6.dp),
+                    color = Persimmon,
+                    fontFamily = Pretendard,
+                    fontSize = 11.sp
+                )
+            }
             Spacer(Modifier.height(19.dp))
             SectionTitle("함께할 챌린지", 13)
             Spacer(Modifier.height(10.dp))
@@ -84,12 +99,16 @@ fun PartyCreateScreen(
         Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
             Button(
                 onClick = {
-                    val requiredDeposit = deposits[selectedDeposit]
-                    // TODO 파티 생성 API 연동 시 파티장 보유 포인트 검증 성공 후 파티 생성 요청
-                    if (availablePoint < requiredDeposit) {
-                        showPointDialog = true
+                    if (!partyNamePattern.matches(partyName)) {
+                        isPartyNameError = true
                     } else {
-                        onCreate(periods[selectedPeriod], requiredDeposit)
+                        val requiredDeposit = deposits[selectedDeposit]
+                        // TODO 파티 생성 API 연동 시 파티장 보유 포인트 검증 성공 후 파티 생성 요청
+                        if (availablePoint < requiredDeposit) {
+                            showPointDialog = true
+                        } else {
+                            onCreate(periods[selectedPeriod], requiredDeposit)
+                        }
                     }
                 },
                 enabled = enabled,
@@ -118,7 +137,7 @@ fun PartyCreateScreen(
 @Composable private fun SectionTitle(text: String, size: Int) = Text(text, color = BlackBrown, fontFamily = Pretendard, fontSize = size.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.13).sp)
 
 @Preview(name = "파티 생성 - 챌린지 미선택", showBackground = true, widthDp = 390, heightDp = 844)
-@Composable private fun PartyCreateEmptyPreview() { OnulDo_FETheme { PartyCreateScreen("", {}, 4, {}, null, {}, {}, { _, _ -> }) } }
+@Composable private fun PartyCreateEmptyPreview() { OnulDo_FETheme { PartyCreateScreen("", {}, 5, {}, null, {}, {}, { _, _ -> }) } }
 
 @Preview(name = "파티 생성 - 챌린지 선택", showBackground = true, widthDp = 390, heightDp = 844)
-@Composable private fun PartyCreateSelectedPreview() { OnulDo_FETheme { PartyCreateScreen("갓생팟", {}, 4, {}, PartyChallengeUi("preview", "30일 헬스 챌린지", "4주", 10_000), {}, {}, { _, _ -> }) } }
+@Composable private fun PartyCreateSelectedPreview() { OnulDo_FETheme { PartyCreateScreen("갓생팟", {}, 5, {}, PartyChallengeUi("preview", "30일 헬스 챌린지", "4주", 10_000), {}, {}, { _, _ -> }) } }

@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.ui.screen.party
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,7 +39,8 @@ import com.example.onuldo_fe.ui.theme.*
 fun PartyChallengeSelectScreen(
     challenges: List<PartyChallengeCardUi>,
     onSelect: (PartyChallengeUi) -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
+    onBack: () -> Unit = {}
 ) {
     var searchText by remember { mutableStateOf("") }
     val searchInteractionSource = remember { MutableInteractionSource() }
@@ -46,6 +48,9 @@ fun PartyChallengeSelectScreen(
     val filterInteractionSource = remember { MutableInteractionSource() }
     val isFilterPressed by filterInteractionSource.collectIsPressedAsState()
     val items = challenges.filter { searchText.isBlank() || it.challenge.title.contains(searchText, ignoreCase = true) }
+
+    // 탐색을 취소하면 Route에서 임시 선택값을 제거하고 파티 만들기 화면으로 돌아갑니다.
+    BackHandler(onBack = onBack)
 
     Column(Modifier.fillMaxSize().background(SourCream).systemBarsPadding()) {
         Text("챌린지", Modifier.padding(start = 20.dp, top = 23.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
@@ -148,7 +153,8 @@ private val previewPartyChallengeCards = listOf(
         PartyChallengeSelectScreen(
             challenges = previewPartyChallengeCards,
             onSelect = {},
-            onConfirm = {}
+            onConfirm = {},
+            onBack = {}
         )
     }
 }

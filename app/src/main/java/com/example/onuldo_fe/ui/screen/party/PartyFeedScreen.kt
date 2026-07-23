@@ -23,11 +23,17 @@ import com.example.onuldo_fe.ui.theme.*
 import com.example.onuldo_fe.viewmodel.party.PartyProgressUiState
 
 @Composable
-fun PartyFeedScreen(progress: PartyProgressUiState, feedItems: List<PartyFeedItemUi>, onBack: () -> Unit) {
+fun PartyFeedScreen(
+    partyName: String,
+    challengeName: String,
+    progress: PartyProgressUiState,
+    feedItems: List<PartyFeedItemUi>,
+    onBack: () -> Unit
+) {
     Column(Modifier.fillMaxSize().background(SourCream).systemBarsPadding()) {
         OnulDoBackButton(Modifier.padding(start = 20.dp, top = 18.dp), onClick = onBack)
-        Text("갓생팟", Modifier.padding(start = 20.dp, top = 8.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Text("새벽 6시 기상", Modifier.padding(start = 20.dp, top = 2.dp), color = DarkBrown70, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Medium)
+        Text(partyName, Modifier.padding(start = 20.dp, top = 8.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Text(challengeName, Modifier.padding(start = 20.dp, top = 2.dp), color = DarkBrown70, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Medium)
         TeamProgressCard(
             progressPercent = progress.progressPercent,
             completedMemberCount = progress.completedMemberCount,
@@ -112,6 +118,8 @@ private fun TeamProgressCardPreview() {
 private fun PartyFeedScreenPreview() {
     OnulDo_FETheme {
         PartyFeedScreen(
+            partyName = "갓생팟",
+            challengeName = "새벽 6시 기상",
             progress = PartyProgressUiState(72, 4, 5),
             feedItems = listOf(
                 PartyFeedItemUi("민지", "2시간 전", imageRes = R.drawable.party_feed_minji),

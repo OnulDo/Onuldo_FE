@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.ui.screen.party
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -73,6 +74,8 @@ fun PartyChallengeDetailScreen(
     onParticipate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    BackHandler(onBack = onBack)
+
     var showVerificationNotice by remember { mutableStateOf(false) }
 
     LazyColumn(

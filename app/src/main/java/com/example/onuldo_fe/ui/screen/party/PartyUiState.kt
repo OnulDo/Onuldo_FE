@@ -6,7 +6,7 @@ enum class PartyMemberRole { Leader, Member }
 enum class PartyReadyStatus { NotApplicable, Waiting, Ready }
 enum class PartyStatus { Recruiting, InProgress, Disbanded }
 enum class InviteCodeError(val message: String) {
-    Invalid("잘못된 초대코드예요. 코드를 다시 확인해주세요"),
+    Invalid("잘못된 초대코드예요. 코드를 다시 확인해주세요."),
     AlreadyStarted("이미 시작된 파티예요."),
     Full("파티 인원이 가득 찼어요."),
     Expired("만료된 초대코드예요.")
