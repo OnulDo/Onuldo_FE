@@ -11,6 +11,7 @@ class FakePartyInviteApi : PartyInviteApi {
         return when {
             FakePartyInviteState.isStarted(normalizedCode) -> PartyJoinResult.Failure(PartyJoinError.AlreadyStarted)
             FakePartyInviteState.isExpired(normalizedCode) -> PartyJoinResult.Failure(PartyJoinError.Expired)
+            FakePartyInviteState.isActive(normalizedCode) -> PartyJoinResult.Success(PartyInviteDummyData.VALID_PARTY_ID)
             else -> when (normalizedCode) {
             PartyInviteDummyData.VALID_CODE -> PartyJoinResult.Success(PartyInviteDummyData.VALID_PARTY_ID)
             PartyInviteDummyData.STARTED_CODE -> PartyJoinResult.Failure(PartyJoinError.AlreadyStarted)

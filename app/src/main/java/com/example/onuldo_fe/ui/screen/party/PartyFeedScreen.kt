@@ -1,6 +1,5 @@
 package com.example.onuldo_fe.ui.screen.party
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -13,53 +12,50 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
+import com.example.onuldo_fe.ui.screen.party.component.PartyFeedCard
 import com.example.onuldo_fe.ui.theme.*
-
-private data class PartyFeedItem(val name: String, val time: String, val verified: Boolean)
-private val partyFeedItems = listOf(
-    PartyFeedItem("민지", "오늘 오전 6:42", true), PartyFeedItem("서연", "오늘 오전 6:51", true),
-    PartyFeedItem("지호", "오늘 오전 6:58", true), PartyFeedItem("수아", "오늘 오전 7:02", true),
-    PartyFeedItem("도윤", "아직 인증 전", false)
-)
+import com.example.onuldo_fe.viewmodel.party.PartyProgressUiState
 
 @Composable
-fun PartyFeedScreen(onBack: () -> Unit, onSettlementClick: () -> Unit) {
+fun PartyFeedScreen(progress: PartyProgressUiState, feedItems: List<PartyFeedItemUi>, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().background(SourCream).systemBarsPadding()) {
-        Box(Modifier.fillMaxWidth().height(60.dp), contentAlignment = Alignment.Center) {
-            OnulDoBackButton(Modifier.align(Alignment.CenterStart).padding(start = 20.dp), onClick = onBack)
-            Text("안녕 러너 파티", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onSettlementClick, modifier = Modifier.align(Alignment.CenterEnd).padding(end = 8.dp)) { Text("정산", color = Persimmon) }
-        }
-        Text("30분 러닝", Modifier.padding(horizontal = 20.dp), color = DarkBrown50)
-        TeamProgressCard(Modifier.padding(horizontal = 20.dp, vertical = 17.dp))
-        Text("파티 인증 피드", Modifier.padding(horizontal = 20.dp).padding(bottom = 12.dp), fontSize = 18.sp, fontWeight = FontWeight.Bold)
-        LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.weight(1f), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(partyFeedItems) { item ->
-                Column(Modifier.background(White, RoundedCornerShape(14.dp)).clip(RoundedCornerShape(14.dp))) {
-                    Box(Modifier.fillMaxWidth().aspectRatio(1f).background(DarkBrown10), contentAlignment = Alignment.Center) {
-                        Text(if (item.verified) "인증 이미지" else "아직 인증 전", color = DarkBrown40, fontSize = 12.sp)
-                    }
-                    Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Image(painterResource(R.drawable.party_member_avatar), null, Modifier.size(28.dp).clip(CircleShape))
-                        Column(Modifier.padding(start = 8.dp)) { Text(item.name, fontWeight = FontWeight.Bold, fontSize = 13.sp); Text(item.time, color = if (item.verified) DarkBrown40 else Persimmon, fontSize = 10.sp) }
-                    }
-                }
+        OnulDoBackButton(Modifier.padding(start = 20.dp, top = 18.dp), onClick = onBack)
+        Text("갓생팟", Modifier.padding(start = 20.dp, top = 8.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Text("새벽 6시 기상", Modifier.padding(start = 20.dp, top = 2.dp), color = DarkBrown70, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Medium)
+        TeamProgressCard(
+            progressPercent = progress.progressPercent,
+            completedMemberCount = progress.completedMemberCount,
+            totalMemberCount = progress.totalMemberCount,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+        )
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(feedItems, key = { it.name }) { item ->
+                PartyFeedCard(item)
             }
         }
     }
 }
 
 @Composable
-private fun TeamProgressCard(modifier: Modifier = Modifier) {
+private fun TeamProgressCard(
+    progressPercent: Int,
+    completedMemberCount: Int,
+    totalMemberCount: Int,
+    modifier: Modifier = Modifier
+) {
+    val progress = (progressPercent / 100f).coerceIn(0f, 1f)
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -78,7 +74,7 @@ private fun TeamProgressCard(modifier: Modifier = Modifier) {
                 letterSpacing = 0.44.sp
             )
             Text(
-                "5명 중 4명 오늘 인증 완료",
+                "${totalMemberCount}명 중 ${completedMemberCount}명 오늘 인증 완료",
                 modifier = Modifier.padding(start = 8.dp),
                 color = DarkBrown50,
                 fontFamily = Pretendard,
@@ -86,7 +82,7 @@ private fun TeamProgressCard(modifier: Modifier = Modifier) {
             )
         }
         Text(
-            "72%",
+            "$progressPercent%",
             color = BlackBrown,
             fontFamily = Pretendard,
             fontSize = 24.sp,
@@ -96,7 +92,7 @@ private fun TeamProgressCard(modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.height(10.dp))
         Box(Modifier.fillMaxWidth().height(8.dp).background(White, CircleShape)) {
-            Box(Modifier.fillMaxWidth(0.64f).height(8.dp).background(Persimmon, CircleShape))
+            Box(Modifier.fillMaxWidth(progress).height(8.dp).background(Persimmon, CircleShape))
         }
     }
 }
@@ -106,7 +102,7 @@ private fun TeamProgressCard(modifier: Modifier = Modifier) {
 private fun TeamProgressCardPreview() {
     OnulDo_FETheme {
         Box(Modifier.background(SourCream).padding(20.dp)) {
-            TeamProgressCard()
+            TeamProgressCard(progressPercent = 72, completedMemberCount = 4, totalMemberCount = 5)
         }
     }
 }
@@ -114,5 +110,14 @@ private fun TeamProgressCardPreview() {
 @Preview(name = "파티 인증 피드", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 private fun PartyFeedScreenPreview() {
-    OnulDo_FETheme { PartyFeedScreen({}, {}) }
+    OnulDo_FETheme {
+        PartyFeedScreen(
+            progress = PartyProgressUiState(72, 4, 5),
+            feedItems = listOf(
+                PartyFeedItemUi("민지", "2시간 전", imageRes = R.drawable.party_feed_minji),
+                PartyFeedItemUi("하늘", "미인증")
+            ),
+            onBack = {}
+        )
+    }
 }

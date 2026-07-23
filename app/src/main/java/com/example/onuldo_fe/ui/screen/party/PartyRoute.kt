@@ -10,17 +10,25 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.viewmodel.party.PartyChallengeSelectViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyInviteViewModel
+import com.example.onuldo_fe.viewmodel.party.PartyFeedViewModel
 import com.example.onuldo_fe.ui.screen.party.component.InviteCodeDialog
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.data.party.dummy.FakePartyInviteState
+import com.example.onuldo_fe.data.party.dummy.FakePartyFeedState
+import com.example.onuldo_fe.ui.screen.party.fake.PartyWaitingRoomFakeData
+import com.example.onuldo_fe.ui.screen.party.fake.PartyWaitingRoomScenario
 
 private enum class PartyScreen { List, Create, ChallengeSelect, ChallengeDetail, WaitingLeader, WaitingMember, Feed, Settlement }
+
+// 다음 화면 전환 테스트용. 실제 생성 직후 상태를 확인할 때는 Recruiting으로 변경
+private val developmentWaitingRoomScenario = PartyWaitingRoomScenario.ReadyToStart
 
 @Composable
 fun PartyRoute(
     challengeSelectViewModel: PartyChallengeSelectViewModel = viewModel(),
-    inviteViewModel: PartyInviteViewModel = viewModel()
+    inviteViewModel: PartyInviteViewModel = viewModel(),
+    partyFeedViewModel: PartyFeedViewModel = viewModel()
 ) {
     var screen by remember { mutableStateOf(PartyScreen.List) }
     var showInviteDialog by remember { mutableStateOf(false) }
@@ -31,9 +39,7 @@ fun PartyRoute(
     var createdPeriod by remember { mutableStateOf("") }
     var createdDeposit by remember { mutableIntStateOf(0) }
     var leaderMembers by remember {
-        mutableStateOf(
-            listOf(PartyMemberUi("민지", PartyMemberRole.Leader, PartyReadyStatus.NotApplicable, "leader-current", 0))
-        )
+        mutableStateOf(PartyWaitingRoomFakeData.members(developmentWaitingRoomScenario, capacity))
     }
     var joinedPartyMembers by remember { mutableStateOf(PartyWaitingRoomUi().members) }
 
@@ -63,10 +69,8 @@ fun PartyRoute(
             onCreate = { period, deposit ->
                 createdPeriod = period
                 createdDeposit = deposit
-                leaderMembers = listOf(
-                    PartyMemberUi("민지", PartyMemberRole.Leader, PartyReadyStatus.NotApplicable, "leader-current", 0)
-                )
-                FakePartyInviteState.activate("82K3H9")
+                leaderMembers = PartyWaitingRoomFakeData.members(developmentWaitingRoomScenario, capacity)
+                FakePartyInviteState.activate("NEW123")
                 screen = PartyScreen.WaitingLeader
             }
         )
@@ -84,6 +88,7 @@ fun PartyRoute(
             ui = PartyWaitingRoomUi(
                 partyName = partyName,
                 challengeName = selectedChallenge?.title.orEmpty(),
+                inviteCode = "NEW123",
                 period = createdPeriod,
                 deposit = createdDeposit,
                 capacity = capacity,
@@ -93,11 +98,13 @@ fun PartyRoute(
             onBack = {
                 // TODO 파티 탈퇴 API 연동 시 탈퇴 성공 후 목록 화면 이동
                 leaderMembers = leaveParty(leaderMembers, "leader-current")
-                if (leaderMembers.isEmpty()) FakePartyInviteState.markExpired("82K3H9")
+                if (leaderMembers.isEmpty()) FakePartyInviteState.markExpired("NEW123")
                 screen = PartyScreen.List
             },
             onStartClick = {
-                FakePartyInviteState.markStarted("82K3H9")
+                FakePartyInviteState.markStarted("NEW123")
+                FakePartyFeedState.updateMemberCount(leaderMembers.size)
+                partyFeedViewModel.loadPartyFeed("party-created")
                 screen = PartyScreen.Feed
             }
         )
@@ -121,8 +128,9 @@ fun PartyRoute(
             }
         )
         PartyScreen.Feed -> PartyFeedScreen(
-            onBack = { screen = PartyScreen.List },
-            onSettlementClick = { screen = PartyScreen.Settlement }
+            progress = partyFeedViewModel.uiState.progress,
+            feedItems = partyFeedViewModel.uiState.feedItems,
+            onBack = { screen = PartyScreen.List }
         )
         PartyScreen.Settlement -> PartySettlementScreen(onBack = { screen = PartyScreen.List })
     }

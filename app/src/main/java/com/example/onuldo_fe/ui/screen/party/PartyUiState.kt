@@ -41,6 +41,14 @@ data class PartyChallengeCardUi(
     @param:DrawableRes val fallbackImageRes: Int
 )
 
+data class PartyFeedItemUi(
+    val name: String,
+    val time: String,
+    val profileImageUrl: String? = null,
+    val verificationImageUrl: String? = null,
+    @param:DrawableRes val imageRes: Int? = null
+)
+
 data class PartyWaitingRoomUi(
     val partyId: String = "party-001",
     val partyName: String = "갓생팟",
