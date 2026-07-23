@@ -36,7 +36,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
-import com.example.onuldo_fe.ui.screen.party.component.PartyChallengeGalleryCard
+import com.example.onuldo_fe.ui.component.party.PartyChallengeGalleryCard
+import com.example.onuldo_fe.viewmodel.party.PartyChallengeCardUi
+import com.example.onuldo_fe.viewmodel.party.PartyChallengeUi
 import com.example.onuldo_fe.ui.theme.*
 
 @Composable
@@ -62,7 +64,7 @@ fun PartyChallengeSelectScreen(
             (selectedCategory == null || it.challenge.category == selectedCategory)
     }
 
-    // 탐색을 취소하면 Route에서 임시 선택값을 제거하고 파티 만들기 화면으로 돌아갑니다.
+    // 탐색을 취소하면 Route에서 임시 선택값을 제거하고 파티 만들기 화면으로 돌아감
     BackHandler(onBack = onBack)
 
     Column(Modifier.fillMaxSize().background(SourCream).systemBarsPadding()) {

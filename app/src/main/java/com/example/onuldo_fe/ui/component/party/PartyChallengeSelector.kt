@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.screen.party.component
+package com.example.onuldo_fe.ui.component.party
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.onuldo_fe.ui.screen.party.PartyChallengeUi
+import com.example.onuldo_fe.viewmodel.party.PartyChallengeUi
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10

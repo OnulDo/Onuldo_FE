@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.screen.party
+package com.example.onuldo_fe.viewmodel.party
 
 import androidx.annotation.DrawableRes
 

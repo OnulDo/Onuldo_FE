@@ -1,8 +1,20 @@
 package com.example.onuldo_fe.model.party
 
-enum class PartyJoinError { Invalid, AlreadyStarted, Full, Expired }
+// 초대코드로 파티 참여 시 발생할 수 있는 정책 오류
+enum class PartyJoinError {
+    Invalid,                                   // 존재하지 않거나 형식이 잘못된 코드
+    AlreadyStarted,                            // 이미 시작되어 참여할 수 없는 파티
+    Full,                                      // 모집 최대 인원에 도달한 파티
+    Expired                                    // 해체 등으로 초대코드가 만료된 파티
+}
 
+// 초대코드 파티 참여 요청의 성공 또는 정책 오류 결과
 sealed interface PartyJoinResult {
-    data class Success(val partyId: String) : PartyJoinResult
-    data class Failure(val error: PartyJoinError) : PartyJoinResult
+    data class Success(
+        val partyId: String                    // 참여에 성공한 파티 고유 ID
+    ) : PartyJoinResult
+
+    data class Failure(
+        val error: PartyJoinError              // 참여 실패 원인을 나타내는 정책 오류
+    ) : PartyJoinResult
 }

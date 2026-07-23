@@ -46,6 +46,8 @@ import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.viewmodel.party.PartyCardUi
+import com.example.onuldo_fe.viewmodel.party.samplePartyCards
 import java.time.LocalTime
 
 @Composable

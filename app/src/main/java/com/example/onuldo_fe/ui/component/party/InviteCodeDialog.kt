@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.screen.party.component
+package com.example.onuldo_fe.ui.component.party
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.onuldo_fe.ui.screen.party.InviteCodeError
+import com.example.onuldo_fe.viewmodel.party.InviteCodeError
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown10
 import com.example.onuldo_fe.ui.theme.DarkBrown40

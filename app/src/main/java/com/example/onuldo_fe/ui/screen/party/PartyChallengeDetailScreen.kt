@@ -41,8 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
-import com.example.onuldo_fe.ui.screen.party.component.PartyVerificationNoticeBottomSheet
-import com.example.onuldo_fe.ui.screen.party.component.PartyNetworkImage
+import com.example.onuldo_fe.ui.component.party.PartyNetworkImage
+import com.example.onuldo_fe.ui.component.party.PartyVerificationNoticeBottomSheet
+import com.example.onuldo_fe.viewmodel.party.PartyChallengeUi
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme

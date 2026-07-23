@@ -8,6 +8,7 @@ import com.example.onuldo_fe.model.party.PartyFeed
 import com.example.onuldo_fe.model.party.PartyFeedItem
 import com.example.onuldo_fe.model.party.PartyProgress
 
+// 파티 피드 API 응답을 진행 현황과 인증 목록 모델로 변환
 class PartyFeedRepositoryImpl(
     private val api: PartyFeedApi
 ) : PartyFeedRepository {

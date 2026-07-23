@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.screen.party.component
+package com.example.onuldo_fe.ui.component.party
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

@@ -12,12 +12,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.party.dummy.PartyTestConfig
 import com.example.onuldo_fe.model.party.CreatePartyCommand
-import com.example.onuldo_fe.ui.screen.party.component.InviteCodeDialog
+import com.example.onuldo_fe.ui.component.party.InviteCodeDialog
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.viewmodel.party.PartyAction
+import com.example.onuldo_fe.viewmodel.party.PartyChallengeUi
 import com.example.onuldo_fe.viewmodel.party.PartyChallengeSelectViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyFeedViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyInviteViewModel
+import com.example.onuldo_fe.viewmodel.party.PartyMemberRole
+import com.example.onuldo_fe.viewmodel.party.PartyReadyStatus
+import com.example.onuldo_fe.viewmodel.party.PartyStatus
 import com.example.onuldo_fe.viewmodel.party.PartyViewModel
 
 // Navigation 라이브러리 연동 전 파티 내부 화면 전환을 구분하는 테스트용 화면 상태

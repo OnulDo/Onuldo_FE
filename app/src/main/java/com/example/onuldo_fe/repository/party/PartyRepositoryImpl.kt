@@ -14,7 +14,7 @@ import com.example.onuldo_fe.model.party.PartyRole
 import com.example.onuldo_fe.model.party.PartySummary
 import com.example.onuldo_fe.model.party.PartyWaitingRoom
 
-// API DTO를 앱 내부 도메인 모델로 변환해 ViewModel의 데이터 출처 의존 제거
+// 파티 생성·대기방 API 요청과 DTO의 도메인 모델 변환 담당
 class PartyRepositoryImpl(private val api: PartyApi) : PartyRepository {
     // 서버의 진행 중 파티 응답 목록을 도메인 요약 모델 목록으로 변환
     override suspend fun getParties(): List<PartySummary> = api.getParties().map(PartySummaryDto::toModel)

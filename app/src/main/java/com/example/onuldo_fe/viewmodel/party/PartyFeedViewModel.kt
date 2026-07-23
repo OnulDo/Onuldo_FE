@@ -9,7 +9,6 @@ import kotlinx.coroutines.launch
 import com.example.onuldo_fe.model.party.PartyProgress
 import com.example.onuldo_fe.model.party.PartyFeedItem
 import com.example.onuldo_fe.R
-import com.example.onuldo_fe.ui.screen.party.PartyFeedItemUi
 import com.example.onuldo_fe.repository.party.PartyFeedRepository
 import com.example.onuldo_fe.repository.party.PartyFeedRepositoryProvider
 

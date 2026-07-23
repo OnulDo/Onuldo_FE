@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.screen.party.component
+package com.example.onuldo_fe.ui.component.party
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,8 +18,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
-import com.example.onuldo_fe.ui.screen.party.*
 import com.example.onuldo_fe.ui.theme.*
+import com.example.onuldo_fe.viewmodel.party.PartyMemberRole
+import com.example.onuldo_fe.viewmodel.party.PartyMemberUi
+import com.example.onuldo_fe.viewmodel.party.PartyReadyStatus
 
 @Composable
 fun PartyWaitingMemberCard(member: PartyMemberUi, modifier: Modifier = Modifier) {

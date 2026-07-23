@@ -10,7 +10,6 @@ import com.example.onuldo_fe.model.party.PartyJoinError
 import com.example.onuldo_fe.model.party.PartyJoinResult
 import com.example.onuldo_fe.repository.party.PartyInviteRepository
 import com.example.onuldo_fe.repository.party.PartyInviteRepositoryProvider
-import com.example.onuldo_fe.ui.screen.party.InviteCodeError
 
 // 초대코드 참여 요청의 입력 오류·성공 결과·네트워크 상태 관리
 data class PartyInviteUiState(

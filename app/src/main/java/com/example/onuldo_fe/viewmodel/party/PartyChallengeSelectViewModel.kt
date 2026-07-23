@@ -10,8 +10,6 @@ import com.example.onuldo_fe.R
 import com.example.onuldo_fe.model.party.PartyChallenge
 import com.example.onuldo_fe.repository.party.PartyChallengeRepository
 import com.example.onuldo_fe.repository.party.PartyChallengeRepositoryProvider
-import com.example.onuldo_fe.ui.screen.party.PartyChallengeCardUi
-import com.example.onuldo_fe.ui.screen.party.PartyChallengeUi
 
 // 파티에 연계할 챌린지 목록의 조회 상태와 UI 데이터 관리
 class PartyChallengeSelectViewModel(

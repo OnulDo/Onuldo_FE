@@ -4,6 +4,7 @@ import com.example.onuldo_fe.data.party.api.PartyChallengeApi
 import com.example.onuldo_fe.data.party.dto.PartyChallengeDto
 import com.example.onuldo_fe.model.party.PartyChallenge
 
+// 챌린지 API 응답을 앱 내부 챌린지 모델로 변환
 class PartyChallengeRepositoryImpl(
     private val api: PartyChallengeApi
 ) : PartyChallengeRepository {

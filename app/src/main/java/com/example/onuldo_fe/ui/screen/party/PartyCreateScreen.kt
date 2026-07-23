@@ -19,12 +19,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
-import com.example.onuldo_fe.ui.screen.party.component.PartyCapacitySelector
-import com.example.onuldo_fe.ui.screen.party.component.PartyChallengeSelector
-import com.example.onuldo_fe.ui.screen.party.component.PartyNameTextField
-import com.example.onuldo_fe.ui.screen.party.component.PartyOptionSelector
-import com.example.onuldo_fe.ui.screen.party.component.PartyInsufficientPointDialog
+import com.example.onuldo_fe.ui.component.party.PartyCapacitySelector
+import com.example.onuldo_fe.ui.component.party.PartyChallengeSelector
+import com.example.onuldo_fe.ui.component.party.PartyInsufficientPointDialog
+import com.example.onuldo_fe.ui.component.party.PartyNameTextField
+import com.example.onuldo_fe.ui.component.party.PartyOptionSelector
 import com.example.onuldo_fe.ui.theme.*
+import com.example.onuldo_fe.viewmodel.party.PartyChallengeUi
 
 @Composable
 fun PartyCreateScreen(
