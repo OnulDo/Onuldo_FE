@@ -92,7 +92,12 @@ fun InviteCodeDialog(
             BasicTextField(
                 value = code,
                 onValueChange = { value ->
-                    if (!isError) code = value.filter(Char::isLetterOrDigit).uppercase().take(6)
+                    if (!isError) {
+                        code = value
+                            .filter { it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' }
+                            .uppercase()
+                            .take(6)
+                    }
                 },
                 singleLine = true,
                 textStyle = TextStyle(color = Color.Transparent),
