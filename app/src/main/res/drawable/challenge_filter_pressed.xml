@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="27dp"
+    android:height="27dp"
+    android:viewportWidth="27"
+    android:viewportHeight="27">
+    <!-- 주황 원 채움 -->
+    <path
+        android:fillColor="#FC6B2B"
+        android:pathData="M13.5,0 A13.5,13.5 0 1 0 13.5,27 A13.5,13.5 0 1 0 13.5,0 Z" />
+    <!-- 슬라이더 3줄 (흰색) -->
+    <path android:fillColor="#FFFDF7" android:pathData="M8.55,9.09961 H18.45 A0.55,0.55 0 0 1 18.45,10.19961 H8.55 A0.55,0.55 0 0 1 8.55,9.09961 Z" />
+    <path android:fillColor="#FFFDF7" android:pathData="M8.55,12.9492 H18.45 A0.55,0.55 0 0 1 18.45,14.0492 H8.55 A0.55,0.55 0 0 1 8.55,12.9492 Z" />
+    <path android:fillColor="#FFFDF7" android:pathData="M8.55,16.7988 H18.45 A0.55,0.55 0 0 1 18.45,17.8988 H8.55 A0.55,0.55 0 0 1 8.55,16.7988 Z" />
+    <!-- 손잡이 3개 (흰색) -->
+    <path android:fillColor="#FFFDF7" android:pathData="M9.1016,9.65 A1.65,1.65 0 1 0 12.4016,9.65 A1.65,1.65 0 1 0 9.1016,9.65 Z" />
+    <path android:fillColor="#FFFDF7" android:pathData="M14.6016,13.4996 A1.65,1.65 0 1 0 17.9016,13.4996 A1.65,1.65 0 1 0 14.6016,13.4996 Z" />
+    <path android:fillColor="#FFFDF7" android:pathData="M10.75,17.3492 A1.65,1.65 0 1 0 14.05,17.3492 A1.65,1.65 0 1 0 10.75,17.3492 Z" />
+</vector>
