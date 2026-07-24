@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -33,14 +34,17 @@ fun OnulDoButton(
         enabled = enabled,
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Persimmon
+            containerColor = Persimmon,
+            // Figma(RFD) btn/disabled = 배경 BlackBrown 10% · 글자 BlackBrown 20%.
+            disabledContainerColor = BlackBrown.copy(alpha = 0.1f),
+            disabledContentColor = BlackBrown.copy(alpha = 0.2f),
         )
     ) {
         Text(
             text = text,
             fontSize = 16.sp,
             fontFamily = Pretendard,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.Bold
         )
     }
 }
