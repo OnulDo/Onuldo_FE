@@ -17,6 +17,7 @@ import coil.compose.AsyncImage
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.camera.component.CameraTopBar
 import com.example.onuldo_fe.camera.component.PreviewBottomBar
+import com.example.onuldo_fe.navigation.Routes
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 
 @Composable
@@ -54,6 +55,7 @@ fun PhotoPreviewScreen(
             PreviewBottomBar(
                 onRetakeClick = onRetakeClick,
                 onSubmitClick = onSubmitClick
+
             )
         }
     }

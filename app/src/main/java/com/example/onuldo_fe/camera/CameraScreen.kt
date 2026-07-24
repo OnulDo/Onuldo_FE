@@ -85,7 +85,8 @@ fun CameraScreen(
                             override fun onImageSaved(
                                 outputFileResults: ImageCapture.OutputFileResults
                             ) {
-                                onPhotoCaptured(outputFileResults.savedUri
+                                val savedUri = outputFileResults.savedUri
+                                onPhotoCaptured(savedUri)
                             }
 
                             override fun onError(
@@ -107,7 +108,8 @@ private fun CameraScreenPreview() {
     OnulDo_FETheme {
         CameraScreen(
             category = "외국어",
-            title = "영단어 100개 암기"
+            title = "영단어 100개 암기",
+            onPhotoCaptured = {}
         )
     }
 }
