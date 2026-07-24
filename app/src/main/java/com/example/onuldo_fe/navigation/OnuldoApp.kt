@@ -31,11 +31,12 @@ import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
 @Composable
 fun OnuldoApp() {
     val navController = rememberNavController()
+    val debugStartDestination = Routes.LANDING
 
     //카메라 -> previewScreen
     val cameraViewModel: CameraViewModel = viewModel()
 
-    NavHost(navController = navController, startDestination = Routes.LANDING) {
+    NavHost(navController = navController, startDestination = debugStartDestination) {
         composable(Routes.LANDING) {
             LandingScreen(
                 onLoginClick = { navController.navigate(Routes.LOGIN) },
@@ -148,8 +149,8 @@ fun OnuldoApp() {
             )
         }
 
-        //검증 로딩
-        composable(Routes.VERIFICATION_LOADING) {
+        //검증 심사중
+        composable(Routes.VERIFICATION_REVIEWING) {
             ChallengeVerificationScreen(
                 status = VerificationStatus.REVIEWING
             )

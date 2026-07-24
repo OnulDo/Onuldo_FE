@@ -26,7 +26,6 @@ object Routes {
     //검증
     const val VERIFICATION_REVIEWING = "verification_reviewing"
     const val VERIFICATION_WAITING = "verification_waiting"
-    const val VERIFICATION_LOADING = "verification_loading"
     const val VERIFICATION_SUCCESS = "verification_success"
     const val VERIFICATION_FAIL = "verification_fail"
 
