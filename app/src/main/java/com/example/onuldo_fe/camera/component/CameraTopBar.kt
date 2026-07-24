@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -13,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.SourCream70
@@ -22,6 +24,7 @@ import com.example.onuldo_fe.ui.theme.White
 fun CameraTopBar(
     category: String,
     title: String,
+    showFlashButton: Boolean = true,
     onCloseClick: () -> Unit = {},
     onFlashClick: () -> Unit = {}
 ) {
@@ -66,13 +69,19 @@ fun CameraTopBar(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        IconButton(
-            onClick = onFlashClick
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.camera_flash_btn),
-                contentDescription = "플래시",
-                tint = White
+        if (showFlashButton) {
+            IconButton(
+                onClick = onFlashClick
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.camera_flash_btn),
+                    contentDescription = "플래시",
+                    tint = White
+                )
+            }
+        } else {
+            Spacer(
+                modifier = Modifier.size(48.dp)
             )
         }
     }

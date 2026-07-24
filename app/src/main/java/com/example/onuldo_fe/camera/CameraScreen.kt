@@ -1,6 +1,7 @@
 package com.example.onuldo_fe.camera
 
 import android.content.ContentValues
+import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.camera.core.ImageCapture
@@ -25,6 +26,7 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 fun CameraScreen(
     category: String,
     title: String,
+    onPhotoCaptured: (Uri?) -> Unit
 ) {
     val imageCapture = remember {
         ImageCapture.Builder().build()
@@ -33,18 +35,22 @@ fun CameraScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         // 카메라 프리뷰
-        /*CameraPreview(
+         CameraPreview(
             imageCapture = imageCapture,
             modifier = Modifier.fillMaxSize()
-        )*/
-        Box(
+        )
+       /* Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black)
-        )
+        )*/
+
         CameraTopBar(
             category = category,
-            title = title
+            title = title,
+            showFlashButton = true,
+            onCloseClick = {},
+            onFlashClick = {  }
         )
         Box(
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -79,10 +85,7 @@ fun CameraScreen(
                             override fun onImageSaved(
                                 outputFileResults: ImageCapture.OutputFileResults
                             ) {
-                                    // TODO
-                                    // 다음 화면으로 이동
-                                    // outputFileResults.savedUri 사용
-
+                                onPhotoCaptured(outputFileResults.savedUri
                             }
 
                             override fun onError(
