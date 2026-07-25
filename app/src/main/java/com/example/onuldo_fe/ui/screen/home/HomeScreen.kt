@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -57,7 +56,7 @@ fun HomeScreen(
             .fillMaxSize()
             .background(SourCream)
             .statusBarsPadding()
-            .navigationBarsPadding()
+        // .navigationBarsPadding()    ← 제거 (Scaffold가 이미 처리)
     ) {
         // 홈 API 상태에 따라 기본 홈과 빈 홈 분기
         if (uiState.hasHomeContent) {

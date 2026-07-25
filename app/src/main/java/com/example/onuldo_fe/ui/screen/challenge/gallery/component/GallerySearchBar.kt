@@ -33,10 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.DarkBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown20
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.SourCream
+import com.example.onuldo_fe.ui.theme.White
 
 //검색창 (특징: 검색 바를위해 제작)
 @Composable
@@ -47,9 +49,8 @@ fun GallerySearchBar(
     placeholder: String = "생활루틴"
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val focused by interactionSource.collectIsFocusedAsState()
-    val borderColor = if (focused) Persimmon.copy(alpha = 0.4f) else DarkBrown40
-    val iconColor = if (focused) Persimmon else DarkBrown
+    val borderColor = DarkBrown40
+    val iconColor = DarkBrown
 
     val textStyle = MaterialTheme.typography.labelLarge.copy(
         fontSize = 13.sp,
@@ -61,6 +62,7 @@ fun GallerySearchBar(
             .fillMaxWidth()
             .height(27.dp)
             .clip(RoundedCornerShape(14.dp))
+            .background(White)
             .border(1.dp, borderColor, RoundedCornerShape(14.dp))
             .padding(top = 6.dp, bottom = 6.dp, start = 11.dp, end = 11.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -79,7 +81,7 @@ fun GallerySearchBar(
                 Text(
                     text = placeholder,
                     style = textStyle,
-                    color = DarkBrown40
+                    color = DarkBrown20
                 )
             }
             BasicTextField(

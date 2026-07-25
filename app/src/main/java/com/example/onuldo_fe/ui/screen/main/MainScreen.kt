@@ -10,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.onuldo_fe.navigation.BottomTab
 import com.example.onuldo_fe.navigation.Routes
 import com.example.onuldo_fe.ui.component.OnuldoBottomBar
+import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryScreen
 import com.example.onuldo_fe.ui.screen.home.HomeRoute
 import com.example.onuldo_fe.ui.screen.mypage.MyMainScreen
 import com.example.onuldo_fe.ui.screen.record.RecordScreen
@@ -38,7 +39,11 @@ fun MainScreen(
             modifier = Modifier.padding(innerPadding),
         ) {
             composable(BottomTab.Home.route) { HomeRoute() }
-            composable(BottomTab.Challenge.route) { PlaceholderScreen("챌린지") }
+            composable(BottomTab.Challenge.route) {
+                GalleryScreen(
+                    onChallengeClick = { onNavigate(Routes.CHALLENGE_DETAIL) },
+                )
+            }
             composable(BottomTab.Party.route) { PlaceholderScreen("파티") }
             composable(BottomTab.Record.route) {
                 RecordScreen(
@@ -68,6 +73,7 @@ fun MainScreen(
                     onChargeClick = { onNavigate(Routes.MYPAGE_CHARGE) },
                     onWithdrawClick = { onNavigate(Routes.MYPAGE_WITHDRAW) },
                     onAccountClick = { onNavigate(Routes.MYPAGE_ACCOUNT) },
+                    onNotificationClick = { onNavigate(Routes.MYPAGE_NOTIFICATION) },
                 )
             }
         }
