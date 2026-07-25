@@ -28,10 +28,10 @@ fun VerificationStepCard(
     title: String,
 ) {
     Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .padding(top = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
+            .padding(top = 8.dp),
         shape = RoundedCornerShape(14.dp),
         color = White,
         border = BorderStroke(

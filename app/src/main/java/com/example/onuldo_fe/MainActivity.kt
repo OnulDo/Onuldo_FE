@@ -4,8 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.onuldo_fe.ui.screen.home.HomeRoute
-import com.example.onuldo_fe.ui.screen.party.PartyRoute
+import com.example.onuldo_fe.navigation.OnuldoApp
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 
 class MainActivity : ComponentActivity() {
@@ -15,7 +14,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             OnulDo_FETheme {
-                PartyRoute()
+                OnuldoApp()
             }
         }
     }
