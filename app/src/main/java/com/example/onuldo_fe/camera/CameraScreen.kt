@@ -119,7 +119,6 @@ fun CameraScreen(
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 private fun CameraScreenPreview() {
