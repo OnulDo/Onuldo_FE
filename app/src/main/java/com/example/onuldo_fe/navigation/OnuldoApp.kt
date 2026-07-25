@@ -23,6 +23,7 @@ import com.example.onuldo_fe.ui.screen.mypage.PointWalletScreen
 import com.example.onuldo_fe.ui.screen.mypage.PointWithdrawScreen
 import com.example.onuldo_fe.ui.screen.mypage.ProfileSettingsScreen
 import com.example.onuldo_fe.ui.screen.mypage.WithdrawAccountScreen
+import com.example.onuldo_fe.ui.screen.mypage.SettingScreen
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.onuldo_fe.camera.PhotoPreviewScreen
@@ -34,7 +35,11 @@ import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
 @Composable
 fun OnuldoApp() {
     val navController = rememberNavController()
-    val debugStartDestination = Routes.LANDING
+    /**
+    *화면 연동 테스트를 위해 로그인 화면을 건너 뜀
+     */
+    //val debugStartDestination = Routes.LANDING
+    val debugStartDestination = Routes.MAIN
 
     //카메라 -> previewScreen
     val cameraViewModel: CameraViewModel = viewModel()
@@ -114,6 +119,10 @@ fun OnuldoApp() {
         }
         composable(Routes.MYPAGE_ACCOUNT) {
             WithdrawAccountScreen(onBack = { navController.popBackStack() })
+        }
+        // 알림 설정(시온)  //화면이 상태 자체 보유 → 등록만. 뒤로가기 → 마이로 복귀
+        composable(Routes.MYPAGE_NOTIFICATION) {
+            SettingScreen(onBackClick = { navController.popBackStack() })
         }
 
         // 카메라 화면

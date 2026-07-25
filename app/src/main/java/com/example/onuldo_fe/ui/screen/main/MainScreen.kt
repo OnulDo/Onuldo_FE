@@ -39,8 +39,6 @@ fun MainScreen(
             modifier = Modifier.padding(innerPadding),
         ) {
             composable(BottomTab.Home.route) { HomeRoute() }
-            composable(BottomTab.Challenge.route) { PlaceholderScreen("챌린지") }
-            composable(BottomTab.Home.route) { PlaceholderScreen("홈") }
             composable(BottomTab.Challenge.route) {
                 GalleryScreen(
                     onChallengeClick = { onNavigate(Routes.CHALLENGE_DETAIL) },
@@ -75,6 +73,7 @@ fun MainScreen(
                     onChargeClick = { onNavigate(Routes.MYPAGE_CHARGE) },
                     onWithdrawClick = { onNavigate(Routes.MYPAGE_WITHDRAW) },
                     onAccountClick = { onNavigate(Routes.MYPAGE_ACCOUNT) },
+                    onNotificationClick = { onNavigate(Routes.MYPAGE_NOTIFICATION) },
                 )
             }
         }

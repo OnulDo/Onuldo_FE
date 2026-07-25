@@ -42,30 +42,24 @@ import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
 
 // 마이페이지 - 알림 설정
+// 상태/유형 모델은 분리: [NotificationSettingsState], [NotificationType]
 
 private val ContentWidth = 350.dp
 
-//더미 데이터(테스트 용이라 true도 있음) TODO: 더미 데이터 — API 연동 시 교체
-data class NotificationSettingsState(
-    val all: Boolean = true,
-    val challengeStart: Boolean = true,
-    val deadline: Boolean = true,
-    val result: Boolean = true,
-    val refund: Boolean = true,
-    val deduction: Boolean = false
-)
-
-enum class NotificationType {
-    ALL, CHALLENGE_START, DEADLINE, RESULT, REFUND, DEDUCTION
-}
-
 @Composable
 fun SettingScreen(
-    state: NotificationSettingsState,
-    onToggle: (NotificationType, Boolean) -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var state by remember { mutableStateOf(NotificationSettingsState()) }
+
+    fun updateState(update: NotificationSettingsState.() -> NotificationSettingsState) {
+        state = state.update()
+
+        // TODO(API 연동 시)
+        // repository.saveNotificationSetting(state)
+    }
+
     // 전체 알림이 꺼지면 개별 알림은 값을 유지한 채 비활성 표시만 한다! (버튼 누르기 비활성)
     val subEnabled = state.all
 
@@ -105,7 +99,7 @@ fun SettingScreen(
             title = "전체 알림 수신",
             description = "모든 알림을 한 번에 끄거나 켤 수 있어요",
             checked = state.all,
-            onCheckedChange = { onToggle(NotificationType.ALL, it) },
+            onCheckedChange = { updateState { copy(all = it) } },
             height = 80.dp,
             backgroundColor = Persimmon10,
             borderColor = Persimmon20
@@ -121,7 +115,7 @@ fun SettingScreen(
             title = "챌린지 시작 알림",
             description = "챌린지 시작 시각 알림",
             checked = state.challengeStart,
-            onCheckedChange = { onToggle(NotificationType.CHALLENGE_START, it) },
+            onCheckedChange = { updateState { copy(challengeStart = it) } },
             enabled = subEnabled
         )
 
@@ -131,7 +125,7 @@ fun SettingScreen(
             title = "인증 마감 알림",
             description = "인증 마감 30분 전 알림",
             checked = state.deadline,
-            onCheckedChange = { onToggle(NotificationType.DEADLINE, it) },
+            onCheckedChange = { updateState { copy(deadline = it) } },
             enabled = subEnabled
         )
 
@@ -141,7 +135,7 @@ fun SettingScreen(
             title = "인증 결과 알림",
             description = "인증 성공/실패 결과 알림",
             checked = state.result,
-            onCheckedChange = { onToggle(NotificationType.RESULT, it) },
+            onCheckedChange = { updateState { copy(result = it) } },
             enabled = subEnabled
         )
 
@@ -155,7 +149,7 @@ fun SettingScreen(
             title = "환급 완료 알림",
             description = "챌린지 종료 후 환급 알림",
             checked = state.refund,
-            onCheckedChange = { onToggle(NotificationType.REFUND, it) },
+            onCheckedChange = { updateState { copy(refund = it) } },
             enabled = subEnabled
         )
 
@@ -165,7 +159,7 @@ fun SettingScreen(
             title = "차감 알림",
             description = "인증 실패로 도전금 차감 시",
             checked = state.deduction,
-            onCheckedChange = { onToggle(NotificationType.DEDUCTION, it) },
+            onCheckedChange = { updateState { copy(deduction = it) } },
             enabled = subEnabled
         )
 
@@ -250,21 +244,6 @@ private fun SettingToggleRow(
 @Composable
 private fun SettingScreenPreview() {
     OnulDo_FETheme {
-        var state by remember { mutableStateOf(NotificationSettingsState()) }
-
-        SettingScreen(
-            state = state,
-            onToggle = { type, value ->
-                state = when (type) {
-                    NotificationType.ALL -> state.copy(all = value)
-                    NotificationType.CHALLENGE_START -> state.copy(challengeStart = value)
-                    NotificationType.DEADLINE -> state.copy(deadline = value)
-                    NotificationType.RESULT -> state.copy(result = value)
-                    NotificationType.REFUND -> state.copy(refund = value)
-                    NotificationType.DEDUCTION -> state.copy(deduction = value)
-                }
-            },
-            onBackClick = {}
-        )
+        SettingScreen(onBackClick = {})
     }
 }
