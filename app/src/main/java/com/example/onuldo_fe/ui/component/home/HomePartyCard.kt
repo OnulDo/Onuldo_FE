@@ -104,7 +104,9 @@ fun HomePartyCard(
         Row(verticalAlignment = Alignment.CenterVertically) {
             val deadlineText = partyChallenge.verifiedAt?.let {
                 stringResource(R.string.home_challenge_verified_at, it.toDisplayText())
-            } ?: stringResource(R.string.home_challenge_deadline, partyChallenge.deadlineAt.toDisplayText())
+            } ?: partyChallenge.deadlineAt?.let {
+                stringResource(R.string.home_challenge_deadline, it.toDisplayText())
+            } ?: stringResource(R.string.home_challenge_deadline_unknown)
             Text(
                 text = deadlineText,
                 color = partyChallenge.status.statusColor(),

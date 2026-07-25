@@ -7,7 +7,7 @@ data class HomePartyChallenge(
     val title: String,                         // 파티 이름
     val subtitle: String,                     // 연계된 챌린지 이름
     val remainingDays: Int,                   // 챌린지 종료일까지 남은 일수
-    val deadlineAt: LocalTime,                // 오늘 인증 마감 시간
+    val deadlineAt: LocalTime?,               // 오늘 인증 마감 시간, 유효한 시간이 없으면 null
     val completedMemberCount: Int,            // 오늘 인증을 완료한 파티원 수
     val totalMemberCount: Int,                // 현재 참여 중인 전체 파티원 수
     val status: ChallengeStatus = ChallengeStatus.NeedCertification, // 오늘 인증 상태

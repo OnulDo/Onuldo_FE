@@ -180,17 +180,17 @@ private fun PartyCardUi.toHomePartyChallenge() = HomePartyChallenge(
     title = partyName,
     subtitle = challengeName,
     remainingDays = dDay.filter(Char::isDigit).toIntOrNull() ?: 0,
-    deadlineAt = deadline.toLocalTimeOrDefault(),
+    deadlineAt = deadline.toLocalTimeOrNull(),
     completedMemberCount = completedMemberCount,
     totalMemberCount = totalMemberCount,
     remainingMinutes = remainingText.toRemainingMinutes()
 )
 
-private fun String.toLocalTimeOrDefault(): LocalTime {
-    val match = Regex("""(\d{1,2}):(\d{2})""").find(this) ?: return LocalTime.MIDNIGHT
+private fun String.toLocalTimeOrNull(): LocalTime? {
+    val match = Regex("""(\d{1,2}):(\d{2})""").find(this) ?: return null
     return runCatching {
         LocalTime.of(match.groupValues[1].toInt(), match.groupValues[2].toInt())
-    }.getOrDefault(LocalTime.MIDNIGHT)
+    }.getOrNull()
 }
 
 private fun String?.toRemainingMinutes(): Int? {
