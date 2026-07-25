@@ -76,7 +76,10 @@ fun PartyListScreen(
                 onClick = onCreateClick,
                 modifier = Modifier.weight(10f).height(52.dp),
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Persimmon),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Persimmon,
+                    contentColor = SourCream
+                ),
                 contentPadding = PaddingValues(0.dp)
             ) {
                 Image(
