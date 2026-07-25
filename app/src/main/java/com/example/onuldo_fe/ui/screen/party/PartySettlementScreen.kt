@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -57,55 +60,85 @@ fun PartySettlementScreen(
     onConfirm: () -> Unit = onBack,
     members: List<PartySettlementMemberUi> = sampleSettlementMembers
 ) {
-    Box(modifier.fillMaxSize().background(SourCream).systemBarsPadding()) {
-        Column(Modifier.fillMaxSize()) {
-            Box(Modifier.fillMaxWidth().height(56.dp)) {
-                OnulDoBackButton(
-                    modifier = Modifier.align(Alignment.CenterStart).padding(start = 4.dp),
-                    onClick = onBack
-                )
+    Column(modifier.fillMaxSize().background(SourCream).systemBarsPadding()) {
+        Box(Modifier.fillMaxWidth().height(56.dp)) {
+            OnulDoBackButton(
+                modifier = Modifier.align(Alignment.CenterStart).padding(start = 4.dp),
+                onClick = onBack
+            )
+            Text(
+                "파티 정산 결과",
+                modifier = Modifier.align(Alignment.CenterStart).padding(start = 44.dp),
+                color = BlackBrown,
+                fontFamily = Pretendard,
+                fontSize = 17.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentPadding = PaddingValues(bottom = 16.dp)
+        ) {
+            item {
+                Spacer(Modifier.height(47.dp))
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Box(
+                        Modifier.size(135.dp).background(Persimmon.copy(alpha = 0.15f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        PartySettlementSuccessCharacter()
+                    }
+                }
+                Spacer(Modifier.height(7.dp))
                 Text(
-                    "파티 정산 결과",
-                    modifier = Modifier.align(Alignment.CenterStart).padding(start = 44.dp),
+                    "전원 성공!",
+                    modifier = Modifier.fillMaxWidth(),
                     color = BlackBrown,
                     fontFamily = Pretendard,
-                    fontSize = 17.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 22.sp,
+                    lineHeight = 40.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
+                Text(
+                    "파티 전원이 챌린지를 완주했어요",
+                    modifier = Modifier.fillMaxWidth(),
+                    color = com.example.onuldo_fe.ui.theme.DarkBrown,
+                    fontFamily = Pretendard,
+                    fontSize = 13.sp,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(Modifier.height(47.dp))
+                Text("내 정산 결과", modifier = Modifier.padding(start = 24.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(2.dp))
+                SettlementSummaryCard(Modifier.padding(horizontal = 20.dp))
+                Spacer(Modifier.height(12.dp))
+                Text("파티원 결과", modifier = Modifier.padding(start = 24.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(2.dp))
             }
 
-            Spacer(Modifier.height(47.dp))
-            Box(
-                Modifier.align(Alignment.CenterHorizontally).size(135.dp).background(Persimmon.copy(alpha = 0.15f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                PartySettlementSuccessCharacter()
-            }
-            Spacer(Modifier.height(7.dp))
-            Text("전원 성공!", modifier = Modifier.align(Alignment.CenterHorizontally), color = BlackBrown, fontFamily = Pretendard, fontSize = 22.sp, lineHeight = 40.sp, fontWeight = FontWeight.Bold)
-            Text("파티 전원이 챌린지를 완주했어요", modifier = Modifier.align(Alignment.CenterHorizontally), color = com.example.onuldo_fe.ui.theme.DarkBrown, fontFamily = Pretendard, fontSize = 13.sp)
-
-            Spacer(Modifier.height(47.dp))
-            Text("내 정산 결과", modifier = Modifier.padding(start = 24.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(2.dp))
-            SettlementSummaryCard(Modifier.padding(horizontal = 20.dp))
-
-            Spacer(Modifier.height(12.dp))
-            Text("파티원 결과", modifier = Modifier.padding(start = 24.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(2.dp))
-            Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                members.forEach { member -> PartySettlementMemberCard(member) }
+            items(members, key = { it.name }) { member ->
+                PartySettlementMemberCard(
+                    member = member,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+                Spacer(Modifier.height(8.dp))
             }
         }
 
-        Button(
-            onClick = onConfirm,
-            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(horizontal = 20.dp, vertical = 46.dp).height(52.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Persimmon, contentColor = SourCream)
-        ) {
-            Text("확인", fontFamily = Pretendard, fontSize = 17.sp, lineHeight = 20.sp, fontWeight = FontWeight.Bold)
+        Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
+            Button(
+                onClick = onConfirm,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 40.dp).height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Persimmon, contentColor = SourCream)
+            ) {
+                Text("확인", fontFamily = Pretendard, fontSize = 17.sp, lineHeight = 20.sp, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -140,9 +173,12 @@ private fun SettlementAmount(label: String, amount: String, labelColor: androidx
 }
 
 @Composable
-private fun PartySettlementMemberCard(member: PartySettlementMemberUi) {
+private fun PartySettlementMemberCard(
+    member: PartySettlementMemberUi,
+    modifier: Modifier = Modifier
+) {
     Row(
-        Modifier.fillMaxWidth().height(56.dp).background(White, RoundedCornerShape(12.dp)).border(BorderStroke(1.dp, DarkBrown40), RoundedCornerShape(12.dp)).padding(horizontal = 16.dp),
+        modifier.fillMaxWidth().height(56.dp).background(White, RoundedCornerShape(12.dp)).border(BorderStroke(1.dp, DarkBrown40), RoundedCornerShape(12.dp)).padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(Modifier.size(40.dp).background(Persimmon10, CircleShape).border(1.dp, Persimmon, CircleShape), contentAlignment = Alignment.Center) {

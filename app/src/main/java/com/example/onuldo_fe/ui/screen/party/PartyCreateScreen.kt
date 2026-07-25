@@ -1,6 +1,8 @@
 package com.example.onuldo_fe.ui.screen.party
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -64,7 +66,13 @@ fun PartyCreateScreen(
             OnulDoBackButton(Modifier.padding(start = 20.dp), onClick = onBack)
             Text("파티 만들기", Modifier.padding(start = 14.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
-        Column(Modifier.weight(1f).padding(horizontal = 20.dp)) {
+        Column(
+            Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+        ) {
             Spacer(Modifier.height(47.dp))
             SectionTitle("파티 이름", 13)
             Spacer(Modifier.height(10.dp))
@@ -103,6 +111,7 @@ fun PartyCreateScreen(
             SectionTitle("모집 인원 (2~5명)", 13)
             Spacer(Modifier.height(10.dp))
             PartyCapacitySelector(capacity = capacity, onCapacityChange = onCapacityChange)
+            Spacer(Modifier.height(16.dp))
         }
         Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
             errorMessage?.let {

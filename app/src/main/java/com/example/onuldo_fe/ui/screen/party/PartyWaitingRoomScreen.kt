@@ -4,7 +4,9 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -54,41 +56,67 @@ fun PartyWaitingRoomScreen(
             Text("파티 대기방", Modifier.padding(start = 14.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
 
-        Column(Modifier.weight(1f).padding(horizontal = 20.dp)) {
-            Spacer(Modifier.height(40.dp))
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(start = 20.dp, top = 40.dp, end = 20.dp, bottom = 24.dp)
+        ) {
             PartyWaitingRoomInfoCard(ui)
-
             Spacer(Modifier.height(16.dp))
-            PartyInviteCodeCard(ui.inviteCode, onCopyClick = { clipboard.setText(AnnotatedString(ui.inviteCode)) })
-
+            PartyInviteCodeCard(
+                ui.inviteCode,
+                onCopyClick = { clipboard.setText(AnnotatedString(ui.inviteCode)) }
+            )
             Spacer(Modifier.height(21.dp))
-            Text("파티원", Modifier.padding(start = 4.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text(
+                "파티원",
+                Modifier.padding(start = 4.dp),
+                color = BlackBrown,
+                fontFamily = Pretendard,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
+            )
             Spacer(Modifier.height(12.dp))
+
             ui.members.forEach { member ->
                 PartyWaitingMemberCard(member)
                 Spacer(Modifier.height(8.dp))
             }
+
             repeat((ui.capacity - ui.members.size).coerceAtLeast(0)) {
                 PartyWaitingEmptySlotCard()
                 Spacer(Modifier.height(8.dp))
             }
-            Text(
-                "전원이 모이면 파티장이 시작할 수 있어요",
-                Modifier.fillMaxWidth().padding(top = 8.dp), color = DarkBrown50, fontFamily = Pretendard, fontSize = 11.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center
-            )
-            errorMessage?.let {
+        }
+
+        Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
-                    it,
-                    Modifier.fillMaxWidth().padding(top = 8.dp),
-                    color = Persimmon,
+                    "전원이 모이면 파티장이 시작할 수 있어요",
+                    Modifier.fillMaxWidth(),
+                    color = DarkBrown50,
                     fontFamily = Pretendard,
                     fontSize = 11.sp,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
+                errorMessage?.let {
+                    Text(
+                        it,
+                        Modifier.fillMaxWidth().padding(top = 4.dp),
+                        color = Persimmon,
+                        fontFamily = Pretendard,
+                        fontSize = 11.sp,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
             }
-        }
-
-        Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
             Button(
                 onClick = {
                     when {
