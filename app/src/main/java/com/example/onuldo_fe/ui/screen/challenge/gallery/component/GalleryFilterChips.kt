@@ -45,7 +45,8 @@ fun GalleryFilterChips(
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         contentPadding = contentPadding,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        // 칩 사이 13dp 간격 (가로 스크롤은 LazyRow라 기본 지원)
+        horizontalArrangement = Arrangement.spacedBy(13.dp)
     ) {
         items(categories) { category ->
             CategoryChip(
@@ -65,37 +66,39 @@ private fun CategoryChip(
 ) {
     Box(
         modifier = Modifier
-            .size(width = 69.dp, height = 22.dp)
-            .clip(RoundedCornerShape(11.dp))
+            .height(22.dp)
+            .widthIn(min = 69.dp)
+            .clip(RoundedCornerShape(14.dp))
             .background(if (selected) Persimmon else White)
             .border(
                 1.dp,
                 if (selected) Persimmon else DarkBrown40,
-                RoundedCornerShape(11.dp)
+                RoundedCornerShape(14.dp)
             )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
+            .clickable(onClick = onClick)
+            .padding(horizontal = 10.dp),
+        // 안 눌렀을 때 가운데, 선택(주황)일 때 왼쪽(10 → X → 8 → 텍스트)
+        contentAlignment = if (selected) Alignment.CenterStart else Alignment.Center
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)   // X ↔ 텍스트 gap 8
         ) {
             if (selected) {
                 Image(
                     painter = painterResource(R.drawable.challenge_close),
                     contentDescription = null,
-                    modifier = Modifier.size(8.dp) // 피그마 크기에 맞게 조절
+                    modifier = Modifier.size(10.dp)
                 )
-
-                Spacer(Modifier.width(8.dp))
             }
 
             Text(
                 text = text,
                 fontFamily = Pretendard,
-                fontSize = 8.sp,
-                lineHeight = 8.sp,
-                fontWeight = FontWeight.Medium,
-                color = if (selected) White else BlackBrown,
+                fontSize = 10.sp,                 // CSS: 10px
+                fontWeight = FontWeight.Medium,   // CSS: 500
+                // line-height: normal → 고정값 안 줌(기본)
+                color = if (selected) White else BlackBrown,   // #1B130C / 선택 시 흰색
                 textAlign = TextAlign.Center
             )
         }

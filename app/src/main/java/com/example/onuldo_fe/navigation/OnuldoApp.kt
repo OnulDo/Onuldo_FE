@@ -7,6 +7,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.onuldo_fe.camera.CameraScreen
 import com.example.onuldo_fe.camera.CameraViewModel
+import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
+import com.example.onuldo_fe.ui.screen.challenge.participate.ParticipateScreen
+import com.example.onuldo_fe.ui.screen.challenge.participate.StartDoneScreen
 import com.example.onuldo_fe.ui.screen.login.LandingScreen
 import com.example.onuldo_fe.ui.screen.login.LoginScreen
 import com.example.onuldo_fe.ui.screen.login.ProfileSetupScreen
@@ -20,6 +23,7 @@ import com.example.onuldo_fe.ui.screen.mypage.PointWalletScreen
 import com.example.onuldo_fe.ui.screen.mypage.PointWithdrawScreen
 import com.example.onuldo_fe.ui.screen.mypage.ProfileSettingsScreen
 import com.example.onuldo_fe.ui.screen.mypage.WithdrawAccountScreen
+import com.example.onuldo_fe.ui.screen.mypage.SettingScreen
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.onuldo_fe.camera.PhotoPreviewScreen
@@ -31,7 +35,11 @@ import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
 @Composable
 fun OnuldoApp() {
     val navController = rememberNavController()
-    val debugStartDestination = Routes.LANDING
+    /**
+    *화면 연동 테스트를 위해 로그인 화면을 건너 뜀
+     */
+    //val debugStartDestination = Routes.LANDING
+    val debugStartDestination = Routes.MAIN
 
     //카메라 -> previewScreen
     val cameraViewModel: CameraViewModel = viewModel()
@@ -112,6 +120,10 @@ fun OnuldoApp() {
         composable(Routes.MYPAGE_ACCOUNT) {
             WithdrawAccountScreen(onBack = { navController.popBackStack() })
         }
+        // 알림 설정(시온)  //화면이 상태 자체 보유 → 등록만. 뒤로가기 → 마이로 복귀
+        composable(Routes.MYPAGE_NOTIFICATION) {
+            SettingScreen(onBackClick = { navController.popBackStack() })
+        }
 
         // 카메라 화면
         composable(Routes.CAMERA) {
@@ -175,5 +187,32 @@ fun OnuldoApp() {
         }
 
 
+
+        // --- 챌린지 상세 흐름 (챌린지 탭 위 풀스크린): 상세 → 참여 → 시작 완료 ---
+        // 콜백만으로 화면끼리 연동. 각 화면은 자체 더미 데이터 표시(id 전달·조회 없음).
+        composable(Routes.CHALLENGE_DETAIL) {
+            DetailScreen(
+                onBackClick = { navController.popBackStack() },
+                onJoinClick = { navController.navigate(Routes.CHALLENGE_PARTICIPATE) },
+            )
+        }
+        composable(Routes.CHALLENGE_PARTICIPATE) {
+            ParticipateScreen(
+                onBackClick = { navController.popBackStack() },
+                onStartClick = { navController.navigate(Routes.CHALLENGE_START_DONE) },
+                // 잔액 부족 팝업의 "충전하기" → 포인트 충전 화면
+                onChargePoint = { navController.navigate(Routes.MYPAGE_CHARGE) },
+            )
+        }
+        composable(Routes.CHALLENGE_START_DONE) {
+            StartDoneScreen(
+                // "홈으로 가기" → 상세 흐름 백스택 정리하고 메인(홈)으로
+                onHomeClick = {
+                    navController.navigate(Routes.MAIN) {
+                        popUpTo(Routes.MAIN) { inclusive = true }
+                    }
+                },
+            )
+        }
     }
 }

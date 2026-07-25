@@ -17,6 +17,13 @@ object Routes {
     const val MYPAGE_CHARGE = "mypage_charge"
     const val MYPAGE_WITHDRAW = "mypage_withdraw"
     const val MYPAGE_ACCOUNT = "mypage_account"
+    //알림 설정 -> 알림 설정페이지 추가 (시온)
+    const val MYPAGE_NOTIFICATION = "mypage_notification"
+
+    // 챌린지 상세 흐름: 갤러리 → 상세 → 참여 → 시작 완료
+    const val CHALLENGE_DETAIL = "challenge_detail"
+    const val CHALLENGE_PARTICIPATE = "challenge_participate"
+    const val CHALLENGE_START_DONE = "challenge_start_done"
     // 추후: PASSWORD_RESET, 알림 설정, 약관 3종 등
 
     //카메라
