@@ -10,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.onuldo_fe.navigation.BottomTab
 import com.example.onuldo_fe.navigation.Routes
 import com.example.onuldo_fe.ui.component.OnuldoBottomBar
+import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryScreen
 import com.example.onuldo_fe.ui.screen.mypage.MyMainScreen
 
 /**
@@ -34,7 +35,11 @@ fun MainScreen(
             modifier = Modifier.padding(innerPadding),
         ) {
             composable(BottomTab.Home.route) { PlaceholderScreen("홈") }
-            composable(BottomTab.Challenge.route) { PlaceholderScreen("챌린지") }
+            composable(BottomTab.Challenge.route) {
+                GalleryScreen(
+                    onChallengeClick = { onNavigate(Routes.CHALLENGE_DETAIL) },
+                )
+            }
             composable(BottomTab.Party.route) { PlaceholderScreen("파티") }
             composable(BottomTab.Record.route) { PlaceholderScreen("기록") }
             composable(BottomTab.My.route) {

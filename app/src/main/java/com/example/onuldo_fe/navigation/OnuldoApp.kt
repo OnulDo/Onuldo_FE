@@ -4,6 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
+import com.example.onuldo_fe.ui.screen.challenge.participate.ParticipateScreen
+import com.example.onuldo_fe.ui.screen.challenge.participate.StartDoneScreen
 import com.example.onuldo_fe.ui.screen.login.LandingScreen
 import com.example.onuldo_fe.ui.screen.login.LoginScreen
 import com.example.onuldo_fe.ui.screen.login.ProfileSetupScreen
@@ -99,6 +102,33 @@ fun OnuldoApp() {
         }
         composable(Routes.MYPAGE_ACCOUNT) {
             WithdrawAccountScreen(onBack = { navController.popBackStack() })
+        }
+
+        // --- 챌린지 상세 흐름 (챌린지 탭 위 풀스크린): 상세 → 참여 → 시작 완료 ---
+        // 콜백만으로 화면끼리 연동. 각 화면은 자체 더미 데이터 표시(id 전달·조회 없음).
+        composable(Routes.CHALLENGE_DETAIL) {
+            DetailScreen(
+                onBackClick = { navController.popBackStack() },
+                onJoinClick = { navController.navigate(Routes.CHALLENGE_PARTICIPATE) },
+            )
+        }
+        composable(Routes.CHALLENGE_PARTICIPATE) {
+            ParticipateScreen(
+                onBackClick = { navController.popBackStack() },
+                onStartClick = { navController.navigate(Routes.CHALLENGE_START_DONE) },
+                // 잔액 부족 팝업의 "충전하기" → 포인트 충전 화면
+                onChargePoint = { navController.navigate(Routes.MYPAGE_CHARGE) },
+            )
+        }
+        composable(Routes.CHALLENGE_START_DONE) {
+            StartDoneScreen(
+                // "홈으로 가기" → 상세 흐름 백스택 정리하고 메인(홈)으로
+                onHomeClick = {
+                    navController.navigate(Routes.MAIN) {
+                        popUpTo(Routes.MAIN) { inclusive = true }
+                    }
+                },
+            )
         }
     }
 }
