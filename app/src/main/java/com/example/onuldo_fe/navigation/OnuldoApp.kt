@@ -26,6 +26,7 @@ import com.example.onuldo_fe.ui.screen.mypage.WithdrawAccountScreen
 import com.example.onuldo_fe.ui.screen.mypage.SettingScreen
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.example.onuldo_fe.camera.CameraPermissionScreen
 import com.example.onuldo_fe.camera.PhotoPreviewScreen
 import com.example.onuldo_fe.ui.screen.verification.ChallengeVerificationScreen
 import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
@@ -123,6 +124,17 @@ fun OnuldoApp() {
             SettingScreen(onBackClick = { navController.popBackStack() })
         }
 
+        composable(Routes.CAMERA_PERMISSION) {
+            CameraPermissionScreen(
+                onBack = { navController.popBackStack() },
+                onPermissionGranted = {
+                    navController.navigate(Routes.CAMERA) {
+                        popUpTo(Routes.CAMERA_PERMISSION) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         // 카메라 화면
         composable(Routes.CAMERA) {
             CameraScreen(
@@ -180,7 +192,12 @@ fun OnuldoApp() {
 
         composable(Routes.VERIFICATION_WAITING) {
             ChallengeVerificationScreen(
-                status = VerificationStatus.WAITING
+                status = VerificationStatus.WAITING,
+                onConfirmClick = {
+                    navController.navigate(Routes.MAIN) {
+                        popUpTo(Routes.MAIN) { inclusive = true }
+                    }
+                }
             )
         }
 

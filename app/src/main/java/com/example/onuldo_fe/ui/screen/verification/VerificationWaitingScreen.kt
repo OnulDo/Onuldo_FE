@@ -1,4 +1,5 @@
 package com.example.onuldo_fe.ui.screen.verification
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -34,8 +35,9 @@ import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.White
 
 @Composable
-fun VerificationWaitingScreen() {
-    // 검토 대기 UI
+fun VerificationWaitingScreen(
+    onConfirmClick: () -> Unit = {}
+) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -62,9 +64,7 @@ fun VerificationWaitingScreen() {
             }
 
             Image(
-                painter = painterResource(
-                    id = R.drawable.verification_waiting_icon
-                ),
+                painter = painterResource(id = R.drawable.verification_waiting_icon),
                 contentDescription = "인증 대기 아이콘",
                 modifier = Modifier
                     .padding(top = 57.dp)
@@ -82,13 +82,13 @@ fun VerificationWaitingScreen() {
             )
 
             Text(
-                text = "AI가 판단하기 어려운 사진이라\n" +
-                        "운영팀에서 직접 확인하고 있어요!",
+                text = "AI가 1차로 사진을 살펴본 뒤\n운영팀에서 직접 확인하고 있어요.",
                 color = DarkBrown70,
                 fontSize = 13.sp,
                 modifier = Modifier.padding(top = 8.dp),
                 textAlign = TextAlign.Center
             )
+
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -98,10 +98,10 @@ fun VerificationWaitingScreen() {
             ) {
                 Column(
                     modifier = Modifier.padding(15.dp)
-                ){
+                ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
-                    ){
+                    ) {
                         Text(
                             text = "검토 안내",
                             color = BlackBrown,
@@ -111,28 +111,28 @@ fun VerificationWaitingScreen() {
                     Spacer(modifier = Modifier.height(11.dp))
 
                     Text(
-                        text = "검토는 최대 24시간 이내 완료됩니다",
+                        text = "검토는 최대 24시간 이내 완료됩니다.",
                         color = DarkBrown,
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(bottom = 9.dp)
                     )
 
                     Text(
-                        text = "검토 중에도 챌린지는 계속 진행됩니다",
+                        text = "검토 중에도 챌린지는 계속 진행됩니다.",
                         color = DarkBrown,
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(bottom = 9.dp)
                     )
 
                     Text(
-                        text = "결과는 알림으로 즉시 알려드려요",
+                        text = "결과는 알림으로 즉시 안내드려요.",
                         color = DarkBrown,
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(bottom = 9.dp)
                     )
 
                     Text(
-                        text = "검토 통과 시 인증 완료 처리됩니다",
+                        text = "검토 통과 시 인증 완료 처리됩니다.",
                         color = DarkBrown,
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(bottom = 14.dp)
@@ -153,20 +153,19 @@ fun VerificationWaitingScreen() {
             ) {
                 Column(
                     modifier = Modifier.padding(15.dp)
-                ){
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
-                    ){
+                    ) {
                         Text(
-                            text = "제출시각",
+                            text = "제출 시간",
                             color = DarkBrown,
                             style = MaterialTheme.typography.bodyMedium
                         )
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        //추후 제출 시각 표현
                         Text(
                             text = "2026년 5월 20일 07:32",
                             color = BlackBrown,
@@ -179,7 +178,7 @@ fun VerificationWaitingScreen() {
 
         OnulDoButton(
             text = "확인",
-            onClick = {},
+            onClick = onConfirmClick,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 42.dp)
