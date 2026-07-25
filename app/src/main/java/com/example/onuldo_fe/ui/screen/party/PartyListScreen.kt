@@ -70,7 +70,7 @@ fun PartyListScreen(
 ) {
     Column(modifier.fillMaxSize().background(SourCream)) {
         Text("파티", modifier = Modifier.padding(start = 24.dp, top = 16.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(21.dp))
         Row(Modifier.padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Button(
                 onClick = onCreateClick,

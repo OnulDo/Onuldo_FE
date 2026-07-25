@@ -47,7 +47,14 @@ fun PartyOptionSelector(
                     .clickable { onSelect(index) },
                 contentAlignment = Alignment.Center
             ) {
-                Text(text, color = if (selected) SourCream else BlackBrown, fontFamily = Pretendard, fontSize = textSize, fontWeight = FontWeight.Bold)
+                Text(
+                    text,
+                    color = if (selected) SourCream else BlackBrown,
+                    fontFamily = Pretendard,
+                    fontSize = textSize,
+                    lineHeight = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

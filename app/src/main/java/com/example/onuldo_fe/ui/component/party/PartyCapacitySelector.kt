@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,19 +54,37 @@ fun PartyCapacitySelector(
         CapacityControlIcon(isPlus = false, enabled = capacity > minCapacity) {
             onCapacityChange((capacity - 1).coerceAtLeast(minCapacity))
         }
-        Text("$capacity 명", Modifier.weight(1f), color = BlackBrown, fontFamily = Pretendard, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-        CapacityControlIcon(isPlus = true, enabled = capacity < maxCapacity) {
+        Text(
+            "$capacity 명",
+            Modifier.weight(1f),
+            color = BlackBrown,
+            fontFamily = Pretendard,
+            fontSize = 17.sp,
+            lineHeight = 20.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+        CapacityControlIcon(
+            isPlus = true,
+            enabled = capacity < maxCapacity,
+            modifier = Modifier.offset(x = (-2).dp)
+        ) {
             onCapacityChange((capacity + 1).coerceAtMost(maxCapacity))
         }
     }
 }
 
 @Composable
-private fun CapacityControlIcon(isPlus: Boolean, enabled: Boolean, onClick: () -> Unit) {
+private fun CapacityControlIcon(
+    isPlus: Boolean,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     val color = if (isPlus) Persimmon else DarkBrown70
     val accessibilityLabel = if (isPlus) "인원 늘리기" else "인원 줄이기"
     Canvas(
-        Modifier
+        modifier
             .size(25.dp)
             .clickable(
                 enabled = enabled,
