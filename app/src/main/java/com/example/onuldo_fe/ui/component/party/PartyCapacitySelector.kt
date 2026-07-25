@@ -16,6 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -61,7 +63,17 @@ fun PartyCapacitySelector(
 @Composable
 private fun CapacityControlIcon(isPlus: Boolean, enabled: Boolean, onClick: () -> Unit) {
     val color = if (isPlus) Persimmon else DarkBrown70
-    Canvas(Modifier.size(25.dp).clickable(enabled = enabled, onClick = onClick)) {
+    val accessibilityLabel = if (isPlus) "인원 늘리기" else "인원 줄이기"
+    Canvas(
+        Modifier
+            .size(25.dp)
+            .clickable(
+                enabled = enabled,
+                onClickLabel = accessibilityLabel,
+                onClick = onClick
+            )
+            .semantics { contentDescription = accessibilityLabel }
+    ) {
         val alpha = if (enabled) 1f else 0.25f
         drawCircle(color.copy(alpha = alpha), style = Stroke(width = 2.dp.toPx()))
         drawLine(color.copy(alpha = alpha), Offset(size.width * 0.29f, size.height * 0.5f), Offset(size.width * 0.71f, size.height * 0.5f), strokeWidth = 2.dp.toPx())
