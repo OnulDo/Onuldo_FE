@@ -43,12 +43,13 @@ fun VerificationStepCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
+
             Image(
                 painter = painterResource(icon),
                 contentDescription = null,
-                modifier = Modifier.size(22.dp),
+                modifier = Modifier.size(22.dp)
             )
 
             Spacer(modifier = Modifier.width(9.dp))
@@ -56,7 +57,7 @@ fun VerificationStepCard(
             Text(
                 text = title,
                 color = BlackBrown,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelMedium
             )
         }
     }
