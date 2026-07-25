@@ -131,6 +131,9 @@ object FakePartyStore {
                 room = stored.room.copy(members = emptyList()),
                 status = "DISBANDED"
             )
+            // 해체된 파티가 진행 목록이나 피드에 이전 상태로 남지 않도록 제거
+            summaries.remove(partyId)
+            FakePartyFeedState.removeParty(partyId)
             return
         }
 
@@ -142,7 +145,22 @@ object FakePartyStore {
                 readyStatus = "NOT_APPLICABLE"
             )
         }
-        parties[partyId] = stored.copy(room = stored.room.copy(members = remaining))
+        val updatedRoom = stored.room.copy(members = remaining)
+        parties[partyId] = stored.copy(room = updatedRoom)
+
+        // 진행 중 파티에서 이탈한 경우 목록 요약과 피드의 전체 인원 수도 함께 갱신
+        summaries[partyId]?.let { summary ->
+            summaries[partyId] = summary.copy(
+                completedMemberCount = summary.completedMemberCount.coerceAtMost(remaining.size),
+                totalMemberCount = remaining.size
+            )
+            FakePartyFeedState.updateParty(
+                partyId = partyId,
+                partyName = updatedRoom.partyName,
+                challengeName = updatedRoom.challengeName,
+                memberCount = remaining.size
+            )
+        }
     }
 
     @Synchronized

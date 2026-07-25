@@ -13,10 +13,17 @@ object FakePartyFeedState {
         "party-2" to PartyFeedMeta("책상 공부 인증 파티", "5시간 집중", 5)
     )
 
+    @Synchronized
     fun updateParty(partyId: String, partyName: String, challengeName: String, memberCount: Int) {
         parties[partyId] = PartyFeedMeta(partyName, challengeName, memberCount.coerceAtLeast(0))
     }
 
+    @Synchronized
+    fun removeParty(partyId: String) {
+        parties.remove(partyId)
+    }
+
+    @Synchronized
     fun get(partyId: String): PartyFeedMeta =
         parties[partyId] ?: PartyFeedMeta("파티", "챌린지", 0)
 }
