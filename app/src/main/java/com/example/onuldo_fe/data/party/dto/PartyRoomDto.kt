@@ -23,7 +23,8 @@ data class PartyMemberDto(
     val profileImageUrl: String?,              // 파티원 프로필 이미지 URL
     val role: String,                          // 파티 역할(LEADER 또는 MEMBER)
     val readyStatus: String,                   // 준비 상태(NOT_APPLICABLE, WAITING, READY)
-    val joinedOrder: Int                       // 방장 승계를 위한 파티 입장 순서
+    val joinedOrder: Int,                      // 방장 승계를 위한 파티 입장 순서
+    val defaultCharacterId: Int? = null        // 프로필 이미지가 없을 때 표시할 기본 캐릭터 ID
 )
 
 // 파티원 모집과 준비 상태를 표시하기 위한 대기방 정보 응답

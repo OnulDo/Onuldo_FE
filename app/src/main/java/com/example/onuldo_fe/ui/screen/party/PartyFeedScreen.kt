@@ -38,22 +38,36 @@ fun PartyFeedScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(112.dp)
         ) {
             OnulDoBackButton(
                 modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = 20.dp),
+                    .align(Alignment.TopStart)
+                    .offset(y = 13.dp),
                 onClick = onBack
             )
+            Text(
+                text = partyName,
+                modifier = Modifier.offset(x = 20.dp, y = 47.dp),
+                color = BlackBrown,
+                fontFamily = Pretendard,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = challengeName,
+                modifier = Modifier.offset(x = 20.dp, y = 79.dp),
+                color = DarkBrown70,
+                fontFamily = Pretendard,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium
+            )
         }
-        Text(partyName, Modifier.padding(start = 20.dp, top = 8.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Text(challengeName, Modifier.padding(start = 20.dp, top = 2.dp), color = DarkBrown70, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Medium)
         TeamProgressCard(
             progressPercent = progress.progressPercent,
             completedMemberCount = progress.completedMemberCount,
             totalMemberCount = progress.totalMemberCount,
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+            modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp)
         )
         when {
             isLoading -> Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {

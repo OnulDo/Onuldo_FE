@@ -34,5 +34,6 @@ private fun PartyFeedItemDto.toModel() = PartyFeedItem(
     nickname = nickname,
     profileImageUrl = profileImageUrl,
     verificationImageUrl = verificationImageUrl,
-    verifiedElapsedMinutes = verifiedElapsedMinutes
+    verifiedElapsedMinutes = verifiedElapsedMinutes,
+    defaultCharacterId = defaultCharacterId
 )

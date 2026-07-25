@@ -64,6 +64,7 @@ private fun PartyMemberDto.toModel() = PartyMember(
     id = id,
     nickname = nickname,
     profileImageUrl = profileImageUrl,
+    defaultCharacterId = defaultCharacterId,
     role = PartyRole.valueOf(role.lowercase().replaceFirstChar(Char::uppercase)),
     readyStatus = when (readyStatus) {
         "READY" -> PartyMemberReadyStatus.Ready

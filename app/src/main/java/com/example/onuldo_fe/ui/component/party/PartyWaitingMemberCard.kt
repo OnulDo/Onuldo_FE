@@ -37,9 +37,9 @@ fun PartyWaitingMemberCard(member: PartyMemberUi, modifier: Modifier = Modifier)
         Box(Modifier.size(40.dp).background(Persimmon10, CircleShape).border(1.dp, Persimmon, CircleShape), contentAlignment = Alignment.Center) {
             PartyNetworkImage(
                 imageUrl = member.profileImageUrl,
-                fallbackImageRes = R.drawable.party_member_avatar,
+                fallbackImageRes = partyCharacterDrawable(member.defaultCharacterId),
                 contentDescription = "${member.name} 프로필",
-                modifier = Modifier.width(38.dp).height(37.dp).clip(CircleShape)
+                modifier = Modifier.width(28.dp).height(33.dp).clip(CircleShape)
             )
         }
         Text(

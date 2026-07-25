@@ -206,7 +206,8 @@ private fun PartyMember.toUi() = PartyMemberUi(
     },
     id = id,
     joinedOrder = joinedOrder,
-    profileImageUrl = profileImageUrl
+    profileImageUrl = profileImageUrl,
+    defaultCharacterId = defaultCharacterId
 )
 
 // 진행 중 파티 요약 정보를 파티 홈 카드에 표시할 UI 모델로 변환

@@ -51,11 +51,21 @@ fun PartyWaitingRoomScreen(
     BackHandler(onBack = onBack)
 
     Column(Modifier.fillMaxSize().background(SourCream)) {
-        Row(Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically) {
-            OnulDoBackButton(Modifier.padding(start = 20.dp), onClick = onBack)
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .background(HeaderCream)
+        ) {
+            OnulDoBackButton(
+                modifier = Modifier.align(Alignment.CenterStart),
+                onClick = onBack
+            )
             Text(
                 "파티 대기방",
-                Modifier.padding(start = 14.dp),
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 48.dp),
                 color = BlackBrown,
                 fontFamily = Pretendard,
                 fontSize = 17.sp,

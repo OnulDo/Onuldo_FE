@@ -54,13 +54,22 @@ fun PartyFeedCard(item: PartyFeedItemUi, modifier: Modifier = Modifier) {
             Box(Modifier.size(28.dp).background(Persimmon10, CircleShape).border(1.dp, Persimmon, CircleShape), contentAlignment = Alignment.Center) {
                 PartyNetworkImage(
                     imageUrl = item.profileImageUrl,
-                    fallbackImageRes = R.drawable.party_member_avatar,
+                    fallbackImageRes = partyCharacterDrawable(item.defaultCharacterId),
                     contentDescription = "${item.name} 프로필",
-                    modifier = Modifier.size(26.dp).clip(CircleShape)
+                    modifier = if (item.profileImageUrl.isNullOrBlank()) {
+                        Modifier.width(22.dp).height(25.dp)
+                    } else {
+                        Modifier.size(26.dp).clip(CircleShape)
+                    },
+                    contentScale = if (item.profileImageUrl.isNullOrBlank()) {
+                        ContentScale.Fit
+                    } else {
+                        ContentScale.Crop
+                    }
                 )
             }
             Column(Modifier.padding(start = 8.dp)) {
-                Text(item.name, color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Bold)
+                Text(item.name, color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
                 Text(item.time, color = DarkBrown50, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Medium)
             }
         }

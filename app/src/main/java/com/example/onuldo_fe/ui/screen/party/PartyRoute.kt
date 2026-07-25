@@ -70,7 +70,9 @@ fun PartyRoute(
     val isCurrentUserReady = currentMember?.readyStatus == PartyReadyStatus.Ready
 
     LaunchedEffect(screen) {
-        onBottomBarVisibilityChange(screen == PartyScreen.List)
+        onBottomBarVisibilityChange(
+            screen == PartyScreen.List || screen == PartyScreen.Feed
+        )
     }
     DisposableEffect(Unit) {
         onDispose { onBottomBarVisibilityChange(true) }

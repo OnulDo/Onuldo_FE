@@ -218,6 +218,8 @@ object FakePartyStore {
         profileImageUrl = null,
         role = role,
         readyStatus = readyStatus,
-        joinedOrder = joinedOrder
+        joinedOrder = joinedOrder,
+        // 실제 대기방 API의 defaultCharacterId 응답을 대신해 멤버마다 다른 캐릭터 표시
+        defaultCharacterId = (joinedOrder % 9) + 1
     )
 }
