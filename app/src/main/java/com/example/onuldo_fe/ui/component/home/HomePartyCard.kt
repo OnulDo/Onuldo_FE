@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -43,6 +44,8 @@ import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
+import com.example.onuldo_fe.ui.theme.Persimmon20
+import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.White
@@ -56,15 +59,40 @@ fun HomePartyCard(partyChallenge: HomePartyChallenge, modifier: Modifier = Modif
             .height(140.dp)
             .background(White, RoundedCornerShape(14.dp))
             .border(BorderStroke(1.dp, DarkBrown40), RoundedCornerShape(14.dp))
-            .padding(horizontal = 14.dp, vertical = 12.dp)
+            .padding(start = 14.dp, top = 14.dp, end = 10.dp, bottom = 17.dp)
     ) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                Text(partyChallenge.title, color = BlackBrown, fontSize = 16.sp, lineHeight = 19.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = partyChallenge.title,
+                    color = BlackBrown,
+                    fontFamily = Pretendard,
+                    fontSize = 17.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Spacer(Modifier.width(7.dp))
-                Text(partyChallenge.subtitle, color = DarkBrown50, fontSize = 13.sp, lineHeight = 16.sp, maxLines = 1)
+                Text(
+                    text = partyChallenge.subtitle,
+                    color = DarkBrown50,
+                    fontFamily = Pretendard,
+                    fontSize = 13.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
+                )
             }
-            Text(stringResource(R.string.home_challenge_d_day, partyChallenge.remainingDays), color = DarkBrown.copy(alpha = 0.8f), fontSize = 11.sp, lineHeight = 13.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = stringResource(R.string.home_challenge_d_day, partyChallenge.remainingDays),
+                color = DarkBrown.copy(alpha = 0.8f),
+                modifier = Modifier.offset(y = (-3).dp),
+                fontFamily = Pretendard,
+                fontSize = 11.sp,
+                lineHeight = 13.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
 
         Spacer(Modifier.height(10.dp))
@@ -72,11 +100,25 @@ fun HomePartyCard(partyChallenge: HomePartyChallenge, modifier: Modifier = Modif
             val deadlineText = partyChallenge.verifiedAt?.let {
                 stringResource(R.string.home_challenge_verified_at, it.toDisplayText())
             } ?: stringResource(R.string.home_challenge_deadline, partyChallenge.deadlineAt.toDisplayText())
-            Text(deadlineText, color = partyChallenge.status.statusColor(), fontSize = 13.sp, lineHeight = 16.sp)
+            Text(
+                text = deadlineText,
+                color = partyChallenge.status.statusColor(),
+                fontFamily = Pretendard,
+                fontSize = 13.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.Medium
+            )
             partyChallenge.remainingMinutes?.takeIf { it in 0..60 }?.let { remainingMinutes ->
                 Spacer(Modifier.width(10.dp))
                 Box(Modifier.background(Persimmon10, RoundedCornerShape(10.dp)).padding(horizontal = 10.dp, vertical = 2.dp)) {
-                    Text(stringResource(R.string.home_challenge_minutes_left, remainingMinutes), color = Persimmon, fontSize = 13.sp, lineHeight = 16.sp)
+                    Text(
+                        text = stringResource(R.string.home_challenge_minutes_left, remainingMinutes),
+                        color = Persimmon,
+                        fontFamily = Pretendard,
+                        fontSize = 13.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
@@ -90,8 +132,10 @@ fun HomePartyCard(partyChallenge: HomePartyChallenge, modifier: Modifier = Modif
                     Box(
                         Modifier
                             .size(33.dp)
-                            .alpha(if (completed) 1f else 0.5f)
-                            .background(Persimmon10, CircleShape)
+                            .background(
+                                if (completed) Persimmon10 else Persimmon20.copy(alpha = 0.5f),
+                                CircleShape
+                            )
                             .then(if (completed) Modifier.border(BorderStroke(1.dp, Persimmon), CircleShape) else Modifier),
                         contentAlignment = Alignment.Center
                     ) {
@@ -101,7 +145,9 @@ fun HomePartyCard(partyChallenge: HomePartyChallenge, modifier: Modifier = Modif
                                 else R.drawable.home_run_dark_icon
                             ),
                             contentDescription = null,
-                            modifier = Modifier.size(31.dp),
+                            modifier = Modifier
+                                .size(31.dp)
+                                .alpha(if (completed) 1f else 0.5f),
                             contentScale = ContentScale.Fit
                         )
                     }
@@ -120,9 +166,16 @@ private fun PartyAction(party: HomePartyChallenge) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Image(painterResource(R.drawable.home_camera_icon), null, Modifier.size(16.dp))
+            Image(painterResource(R.drawable.home_camera_icon), null, Modifier.size(14.dp))
             Spacer(Modifier.width(5.dp))
-            Text(stringResource(R.string.home_challenge_action_verify), color = Persimmon, fontSize = 13.sp, lineHeight = 16.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = stringResource(R.string.home_challenge_action_verify),
+                color = Persimmon,
+                fontFamily = Pretendard,
+                fontSize = 12.sp,
+                lineHeight = 22.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
         return
     }
@@ -138,7 +191,14 @@ private fun PartyAction(party: HomePartyChallenge) {
             Modifier.size(width = 78.dp, height = 26.dp).background(background, RoundedCornerShape(13.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Text(stringResource(party.status.actionTextRes()), color = textColor, fontSize = 10.sp, lineHeight = 12.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = stringResource(party.status.actionTextRes()),
+                color = textColor,
+                fontFamily = Pretendard,
+                fontSize = 10.sp,
+                lineHeight = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

@@ -8,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,14 +25,17 @@ fun OnulDoButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    height: Dp = 56.dp,
+    fontSize: TextUnit = 16.sp,
+    horizontalPadding: Dp = 20.dp
 ) {
     Button(
         onClick = onClick,
         modifier = modifier
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = horizontalPadding)
             .fillMaxWidth()
-            .height(56.dp),
+            .height(height),
         enabled = enabled,
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
@@ -42,7 +47,7 @@ fun OnulDoButton(
     ) {
         Text(
             text = text,
-            fontSize = 16.sp,
+            fontSize = fontSize,
             fontFamily = Pretendard,
             fontWeight = FontWeight.Bold
         )

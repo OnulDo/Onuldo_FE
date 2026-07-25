@@ -28,6 +28,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown80
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
 
 @Composable
@@ -51,9 +52,23 @@ fun SettlementCompleteCard(
             modifier = Modifier.size(width = 22.dp, height = 22.dp)
         )
         Spacer(Modifier.width(8.dp))
-        Text(stringResource(R.string.home_settlement_complete_title), color = BlackBrown, fontSize = 15.sp, lineHeight = 18.sp, fontWeight = FontWeight.Bold)
+        Text(
+            text = stringResource(R.string.home_settlement_complete_title),
+            color = BlackBrown,
+            fontFamily = Pretendard,
+            fontSize = 14.sp,
+            lineHeight = 22.sp,
+            fontWeight = FontWeight.Bold
+        )
         Spacer(Modifier.weight(1f))
-        Text(partyName, color = DarkBrown80, fontSize = 12.sp, lineHeight = 14.sp)
+        Text(
+            text = partyName,
+            color = DarkBrown80,
+            fontFamily = Pretendard,
+            fontSize = 12.sp,
+            lineHeight = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
         Spacer(Modifier.width(12.dp))
         Image(
             painter = painterResource(R.drawable.home_arrow_right),

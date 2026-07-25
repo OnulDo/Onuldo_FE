@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
@@ -26,6 +27,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 
 @Composable
@@ -43,7 +45,9 @@ fun EmptyChallengeContent(
             Image(
                 painter = painterResource(id = R.drawable.home_question_icon),
                 contentDescription = null,
-                modifier = Modifier.size(width = 82.dp, height = 95.dp),
+                modifier = Modifier
+                    .size(width = 82.dp, height = 95.dp)
+                    .offset(x = (-5).dp, y = 2.5.dp),
                 contentScale = ContentScale.Fit
             )
         }
@@ -52,24 +56,29 @@ fun EmptyChallengeContent(
         Text(
             text = "아직 시작한 챌린지가 없어요",
             color = BlackBrown,
+            fontFamily = Pretendard,
             fontSize = 22.sp,
-            lineHeight = 26.sp,
+            lineHeight = 40.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = "도전금을 걸고 작은 습관부터\n갓생을 시작해보세요!",
             color = DarkBrown,
+            modifier = Modifier.offset(y = (-10).dp),
+            fontFamily = Pretendard,
             fontSize = 13.sp,
             lineHeight = 18.sp,
             fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(47.dp))
+        Spacer(modifier = Modifier.height(37.dp))
         OnulDoButton(
             text = "챌린지 둘러보기",
             onClick = onBrowseChallengesClick,
+            height = 52.dp,
+            fontSize = 14.sp,
+            horizontalPadding = 0.dp,
             modifier = Modifier.fillMaxWidth()
         )
     }

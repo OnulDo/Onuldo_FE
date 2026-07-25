@@ -42,6 +42,7 @@ import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
+import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.SourCream
@@ -78,6 +79,7 @@ fun HomeChallengeCard(
                 Text(
                     text = challenge.title,
                     color = BlackBrown,
+                    fontFamily = Pretendard,
                     fontSize = 18.sp,
                     lineHeight = 21.sp,
                     fontWeight = FontWeight.Bold
@@ -87,8 +89,10 @@ fun HomeChallengeCard(
                     // 서버의 상태와 연속 성공 일수로 카드 보조 문구 구성
                     text = challenge.subtitleText(),
                     color = DarkBrown50,
+                    fontFamily = Pretendard,
                     fontSize = 12.sp,
                     lineHeight = 16.sp,
+                    fontWeight = FontWeight.Medium,
                     maxLines = 1
                 )
             }
@@ -96,6 +100,7 @@ fun HomeChallengeCard(
             Text(
                 text = stringResource(R.string.home_challenge_d_day, challenge.remainingDays),
                 color = DarkBrown80,
+                fontFamily = Pretendard,
                 fontSize = 12.sp,
                 lineHeight = 14.sp,
                 fontWeight = FontWeight.Bold
@@ -115,9 +120,10 @@ fun HomeChallengeCard(
                         stringResource(R.string.home_challenge_verified_at, it.toDisplayText())
                     } ?: stringResource(R.string.home_challenge_deadline, challenge.deadlineAt.toDisplayText()),
                     color = challenge.deadlineColor(),
+                    fontFamily = Pretendard,
                     fontSize = 13.sp,
-                    lineHeight = 16.sp,
-                    fontWeight = FontWeight.Normal
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Medium
                 )
                 //인증 마감 1시간 전부터 표시
                 challenge.remainingMinutes?.takeIf { it in 0..60 }?.let { minutes ->
@@ -127,7 +133,14 @@ fun HomeChallengeCard(
                             .background(Persimmon10, RoundedCornerShape(10.dp))
                             .padding(horizontal = 10.dp, vertical = 2.dp)
                     ) {
-                        Text(minutes.toRemainingTimeText(), color = Persimmon, fontSize = 13.sp, lineHeight = 16.sp)
+                        Text(
+                            text = minutes.toRemainingTimeText(),
+                            color = Persimmon,
+                            fontFamily = Pretendard,
+                            fontSize = 13.sp,
+                            lineHeight = 20.sp,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }
@@ -159,6 +172,7 @@ fun HomeChallengeCard(
                     Text(
                         text = stringResource(challenge.status.actionTextRes()),
                         color = actionColors.text,
+                        fontFamily = Pretendard,
                         fontSize = 10.sp,
                         lineHeight = 12.sp,
                         fontWeight = FontWeight.Bold,

@@ -29,6 +29,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown20
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon20
+import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
 
@@ -58,13 +59,15 @@ fun HomeHeader(
             Text(
                 text = "오늘두 함께 도전!",
                 color = BlackBrown.copy(alpha = 0.7f),
+                fontFamily = Pretendard,
                 fontSize = 8.sp,
-                lineHeight = 10.sp,
-                fontWeight = FontWeight.Bold
+                lineHeight = 8.sp,
+                fontWeight = FontWeight.SemiBold
             )
             Text(
                 text = userName,
                 color = BlackBrown,
+                fontFamily = Pretendard,
                 fontSize = 18.sp,
                 lineHeight = 21.sp,
                 fontWeight = FontWeight.ExtraBold

@@ -30,6 +30,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
+import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 
 @Composable
@@ -44,7 +45,7 @@ fun TodayChallengeCard(
                 shape = RoundedCornerShape(14.dp)
             )
             .border(
-                border = BorderStroke(1.dp, Persimmon.copy(alpha = 0.55f)),
+                border = BorderStroke(1.dp, Persimmon.copy(alpha = 0.5f)),
                 shape = RoundedCornerShape(14.dp)
             )
             .height(148.dp)
@@ -53,12 +54,13 @@ fun TodayChallengeCard(
         Text(
             text = todayChallenge.date,
             color = BlackBrown,
+            fontFamily = Pretendard,
             fontSize = 20.sp,
-            lineHeight = 24.sp,
+            lineHeight = 20.sp,
             fontWeight = FontWeight.ExtraBold
         )
 
-        Spacer(modifier = Modifier.height(38.dp))
+        Spacer(modifier = Modifier.height(42.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -68,19 +70,21 @@ fun TodayChallengeCard(
             Text(
                 text = stringResource(R.string.home_today_challenge_title),
                 color = BlackBrown,
-                fontSize = 16.sp,
-                lineHeight = 19.sp,
+                fontFamily = Pretendard,
+                fontSize = 17.sp,
+                lineHeight = 20.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = buildAnnotatedString {
-                    withStyle(SpanStyle(color = Persimmon, fontWeight = FontWeight.ExtraBold)) {
+                    withStyle(SpanStyle(color = Persimmon, fontWeight = FontWeight.Black)) {
                         append(todayChallenge.completedCount.toString())
                     }
-                    withStyle(SpanStyle(color = BlackBrown, fontWeight = FontWeight.Normal)) {
+                    withStyle(SpanStyle(color = BlackBrown, fontWeight = FontWeight.Medium)) {
                         append("/${todayChallenge.totalCount} 완료")
                     }
                 },
+                fontFamily = Pretendard,
                 fontSize = 12.sp,
                 lineHeight = 14.sp,
             )
