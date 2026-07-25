@@ -6,14 +6,14 @@ package com.example.onuldo_fe.data.party.dummy
  */
 object PartyTestConfig {
     /**
-     * 파티 생성 직후 대기방 상태 테스트
+     * 파티 생성 직후 대기방 상태 테스트용
      * true: 방장 + 준비완료 파티원 1명으로 [시작하기] 활성화 테스트
      * false: 방장만 참여한 모집 상태로 [시작하기] 비활성화 테스트
      */
     const val CREATE_READY_TO_START = true
 
     /**
-     * 현재 사용자의 fake 보유 포인트 테스트
+     * 현재 사용자의 fake 보유 포인트 테스트용
      * 50_000: 일반적인 파티 생성·준비완료 성공 테스트
      * 5_000: 도전금보다 포인트가 부족한 안내 모달 테스트
      */

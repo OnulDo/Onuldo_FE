@@ -26,6 +26,7 @@ import com.example.onuldo_fe.ui.component.party.PartyNameTextField
 import com.example.onuldo_fe.ui.component.party.PartyOptionSelector
 import com.example.onuldo_fe.ui.theme.*
 import com.example.onuldo_fe.viewmodel.party.PartyChallengeUi
+import java.text.Normalizer
 
 @Composable
 fun PartyCreateScreen(
@@ -49,7 +50,11 @@ fun PartyCreateScreen(
     var showPointDialog by remember { mutableStateOf(false) }
     var isPartyNameError by remember { mutableStateOf(false) }
     val partyNamePattern = remember { Regex("^[가-힣A-Za-z0-9]{2,20}$") }
-    val enabled = partyName.isNotBlank() &&
+    val normalizedPartyName = remember(partyName) {
+        // 한글 입력기에서 조합형 자모로 전달된 이름을 완성형 한글로 변환
+        Normalizer.normalize(partyName.trim(), Normalizer.Form.NFC)
+    }
+    val enabled = normalizedPartyName.isNotBlank() &&
         selectedChallenge != null &&
         selectedPeriod >= 0 &&
         selectedDeposit >= 0
@@ -111,9 +116,10 @@ fun PartyCreateScreen(
             }
             Button(
                 onClick = {
-                    if (!partyNamePattern.matches(partyName)) {
+                    if (!partyNamePattern.matches(normalizedPartyName)) {
                         isPartyNameError = true
                     } else {
+                        onPartyNameChange(normalizedPartyName)
                         val requiredDeposit = deposits[selectedDeposit]
                         // TODO 파티 생성 API 연동 시 파티장 보유 포인트 검증 성공 후 파티 생성 요청
                         if (availablePoint < requiredDeposit) {

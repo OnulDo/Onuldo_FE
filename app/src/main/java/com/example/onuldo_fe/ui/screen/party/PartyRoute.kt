@@ -25,6 +25,7 @@ import com.example.onuldo_fe.viewmodel.party.PartyMemberRole
 import com.example.onuldo_fe.viewmodel.party.PartyReadyStatus
 import com.example.onuldo_fe.viewmodel.party.PartyStatus
 import com.example.onuldo_fe.viewmodel.party.PartyViewModel
+import java.text.Normalizer
 
 // Navigation 라이브러리 연동 전 파티 내부 화면 전환을 구분하는 테스트용 화면 상태
 private enum class PartyScreen {
@@ -120,7 +121,8 @@ fun PartyRoute(
                 val challenge = selectedChallenge ?: return@PartyCreateScreen
                 partyViewModel.createParty(
                     command = CreatePartyCommand(
-                        name = partyName,
+                        // 화면 검증과 동일하게 정규화된 파티 이름을 생성 요청에 전달
+                        name = Normalizer.normalize(partyName.trim(), Normalizer.Form.NFC),
                         challengeId = challenge.id,
                         challengeName = challenge.title,
                         period = period,
