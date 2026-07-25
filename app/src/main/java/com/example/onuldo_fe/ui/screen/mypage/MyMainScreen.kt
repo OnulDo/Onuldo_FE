@@ -57,6 +57,7 @@ fun MyMainScreen(
     onChargeClick: () -> Unit,
     onWithdrawClick: () -> Unit,
     onAccountClick: () -> Unit,
+    onNotificationClick: () -> Unit,
     nickname: String = "오늘두",
     email: String = "user@example.com",
     point: String = "52,000P",
@@ -86,7 +87,8 @@ fun MyMainScreen(
         Spacer(Modifier.height(16.dp))
 
         SectionLabel("설정")
-        MenuCard(title = "알림 설정", onClick = { /* TODO: 알림 설정 화면(이번 범위 제외) */ })
+        //알림 이동 추가 (시온)
+        MenuCard(title = "알림 설정", onClick = onNotificationClick)
         Spacer(Modifier.height(10.dp))
         MenuCard(title = "출금 계좌 관리", onClick = onAccountClick)
 
@@ -309,7 +311,7 @@ private fun MyMainScreenPreview() {
     OnulDo_FETheme {
         MyMainScreen(
             onProfileClick = {}, onWalletClick = {}, onChargeClick = {},
-            onWithdrawClick = {}, onAccountClick = {},
+            onWithdrawClick = {}, onAccountClick = {}, onNotificationClick = {},
         )
     }
 }

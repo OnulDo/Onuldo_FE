@@ -65,11 +65,20 @@ fun DetailScreen(
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(Modifier.height(25.dp))
-        OnulDoBackButton(
-            onClick = onBackClick,
-            modifier = Modifier.padding(start = 8.dp)
-        )
+        // 헤더 — 참여 화면과 같은 56dp 높이
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            OnulDoBackButton(
+                onClick = onBackClick,
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 8.dp)
+            )
+        }
 
         // 제목 + 카테고리 · 참여자
         Column(
@@ -123,9 +132,9 @@ fun DetailScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 20.dp)
         ) {
-            // TODO: "이 챌린지는? / 하면 좋은 점 / 이런 분께 추천해요" 본문은 서버에서 마크다운 텍스트로
-            //       내려올 예정. 현재는 마크다운 렌더링(라이브러리 or AnnotatedString 파싱)이 없어
-            //       일반 Text(더미)로 표시. 마크다운 방식 확정되면 렌더링만 교체.
+            // TODO: "이 챌린지는? / 하면 좋은 점 / 이런 분께 추천해요" 본문은 서버에서 json 제공
+            //       내려올 예정. 현재는 렌더링(AnnotatedString 파싱)이 없어
+            //       일반 Text(더미)로 표시.
             DetailSectionTitle("이 챌린지는?")
             Row(
                 modifier = Modifier.padding(top = 5.dp),
