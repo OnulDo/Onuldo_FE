@@ -15,7 +15,7 @@ import com.example.onuldo_fe.model.party.PartyJoinResult
 object FakePartyStore {
     // TODO 로그인 연동 시 인증 서버가 내려주는 현재 사용자 ID로 교체
     const val CURRENT_USER_ID = "current-user"
-    private const val CREATED_PARTY_ID = "party-created"
+    private var createdPartySequence = 0L
 
     // 대기방 정보와 파티 생명주기를 함께 저장해 초대코드 검증과 목록 노출에 사용
     private data class StoredParty(
@@ -52,12 +52,17 @@ object FakePartyStore {
 
     @Synchronized
     fun create(request: CreatePartyRequestDto): CreatePartyResponseDto {
+        // Fake 환경에서도 생성된 파티가 기존 파티를 덮어쓰지 않도록 고유 ID와 코드를 발급
+        val sequence = ++createdPartySequence
+        val partyId = "party-created-$sequence"
+        val inviteCode = "P${sequence.toString(36).uppercase().padStart(5, '0').takeLast(5)}"
+
         // 파티 생성자는 항상 방장이며 준비완료 대상에서 제외
         val room = PartyWaitingRoomDto(
-            partyId = CREATED_PARTY_ID,
+            partyId = partyId,
             partyName = request.name,
             challengeName = request.challengeName,
-            inviteCode = PartyInviteDummyData.CREATED_PARTY_CODE,
+            inviteCode = inviteCode,
             period = request.period,
             deposit = request.deposit,
             capacity = request.capacity,
@@ -69,8 +74,8 @@ object FakePartyStore {
                 }
             }
         )
-        parties[CREATED_PARTY_ID] = StoredParty(room, "RECRUITING")
-        return CreatePartyResponseDto(CREATED_PARTY_ID, room.inviteCode)
+        parties[partyId] = StoredParty(room, "RECRUITING")
+        return CreatePartyResponseDto(partyId, room.inviteCode)
     }
 
     @Synchronized
