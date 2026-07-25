@@ -168,10 +168,7 @@ private fun HomeContent(
 
         // 완료 상태일 때 완료 챌린지 목록 노출
         ChallengeSection(
-            title = stringResource(
-                R.string.home_completed_challenge_count,
-                uiState.completedChallenges.size
-            ),
+            title = stringResource(R.string.home_completed_challenge_title),
             visible = isAllCompleted,
             topSpacing = 26.dp,
             itemSpacing = 8.dp
@@ -226,6 +223,19 @@ private fun SectionTitle(text: String, modifier: Modifier = Modifier) {
 @Preview(name = "Home With Content", showBackground = true, showSystemUi = true, widthDp = 390, heightDp = 938)
 @Composable
 private fun HomeScreenPreview() {
+    HomeScenarioPreview(FakeHomeScenario.Default)
+}
+
+@Preview(
+    name = "Home Party Integrated",
+    showBackground = true,
+    showSystemUi = true,
+    widthDp = 390,
+    heightDp = 1338
+)
+@Composable
+private fun HomeScreenPartyPreview() {
+    // Default 더미 데이터에 파티 챌린지와 정산 완료 배너가 포함되어 파티 통합 상태 확인
     HomeScenarioPreview(FakeHomeScenario.Default)
 }
 
