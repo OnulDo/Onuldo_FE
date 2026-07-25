@@ -18,11 +18,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.component.home.HomeVerifyButton
 import com.example.onuldo_fe.viewmodel.party.PartyFeedItemUi
 import com.example.onuldo_fe.ui.theme.*
 
 @Composable
-fun PartyFeedCard(item: PartyFeedItemUi, modifier: Modifier = Modifier) {
+fun PartyFeedCard(
+    item: PartyFeedItemUi,
+    modifier: Modifier = Modifier,
+    isCurrentUser: Boolean = false,
+    onVerifyClick: () -> Unit = {}
+) {
+    val shouldShowVerifyButton = isCurrentUser && item.verificationImageUrl == null
+
     Column(
         modifier
             .fillMaxWidth()
@@ -50,7 +58,7 @@ fun PartyFeedCard(item: PartyFeedItemUi, modifier: Modifier = Modifier) {
                 )
             }
         }
-        Row(Modifier.fillMaxWidth().height(50.dp).padding(start = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().height(50.dp).padding(start = 10.dp, end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(28.dp).background(Persimmon10, CircleShape).border(1.dp, Persimmon, CircleShape), contentAlignment = Alignment.Center) {
                 PartyNetworkImage(
                     imageUrl = item.profileImageUrl,
@@ -62,6 +70,17 @@ fun PartyFeedCard(item: PartyFeedItemUi, modifier: Modifier = Modifier) {
             Column(Modifier.padding(start = 8.dp)) {
                 Text(item.name, color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Bold)
                 Text(item.time, color = DarkBrown50, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Medium)
+            }
+            if (shouldShowVerifyButton) {
+                Spacer(Modifier.weight(1f))
+                HomeVerifyButton(
+                    onClick = onVerifyClick,
+                    width = 78.dp,
+                    height = 26.dp,
+                    iconSize = 12.dp,
+                    fontSize = 10.sp,
+                    lineHeight = 12.sp
+                )
             }
         }
     }
@@ -82,7 +101,7 @@ private fun PartyFeedCardPreview() {
 private fun PartyFeedUnverifiedCardPreview() {
     OnulDo_FETheme {
         Box(Modifier.width(169.dp).background(SourCream)) {
-            PartyFeedCard(PartyFeedItemUi("하늘", "미인증"))
+            PartyFeedCard(PartyFeedItemUi("하늘", "미인증", memberId = "current-user"), isCurrentUser = true)
         }
     }
 }

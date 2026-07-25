@@ -43,7 +43,7 @@ fun CameraBottomBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-
+        //추후 촬영 버튼 외 기능 추가 예정
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
