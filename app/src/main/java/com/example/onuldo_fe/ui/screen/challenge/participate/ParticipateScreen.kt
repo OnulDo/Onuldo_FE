@@ -78,10 +78,13 @@ fun ParticipateScreen(
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
     ) {
-        // → 12 + (48-19)/2 ≈ 26 이 되도록 보정
-        Spacer(Modifier.height(12.dp))
 
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            contentAlignment = Alignment.Center
+        ) {
             OnulDoBackButton(
                 onClick = onBackClick,
                 modifier = Modifier

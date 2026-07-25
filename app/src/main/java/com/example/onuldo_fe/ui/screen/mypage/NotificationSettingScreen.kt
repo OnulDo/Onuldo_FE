@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -67,22 +68,23 @@ fun SettingScreen(
         modifier = modifier
             .fillMaxSize()
             .background(SourCream)
+            .statusBarsPadding()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(26.dp))
-
+        // 헤더 — 다른 마이 화면과 같은 56dp 높이
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp),
+                .height(56.dp),
             contentAlignment = Alignment.Center
         ) {
             OnulDoBackButton(
-                modifier = Modifier.align(Alignment.CenterStart),
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 8.dp),
                 onClick = onBackClick
             )
-
             Text(
                 text = "알림 설정",
                 fontFamily = Pretendard,

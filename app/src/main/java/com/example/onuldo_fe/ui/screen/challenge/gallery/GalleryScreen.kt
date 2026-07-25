@@ -97,7 +97,6 @@ fun GalleryScreen(
             // 제목 + 검색창 (스크롤됨)
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Column {
-                    Spacer(Modifier.height(23.dp))
                     Text(
                         text = "챌린지",
                         style = MaterialTheme.typography.headlineLarge,

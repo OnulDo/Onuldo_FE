@@ -65,11 +65,20 @@ fun DetailScreen(
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(Modifier.height(25.dp))
-        OnulDoBackButton(
-            onClick = onBackClick,
-            modifier = Modifier.padding(start = 8.dp)
-        )
+        // 헤더 — 참여 화면과 같은 56dp 높이
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            OnulDoBackButton(
+                onClick = onBackClick,
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 8.dp)
+            )
+        }
 
         // 제목 + 카테고리 · 참여자
         Column(
