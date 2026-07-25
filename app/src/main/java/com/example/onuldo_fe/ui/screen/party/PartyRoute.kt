@@ -13,6 +13,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.party.dummy.PartyTestConfig
 import com.example.onuldo_fe.model.party.CreatePartyCommand
 import com.example.onuldo_fe.ui.component.party.InviteCodeDialog
+import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
+import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.viewmodel.party.PartyAction
 import com.example.onuldo_fe.viewmodel.party.PartyChallengeUi
@@ -153,10 +155,10 @@ fun PartyRoute(
             if (challenge == null) {
                 LaunchedEffect(Unit) { screen = PartyScreen.ChallengeSelect }
             } else {
-                PartyChallengeDetailScreen(
-                    challenge = challenge,
-                    onBack = { screen = PartyScreen.ChallengeSelect },
-                    onParticipate = {
+                DetailScreen(
+                    challenge = challenge.toSharedChallenge(),
+                    onBackClick = { screen = PartyScreen.ChallengeSelect },
+                    onJoinClick = {
                         // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정
                         selectedChallenge = pendingChallenge
                         pendingChallenge = null
@@ -247,6 +249,13 @@ fun PartyRoute(
         }
     }
 }
+
+// 파티 선택 데이터를 기존 챌린지 상세 화면의 임시 모델로 변환
+private fun PartyChallengeUi.toSharedChallenge() = Challenge(
+    id = id.toIntOrNull() ?: id.hashCode(),
+    title = title,
+    participantCount = participantCount
+)
 
 @Composable
 private fun PartyLoadingScreen(
