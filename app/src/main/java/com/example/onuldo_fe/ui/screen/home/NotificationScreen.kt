@@ -68,13 +68,14 @@ fun NotificationScreen(
         modifier = modifier
             .fillMaxSize()
             .background(SourCream)
-            .statusBarsPadding()
+        // .statusBarsPadding()        ← 제거 (Scaffold가 이미 처리)
     ) {
         // 상단 바 (뒤로가기 + 알림)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(56.dp),
+            contentAlignment = Alignment.Center
         ) {
             OnulDoBackButton(
                 onClick = onBackClick,
