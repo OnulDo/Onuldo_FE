@@ -3,6 +3,10 @@ package com.example.onuldo_fe.ui.screen.main
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -13,6 +17,7 @@ import com.example.onuldo_fe.ui.component.OnuldoBottomBar
 import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryScreen
 import com.example.onuldo_fe.ui.screen.home.HomeRoute
 import com.example.onuldo_fe.ui.screen.mypage.MyMainScreen
+import com.example.onuldo_fe.ui.screen.party.PartyRoute
 import com.example.onuldo_fe.ui.screen.record.RecordScreen
 import com.example.onuldo_fe.ui.screen.record.data.CompleteRecord
 import kotlin.collections.emptyList
@@ -29,9 +34,14 @@ fun MainScreen(
     onNavigate: (String) -> Unit = {},
 ) {
     val navController = rememberNavController()
+    var showBottomBar by remember { mutableStateOf(true) }
 
     Scaffold(
-        bottomBar = { OnuldoBottomBar(navController) },
+        bottomBar = {
+            if (showBottomBar) {
+                OnuldoBottomBar(navController)
+            }
+        },
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -44,7 +54,9 @@ fun MainScreen(
                     onChallengeClick = { onNavigate(Routes.CHALLENGE_DETAIL) },
                 )
             }
-            composable(BottomTab.Party.route) { PlaceholderScreen("파티") }
+            composable(BottomTab.Party.route) {
+                PartyRoute(onBottomBarVisibilityChange = { showBottomBar = it })
+            }
             composable(BottomTab.Record.route) {
                 RecordScreen(
                     progressList = emptyList(),

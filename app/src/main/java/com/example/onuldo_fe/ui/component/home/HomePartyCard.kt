@@ -90,7 +90,9 @@ fun HomePartyCard(
             Text(
                 text = stringResource(R.string.home_challenge_d_day, partyChallenge.remainingDays),
                 color = DarkBrown.copy(alpha = 0.8f),
-                modifier = Modifier.offset(y = (-3).dp),
+                modifier = Modifier
+                    .padding(end = 6.dp)
+                    .offset(y = (-3).dp),
                 fontFamily = Pretendard,
                 fontSize = 11.sp,
                 lineHeight = 13.sp,
@@ -214,7 +216,7 @@ private fun ChallengeStatus.actionTextRes(): Int = when (this) {
     ChallengeStatus.Success -> R.string.home_challenge_action_success
 }
 
-private val homeTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+private val homeTimeFormatter = DateTimeFormatter.ofPattern("H:mm")
 
 private fun LocalTime.toDisplayText(): String = format(homeTimeFormatter)
 
