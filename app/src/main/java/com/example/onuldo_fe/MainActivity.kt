@@ -11,7 +11,9 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        installSplashScreen()          // 스플래시 테마 미호출(없으면 상단바 생김)
+        // 시스템 스플래시 설치 → 종료 후 postSplashScreenTheme(Theme.OnulDo_FE)로 전환.
+        // 미호출 시 스플래시 테마(Theme.SplashScreen)에 머물러 회색 상단바가 남는다.
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 

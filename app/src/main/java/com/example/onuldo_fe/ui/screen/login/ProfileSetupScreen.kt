@@ -138,10 +138,12 @@ fun ProfileSetupScreen(
                         .background(Persimmon10),
                     contentAlignment = Alignment.Center,
                 ) {
+                    // 캐릭터는 배경 투명 PNG. Figma(node 5154:5045) 실측대로 원(120dp)의
+                    // 약 90%(91×108)를 채우도록 108dp로 배치 → 중앙 정렬 시 오프셋도 Figma와 일치.
                     Image(
                         painter = painterResource(ProfileCharacters[selectedChar]),
                         contentDescription = "프로필 캐릭터",
-                        modifier = Modifier.size(88.dp),
+                        modifier = Modifier.size(108.dp),
                     )
                 }
                 Box(
