@@ -18,4 +18,16 @@ object Routes {
     const val MYPAGE_WITHDRAW = "mypage_withdraw"
     const val MYPAGE_ACCOUNT = "mypage_account"
     // 추후: PASSWORD_RESET, 알림 설정, 약관 3종 등
+
+    //카메라
+    const val CAMERA = "camera"
+    const val PHOTO_PREVIEW = "photo_preview"
+
+    //검증
+    const val VERIFICATION_REVIEWING = "verification_reviewing"
+    const val VERIFICATION_WAITING = "verification_waiting"
+    const val VERIFICATION_SUCCESS = "verification_success"
+    const val VERIFICATION_FAIL = "verification_fail"
+
+
 }
