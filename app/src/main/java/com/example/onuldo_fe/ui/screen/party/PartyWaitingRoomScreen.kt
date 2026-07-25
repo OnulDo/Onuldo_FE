@@ -108,6 +108,16 @@ fun PartyWaitingRoomScreen(
                 PartyWaitingEmptySlotCard()
                 Spacer(Modifier.height(8.dp))
             }
+
+            Text(
+                text = "전원이 모이면 파티장이 시작할 수 있어요",
+                modifier = Modifier.fillMaxWidth(),
+                color = DarkBrown50,
+                fontFamily = Pretendard,
+                fontSize = 11.sp,
+                lineHeight = 13.sp,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
         }
 
         Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
@@ -117,15 +127,6 @@ fun PartyWaitingRoomScreen(
                     .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    "전원이 모이면 파티장이 시작할 수 있어요",
-                    Modifier.fillMaxWidth(),
-                    color = DarkBrown50,
-                    fontFamily = Pretendard,
-                    fontSize = 11.sp,
-                    lineHeight = 13.sp,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
                 errorMessage?.let {
                     Text(
                         it,
