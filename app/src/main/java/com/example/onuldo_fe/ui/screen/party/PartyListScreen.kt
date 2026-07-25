@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -69,7 +68,7 @@ fun PartyListScreen(
         )
     }
 ) {
-    Column(modifier.fillMaxSize().background(SourCream).statusBarsPadding()) {
+    Column(modifier.fillMaxSize().background(SourCream)) {
         Text("파티", modifier = Modifier.padding(start = 24.dp, top = 16.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(20.dp))
         Row(Modifier.padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {

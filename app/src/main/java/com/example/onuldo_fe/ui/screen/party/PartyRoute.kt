@@ -1,6 +1,7 @@
 package com.example.onuldo_fe.ui.screen.party
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -15,10 +16,9 @@ import com.example.onuldo_fe.model.party.CreatePartyCommand
 import com.example.onuldo_fe.ui.component.party.InviteCodeDialog
 import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
+import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryScreen
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.viewmodel.party.PartyAction
-import com.example.onuldo_fe.viewmodel.party.PartyChallengeUi
-import com.example.onuldo_fe.viewmodel.party.PartyChallengeSelectViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyFeedViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyInviteViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyMemberRole
@@ -42,17 +42,17 @@ private enum class PartyScreen {
 @Composable
 fun PartyRoute(
     partyViewModel: PartyViewModel = viewModel(),
-    challengeSelectViewModel: PartyChallengeSelectViewModel = viewModel(),
     inviteViewModel: PartyInviteViewModel = viewModel(),
-    partyFeedViewModel: PartyFeedViewModel = viewModel()
+    partyFeedViewModel: PartyFeedViewModel = viewModel(),
+    onBottomBarVisibilityChange: (Boolean) -> Unit = {}
 ) {
     // 현재 화면과 다이얼로그 노출 여부는 Route에서만 관리
     var screen by remember { mutableStateOf(PartyScreen.List) }
     var showInviteDialog by remember { mutableStateOf(false) }
 
     // pendingChallenge는 상세 확인 중인 임시 선택, selectedChallenge는 생성 화면에서 확정된 선택
-    var selectedChallenge by remember { mutableStateOf<PartyChallengeUi?>(null) }
-    var pendingChallenge by remember { mutableStateOf<PartyChallengeUi?>(null) }
+    var selectedChallenge by remember { mutableStateOf<Challenge?>(null) }
+    var pendingChallenge by remember { mutableStateOf<Challenge?>(null) }
 
     // 생성 화면을 벗어나 챌린지를 탐색해도 입력값을 유지하도록 Route가 생성 폼 상태 보관
     var partyName by remember { mutableStateOf("") }
@@ -68,6 +68,13 @@ fun PartyRoute(
     val currentMember = waitingRoom?.members?.firstOrNull { it.id == partyViewModel.currentUserId }
     val isCurrentUserLeader = currentMember?.role == PartyMemberRole.Leader
     val isCurrentUserReady = currentMember?.readyStatus == PartyReadyStatus.Ready
+
+    LaunchedEffect(screen) {
+        onBottomBarVisibilityChange(screen == PartyScreen.List)
+    }
+    DisposableEffect(Unit) {
+        onDispose { onBottomBarVisibilityChange(true) }
+    }
 
     when (screen) {
         PartyScreen.List -> PartyListScreen(
@@ -123,7 +130,7 @@ fun PartyRoute(
                     command = CreatePartyCommand(
                         // 화면 검증과 동일하게 정규화된 파티 이름을 생성 요청에 전달
                         name = Normalizer.normalize(partyName.trim(), Normalizer.Form.NFC),
-                        challengeId = challenge.id,
+                        challengeId = challenge.id.toString(),
                         challengeName = challenge.title,
                         period = period,
                         deposit = deposit,
@@ -137,17 +144,10 @@ fun PartyRoute(
             }
         )
 
-        PartyScreen.ChallengeSelect -> PartyChallengeSelectScreen(
-            challenges = challengeSelectViewModel.uiState.challenges,
-            isLoading = challengeSelectViewModel.uiState.isLoading,
-            errorMessage = challengeSelectViewModel.uiState.errorMessage,
-            onRetry = challengeSelectViewModel::loadPartyChallenges,
-            // 한 개의 임시 선택만 저장해 다른 카드 선택 시 이전 선택 자동 해제
-            onSelect = { pendingChallenge = it },
-            onConfirm = { screen = PartyScreen.ChallengeDetail },
-            onBack = {
-                pendingChallenge = null
-                screen = PartyScreen.Create
+        PartyScreen.ChallengeSelect -> GalleryScreen(
+            onChallengeClick = { challenge ->
+                pendingChallenge = challenge
+                screen = PartyScreen.ChallengeDetail
             }
         )
 
@@ -158,7 +158,7 @@ fun PartyRoute(
                 LaunchedEffect(Unit) { screen = PartyScreen.ChallengeSelect }
             } else {
                 DetailScreen(
-                    challenge = challenge.toSharedChallenge(),
+                    challenge = challenge,
                     onBackClick = { screen = PartyScreen.ChallengeSelect },
                     onJoinClick = {
                         // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정
@@ -251,13 +251,6 @@ fun PartyRoute(
         }
     }
 }
-
-// 파티 선택 데이터를 기존 챌린지 상세 화면의 임시 모델로 변환
-private fun PartyChallengeUi.toSharedChallenge() = Challenge(
-    id = id.toIntOrNull() ?: id.hashCode(),
-    title = title,
-    participantCount = participantCount
-)
 
 @Composable
 private fun PartyLoadingScreen(

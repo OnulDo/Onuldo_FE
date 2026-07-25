@@ -42,11 +42,18 @@ fun PartyWaitingMemberCard(member: PartyMemberUi, modifier: Modifier = Modifier)
                 modifier = Modifier.width(38.dp).height(37.dp).clip(CircleShape)
             )
         }
-        Text(member.name, Modifier.weight(1f).padding(start = 12.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        Text(
+            member.name,
+            Modifier.weight(1f).padding(start = 12.dp),
+            color = BlackBrown,
+            fontFamily = Pretendard,
+            fontSize = 12.sp,
+            lineHeight = 22.sp,
+            fontWeight = FontWeight.Bold
+        )
         when {
             member.role == PartyMemberRole.Leader -> PartyWaitingStatusChip("파티장", Persimmon10, Persimmon)
             member.readyStatus == PartyReadyStatus.Ready -> PartyWaitingStatusChip("준비완료", Persimmon, SourCream)
-            else -> PartyWaitingStatusChip("대기", DarkBrown10, DarkBrown50)
         }
     }
 }

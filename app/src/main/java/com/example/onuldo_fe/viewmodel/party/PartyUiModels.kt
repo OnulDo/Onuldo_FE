@@ -53,27 +53,6 @@ data class PartyCardUi(
     val status: PartyStatus = PartyStatus.InProgress // 파티 모집·진행·해체 상태
 )
 
-// 파티에서 선택할 챌린지의 상세 화면에 표시할 정보
-data class PartyChallengeUi(
-    val id: String,                            // 챌린지 고유 ID
-    val title: String,                         // 챌린지 이름
-    val category: String,                      // 챌린지 카테고리
-    val participantCount: Int = 0,             // 챌린지 누적 참여 인원
-    val summary: String = "",                  // 챌린지 소개 문구
-    val benefits: List<String> = emptyList(),  // 챌린지를 통해 얻을 수 있는 효과 목록
-    val recommendations: List<String> = emptyList(), // 챌린지 추천 대상 목록
-    val verificationInstruction: String = "", // 인증 사진 촬영 방법
-    val verificationImageUrl: String? = null   // 인증 예시 이미지 URL
-)
-
-// 파티 챌린지 선택 목록의 카드에 표시할 정보
-data class PartyChallengeCardUi(
-    val challenge: PartyChallengeUi,           // 카드 선택 시 상세 화면으로 전달할 챌린지 정보
-    val participantCount: Int,                 // 카드에 표시할 챌린지 누적 참여 인원
-    val imageUrl: String? = null,               // 서버에서 전달받은 챌린지 대표 이미지 URL
-    @param:DrawableRes val fallbackImageRes: Int // 네트워크 이미지가 없을 때 표시할 로컬 이미지
-)
-
 // 파티 피드의 파티원 인증 카드에 표시할 정보
 data class PartyFeedItemUi(
     val name: String,                          // 인증한 파티원의 닉네임

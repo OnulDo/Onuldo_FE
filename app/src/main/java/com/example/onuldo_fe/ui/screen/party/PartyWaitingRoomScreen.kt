@@ -50,10 +50,18 @@ fun PartyWaitingRoomScreen(
     // 상단 뒤로가기와 시스템 뒤로가기 모두 동일한 파티 탈퇴 로직 실행
     BackHandler(onBack = onBack)
 
-    Column(Modifier.fillMaxSize().background(SourCream).systemBarsPadding()) {
+    Column(Modifier.fillMaxSize().background(SourCream)) {
         Row(Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically) {
             OnulDoBackButton(Modifier.padding(start = 20.dp), onClick = onBack)
-            Text("파티 대기방", Modifier.padding(start = 14.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(
+                "파티 대기방",
+                Modifier.padding(start = 14.dp),
+                color = BlackBrown,
+                fontFamily = Pretendard,
+                fontSize = 17.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
 
         Column(
@@ -75,10 +83,11 @@ fun PartyWaitingRoomScreen(
                 Modifier.padding(start = 4.dp),
                 color = BlackBrown,
                 fontFamily = Pretendard,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
+                lineHeight = 22.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(9.dp))
 
             ui.members.forEach { member ->
                 PartyWaitingMemberCard(member)
@@ -104,6 +113,7 @@ fun PartyWaitingRoomScreen(
                     color = DarkBrown50,
                     fontFamily = Pretendard,
                     fontSize = 11.sp,
+                    lineHeight = 13.sp,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
                 errorMessage?.let {
@@ -133,7 +143,8 @@ fun PartyWaitingRoomScreen(
                 Text(
                     if (isActionInProgress) "처리 중..." else if (isLeader) "시작하기" else "준비완료",
                     fontFamily = Pretendard,
-                    fontSize = 16.sp,
+                    fontSize = 17.sp,
+                    lineHeight = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -164,10 +175,22 @@ private fun PartyWaitingRoomInfoCard(ui: PartyWaitingRoomUi, modifier: Modifier 
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text(ui.partyName, color = BlackBrown, fontFamily = Pretendard, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+        Text(
+            ui.partyName,
+            color = BlackBrown,
+            fontFamily = Pretendard,
+            fontSize = 14.sp,
+            lineHeight = 22.sp,
+            fontWeight = FontWeight.Bold
+        )
         Text(
             "모집중 · ${ui.members.size}/${ui.capacity}명 · ${ui.period} · 1인 ${"%,d".format(ui.deposit)}P",
-            Modifier.padding(top = 8.dp), color = DarkBrown, fontFamily = Pretendard, fontSize = 11.sp, fontWeight = FontWeight.Bold
+            Modifier.padding(top = 3.dp),
+            color = DarkBrown,
+            fontFamily = Pretendard,
+            fontSize = 11.sp,
+            lineHeight = 13.sp,
+            fontWeight = FontWeight.Bold
         )
     }
 }

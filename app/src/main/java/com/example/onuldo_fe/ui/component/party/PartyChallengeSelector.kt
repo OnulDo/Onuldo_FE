@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,10 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.onuldo_fe.viewmodel.party.PartyChallengeUi
+import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Persimmon
-import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
@@ -35,7 +33,7 @@ import com.example.onuldo_fe.ui.theme.SourCream
 
 @Composable
 fun PartyChallengeSelector(
-    challenge: PartyChallengeUi?,
+    challenge: Challenge?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -62,10 +60,7 @@ fun PartyChallengeSelector(
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(Modifier.width(56.dp).height(24.dp).background(Persimmon10, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
-            Text(challenge.category, color = Persimmon, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-        }
-        Text(challenge.title, Modifier.weight(1f).padding(start = 8.dp), color = Persimmon, fontFamily = Pretendard, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+        Text(challenge.title, Modifier.weight(1f), color = Persimmon, fontFamily = Pretendard, fontSize = 15.sp, fontWeight = FontWeight.Bold)
         Row(Modifier.clickable(onClick = onClick), verticalAlignment = Alignment.CenterVertically) {
             Text("변경", color = DarkBrown50, fontFamily = Pretendard, fontSize = 13.sp)
             Text("›", Modifier.padding(start = 7.dp), color = DarkBrown50, fontSize = 18.sp, fontWeight = FontWeight.Bold)
@@ -100,7 +95,7 @@ private fun PartyChallengeSelectorSelectedPreview() {
     OnulDo_FETheme {
         Box(Modifier.background(SourCream).padding(20.dp)) {
             PartyChallengeSelector(
-                challenge = PartyChallengeUi("preview", "30일 헬스 챌린지", "피트니스"),
+                challenge = Challenge(id = 1, title = "30일 헬스 챌린지", participantCount = 0),
                 onClick = {}
             )
         }

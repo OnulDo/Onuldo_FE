@@ -26,8 +26,8 @@ import com.example.onuldo_fe.ui.component.party.PartyChallengeSelector
 import com.example.onuldo_fe.ui.component.party.PartyInsufficientPointDialog
 import com.example.onuldo_fe.ui.component.party.PartyNameTextField
 import com.example.onuldo_fe.ui.component.party.PartyOptionSelector
+import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.theme.*
-import com.example.onuldo_fe.viewmodel.party.PartyChallengeUi
 import java.text.Normalizer
 
 @Composable
@@ -36,7 +36,7 @@ fun PartyCreateScreen(
     onPartyNameChange: (String) -> Unit,
     capacity: Int,
     onCapacityChange: (Int) -> Unit,
-    selectedChallenge: PartyChallengeUi?,
+    selectedChallenge: Challenge?,
     onChallengeClick: () -> Unit,
     onBack: () -> Unit,
     onCreate: (period: String, deposit: Int) -> Unit,
@@ -61,7 +61,7 @@ fun PartyCreateScreen(
         selectedPeriod >= 0 &&
         selectedDeposit >= 0
 
-    Column(Modifier.fillMaxSize().background(SourCream).systemBarsPadding()) {
+    Column(Modifier.fillMaxSize().background(SourCream)) {
         Row(Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically) {
             OnulDoBackButton(Modifier.padding(start = 20.dp), onClick = onBack)
             Text("파티 만들기", Modifier.padding(start = 14.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 16.sp, fontWeight = FontWeight.Bold)
@@ -167,4 +167,4 @@ fun PartyCreateScreen(
 @Composable private fun PartyCreateEmptyPreview() { OnulDo_FETheme { PartyCreateScreen("", {}, 5, {}, null, {}, {}, { _, _ -> }) } }
 
 @Preview(name = "파티 생성 - 챌린지 선택", showBackground = true, widthDp = 390, heightDp = 844)
-@Composable private fun PartyCreateSelectedPreview() { OnulDo_FETheme { PartyCreateScreen("갓생팟", {}, 5, {}, PartyChallengeUi("preview", "30일 헬스 챌린지", "피트니스"), {}, {}, { _, _ -> }) } }
+@Composable private fun PartyCreateSelectedPreview() { OnulDo_FETheme { PartyCreateScreen("갓생팟", {}, 5, {}, Challenge(1, "30일 헬스 챌린지", 0), {}, {}, { _, _ -> }) } }

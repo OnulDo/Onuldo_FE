@@ -34,8 +34,19 @@ fun PartyFeedScreen(
     onRetry: () -> Unit = {},
     onBack: () -> Unit
 ) {
-    Column(Modifier.fillMaxSize().background(SourCream).systemBarsPadding()) {
-        OnulDoBackButton(Modifier.padding(start = 20.dp, top = 18.dp), onClick = onBack)
+    Column(Modifier.fillMaxSize().background(SourCream)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        ) {
+            OnulDoBackButton(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 20.dp),
+                onClick = onBack
+            )
+        }
         Text(partyName, Modifier.padding(start = 20.dp, top = 8.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         Text(challengeName, Modifier.padding(start = 20.dp, top = 2.dp), color = DarkBrown70, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Medium)
         TeamProgressCard(
