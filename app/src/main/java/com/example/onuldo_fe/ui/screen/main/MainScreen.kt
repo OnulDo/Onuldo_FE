@@ -19,7 +19,7 @@ import kotlin.collections.emptyList
 
 /**
  * 로그인 이후 진입하는 메인 화면. 하단 5탭 내비 + 탭별 NavHost.
- * 홈·챌린지·파티·기록은 타 팀원 담당 → placeholder. 마이는 내 담당.
+ * 홈·챌린지·기록은 타 팀원 구현분 연결, 파티는 아직 placeholder. 마이는 내 담당.
  *
  * [onNavigate]는 앱 최상위(루트) 내비게이션으로, 마이페이지 하위 화면을
  * 하단 탭 위에 풀스크린으로 띄우기 위해 사용한다.
