@@ -1,5 +1,7 @@
 package com.example.onuldo_fe.ui.screen.challenge.gallery
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,7 +58,8 @@ import com.example.onuldo_fe.ui.theme.White
 data class Challenge(
     val id: Int,
     val title: String,
-    val participantCount: Int
+    val participantCount: Int,
+    @DrawableRes val imageRes: Int = R.drawable.challenge_sample_1
 )
 
 // 카테고리 더미 — API 연동 시 교체
@@ -167,11 +171,14 @@ private fun ChallengeCard(
             .border(1.dp, DarkBrown20, RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
     ) {
-        Box(
+        Image(
+            painter = painterResource(challenge.imageRes),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(169f / 130f)
-                .background(DarkBrown10)
+                .background(DarkBrown10)   // 로딩/여백 대비 회색 배경 유지
         )
 
         Column(
