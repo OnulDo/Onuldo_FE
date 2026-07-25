@@ -1,9 +1,12 @@
 package com.example.onuldo_fe.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.onuldo_fe.camera.CameraScreen
+import com.example.onuldo_fe.camera.CameraViewModel
 import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
 import com.example.onuldo_fe.ui.screen.challenge.participate.ParticipateScreen
 import com.example.onuldo_fe.ui.screen.challenge.participate.StartDoneScreen
@@ -20,14 +23,23 @@ import com.example.onuldo_fe.ui.screen.mypage.PointWalletScreen
 import com.example.onuldo_fe.ui.screen.mypage.PointWithdrawScreen
 import com.example.onuldo_fe.ui.screen.mypage.ProfileSettingsScreen
 import com.example.onuldo_fe.ui.screen.mypage.WithdrawAccountScreen
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.example.onuldo_fe.camera.PhotoPreviewScreen
+import com.example.onuldo_fe.ui.screen.verification.ChallengeVerificationScreen
+import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
 
 /** 앱 전체 내비게이션 그래프. 랜딩 → 로그인/회원가입 → 프로필 설정 → 환영 → 메인(탭).
  *  (스플래시는 별도 화면이 아니라 시스템 스플래시로 처리 — [MainActivity]) */
 @Composable
 fun OnuldoApp() {
     val navController = rememberNavController()
+    val debugStartDestination = Routes.LANDING
 
-    NavHost(navController = navController, startDestination = Routes.LANDING) {
+    //카메라 -> previewScreen
+    val cameraViewModel: CameraViewModel = viewModel()
+
+    NavHost(navController = navController, startDestination = debugStartDestination) {
         composable(Routes.LANDING) {
             LandingScreen(
                 onLoginClick = { navController.navigate(Routes.LOGIN) },
@@ -103,6 +115,69 @@ fun OnuldoApp() {
         composable(Routes.MYPAGE_ACCOUNT) {
             WithdrawAccountScreen(onBack = { navController.popBackStack() })
         }
+
+        // 카메라 화면
+        composable(Routes.CAMERA) {
+            CameraScreen(
+                category = "",
+                title = "",
+                onPhotoCaptured = { uri ->
+                    cameraViewModel.setImageUri(uri)
+                    navController.navigate(Routes.PHOTO_PREVIEW)
+                }
+            )
+        }
+
+        //프리뷰
+        composable(Routes.PHOTO_PREVIEW) {
+
+            val imageUri by cameraViewModel.imageUri.collectAsState()
+
+            PhotoPreviewScreen(
+                category = "",
+                title = "",
+                imageUri = imageUri,
+
+                onCloseClick = {
+                    navController.popBackStack()
+                },
+
+                onRetakeClick = {
+                    navController.popBackStack()
+                },
+
+                onSubmitClick = {
+                    navController.navigate(Routes.VERIFICATION_WAITING)
+                }
+            )
+        }
+
+        //검증 심사중
+        composable(Routes.VERIFICATION_REVIEWING) {
+            ChallengeVerificationScreen(
+                status = VerificationStatus.REVIEWING
+            )
+        }
+
+        composable(Routes.VERIFICATION_SUCCESS) {
+            ChallengeVerificationScreen(
+                status = VerificationStatus.SUCCESS
+            )
+        }
+
+        composable(Routes.VERIFICATION_FAIL) {
+            ChallengeVerificationScreen(
+                status = VerificationStatus.FAILURE
+            )
+        }
+
+        composable(Routes.VERIFICATION_WAITING) {
+            ChallengeVerificationScreen(
+                status = VerificationStatus.WAITING
+            )
+        }
+
+
 
         // --- 챌린지 상세 흐름 (챌린지 탭 위 풀스크린): 상세 → 참여 → 시작 완료 ---
         // 콜백만으로 화면끼리 연동. 각 화면은 자체 더미 데이터 표시(id 전달·조회 없음).

@@ -11,7 +11,11 @@ import com.example.onuldo_fe.navigation.BottomTab
 import com.example.onuldo_fe.navigation.Routes
 import com.example.onuldo_fe.ui.component.OnuldoBottomBar
 import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryScreen
+import com.example.onuldo_fe.ui.screen.home.HomeRoute
 import com.example.onuldo_fe.ui.screen.mypage.MyMainScreen
+import com.example.onuldo_fe.ui.screen.record.RecordScreen
+import com.example.onuldo_fe.ui.screen.record.data.CompleteRecord
+import kotlin.collections.emptyList
 
 /**
  * 로그인 이후 진입하는 메인 화면. 하단 5탭 내비 + 탭별 NavHost.
@@ -34,6 +38,8 @@ fun MainScreen(
             startDestination = BottomTab.Home.route,
             modifier = Modifier.padding(innerPadding),
         ) {
+            composable(BottomTab.Home.route) { HomeRoute() }
+            composable(BottomTab.Challenge.route) { PlaceholderScreen("챌린지") }
             composable(BottomTab.Home.route) { PlaceholderScreen("홈") }
             composable(BottomTab.Challenge.route) {
                 GalleryScreen(
@@ -41,7 +47,27 @@ fun MainScreen(
                 )
             }
             composable(BottomTab.Party.route) { PlaceholderScreen("파티") }
-            composable(BottomTab.Record.route) { PlaceholderScreen("기록") }
+            composable(BottomTab.Record.route) {
+                RecordScreen(
+                    progressList = emptyList(),
+                    completeList = listOf(
+                        CompleteRecord(
+                            isSuccess = true,
+                            title = "운동 30분 하기",
+                            progress = 100,
+                            completeDate = "2026.07.22",
+                            point = 5000
+                        ),
+                        CompleteRecord(
+                            isSuccess = false,
+                            title = "책 50페이지 읽기",
+                            progress = 70,
+                            completeDate = "2026.07.18",
+                            point = -1000
+                        )
+                    )
+                )
+            }
             composable(BottomTab.My.route) {
                 MyMainScreen(
                     onProfileClick = { onNavigate(Routes.MYPAGE_PROFILE) },
