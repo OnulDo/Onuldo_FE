@@ -159,7 +159,8 @@ fun ParticipateScreen(
                 OptionChip(
                     text = option,
                     onClick = { selectedPeriod = option },
-                    selected = selectedPeriod == option
+                    selected = selectedPeriod == option,
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -214,7 +215,8 @@ fun ParticipateScreen(
                 OptionChip(
                     text = option,
                     onClick = { selectedPoint = option },
-                    selected = selectedPoint == option
+                    selected = selectedPoint == option,
+                    modifier = Modifier.weight(1f)
                 )
             }
         }

@@ -45,8 +45,6 @@ import com.example.onuldo_fe.ui.theme.White
 // 마이페이지 - 알림 설정
 // 상태/유형 모델은 분리: [NotificationSettingsState], [NotificationType]
 
-private val ContentWidth = 350.dp
-
 @Composable
 fun SettingScreen(
     onBackClick: () -> Unit,
@@ -69,8 +67,7 @@ fun SettingScreen(
             .fillMaxSize()
             .background(SourCream)
             .statusBarsPadding()
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .verticalScroll(rememberScrollState())
     ) {
         // 헤더 — 다른 마이 화면과 같은 56dp 높이
         Box(
@@ -182,8 +179,8 @@ private fun SettingSectionHeader(
         lineHeight = 12.sp,
         color = DarkBrown50,
         modifier = modifier
-            .width(ContentWidth)
-            .padding(start = 4.dp)
+            .fillMaxWidth()
+            .padding(start = 24.dp)
     )
 }
 
@@ -201,7 +198,9 @@ private fun SettingToggleRow(
 ) {
     Row(
         modifier = modifier
-            .width(ContentWidth)
+            //사이즈가 작게 나와서 가로 padding기준으로 바꿈
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
             .height(height)
             .clip(RoundedCornerShape(14.dp))
             .background(backgroundColor)
