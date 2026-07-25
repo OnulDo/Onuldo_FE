@@ -13,6 +13,11 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.theme.BlackBrown
@@ -28,8 +33,12 @@ fun OnulDoButton(
     enabled: Boolean = true,
     height: Dp = 56.dp,
     fontSize: TextUnit = 16.sp,
-    horizontalPadding: Dp = 20.dp
+    horizontalPadding: Dp = 20.dp,
+    pressedContainerColor: Color = Persimmon
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
     Button(
         onClick = onClick,
         modifier = modifier
@@ -39,11 +48,12 @@ fun OnulDoButton(
         enabled = enabled,
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Persimmon,
+            containerColor = if (isPressed) pressedContainerColor else Persimmon,
             // Figma(RFD) btn/disabled = 배경 BlackBrown 10% · 글자 BlackBrown 20%.
             disabledContainerColor = BlackBrown.copy(alpha = 0.1f),
             disabledContentColor = BlackBrown.copy(alpha = 0.2f),
-        )
+        ),
+        interactionSource = interactionSource
     ) {
         Text(
             text = text,

@@ -1,7 +1,6 @@
 package com.example.onuldo_fe.ui.component.home
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -20,8 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -53,7 +50,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun HomeChallengeCard(
     challenge: HomeChallenge,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onVerifyClick: () -> Unit = {}
 ) {
     val actionColors = challenge.actionColors()
 
@@ -145,30 +143,23 @@ fun HomeChallengeCard(
                 }
             }
 
-            if (challenge.status != ChallengeStatus.NeedCertification || challenge.canVerify) Box(
-                modifier = Modifier
-                    .background(actionColors.background, RoundedCornerShape(50))
-                    .border(
-                        border = BorderStroke(
-                            width = if (challenge.status == ChallengeStatus.NeedCertification) 1.dp else 0.dp,
-                            color = if (challenge.status == ChallengeStatus.NeedCertification) Persimmon else actionColors.background
-                        ),
-                        shape = RoundedCornerShape(50)
-                    )
-                    .width(78.dp)
-                    .height(26.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (challenge.status == ChallengeStatus.NeedCertification) {
-                        Image(
-                            painter = painterResource(id = R.drawable.home_camera_icon),
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            contentScale = ContentScale.Fit
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                    }
+            if (challenge.status == ChallengeStatus.NeedCertification && challenge.canVerify) {
+                HomeVerifyButton(
+                    onClick = onVerifyClick,
+                    width = 78.dp,
+                    height = 26.dp,
+                    iconSize = 12.dp,
+                    fontSize = 10.sp,
+                    lineHeight = 12.sp
+                )
+            } else if (challenge.status != ChallengeStatus.NeedCertification) {
+                Box(
+                    modifier = Modifier
+                        .background(actionColors.background, RoundedCornerShape(50))
+                        .width(78.dp)
+                        .height(26.dp),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
                         text = stringResource(challenge.status.actionTextRes()),
                         color = actionColors.text,

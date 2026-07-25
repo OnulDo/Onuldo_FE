@@ -44,7 +44,6 @@ import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
-import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
@@ -53,7 +52,11 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun HomePartyCard(partyChallenge: HomePartyChallenge, modifier: Modifier = Modifier) {
+fun HomePartyCard(
+    partyChallenge: HomePartyChallenge,
+    modifier: Modifier = Modifier,
+    onVerifyClick: () -> Unit = {}
+) {
     Column(
         modifier = modifier
             .height(140.dp)
@@ -133,7 +136,7 @@ fun HomePartyCard(partyChallenge: HomePartyChallenge, modifier: Modifier = Modif
                         Modifier
                             .size(33.dp)
                             .background(
-                                if (completed) Persimmon10 else Persimmon20.copy(alpha = 0.5f),
+                                if (completed) Persimmon10 else Persimmon.copy(alpha = 0.1f),
                                 CircleShape
                             )
                             .then(if (completed) Modifier.border(BorderStroke(1.dp, Persimmon), CircleShape) else Modifier),
@@ -153,30 +156,25 @@ fun HomePartyCard(partyChallenge: HomePartyChallenge, modifier: Modifier = Modif
                     }
                 }
             }
-            PartyAction(partyChallenge)
+            PartyAction(partyChallenge, onVerifyClick)
         }
     }
 }
 
 @Composable
-private fun PartyAction(party: HomePartyChallenge) {
+private fun PartyAction(
+    party: HomePartyChallenge,
+    onVerifyClick: () -> Unit
+) {
     if (party.status == ChallengeStatus.NeedCertification && party.canVerify) {
-        Row(
-            Modifier.size(width = 96.dp, height = 32.dp).border(BorderStroke(1.dp, Persimmon), RoundedCornerShape(16.dp)),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Image(painterResource(R.drawable.home_camera_icon), null, Modifier.size(14.dp))
-            Spacer(Modifier.width(5.dp))
-            Text(
-                text = stringResource(R.string.home_challenge_action_verify),
-                color = Persimmon,
-                fontFamily = Pretendard,
-                fontSize = 12.sp,
-                lineHeight = 22.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        HomeVerifyButton(
+            onClick = onVerifyClick,
+            width = 96.dp,
+            height = 32.dp,
+            iconSize = 14.dp,
+            fontSize = 12.sp,
+            lineHeight = 22.sp
+        )
         return
     }
 

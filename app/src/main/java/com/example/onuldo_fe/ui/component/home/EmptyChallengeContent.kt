@@ -79,6 +79,7 @@ fun EmptyChallengeContent(
             height = 52.dp,
             fontSize = 14.sp,
             horizontalPadding = 0.dp,
+            pressedContainerColor = DarkBrown,
             modifier = Modifier.fillMaxWidth()
         )
     }
