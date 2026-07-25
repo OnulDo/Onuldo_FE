@@ -107,6 +107,7 @@ object FakePartyStore {
     }
 
     // 상태 변경 후 화면 전체를 다시 그릴 수 있도록 최신 대기방 스냅샷 반환
+    @Synchronized
     fun getRoom(partyId: String): PartyWaitingRoomDto =
         parties[partyId]?.room ?: error("존재하지 않는 파티입니다.")
 
@@ -200,6 +201,7 @@ object FakePartyStore {
         return summary
     }
 
+    @Synchronized
     fun getInProgressParties(): List<PartySummaryDto> =
         summaries.values.filter { it.status == "IN_PROGRESS" }
 
