@@ -104,6 +104,9 @@ app
        ├── 마이페이지
        └── 파티
 ```
+## 피그마 링크 
+
+https://www.figma.com/design/Cnn54WuPxboHl6XAieA1BW/%EC%98%A4%EB%8A%98%EB%91%90?node-id=4516-5&t=6sAc148DgwkqwoyS-4
 
 ## 구현 화면 목록
 
