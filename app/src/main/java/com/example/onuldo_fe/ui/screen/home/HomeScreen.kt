@@ -49,6 +49,7 @@ fun HomeScreen(
     onNotificationClick: () -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
     onSettlementResultClick: (String) -> Unit = {},
+    onVerifyClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -60,7 +61,12 @@ fun HomeScreen(
     ) {
         // 홈 API 상태에 따라 기본 홈과 빈 홈 분기
         if (uiState.hasHomeContent) {
-            HomeContent(uiState, onNotificationClick, onSettlementResultClick)
+            HomeContent(
+                uiState = uiState,
+                onNotificationClick = onNotificationClick,
+                onSettlementResultClick = onSettlementResultClick,
+                onVerifyClick = onVerifyClick
+            )
         } else {
             EmptyHomeContent(
                 userName = uiState.userName,
@@ -103,7 +109,8 @@ private fun EmptyHomeContent(
 private fun HomeContent(
     uiState: HomeUiState,
     onNotificationClick: () -> Unit,
-    onSettlementResultClick: (String) -> Unit
+    onSettlementResultClick: (String) -> Unit,
+    onVerifyClick: () -> Unit
 ) {
     val isAllCompleted = uiState.isAllCompleted
 
@@ -151,7 +158,11 @@ private fun HomeContent(
             topSpacing = if (uiState.settlementBanner != null) 18.dp else 28.dp
         ) {
             uiState.partyChallenges.forEach { partyChallenge ->
-                HomePartyCard(partyChallenge, Modifier.fillMaxWidth())
+                HomePartyCard(
+                    partyChallenge = partyChallenge,
+                    modifier = Modifier.fillMaxWidth(),
+                    onVerifyClick = onVerifyClick
+                )
             }
         }
 
@@ -162,7 +173,11 @@ private fun HomeContent(
             topSpacing = if (uiState.partyChallenges.isNotEmpty()) 18.dp else 28.dp
         ) {
             uiState.challenges.forEach { challenge ->
-                HomeChallengeCard(challenge, Modifier.fillMaxWidth())
+                HomeChallengeCard(
+                    challenge = challenge,
+                    modifier = Modifier.fillMaxWidth(),
+                    onVerifyClick = onVerifyClick
+                )
             }
         }
 

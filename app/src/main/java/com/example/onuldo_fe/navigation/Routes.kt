@@ -27,6 +27,7 @@ object Routes {
     // 추후: PASSWORD_RESET, 알림 설정, 약관 3종 등
 
     //카메라
+    const val CAMERA_PERMISSION = "camera_permission"
     const val CAMERA = "camera"
     const val PHOTO_PREVIEW = "photo_preview"
 

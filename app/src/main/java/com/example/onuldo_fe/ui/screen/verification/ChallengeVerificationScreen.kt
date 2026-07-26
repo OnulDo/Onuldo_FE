@@ -4,7 +4,8 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun ChallengeVerificationScreen(
-    status: VerificationStatus
+    status: VerificationStatus,
+    onConfirmClick: () -> Unit = {}
 ) {
     when (status) {
         VerificationStatus.REVIEWING ->
@@ -17,6 +18,6 @@ fun ChallengeVerificationScreen(
             VerificationFailureScreen()
 
         VerificationStatus.WAITING ->
-            VerificationWaitingScreen()
+            VerificationWaitingScreen(onConfirmClick = onConfirmClick)
     }
 }
