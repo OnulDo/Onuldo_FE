@@ -48,14 +48,23 @@ fun MainScreen(
             startDestination = BottomTab.Home.route,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable(BottomTab.Home.route) { HomeRoute() }
+            composable(BottomTab.Home.route) {
+                HomeRoute(
+                    onCameraPermissionRequired = { onNavigate(Routes.CAMERA_PERMISSION) },
+                    onCameraNavigate = { onNavigate(Routes.CAMERA) }
+                )
+            }
             composable(BottomTab.Challenge.route) {
                 GalleryScreen(
                     onChallengeClick = { onNavigate(Routes.CHALLENGE_DETAIL) },
                 )
             }
             composable(BottomTab.Party.route) {
-                PartyRoute(onBottomBarVisibilityChange = { showBottomBar = it })
+                PartyRoute(
+                    onBottomBarVisibilityChange = { showBottomBar = it },
+                    onCameraPermissionRequired = { onNavigate(Routes.CAMERA_PERMISSION) },
+                    onCameraNavigate = { onNavigate(Routes.CAMERA) }
+                )
             }
             composable(BottomTab.Record.route) {
                 RecordScreen(
