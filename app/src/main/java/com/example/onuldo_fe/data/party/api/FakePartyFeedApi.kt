@@ -1,30 +1,23 @@
 package com.example.onuldo_fe.data.party.api
 
-import com.example.onuldo_fe.data.party.dto.PartyProgressDto
 import com.example.onuldo_fe.data.party.dto.PartyFeedDto
-import com.example.onuldo_fe.data.party.dummy.PartyFeedDummyData
 import com.example.onuldo_fe.data.party.dummy.FakePartyFeedState
+import com.example.onuldo_fe.data.party.dummy.PartyFeedDummyData
 
 class FakePartyFeedApi : PartyFeedApi {
-    override suspend fun getPartyFeed(partyId: String): PartyFeedDto {
+    override suspend fun getPartyFeed(partyId: Long): PartyFeedDto {
         val party = FakePartyFeedState.get(partyId)
-        val totalMemberCount = party.memberCount.coerceAtLeast(0)
-        val visibleFeedItemCount = totalMemberCount.coerceAtMost(PartyFeedDummyData.feedItems.size)
-        val items = when {
-            visibleFeedItemCount == 0 -> emptyList()
-            visibleFeedItemCount == 1 -> listOf(PartyFeedDummyData.feedItems.last())
-            else -> PartyFeedDummyData.feedItems.take(visibleFeedItemCount - 1) +
-                PartyFeedDummyData.feedItems.last()
-        }
+        val total = party.memberCount.coerceAtLeast(0)
+        val members = PartyFeedDummyData.feedItems.take(total.coerceAtMost(PartyFeedDummyData.feedItems.size))
+        val verified = members.count { it.isVerifiedToday }
         return PartyFeedDto(
             partyId = partyId,
-            partyName = party.partyName,
-            challengeName = party.challengeName,
-            progress = PartyProgressDto(
-                completedMemberCount = (visibleFeedItemCount - 1).coerceAtLeast(0),
-                totalMemberCount = totalMemberCount
-            ),
-            items = items
+            name = party.partyName,
+            challengeTitle = party.challengeName,
+            progressRate = if (total == 0) 0.0 else verified.toDouble() / total,
+            verifiedMemberCount = verified,
+            totalMemberCount = total,
+            members = members
         )
     }
 }
