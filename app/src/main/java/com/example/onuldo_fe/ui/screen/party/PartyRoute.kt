@@ -182,6 +182,8 @@ fun PartyRoute(
                 DetailScreen(
                     challenge = challenge,
                     onBackClick = { screen = PartyScreen.ChallengeSelect },
+                    // 파티 생성 경로에서는 즉시 참여하지 않고 선택 결과를 생성 화면으로 전달
+                    ctaText = "이 챌린지로 파티 만들기",
                     onJoinClick = {
                         // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정
                         selectedChallenge = pendingChallenge

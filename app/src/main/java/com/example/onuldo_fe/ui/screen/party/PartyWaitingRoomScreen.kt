@@ -109,35 +109,21 @@ fun PartyWaitingRoomScreen(
                 Spacer(Modifier.height(8.dp))
             }
 
+        }
+
+        Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
             Text(
-                text = "전원이 모이면 파티장이 시작할 수 있어요",
-                modifier = Modifier.fillMaxWidth(),
-                color = DarkBrown50,
+                text = errorMessage ?: "전원이 모이면 파티장이 시작할 수 있어요",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .offset(y = 6.dp),
+                color = if (errorMessage == null) DarkBrown50 else Persimmon,
                 fontFamily = Pretendard,
                 fontSize = 11.sp,
                 lineHeight = 13.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
-        }
-
-        Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                errorMessage?.let {
-                    Text(
-                        it,
-                        Modifier.fillMaxWidth().padding(top = 4.dp),
-                        color = Persimmon,
-                        fontFamily = Pretendard,
-                        fontSize = 11.sp,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                    )
-                }
-            }
             Button(
                 onClick = {
                     when {
