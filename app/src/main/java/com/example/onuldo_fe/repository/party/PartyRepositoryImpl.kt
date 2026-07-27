@@ -5,6 +5,7 @@ import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyMemberDto
 import com.example.onuldo_fe.data.party.dto.PartySummaryDto
 import com.example.onuldo_fe.data.party.dto.PartyWaitingRoomDto
+import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
 import com.example.onuldo_fe.model.party.CreatePartyCommand
 import com.example.onuldo_fe.model.party.CreatedParty
 import com.example.onuldo_fe.model.party.PartyLifecycleStatus
@@ -13,6 +14,10 @@ import com.example.onuldo_fe.model.party.PartyMemberReadyStatus
 import com.example.onuldo_fe.model.party.PartyRole
 import com.example.onuldo_fe.model.party.PartySummary
 import com.example.onuldo_fe.model.party.PartyWaitingRoom
+import com.example.onuldo_fe.model.party.PartySettlementMember
+import com.example.onuldo_fe.model.party.PartySettlementMemberStatus
+import com.example.onuldo_fe.model.party.PartySettlementResult
+import com.example.onuldo_fe.model.party.PartySettlementStatus
 
 // 파티 생성·대기방 API 요청과 DTO의 도메인 모델 변환 담당
 class PartyRepositoryImpl(private val api: PartyApi) : PartyRepository {
@@ -45,7 +50,39 @@ class PartyRepositoryImpl(private val api: PartyApi) : PartyRepository {
 
     override suspend fun startParty(partyId: String): PartySummary =
         api.startParty(partyId).toModel()
+
+    override suspend fun getSettlementResult(partyId: String): PartySettlementResult =
+        api.getSettlementResult(partyId).toModel()
 }
+
+// 서버 정산 상태와 파티원 결과를 앱에서 사용하는 도메인 모델로 변환
+internal fun PartySettlementResultDto.toModel() = PartySettlementResult(
+    partyId = partyId,
+    status = when (overallStatus) {
+        "ALL_SUCCESS" -> PartySettlementStatus.AllSuccess
+        "PARTIAL_SUCCESS" -> PartySettlementStatus.PartialSuccess
+        "ALL_FAILED" -> PartySettlementStatus.AllFailed
+        else -> error("Unsupported settlement status: $overallStatus")
+    },
+    title = overallTitle,
+    description = overallDescription,
+    refundAmount = myResult.depositRefundAmount,
+    adjustmentAmount = myResult.bonusAmount,
+    members = memberResults.map { member ->
+        PartySettlementMember(
+            memberId = member.memberId,
+            name = member.name,
+            profileImageUrl = member.profileImageUrl,
+            defaultCharacterId = member.defaultCharacterId,
+            status = if (member.isSuccess) {
+                PartySettlementMemberStatus.Completed
+            } else {
+                PartySettlementMemberStatus.Incomplete
+            },
+            adjustmentAmount = member.bonusAmount
+        )
+    }
+)
 
 // 대기방 응답과 중첩된 파티원 DTO를 도메인 모델로 함께 변환
 private fun PartyWaitingRoomDto.toModel() = PartyWaitingRoom(

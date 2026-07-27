@@ -25,32 +25,12 @@ import com.example.onuldo_fe.viewmodel.party.PartyReadyStatus
 
 @Composable
 fun PartyWaitingMemberCard(member: PartyMemberUi, modifier: Modifier = Modifier) {
-    Row(
+    PartyMemberCard(
+        name = member.name,
+        profileImageUrl = member.profileImageUrl,
+        defaultCharacterId = member.defaultCharacterId,
         modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .background(White, RoundedCornerShape(12.dp))
-            .border(1.dp, DarkBrown40, RoundedCornerShape(12.dp))
-            .padding(horizontal = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(Modifier.size(40.dp).background(Persimmon10, CircleShape).border(1.dp, Persimmon, CircleShape), contentAlignment = Alignment.Center) {
-            PartyNetworkImage(
-                imageUrl = member.profileImageUrl,
-                fallbackImageRes = partyCharacterDrawable(member.defaultCharacterId),
-                contentDescription = "${member.name} 프로필",
-                modifier = Modifier.width(28.dp).height(33.dp).clip(CircleShape)
-            )
-        }
-        Text(
-            member.name,
-            Modifier.weight(1f).padding(start = 12.dp),
-            color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 12.sp,
-            lineHeight = 22.sp,
-            fontWeight = FontWeight.Bold
-        )
         when {
             member.role == PartyMemberRole.Leader -> PartyWaitingStatusChip("파티장", Persimmon10, Persimmon)
             member.readyStatus == PartyReadyStatus.Ready -> PartyWaitingStatusChip("준비완료", Persimmon, SourCream)

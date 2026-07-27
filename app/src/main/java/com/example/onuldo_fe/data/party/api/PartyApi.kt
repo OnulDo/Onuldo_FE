@@ -4,6 +4,7 @@ import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartySummaryDto
 import com.example.onuldo_fe.data.party.dto.PartyWaitingRoomDto
+import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
 
 interface PartyApi {
     suspend fun getParties(): List<PartySummaryDto>
@@ -12,4 +13,5 @@ interface PartyApi {
     suspend fun readyParty(partyId: String): PartyWaitingRoomDto
     suspend fun leaveParty(partyId: String)
     suspend fun startParty(partyId: String): PartySummaryDto
+    suspend fun getSettlementResult(partyId: String): PartySettlementResultDto
 }

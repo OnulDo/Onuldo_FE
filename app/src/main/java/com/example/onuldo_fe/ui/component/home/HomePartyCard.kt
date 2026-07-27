@@ -1,7 +1,6 @@
 package com.example.onuldo_fe.ui.component.home
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -21,10 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,6 +30,8 @@ import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomePartyChallenge
+import com.example.onuldo_fe.model.home.HomePartyMember
+import com.example.onuldo_fe.ui.component.party.PartyMemberProfileImage
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown10
@@ -133,31 +131,28 @@ fun HomePartyCard(
         Spacer(Modifier.weight(1f))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                // 전체 인원만큼 표시하고 왼쪽부터 인증 성공 인원 적용
-                repeat(partyChallenge.totalMemberCount) { index ->
-                    val completed = index < partyChallenge.completedMemberCount
-                    Box(
-                        Modifier
-                            .size(33.dp)
-                            .background(
-                                if (completed) Persimmon10 else Persimmon.copy(alpha = 0.1f),
-                                CircleShape
-                            )
-                            .then(if (completed) Modifier.border(BorderStroke(1.dp, Persimmon), CircleShape) else Modifier),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(
-                                if (completed) R.drawable.home_run_light_icon
-                                else R.drawable.home_run_dark_icon
-                            ),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(31.dp)
-                                .alpha(if (completed) 1f else 0.5f),
-                            contentScale = ContentScale.Fit
+                val members = partyChallenge.members.ifEmpty {
+                    // 실제 API 연결 전에도 현재 인원 수와 인증 상태를 확인할 수 있도록 임시 멤버 구성
+                    List(partyChallenge.totalMemberCount) { index ->
+                        HomePartyMember(
+                            memberId = "preview-member-$index",
+                            profileImageUrl = null,
+                            defaultCharacterId = (index % 9) + 1,
+                            isVerifiedToday = index < partyChallenge.completedMemberCount
                         )
                     }
+                }
+                members.forEach { member ->
+                    PartyMemberProfileImage(
+                        profileImageUrl = member.profileImageUrl,
+                        defaultCharacterId = member.defaultCharacterId,
+                        contentDescription = null,
+                        containerSize = 33.dp,
+                        characterWidth = 28.dp,
+                        characterHeight = 33.dp,
+                        showBorder = member.isVerifiedToday,
+                        dimmed = !member.isVerifiedToday
+                    )
                 }
             }
             PartyAction(partyChallenge, onVerifyClick)

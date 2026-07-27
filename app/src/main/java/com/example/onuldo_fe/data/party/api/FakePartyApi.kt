@@ -4,7 +4,9 @@ import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartySummaryDto
 import com.example.onuldo_fe.data.party.dto.PartyWaitingRoomDto
+import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
 import com.example.onuldo_fe.data.party.dummy.FakePartyStore
+import com.example.onuldo_fe.data.party.dummy.PartySettlementDummyData
 
 // 실제 서버 연동 전 파티 생성·대기방·시작·이탈 흐름을 메모리 저장소로 테스트
 // Retrofit API 구현 준비 후 PartyRepositoryProvider에서 이 구현체만 교체
@@ -26,4 +28,8 @@ class FakePartyApi : PartyApi {
 
     // 시작 조건 검증 후 파티를 진행 중 상태로 변경
     override suspend fun startParty(partyId: String): PartySummaryDto = FakePartyStore.start(partyId)
+
+    // partyId에 따라 전원 성공·일부 성공·전원 실패 정산 결과 반환
+    override suspend fun getSettlementResult(partyId: String): PartySettlementResultDto =
+        PartySettlementDummyData.get(partyId)
 }

@@ -25,6 +25,7 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.viewmodel.party.PartyAction
 import com.example.onuldo_fe.viewmodel.party.PartyFeedViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyInviteViewModel
+import com.example.onuldo_fe.viewmodel.party.PartySettlementViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyMemberRole
 import com.example.onuldo_fe.viewmodel.party.PartyReadyStatus
 import com.example.onuldo_fe.viewmodel.party.PartyStatus
@@ -48,6 +49,7 @@ fun PartyRoute(
     partyViewModel: PartyViewModel = viewModel(),
     inviteViewModel: PartyInviteViewModel = viewModel(),
     partyFeedViewModel: PartyFeedViewModel = viewModel(),
+    partySettlementViewModel: PartySettlementViewModel = viewModel(),
     onBottomBarVisibilityChange: (Boolean) -> Unit = {},
     onCameraPermissionRequired: () -> Unit = {},
     onCameraNavigate: () -> Unit = {}
@@ -247,7 +249,25 @@ fun PartyRoute(
             onVerifyClick = ::handleVerifyClick
         )
 
-        PartyScreen.Settlement -> PartySettlementScreen(onBack = { screen = PartyScreen.List })
+        PartyScreen.Settlement -> {
+            LaunchedEffect(feedPartyId) {
+                partySettlementViewModel.loadSettlementResult(feedPartyId)
+            }
+            val settlementState = partySettlementViewModel.uiState
+            val settlementResult = settlementState.result
+            if (settlementResult == null) {
+                PartyLoadingScreen(
+                    errorMessage = settlementState.errorMessage,
+                    onRetry = { partySettlementViewModel.loadSettlementResult(feedPartyId) },
+                    onBack = { screen = PartyScreen.List }
+                )
+            } else {
+                PartySettlementScreen(
+                    result = settlementResult,
+                    onBack = { screen = PartyScreen.List }
+                )
+            }
+        }
     }
 
     if (showInviteDialog) {

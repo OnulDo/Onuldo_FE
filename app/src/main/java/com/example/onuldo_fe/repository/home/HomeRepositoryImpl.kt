@@ -10,6 +10,7 @@ import com.example.onuldo_fe.model.home.HomeChallenge
 import com.example.onuldo_fe.model.home.HomeCompletedChallenge
 import com.example.onuldo_fe.model.home.HomeData
 import com.example.onuldo_fe.model.home.HomePartyChallenge
+import com.example.onuldo_fe.model.home.HomePartyMember
 import com.example.onuldo_fe.model.home.SettlementBanner
 import com.example.onuldo_fe.model.home.TodayChallenge
 import java.time.LocalTime
@@ -76,7 +77,15 @@ private fun HomePartyChallengeDto.toModel() = HomePartyChallenge(
     status = status.toChallengeStatus(),
     verifiedAt = verifiedAt?.let(LocalTime::parse),
     remainingMinutes = remainingMinutes,
-    canVerify = canVerify
+    canVerify = canVerify,
+    members = members.map {
+        HomePartyMember(
+            memberId = it.memberId,
+            profileImageUrl = it.profileImageUrl,
+            defaultCharacterId = it.defaultCharacterId,
+            isVerifiedToday = it.isVerifiedToday
+        )
+    }
 )
 
 private fun HomeCompletedChallengeDto.toModel(): HomeCompletedChallenge = when (type) {

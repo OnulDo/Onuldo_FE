@@ -11,5 +11,14 @@ data class HomePartyChallengeDto(
     val status: String = "NEED_CERTIFICATION",       // 오늘 인증 상태
     val verifiedAt: String? = null,                   // 인증 완료 시각
     val remainingMinutes: Int? = null,                // 인증 마감까지 남은 시간
-    val canVerify: Boolean = true                     // 현재 인증 가능 여부
+    val canVerify: Boolean = true,                    // 현재 인증 가능 여부
+    val members: List<HomePartyMemberDto> = emptyList() // 파티원 프로필과 오늘 인증 상태
+)
+
+// 홈 파티 카드에 표시할 파티원 프로필 응답
+data class HomePartyMemberDto(
+    val memberId: String,
+    val profileImageUrl: String? = null,
+    val defaultCharacterId: Int? = null,
+    val isVerifiedToday: Boolean
 )
