@@ -27,7 +27,9 @@ fun CameraPreview(
         modifier = modifier,
         factory = { ctx ->
 
-            val previewView = PreviewView(ctx)
+            val previewView = PreviewView(ctx).apply {
+                implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+            }
 
             val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
 
