@@ -1,5 +1,8 @@
 package com.example.onuldo_fe.ui.screen.party
 
+import android.Manifest
+import android.content.pm.PackageManager
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -8,8 +11,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.party.dummy.PartyTestConfig
 import com.example.onuldo_fe.model.party.CreatePartyCommand
@@ -44,8 +49,11 @@ fun PartyRoute(
     partyViewModel: PartyViewModel = viewModel(),
     inviteViewModel: PartyInviteViewModel = viewModel(),
     partyFeedViewModel: PartyFeedViewModel = viewModel(),
-    onBottomBarVisibilityChange: (Boolean) -> Unit = {}
+    onBottomBarVisibilityChange: (Boolean) -> Unit = {},
+    onCameraPermissionRequired: () -> Unit = {},
+    onCameraNavigate: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     // 현재 화면과 다이얼로그 노출 여부는 Route에서만 관리
     var screen by remember { mutableStateOf(PartyScreen.List) }
     var showInviteDialog by remember { mutableStateOf(false) }
@@ -69,6 +77,19 @@ fun PartyRoute(
     val isCurrentUserLeader = currentMember?.role == PartyMemberRole.Leader
     val isCurrentUserReady = currentMember?.readyStatus == PartyReadyStatus.Ready
 
+    fun handleVerifyClick() {
+        val isCameraPermissionGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (isCameraPermissionGranted) {
+            onCameraNavigate()
+        } else {
+            onCameraPermissionRequired()
+        }
+    }
+
     LaunchedEffect(screen) {
         onBottomBarVisibilityChange(screen == PartyScreen.List)
     }
@@ -80,6 +101,7 @@ fun PartyRoute(
         PartyScreen.List -> PartyListScreen(
             // 정책상 파티 홈에는 모집 중 파티를 제외하고 진행 중 파티만 노출
             parties = partyState.parties.filter { it.status == PartyStatus.InProgress },
+            onVerifyClick = ::handleVerifyClick,
             isLoading = partyState.isListLoading,
             errorMessage = partyState.errorMessage,
             onRetry = partyViewModel::loadParties,

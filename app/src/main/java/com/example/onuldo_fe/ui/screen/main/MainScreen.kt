@@ -60,7 +60,11 @@ fun MainScreen(
                 )
             }
             composable(BottomTab.Party.route) {
-                PartyRoute(onBottomBarVisibilityChange = { showBottomBar = it })
+                PartyRoute(
+                    onBottomBarVisibilityChange = { showBottomBar = it },
+                    onCameraPermissionRequired = { onNavigate(Routes.CAMERA_PERMISSION) },
+                    onCameraNavigate = { onNavigate(Routes.CAMERA) }
+                )
             }
             composable(BottomTab.Record.route) {
                 RecordScreen(
