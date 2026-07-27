@@ -143,6 +143,9 @@ fun OnuldoApp() {
                 onPhotoCaptured = { uri ->
                     cameraViewModel.setImageUri(uri)
                     navController.navigate(Routes.PHOTO_PREVIEW)
+                },
+                onCloseClick = {
+                    navController.popBackStack()
                 }
             )
         }

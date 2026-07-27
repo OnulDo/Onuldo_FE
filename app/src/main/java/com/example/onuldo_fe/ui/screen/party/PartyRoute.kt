@@ -2,7 +2,7 @@ package com.example.onuldo_fe.ui.screen.party
 
 import android.Manifest
 import android.content.pm.PackageManager
-
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -12,7 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -237,10 +236,12 @@ fun PartyRoute(
             challengeName = partyFeedViewModel.uiState.challengeName,
             progress = partyFeedViewModel.uiState.progress,
             feedItems = partyFeedViewModel.uiState.feedItems,
+            currentUserId = partyViewModel.currentUserId,
             isLoading = partyFeedViewModel.uiState.isLoading,
             errorMessage = partyFeedViewModel.uiState.errorMessage,
             onRetry = { partyFeedViewModel.loadPartyFeed(feedPartyId) },
-            onBack = { screen = PartyScreen.List }
+            onBack = { screen = PartyScreen.List },
+            onVerifyClick = ::handleVerifyClick
         )
 
         PartyScreen.Settlement -> PartySettlementScreen(onBack = { screen = PartyScreen.List })

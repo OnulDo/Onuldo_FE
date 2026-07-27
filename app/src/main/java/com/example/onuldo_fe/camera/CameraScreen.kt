@@ -29,13 +29,14 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 fun CameraScreen(
     category: String,
     title: String,
-    onPhotoCaptured: (Uri?) -> Unit
-) {
+    onPhotoCaptured: (Uri?) -> Unit,
+    onCloseClick: () -> Unit
+){
     val imageCapture = remember {
         ImageCapture.Builder().build()
     }
     var showVerificationNotice by remember { mutableStateOf(false) }
-
+    
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -54,7 +55,7 @@ fun CameraScreen(
             category = category,
             title = title,
             showFlashButton = true,
-            onCloseClick = {},
+            onCloseClick = onCloseClick,
             onFlashClick = {  }
         )
         Box(
@@ -105,6 +106,7 @@ fun CameraScreen(
                         }
                     )
                 }
+
             )
         }
 
@@ -116,7 +118,6 @@ fun CameraScreen(
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 private fun CameraScreenPreview() {
@@ -124,7 +125,8 @@ private fun CameraScreenPreview() {
         CameraScreen(
             category = "외국어",
             title = "영단어 100개 암기",
-            onPhotoCaptured = {}
+            onPhotoCaptured = {},
+            onCloseClick = {}
         )
     }
 }
