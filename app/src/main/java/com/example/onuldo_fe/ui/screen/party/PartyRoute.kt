@@ -2,6 +2,7 @@ package com.example.onuldo_fe.ui.screen.party
 
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -12,7 +13,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.party.dummy.PartyTestConfig
@@ -100,6 +100,7 @@ fun PartyRoute(
         PartyScreen.List -> PartyListScreen(
             // 정책상 파티 홈에는 모집 중 파티를 제외하고 진행 중 파티만 노출
             parties = partyState.parties.filter { it.status == PartyStatus.InProgress },
+            onVerifyClick = ::handleVerifyClick,
             isLoading = partyState.isListLoading,
             errorMessage = partyState.errorMessage,
             onRetry = partyViewModel::loadParties,
