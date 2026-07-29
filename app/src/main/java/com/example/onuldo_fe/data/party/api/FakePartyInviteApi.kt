@@ -9,7 +9,7 @@ import com.example.onuldo_fe.model.party.PartyJoinError
 
 class FakePartyInviteApi : PartyInviteApi {
     override suspend fun joinParty(request: PartyJoinRequestDto): PartyWaitingRoomDto {
-        val code = request.inviteCode.uppercase()
+        val code = request.inviteCode.trim().uppercase()
         when (code) {
             PartyInviteDummyData.STARTED_CODE -> throw FakePartyJoinException(PartyJoinError.AlreadyStarted)
             PartyInviteDummyData.FULL_CODE -> throw FakePartyJoinException(PartyJoinError.Full)
