@@ -40,8 +40,8 @@ import com.example.onuldo_fe.model.party.PartySettlementMemberStatus
 import com.example.onuldo_fe.model.party.PartySettlementResult
 import com.example.onuldo_fe.model.party.PartySettlementStatus
 import com.example.onuldo_fe.repository.party.toModel
-import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.screen.party.components.PartyMemberCard
+import com.example.onuldo_fe.ui.screen.party.components.PartyTopBar
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown50
@@ -66,21 +66,7 @@ fun PartySettlementScreen(
     val content = result.status.content()
 
     Column(modifier.fillMaxSize().background(SourCream)) {
-        Box(Modifier.fillMaxWidth().height(56.dp)) {
-            OnulDoBackButton(
-                modifier = Modifier.align(Alignment.CenterStart).padding(start = 4.dp),
-                onClick = onBack
-            )
-            Text(
-                text = "파티 정산 결과",
-                modifier = Modifier.align(Alignment.CenterStart).padding(start = 44.dp),
-                color = BlackBrown,
-                fontFamily = Pretendard,
-                fontSize = 17.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        PartyTopBar(title = "파티 정산 결과", onBack = onBack)
 
         LazyColumn(
             modifier = Modifier.weight(1f).fillMaxWidth(),

@@ -23,9 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.screen.party.components.PartyInsufficientPointDialog
 import com.example.onuldo_fe.ui.screen.party.components.PartyInviteCodeCard
+import com.example.onuldo_fe.ui.screen.party.components.PartyTopBar
 import com.example.onuldo_fe.ui.screen.party.components.PartyWaitingEmptySlotCard
 import com.example.onuldo_fe.ui.screen.party.components.PartyWaitingMemberCard
 import com.example.onuldo_fe.ui.theme.*
@@ -51,28 +51,7 @@ fun PartyWaitingRoomScreen(
     BackHandler(onBack = onBack)
 
     Column(Modifier.fillMaxSize().background(SourCream)) {
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(HeaderCream)
-        ) {
-            OnulDoBackButton(
-                modifier = Modifier.align(Alignment.CenterStart),
-                onClick = onBack
-            )
-            Text(
-                "파티 대기방",
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = 48.dp),
-                color = BlackBrown,
-                fontFamily = Pretendard,
-                fontSize = 17.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        PartyTopBar(title = "파티 대기방", onBack = onBack)
 
         Column(
             modifier = Modifier

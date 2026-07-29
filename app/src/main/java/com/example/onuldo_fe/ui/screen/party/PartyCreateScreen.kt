@@ -20,12 +20,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.screen.party.components.PartyCapacitySelector
 import com.example.onuldo_fe.ui.screen.party.components.PartyChallengeSelector
 import com.example.onuldo_fe.ui.screen.party.components.PartyInsufficientPointDialog
 import com.example.onuldo_fe.ui.screen.party.components.PartyNameTextField
 import com.example.onuldo_fe.ui.screen.party.components.PartyOptionSelector
+import com.example.onuldo_fe.ui.screen.party.components.PartyTopBar
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.theme.*
 import java.text.Normalizer
@@ -63,28 +63,7 @@ fun PartyCreateScreen(
         selectedDeposit >= 0
 
     Column(Modifier.fillMaxSize().background(SourCream)) {
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(HeaderCream)
-        ) {
-            OnulDoBackButton(
-                modifier = Modifier.align(Alignment.CenterStart),
-                onClick = onBack
-            )
-            Text(
-                "파티 만들기",
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = 48.dp),
-                color = BlackBrown,
-                fontFamily = Pretendard,
-                fontSize = 17.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        PartyTopBar(title = "파티 만들기", onBack = onBack)
         Column(
             Modifier
                 .weight(1f)
@@ -123,16 +102,16 @@ fun PartyCreateScreen(
             if (selectedChallenge != null) {
                 Spacer(Modifier.height(19.dp))
                 SectionTitle("진행 기간", 14)
-                Spacer(Modifier.height(5.dp))
+                Spacer(Modifier.height(7.dp))
                 PartyOptionSelector(periods, selectedPeriod, onSelect = { selectedPeriod = it }, textSize = 14.sp)
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(23.dp))
                 SectionTitle("도전금", 14)
-                Spacer(Modifier.height(5.dp))
+                Spacer(Modifier.height(7.dp))
                 PartyOptionSelector(deposits.map { "%,dP".format(it) }, selectedDeposit, onSelect = { selectedDeposit = it }, textSize = 12.sp)
             }
             Spacer(Modifier.height(if (selectedChallenge == null) 26.dp else 19.dp))
             SectionTitle("모집 인원 (2~5명)", 12)
-            Spacer(Modifier.height(5.dp))
+            Spacer(Modifier.height(8.dp))
             PartyCapacitySelector(capacity = capacity, onCapacityChange = onCapacityChange)
             Spacer(Modifier.height(16.dp))
         }
