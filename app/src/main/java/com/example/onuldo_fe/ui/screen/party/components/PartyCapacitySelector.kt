@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.component.party
+package com.example.onuldo_fe.ui.screen.party.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -51,17 +54,45 @@ fun PartyCapacitySelector(
         CapacityControlIcon(isPlus = false, enabled = capacity > minCapacity) {
             onCapacityChange((capacity - 1).coerceAtLeast(minCapacity))
         }
-        Text("$capacity 명", Modifier.weight(1f), color = BlackBrown, fontFamily = Pretendard, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-        CapacityControlIcon(isPlus = true, enabled = capacity < maxCapacity) {
+        Text(
+            "$capacity 명",
+            Modifier.weight(1f),
+            color = BlackBrown,
+            fontFamily = Pretendard,
+            fontSize = 17.sp,
+            lineHeight = 20.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+        CapacityControlIcon(
+            isPlus = true,
+            enabled = capacity < maxCapacity,
+            modifier = Modifier.offset(x = (-2).dp)
+        ) {
             onCapacityChange((capacity + 1).coerceAtMost(maxCapacity))
         }
     }
 }
 
 @Composable
-private fun CapacityControlIcon(isPlus: Boolean, enabled: Boolean, onClick: () -> Unit) {
+private fun CapacityControlIcon(
+    isPlus: Boolean,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     val color = if (isPlus) Persimmon else DarkBrown70
-    Canvas(Modifier.size(25.dp).clickable(enabled = enabled, onClick = onClick)) {
+    val accessibilityLabel = if (isPlus) "인원 늘리기" else "인원 줄이기"
+    Canvas(
+        modifier
+            .size(25.dp)
+            .clickable(
+                enabled = enabled,
+                onClickLabel = accessibilityLabel,
+                onClick = onClick
+            )
+            .semantics { contentDescription = accessibilityLabel }
+    ) {
         val alpha = if (enabled) 1f else 0.25f
         drawCircle(color.copy(alpha = alpha), style = Stroke(width = 2.dp.toPx()))
         drawLine(color.copy(alpha = alpha), Offset(size.width * 0.29f, size.height * 0.5f), Offset(size.width * 0.71f, size.height * 0.5f), strokeWidth = 2.dp.toPx())

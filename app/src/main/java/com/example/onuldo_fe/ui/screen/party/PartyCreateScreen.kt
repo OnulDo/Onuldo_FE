@@ -20,12 +20,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.onuldo_fe.ui.component.OnulDoBackButton
-import com.example.onuldo_fe.ui.component.party.PartyCapacitySelector
-import com.example.onuldo_fe.ui.component.party.PartyChallengeSelector
-import com.example.onuldo_fe.ui.component.party.PartyInsufficientPointDialog
-import com.example.onuldo_fe.ui.component.party.PartyNameTextField
-import com.example.onuldo_fe.ui.component.party.PartyOptionSelector
+import com.example.onuldo_fe.ui.screen.party.components.PartyCapacitySelector
+import com.example.onuldo_fe.ui.screen.party.components.PartyChallengeSelector
+import com.example.onuldo_fe.ui.screen.party.components.PartyInsufficientPointDialog
+import com.example.onuldo_fe.ui.screen.party.components.PartyNameTextField
+import com.example.onuldo_fe.ui.screen.party.components.PartyOptionSelector
+import com.example.onuldo_fe.ui.screen.party.components.PartyTopBar
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.theme.*
 import java.text.Normalizer
@@ -43,7 +43,8 @@ fun PartyCreateScreen(
     availablePoint: Int = 50_000,
     onChargePoint: () -> Unit = {},
     isSubmitting: Boolean = false,
-    errorMessage: String? = null
+    errorMessage: String? = null,
+    selectedChallengeCategoryLabel: String? = null
 ) {
     val periods = listOf("2주", "4주", "8주", "12주")
     val deposits = listOf(10_000, 20_000, 30_000, 50_000)
@@ -62,10 +63,7 @@ fun PartyCreateScreen(
         selectedDeposit >= 0
 
     Column(Modifier.fillMaxSize().background(SourCream)) {
-        Row(Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically) {
-            OnulDoBackButton(Modifier.padding(start = 20.dp), onClick = onBack)
-            Text("파티 만들기", Modifier.padding(start = 14.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
+        PartyTopBar(title = "파티 만들기", onBack = onBack)
         Column(
             Modifier
                 .weight(1f)
@@ -74,8 +72,8 @@ fun PartyCreateScreen(
                 .padding(horizontal = 20.dp)
         ) {
             Spacer(Modifier.height(47.dp))
-            SectionTitle("파티 이름", 13)
-            Spacer(Modifier.height(10.dp))
+            SectionTitle("파티 이름", 12)
+            Spacer(Modifier.height(7.dp))
             PartyNameTextField(
                 value = partyName,
                 onValueChange = {
@@ -93,23 +91,27 @@ fun PartyCreateScreen(
                     fontSize = 11.sp
                 )
             }
-            Spacer(Modifier.height(19.dp))
-            SectionTitle("함께할 챌린지", 13)
-            Spacer(Modifier.height(10.dp))
-            PartyChallengeSelector(challenge = selectedChallenge, onClick = onChallengeClick)
+            Spacer(Modifier.height(16.dp))
+            SectionTitle("함께할 챌린지", 12)
+            Spacer(Modifier.height(8.dp))
+            PartyChallengeSelector(
+                challenge = selectedChallenge,
+                categoryLabel = selectedChallengeCategoryLabel,
+                onClick = onChallengeClick
+            )
             if (selectedChallenge != null) {
                 Spacer(Modifier.height(19.dp))
                 SectionTitle("진행 기간", 14)
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(7.dp))
                 PartyOptionSelector(periods, selectedPeriod, onSelect = { selectedPeriod = it }, textSize = 14.sp)
-                Spacer(Modifier.height(19.dp))
+                Spacer(Modifier.height(23.dp))
                 SectionTitle("도전금", 14)
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(7.dp))
                 PartyOptionSelector(deposits.map { "%,dP".format(it) }, selectedDeposit, onSelect = { selectedDeposit = it }, textSize = 12.sp)
             }
-            Spacer(Modifier.height(if (selectedChallenge == null) 27.dp else 19.dp))
-            SectionTitle("모집 인원 (2~5명)", 13)
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(if (selectedChallenge == null) 26.dp else 19.dp))
+            SectionTitle("모집 인원 (2~5명)", 12)
+            Spacer(Modifier.height(8.dp))
             PartyCapacitySelector(capacity = capacity, onCapacityChange = onCapacityChange)
             Spacer(Modifier.height(16.dp))
         }
@@ -141,9 +143,20 @@ fun PartyCreateScreen(
                 enabled = enabled && !isSubmitting,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 40.dp).height(52.dp),
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Persimmon, contentColor = SourCream, disabledContainerColor = DarkBrown10, disabledContentColor = DarkBrown)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Persimmon,
+                    contentColor = SourCream,
+                    disabledContainerColor = BlackBrown.copy(alpha = 0.1f),
+                    disabledContentColor = BlackBrown.copy(alpha = 0.2f)
+                )
             ) {
-                Text(if (isSubmitting) "만드는 중..." else "파티 만들기", fontFamily = Pretendard, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    if (isSubmitting) "만드는 중..." else "파티 만들기",
+                    fontFamily = Pretendard,
+                    fontSize = 17.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
@@ -161,7 +174,16 @@ fun PartyCreateScreen(
     }
 }
 
-@Composable private fun SectionTitle(text: String, size: Int) = Text(text, color = BlackBrown, fontFamily = Pretendard, fontSize = size.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.13).sp)
+@Composable
+private fun SectionTitle(text: String, size: Int) = Text(
+    text = text,
+    modifier = Modifier.padding(start = 4.dp),
+    color = BlackBrown,
+    fontFamily = Pretendard,
+    fontSize = size.sp,
+    lineHeight = 22.sp,
+    fontWeight = FontWeight.Bold
+)
 
 @Preview(name = "파티 생성 - 챌린지 미선택", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable private fun PartyCreateEmptyPreview() { OnulDo_FETheme { PartyCreateScreen("", {}, 5, {}, null, {}, {}, { _, _ -> }) } }

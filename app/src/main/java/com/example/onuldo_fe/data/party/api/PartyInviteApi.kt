@@ -1,7 +1,8 @@
 package com.example.onuldo_fe.data.party.api
 
-import com.example.onuldo_fe.model.party.PartyJoinResult
+import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
+import com.example.onuldo_fe.data.party.dto.PartyWaitingRoomDto
 
 interface PartyInviteApi {
-    suspend fun joinParty(inviteCode: String): PartyJoinResult
+    suspend fun joinParty(request: PartyJoinRequestDto): PartyWaitingRoomDto
 }

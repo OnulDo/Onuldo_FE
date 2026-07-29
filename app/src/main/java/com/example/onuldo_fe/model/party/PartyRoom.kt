@@ -27,7 +27,8 @@ data class PartyMember(
     val profileImageUrl: String?,              // 파티원 프로필 이미지 URL
     val role: PartyRole,                       // 파티장 또는 일반 파티원 권한
     val readyStatus: PartyMemberReadyStatus,   // 준비완료 대상 여부와 현재 준비 상태
-    val joinedOrder: Int                       // 방장 승계를 결정하는 파티 입장 순서
+    val joinedOrder: Int,                      // 방장 승계를 결정하는 파티 입장 순서
+    val defaultCharacterId: Int?               // 프로필 이미지가 없을 때 표시할 기본 캐릭터 ID
 )
 
 // 파티원 모집과 준비 상태를 표시할 대기방 정보

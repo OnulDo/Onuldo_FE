@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -61,7 +62,16 @@ fun MainScreen(
             composable(BottomTab.Party.route) {
                 PartyRoute(
                     onBottomBarVisibilityChange = { showBottomBar = it },
-                    onCameraNavigate = { onNavigate(Routes.CAMERA) }
+                    onCameraNavigate = { onNavigate(Routes.CAMERA) },
+                    onHomeNavigate = {
+                        navController.navigate(BottomTab.Home.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
             }
             composable(BottomTab.Record.route) {

@@ -1,6 +1,10 @@
 package com.example.onuldo_fe.ui.screen.party
 
 import android.Manifest
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -10,21 +14,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.party.dummy.PartyTestConfig
 import com.example.onuldo_fe.model.party.CreatePartyCommand
+import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
 import com.example.onuldo_fe.ui.component.PermissionDialogType
 import com.example.onuldo_fe.ui.component.PermissionSettingDialog
-import com.example.onuldo_fe.ui.component.party.InviteCodeDialog
-import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
+import com.example.onuldo_fe.ui.screen.party.components.InviteCodeDialog
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryScreen
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
@@ -32,6 +32,7 @@ import com.example.onuldo_fe.util.moveToAppSettings
 import com.example.onuldo_fe.viewmodel.party.PartyAction
 import com.example.onuldo_fe.viewmodel.party.PartyFeedViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyInviteViewModel
+import com.example.onuldo_fe.viewmodel.party.PartySettlementViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyMemberRole
 import com.example.onuldo_fe.viewmodel.party.PartyReadyStatus
 import com.example.onuldo_fe.viewmodel.party.PartyStatus
@@ -55,16 +56,20 @@ fun PartyRoute(
     partyViewModel: PartyViewModel = viewModel(),
     inviteViewModel: PartyInviteViewModel = viewModel(),
     partyFeedViewModel: PartyFeedViewModel = viewModel(),
+    partySettlementViewModel: PartySettlementViewModel = viewModel(),
     onBottomBarVisibilityChange: (Boolean) -> Unit = {},
-    onCameraNavigate: () -> Unit = {}
+    onCameraNavigate: () -> Unit = {},
+    onHomeNavigate: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+
     // 현재 화면과 다이얼로그 노출 여부는 Route에서만 관리
     var screen by remember { mutableStateOf(PartyScreen.List) }
     var showInviteDialog by remember { mutableStateOf(false) }
-    var showCameraPermissionDialog by rememberSaveable { mutableStateOf(false) }
-
+    var showCameraPermissionDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
     // pendingChallenge는 상세 확인 중인 임시 선택, selectedChallenge는 생성 화면에서 확정된 선택
     var selectedChallenge by remember { mutableStateOf<Challenge?>(null) }
     var pendingChallenge by remember { mutableStateOf<Challenge?>(null) }
@@ -74,7 +79,7 @@ fun PartyRoute(
     var capacity by remember { mutableIntStateOf(5) }
 
     // 피드 재조회와 대기방 오류 재시도에 사용할 마지막 partyId 보관
-    var feedPartyId by remember { mutableStateOf("party-001") }
+    var feedPartyId by remember { mutableStateOf("1") }
     var waitingPartyId by remember { mutableStateOf<String?>(null) }
 
     // 로그인 사용자와 대기방 멤버 ID를 비교해 파티장/파티원 전용 UI 결정
@@ -117,7 +122,9 @@ fun PartyRoute(
     }
 
     LaunchedEffect(screen) {
-        onBottomBarVisibilityChange(screen == PartyScreen.List)
+        onBottomBarVisibilityChange(
+            screen == PartyScreen.List || screen == PartyScreen.Feed
+        )
     }
     DisposableEffect(Unit) {
         onDispose { onBottomBarVisibilityChange(true) }
@@ -158,6 +165,8 @@ fun PartyRoute(
             capacity = capacity,
             onCapacityChange = { capacity = it.coerceIn(2, 5) },
             selectedChallenge = selectedChallenge,
+            // API category Enum에 연결된 화면 표시명을 선택 카드의 카테고리 칩에 전달
+            selectedChallengeCategoryLabel = selectedChallenge?.category?.displayName,
             onChallengeClick = {
                 // 기존 확정 선택은 유지하고 새로 탐색할 임시 선택만 초기화
                 pendingChallenge = null
@@ -208,6 +217,8 @@ fun PartyRoute(
                 DetailScreen(
                     challenge = challenge,
                     onBackClick = { screen = PartyScreen.ChallengeSelect },
+                    // 파티 생성 경로에서는 즉시 참여하지 않고 선택 결과를 생성 화면으로 전달
+                    ctaText = "이 챌린지로 파티 만들기",
                     onJoinClick = {
                         // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정
                         selectedChallenge = pendingChallenge
@@ -245,12 +256,9 @@ fun PartyRoute(
                         partyViewModel.leaveParty { screen = PartyScreen.List }
                     },
                     onStartClick = {
-                        // 시작 API 성공 후 파티 피드 재조회
-                        partyViewModel.startParty { partyId ->
-                            // TODO 테스트 종료 후 명세대로 홈 이동으로 교체
-                            feedPartyId = partyId
-                            partyFeedViewModel.loadPartyFeed(partyId)
-                            screen = PartyScreen.Feed
+                        // 시작 API 성공 후 명세에 따라 홈 화면으로 이동
+                        partyViewModel.startParty {
+                            onHomeNavigate()
                         }
                     },
                     onReadyClick = partyViewModel::readyParty
@@ -271,7 +279,25 @@ fun PartyRoute(
             onVerifyClick = ::handleVerifyClick
         )
 
-        PartyScreen.Settlement -> PartySettlementScreen(onBack = { screen = PartyScreen.List })
+        PartyScreen.Settlement -> {
+            LaunchedEffect(feedPartyId) {
+                partySettlementViewModel.loadSettlementResult(feedPartyId.toLong())
+            }
+            val settlementState = partySettlementViewModel.uiState
+            val settlementResult = settlementState.result
+            if (settlementResult == null) {
+                PartyLoadingScreen(
+                    errorMessage = settlementState.errorMessage,
+                    onRetry = { partySettlementViewModel.loadSettlementResult(feedPartyId.toLong()) },
+                    onBack = { screen = PartyScreen.List }
+                )
+            } else {
+                PartySettlementScreen(
+                    result = settlementResult,
+                    onBack = { screen = PartyScreen.List }
+                )
+            }
+        }
     }
 
     if (showInviteDialog) {

@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.component.party
+package com.example.onuldo_fe.ui.screen.party.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.text.font.FontWeight
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.Persimmon
@@ -42,7 +43,12 @@ fun PartyNameTextField(
         onValueChange = { input -> onValueChange(input.take(20)) },
         modifier = modifier.fillMaxWidth(),
         singleLine = true,
-        textStyle = TextStyle(color = BlackBrown, fontFamily = Pretendard, fontSize = 13.sp),
+        textStyle = TextStyle(
+            color = BlackBrown,
+            fontFamily = Pretendard,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Normal
+        ),
         cursorBrush = SolidColor(Persimmon),
         decorationBox = { innerTextField ->
             Box(

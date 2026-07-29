@@ -76,6 +76,7 @@ private fun PartyFeedItem.toUiState() = PartyFeedItemUi(
     name = nickname,
     time = verifiedElapsedMinutes?.toElapsedTimeText() ?: "미인증",
     profileImageUrl = profileImageUrl,
+    defaultCharacterId = defaultCharacterId,
     verificationImageUrl = verificationImageUrl,
     // 실제 API 이미지가 존재하는 항목에 fake 로컬 이미지를 대응시켜 UI 테스트
     imageRes = if (verificationImageUrl == null) {
