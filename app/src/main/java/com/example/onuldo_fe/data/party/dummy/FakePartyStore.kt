@@ -8,6 +8,7 @@ import com.example.onuldo_fe.data.party.dto.PartySummaryDto
 import com.example.onuldo_fe.data.party.dto.PartyWaitingRoomDto
 import com.example.onuldo_fe.model.party.PartyJoinError
 import com.example.onuldo_fe.model.party.PartyJoinResult
+import java.util.Locale
 
 /** 실제 파티 API 응답 DTO와 같은 형태를 사용하는 메모리 Fake 저장소. */
 object FakePartyStore {
@@ -95,7 +96,7 @@ object FakePartyStore {
     @Synchronized
     fun create(request: CreatePartyRequestDto): CreatePartyResponseDto {
         val partyId = ++createdPartySequence
-        val inviteCode = "P${partyId.toString(36).uppercase().padStart(5, '0').takeLast(5)}"
+        val inviteCode = "P${partyId.toString(36).uppercase(Locale.ROOT).padStart(5, '0').takeLast(5)}"
         val members = buildList {
             add(member(CURRENT_USER_ID, "하늘", "HOST", "WAITING"))
             if (PartyTestConfig.CREATE_READY_TO_START) {
@@ -131,7 +132,9 @@ object FakePartyStore {
 
     @Synchronized
     fun join(inviteCode: String): PartyWaitingRoomDto {
-        val entry = parties.entries.firstOrNull { it.value.room.inviteCode == inviteCode.uppercase() }
+        val entry = parties.entries.firstOrNull {
+            it.value.room.inviteCode == inviteCode.trim().uppercase(Locale.ROOT)
+        }
             ?: throw FakePartyJoinException(PartyJoinError.Invalid)
         val stored = entry.value
         if (stored.status == "ONGOING") throw FakePartyJoinException(PartyJoinError.AlreadyStarted)
