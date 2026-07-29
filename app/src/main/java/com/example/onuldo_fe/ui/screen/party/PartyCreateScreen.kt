@@ -44,8 +44,7 @@ fun PartyCreateScreen(
     onChargePoint: () -> Unit = {},
     isSubmitting: Boolean = false,
     errorMessage: String? = null,
-    // TODO 챌린지 목록 API 연동 시 선택한 챌린지의 category Enum을 화면 표시명으로 변환해 전달
-    selectedChallengeCategoryLabel: String? = "생활루틴"
+    selectedChallengeCategoryLabel: String? = null
 ) {
     val periods = listOf("2주", "4주", "8주", "12주")
     val deposits = listOf(10_000, 20_000, 30_000, 50_000)

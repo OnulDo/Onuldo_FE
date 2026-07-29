@@ -3,12 +3,14 @@ package com.example.onuldo_fe.ui.screen.party.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -20,10 +22,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Persimmon
@@ -101,12 +105,12 @@ fun PartyChallengeSelector(
                 lineHeight = 20.sp,
                 fontWeight = FontWeight.Medium
             )
-            Text(
-                "›",
-                Modifier.padding(start = 7.dp),
-                color = DarkBrown50,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+            Image(
+                painter = painterResource(R.drawable.party_create_arrow_right),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(start = 7.dp)
+                    .size(width = 5.dp, height = 10.dp)
             )
         }
     }

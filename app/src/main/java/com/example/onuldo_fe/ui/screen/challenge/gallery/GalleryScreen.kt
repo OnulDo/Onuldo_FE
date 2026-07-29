@@ -53,12 +53,14 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.model.challenge.ChallengeCategory
 
 //챌린지 탐색 화면
 data class Challenge(
     val id: Int,
     val title: String,
     val participantCount: Int,
+    val category: ChallengeCategory = ChallengeCategory.DAILY_ROUTINE,
     @DrawableRes val imageRes: Int = R.drawable.challenge_sample_1
 )
 

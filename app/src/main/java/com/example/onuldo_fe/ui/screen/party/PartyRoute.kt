@@ -136,6 +136,8 @@ fun PartyRoute(
             capacity = capacity,
             onCapacityChange = { capacity = it.coerceIn(2, 5) },
             selectedChallenge = selectedChallenge,
+            // API category Enum에 연결된 화면 표시명을 선택 카드의 카테고리 칩에 전달
+            selectedChallengeCategoryLabel = selectedChallenge?.category?.displayName,
             onChallengeClick = {
                 // 기존 확정 선택은 유지하고 새로 탐색할 임시 선택만 초기화
                 pendingChallenge = null
