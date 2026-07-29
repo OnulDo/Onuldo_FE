@@ -52,6 +52,7 @@ import java.time.LocalTime
 @Composable
 fun PartyListScreen(
     parties: List<PartyCardUi>,
+    onVerifyClick: () -> Unit,
     onCreateClick: () -> Unit,
     onInviteCodeClick: () -> Unit,
     onPartyClick: (String) -> Unit,
@@ -62,6 +63,7 @@ fun PartyListScreen(
     partyCardContent: @Composable (PartyCardUi, () -> Unit) -> Unit = { party, onClick ->
         HomePartyCard(
             partyChallenge = party.toHomePartyChallenge(),
+            onVerifyClick = onVerifyClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
@@ -203,11 +205,11 @@ private fun String?.toRemainingMinutes(): Int? {
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 private fun PartyListScreenPreview() {
-    OnulDo_FETheme { PartyListScreen(samplePartyCards, {}, {}, {}) }
+    OnulDo_FETheme { PartyListScreen(samplePartyCards, {}, {}, {}, {}) }
 }
 
 @Preview(name = "파티 목록 - 빈 상태", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 private fun PartyListEmptyScreenPreview() {
-    OnulDo_FETheme { PartyListScreen(emptyList(), {}, {}, {}) }
+    OnulDo_FETheme { PartyListScreen(emptyList(), {}, {}, {}, {}) }
 }

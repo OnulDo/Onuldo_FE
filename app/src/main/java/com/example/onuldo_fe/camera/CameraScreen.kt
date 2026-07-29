@@ -16,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
@@ -32,11 +31,12 @@ fun CameraScreen(
     title: String,
     onPhotoCaptured: (Uri?) -> Unit,
     onCloseClick: () -> Unit
-) {
+){
     val imageCapture = remember {
         ImageCapture.Builder().build()
     }
     var showVerificationNotice by remember { mutableStateOf(false) }
+    
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -109,12 +109,11 @@ fun CameraScreen(
 
             )
         }
+
         if (showVerificationNotice) {
             VerificationNoticeBottomSheet(
                 challengeTitle = title,
-                onDismiss = {
-                    showVerificationNotice = false
-                }
+                onDismiss = { showVerificationNotice = false }
             )
         }
     }
