@@ -206,8 +206,10 @@ object FakePartyStore {
     @Synchronized
     fun start(partyId: Long): PartyStartResponseDto {
         val stored = parties[partyId] ?: error("존재하지 않는 파티입니다.")
+        // 대기 중인 파티만 한 번 시작할 수 있으며 진행·해체 상태의 재시작은 허용하지 않음
+        check(stored.status == "WAITING") { "이미 시작되었거나 해체된 파티입니다." }
         val members = stored.room.members
-        check(members.size >= 2 && members.filter { it.role == "MEMBER" }.all { it.status == "READY" }) {
+        check(canStart(members)) {
             "모든 파티원이 준비되지 않았습니다."
         }
         parties[partyId] = stored.copy(status = "ONGOING")
