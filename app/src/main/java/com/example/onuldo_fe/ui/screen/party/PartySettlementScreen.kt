@@ -121,7 +121,7 @@ fun PartySettlementScreen(
                 Spacer(Modifier.height(6.dp))
             }
 
-            items(result.members, key = { it.memberId }) { member ->
+            items(result.members, key = { it.userId }) { member ->
                 PartySettlementMemberCard(
                     member = member,
                     showCompletionStatus = result.status == PartySettlementStatus.PartialSuccess,

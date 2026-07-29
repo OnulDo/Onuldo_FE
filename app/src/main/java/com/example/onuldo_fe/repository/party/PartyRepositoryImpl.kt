@@ -70,7 +70,7 @@ internal fun PartySettlementResultDto.toModel() = PartySettlementResult(
     adjustmentAmount = myResult.bonusAmount,
     members = memberResults.map { member ->
         PartySettlementMember(
-            memberId = member.memberId,
+            userId = member.userId,
             name = member.name,
             profileImageUrl = member.profileImageUrl,
             defaultCharacterId = member.defaultCharacterId,

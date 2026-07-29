@@ -18,7 +18,7 @@ data class PartyMySettlementDto(
 
 // 파티원별 완주 여부와 정산 금액 및 프로필 정보
 data class PartySettlementMemberDto(
-    val memberId: String,
+    val userId: Long,
     val name: String,
     val profileImageUrl: String?,
     val defaultCharacterId: Int?,

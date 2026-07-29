@@ -29,7 +29,7 @@ data class PartySettlementResult(
 
 // 파티원별 정산 결과와 프로필 정보
 data class PartySettlementMember(
-    val memberId: String,
+    val userId: Long,
     val name: String,
     val profileImageUrl: String?,
     val defaultCharacterId: Int?,

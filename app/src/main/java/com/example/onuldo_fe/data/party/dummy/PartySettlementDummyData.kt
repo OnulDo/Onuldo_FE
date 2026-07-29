@@ -57,7 +57,7 @@ object PartySettlementDummyData {
         val characterIds = listOf(4, 5, 3, 8, 9)
         return names.indices.map { index ->
             PartySettlementMemberDto(
-                memberId = "settlement-member-${index + 1}",
+                userId = (index + 1).toLong(),
                 name = names[index],
                 profileImageUrl = null,
                 defaultCharacterId = characterIds[index],
