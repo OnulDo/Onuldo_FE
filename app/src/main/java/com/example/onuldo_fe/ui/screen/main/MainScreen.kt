@@ -50,7 +50,6 @@ fun MainScreen(
         ) {
             composable(BottomTab.Home.route) {
                 HomeRoute(
-                    onCameraPermissionRequired = { onNavigate(Routes.CAMERA_PERMISSION) },
                     onCameraNavigate = { onNavigate(Routes.CAMERA) }
                 )
             }
@@ -62,7 +61,6 @@ fun MainScreen(
             composable(BottomTab.Party.route) {
                 PartyRoute(
                     onBottomBarVisibilityChange = { showBottomBar = it },
-                    onCameraPermissionRequired = { onNavigate(Routes.CAMERA_PERMISSION) },
                     onCameraNavigate = { onNavigate(Routes.CAMERA) }
                 )
             }
