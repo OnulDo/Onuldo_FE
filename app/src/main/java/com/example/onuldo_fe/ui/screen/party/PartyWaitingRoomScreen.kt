@@ -23,11 +23,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.onuldo_fe.ui.component.OnulDoBackButton
-import com.example.onuldo_fe.ui.component.party.PartyInsufficientPointDialog
-import com.example.onuldo_fe.ui.component.party.PartyInviteCodeCard
-import com.example.onuldo_fe.ui.component.party.PartyWaitingEmptySlotCard
-import com.example.onuldo_fe.ui.component.party.PartyWaitingMemberCard
+import com.example.onuldo_fe.ui.screen.party.components.PartyInsufficientPointDialog
+import com.example.onuldo_fe.ui.screen.party.components.PartyInviteCodeCard
+import com.example.onuldo_fe.ui.screen.party.components.PartyTopBar
+import com.example.onuldo_fe.ui.screen.party.components.PartyWaitingEmptySlotCard
+import com.example.onuldo_fe.ui.screen.party.components.PartyWaitingMemberCard
 import com.example.onuldo_fe.ui.theme.*
 import com.example.onuldo_fe.viewmodel.party.PartyWaitingRoomUi
 
@@ -51,18 +51,7 @@ fun PartyWaitingRoomScreen(
     BackHandler(onBack = onBack)
 
     Column(Modifier.fillMaxSize().background(SourCream)) {
-        Row(Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically) {
-            OnulDoBackButton(Modifier.padding(start = 20.dp), onClick = onBack)
-            Text(
-                "파티 대기방",
-                Modifier.padding(start = 14.dp),
-                color = BlackBrown,
-                fontFamily = Pretendard,
-                fontSize = 17.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        PartyTopBar(title = "파티 대기방", onBack = onBack)
 
         Column(
             modifier = Modifier
@@ -98,35 +87,22 @@ fun PartyWaitingRoomScreen(
                 PartyWaitingEmptySlotCard()
                 Spacer(Modifier.height(8.dp))
             }
+
         }
 
         Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
-            Column(
+            Text(
+                text = errorMessage ?: "전원이 모이면 파티장이 시작할 수 있어요",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    "전원이 모이면 파티장이 시작할 수 있어요",
-                    Modifier.fillMaxWidth(),
-                    color = DarkBrown50,
-                    fontFamily = Pretendard,
-                    fontSize = 11.sp,
-                    lineHeight = 13.sp,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-                errorMessage?.let {
-                    Text(
-                        it,
-                        Modifier.fillMaxWidth().padding(top = 4.dp),
-                        color = Persimmon,
-                        fontFamily = Pretendard,
-                        fontSize = 11.sp,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                    )
-                }
-            }
+                    .padding(horizontal = 20.dp)
+                    .offset(y = 6.dp),
+                color = if (errorMessage == null) DarkBrown50 else Persimmon,
+                fontFamily = Pretendard,
+                fontSize = 11.sp,
+                lineHeight = 13.sp,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
             Button(
                 onClick = {
                     when {

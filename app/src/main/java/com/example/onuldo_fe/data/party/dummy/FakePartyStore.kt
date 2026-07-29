@@ -3,196 +3,313 @@ package com.example.onuldo_fe.data.party.dummy
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyMemberDto
+import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.data.party.dto.PartySummaryDto
 import com.example.onuldo_fe.data.party.dto.PartyWaitingRoomDto
 import com.example.onuldo_fe.model.party.PartyJoinError
 import com.example.onuldo_fe.model.party.PartyJoinResult
+import java.util.Locale
 
-/**
- * 모든 fake 파티 화면이 공유하는 단일 저장소
- * 실제 API 연동 시 각 함수 호출을 서버 요청으로 교체
- */
+/** 실제 파티 API 응답 DTO와 같은 형태를 사용하는 메모리 Fake 저장소. */
 object FakePartyStore {
-    // TODO 로그인 연동 시 인증 서버가 내려주는 현재 사용자 ID로 교체
-    const val CURRENT_USER_ID = "current-user"
-    private const val CREATED_PARTY_ID = "party-created"
+    const val CURRENT_USER_ID = 99L
+    private var createdPartySequence = 200L
 
-    // 대기방 정보와 파티 생명주기를 함께 저장해 초대코드 검증과 목록 노출에 사용
     private data class StoredParty(
         val room: PartyWaitingRoomDto,
-        val status: String
+        val challengeName: String,
+        val status: String,
+        val verifiedMemberIds: Set<Long> = emptySet()
     )
 
-    // 앱 실행 중 생성·참여·준비·이탈 결과를 모든 fake API가 공유하는 메모리 저장소
-    // 앱 프로세스 종료 시 상태 초기화
+    data class FeedSnapshot(
+        val partyName: String,
+        val challengeName: String,
+        val members: List<PartyMemberDto>,
+        val verifiedMemberIds: Set<Long>
+    )
+
     private val parties = mutableMapOf(
-        "party-001" to StoredParty(
-            room = PartyWaitingRoomDto(
-                partyId = "party-001",
-                partyName = "갓생팟",
-                challengeName = "30일 헬스 챌린지",
-                inviteCode = PartyInviteDummyData.VALID_CODE,
-                period = "4주",
-                deposit = 30_000,
-                capacity = 5,
+        1L to StoredParty(
+            room = waitingRoom(
+                partyId = 1L,
+                name = "새벽 러너 파티",
+                goal = "30분 러닝",
+                inviteCode = "START1",
+                durationDays = 12,
+                depositAmount = 30_000,
+                maxMembers = 5,
                 members = listOf(
-                    member("leader-001", "민지", "LEADER", "NOT_APPLICABLE", 0),
-                    member("member-001", "서연", "MEMBER", "READY", 1)
+                    member(1L, "민지", "HOST", "WAITING"),
+                    member(2L, "서연", "MEMBER", "READY"),
+                    member(3L, "지호", "MEMBER", "READY"),
+                    member(4L, "수아", "MEMBER", "READY"),
+                    member(CURRENT_USER_ID, "하늘", "MEMBER", "READY")
                 )
             ),
-            status = "RECRUITING"
+            challengeName = "30분 러닝",
+            status = "ONGOING",
+            verifiedMemberIds = setOf(1L, 2L)
+        ),
+        2L to StoredParty(
+            room = waitingRoom(
+                partyId = 2L,
+                name = "책상 공부 인증 파티",
+                goal = "5시간 집중",
+                inviteCode = "START2",
+                durationDays = 20,
+                depositAmount = 20_000,
+                maxMembers = 5,
+                members = listOf(
+                    member(1L, "민지", "HOST", "WAITING"),
+                    member(2L, "서연", "MEMBER", "READY"),
+                    member(3L, "지호", "MEMBER", "READY"),
+                    member(4L, "수아", "MEMBER", "READY"),
+                    member(CURRENT_USER_ID, "하늘", "MEMBER", "READY")
+                )
+            ),
+            challengeName = "5시간 집중",
+            status = "ONGOING",
+            verifiedMemberIds = setOf(1L, 2L, 3L)
+        ),
+        101L to StoredParty(
+            room = waitingRoom(
+                partyId = 101L,
+                name = "갓생팟",
+                goal = "30일 헬스 챌린지",
+                inviteCode = PartyInviteDummyData.VALID_CODE,
+                durationDays = 28,
+                depositAmount = 30_000,
+                maxMembers = 5,
+                members = listOf(
+                    member(5L, "민지", "HOST", "WAITING"),
+                    member(7L, "서연", "MEMBER", "READY")
+                )
+            ),
+            challengeName = "30일 헬스 챌린지",
+            status = "WAITING"
         )
     )
 
-    // 파티 홈에 모집 중 대기방이 아닌 진행 중 파티 요약만 제공하기 위한 저장소
     private val summaries = mutableMapOf(
-        "party-1" to PartySummaryDto("party-1", "새벽 러너 파티", "30분 러닝", "D-12", "7:00 마감", "45분 남음", 2, 5, "IN_PROGRESS"),
-        "party-2" to PartySummaryDto("party-2", "책상 공부 인증 파티", "5시간 집중", "D-20", "6:00 마감", "1시간 남음", 3, 5, "IN_PROGRESS")
+        1L to PartySummaryDto(
+            partyId = 1L,
+            name = "새벽 러너 파티",
+            goal = "30분 러닝",
+            deadline = "07:00",
+            status = "ONGOING",
+            dDay = 12,
+            progressRate = 0.4,
+            verifiedToday = 2,
+            totalMembers = 5
+        ),
+        2L to PartySummaryDto(
+            partyId = 2L,
+            name = "책상 공부 인증 파티",
+            goal = "5시간 집중",
+            deadline = null,
+            status = "ONGOING",
+            dDay = 20,
+            progressRate = 0.6,
+            verifiedToday = 3,
+            totalMembers = 5
+        )
     )
 
     @Synchronized
     fun create(request: CreatePartyRequestDto): CreatePartyResponseDto {
-        // 파티 생성자는 항상 방장이며 준비완료 대상에서 제외
-        val room = PartyWaitingRoomDto(
-            partyId = CREATED_PARTY_ID,
-            partyName = request.name,
-            challengeName = request.challengeName,
-            inviteCode = PartyInviteDummyData.CREATED_PARTY_CODE,
-            period = request.period,
-            deposit = request.deposit,
-            capacity = request.capacity,
-            members = buildList {
-                add(member(CURRENT_USER_ID, "민지", "LEADER", "NOT_APPLICABLE", 0))
-                // 시작 화면 이동 테스트 시 PartyTestConfig 값을 true로 사용
-                if (PartyTestConfig.CREATE_READY_TO_START) {
-                    add(member("member-test-1", "서연", "MEMBER", "READY", 1))
-                }
+        val partyId = ++createdPartySequence
+        val inviteCode = "P${partyId.toString(36).uppercase(Locale.ROOT).padStart(5, '0').takeLast(5)}"
+        val members = buildList {
+            add(member(CURRENT_USER_ID, "하늘", "HOST", "WAITING"))
+            if (PartyTestConfig.CREATE_READY_TO_START) {
+                add(member(100L, "서연", "MEMBER", "READY"))
             }
+        }
+        val room = waitingRoom(
+            partyId = partyId,
+            name = request.name,
+            goal = fakeChallengeName(request.challengeId),
+            inviteCode = inviteCode,
+            durationDays = request.durationDays,
+            depositAmount = request.depositAmount,
+            maxMembers = request.maxMembers,
+            members = members
         )
-        parties[CREATED_PARTY_ID] = StoredParty(room, "RECRUITING")
-        return CreatePartyResponseDto(CREATED_PARTY_ID, room.inviteCode)
+        parties[partyId] = StoredParty(
+            room = room,
+            challengeName = room.goal.orEmpty(),
+            status = "WAITING"
+        )
+        return CreatePartyResponseDto(
+            partyId = partyId,
+            name = request.name,
+            inviteCode = inviteCode,
+            inviteExpiresAt = "2026-08-20T00:00:00",
+            status = "WAITING",
+            hostUserId = CURRENT_USER_ID,
+            maxMembers = request.maxMembers,
+            createdAt = "2026-07-27T12:00:00"
+        )
     }
 
     @Synchronized
-    fun join(inviteCode: String): PartyJoinResult {
-        // 초대코드 상태와 정원 확인 후 방장 승인 없이 파티원을 즉시 추가
-        val normalizedCode = inviteCode.uppercase()
-        val entry = parties.entries.firstOrNull { it.value.room.inviteCode == normalizedCode }
-            ?: return PartyJoinResult.Failure(PartyJoinError.Invalid)
-        val stored = entry.value
-        if (stored.status == "IN_PROGRESS") return PartyJoinResult.Failure(PartyJoinError.AlreadyStarted)
-        if (stored.status == "DISBANDED") return PartyJoinResult.Failure(PartyJoinError.Expired)
-        if (stored.room.members.size >= stored.room.capacity) return PartyJoinResult.Failure(PartyJoinError.Full)
-
-        // 이미 참여한 사용자는 중복 추가하지 않고 기존 파티 ID만 반환
-        if (stored.room.members.none { it.id == CURRENT_USER_ID }) {
-            val nextOrder = (stored.room.members.maxOfOrNull { it.joinedOrder } ?: 0) + 1
-            val updatedRoom = stored.room.copy(
-                members = stored.room.members + member(
-                    CURRENT_USER_ID,
-                    "준호",
-                    "MEMBER",
-                    "WAITING",
-                    nextOrder
-                )
-            )
-            parties[entry.key] = stored.copy(room = updatedRoom)
+    fun join(inviteCode: String): PartyWaitingRoomDto {
+        val entry = parties.entries.firstOrNull {
+            it.value.room.inviteCode == inviteCode.trim().uppercase(Locale.ROOT)
         }
-        return PartyJoinResult.Success(entry.key)
+            ?: throw FakePartyJoinException(PartyJoinError.Invalid)
+        val stored = entry.value
+        if (stored.status == "ONGOING") throw FakePartyJoinException(PartyJoinError.AlreadyStarted)
+        if (stored.status == "DISBANDED") throw FakePartyJoinException(PartyJoinError.Expired)
+        if (stored.room.members.size >= stored.room.maxMembers) {
+            throw FakePartyJoinException(PartyJoinError.Full)
+        }
+        var room = stored.room
+        if (stored.room.members.none { it.userId == CURRENT_USER_ID }) {
+            val updatedMembers = stored.room.members + member(CURRENT_USER_ID, "하늘", "MEMBER", "WAITING")
+            room = stored.room.withMembers(updatedMembers)
+            parties[entry.key] = stored.copy(room = room)
+        }
+        return room
     }
 
-    // 상태 변경 후 화면 전체를 다시 그릴 수 있도록 최신 대기방 스냅샷 반환
-    fun getRoom(partyId: String): PartyWaitingRoomDto =
+    @Synchronized
+    fun getRoom(partyId: Long): PartyWaitingRoomDto =
         parties[partyId]?.room ?: error("존재하지 않는 파티입니다.")
 
+    // Fake 피드도 고정 인원 목록이 아닌 해당 파티에 실제 저장된 멤버와 인증 상태를 사용
     @Synchronized
-    fun ready(partyId: String): PartyWaitingRoomDto {
-        // 실제 API에서는 서버의 포인트 검증 성공 응답 후 Ready 상태 반영
+    fun getFeedSnapshot(partyId: Long): FeedSnapshot {
         val stored = parties[partyId] ?: error("존재하지 않는 파티입니다.")
-        val room = stored.room.copy(
-            members = stored.room.members.map {
-                if (it.id == CURRENT_USER_ID && it.role != "LEADER") it.copy(readyStatus = "READY") else it
-            }
+        return FeedSnapshot(
+            partyName = stored.room.name,
+            challengeName = stored.challengeName,
+            members = stored.room.members.toList(),
+            verifiedMemberIds = stored.verifiedMemberIds.toSet()
         )
+    }
+
+    @Synchronized
+    fun ready(partyId: Long): PartyWaitingRoomDto {
+        val stored = parties[partyId] ?: error("존재하지 않는 파티입니다.")
+        val members = stored.room.members.map { member ->
+            if (member.userId == CURRENT_USER_ID && member.role != "HOST") {
+                member.copy(status = if (member.status == "READY") "WAITING" else "READY")
+            } else member
+        }
+        val room = stored.room.withMembers(members)
         parties[partyId] = stored.copy(room = room)
         return room
     }
 
     @Synchronized
-    fun leave(partyId: String) {
-        // 현재 사용자 제거 후 방장 이탈이면 가장 먼저 입장한 파티원에게 권한 승계
+    fun leave(partyId: Long) {
         val stored = parties[partyId] ?: return
-        val leavingMember = stored.room.members.firstOrNull { it.id == CURRENT_USER_ID } ?: return
-        val remaining = stored.room.members.filterNot { it.id == CURRENT_USER_ID }.toMutableList()
-
+        val leavingMember = stored.room.members.firstOrNull { it.userId == CURRENT_USER_ID } ?: return
+        val remaining = stored.room.members.filterNot { it.userId == CURRENT_USER_ID }.toMutableList()
         if (remaining.isEmpty()) {
-            // 마지막 파티원 이탈 시 파티 해체 및 초대코드 만료 처리
-            parties[partyId] = stored.copy(
-                room = stored.room.copy(members = emptyList()),
-                status = "DISBANDED"
-            )
+            parties[partyId] = stored.copy(room = stored.room.withMembers(emptyList()), status = "DISBANDED")
+            summaries.remove(partyId)
+            FakePartyFeedState.removeParty(partyId)
             return
         }
-
-        if (leavingMember.role == "LEADER") {
-            // joinedOrder가 가장 작은 파티원을 새 방장으로 지정
-            val successorIndex = remaining.indices.minBy { remaining[it].joinedOrder }
-            remaining[successorIndex] = remaining[successorIndex].copy(
-                role = "LEADER",
-                readyStatus = "NOT_APPLICABLE"
+        if (leavingMember.role == "HOST") {
+            remaining[0] = remaining[0].copy(role = "HOST", status = "WAITING")
+        }
+        val room = stored.room.withMembers(remaining)
+        parties[partyId] = stored.copy(room = room)
+        summaries[partyId]?.let { summary ->
+            summaries[partyId] = summary.copy(
+                verifiedToday = summary.verifiedToday.coerceAtMost(remaining.size),
+                totalMembers = remaining.size,
+                progressRate = if (remaining.isEmpty()) 0.0 else
+                    summary.verifiedToday.coerceAtMost(remaining.size).toDouble() / remaining.size
             )
         }
-        parties[partyId] = stored.copy(room = stored.room.copy(members = remaining))
     }
 
     @Synchronized
-    fun start(partyId: String): PartySummaryDto {
-        // 정원 충족 여부와 관계없이 2명 이상이고 현재 파티원 전원이 준비했을 때 시작
+    fun start(partyId: Long): PartyStartResponseDto {
         val stored = parties[partyId] ?: error("존재하지 않는 파티입니다.")
+        // 대기 중인 파티만 한 번 시작할 수 있으며 진행·해체 상태의 재시작은 허용하지 않음
+        check(stored.status == "WAITING") { "이미 시작되었거나 해체된 파티입니다." }
         val members = stored.room.members
-        check(members.size >= 2 && members.filter { it.role == "MEMBER" }.all { it.readyStatus == "READY" }) {
+        check(canStart(members)) {
             "모든 파티원이 준비되지 않았습니다."
         }
-        parties[partyId] = stored.copy(status = "IN_PROGRESS")
-        // 시작된 파티는 대기방 상태 갱신 후 파티 홈 요약 목록에도 추가
-        val summary = PartySummaryDto(
+        parties[partyId] = stored.copy(status = "ONGOING")
+        summaries[partyId] = PartySummaryDto(
             partyId = partyId,
-            partyName = stored.room.partyName,
-            challengeName = stored.room.challengeName,
-            dDay = "D-28",
-            deadline = "오늘 마감",
-            remainingText = null,
-            completedMemberCount = 0,
-            totalMemberCount = members.size,
-            status = "IN_PROGRESS"
+            name = stored.room.name,
+            goal = stored.challengeName,
+            // 실제 API 명세에 마감 시간이 추가되기 전까지 Fake 생성 파티는 값 없음으로 유지
+            deadline = null,
+            status = "ONGOING",
+            dDay = stored.room.durationDays,
+            progressRate = 0.0,
+            verifiedToday = 0,
+            totalMembers = members.size
         )
-        summaries[partyId] = summary
-        // 피드 화면이 실제 참여 인원과 파티 정보를 사용하도록 fake 피드 상태도 갱신
-        FakePartyFeedState.updateParty(
-            partyId = partyId,
-            partyName = stored.room.partyName,
-            challengeName = stored.room.challengeName,
-            memberCount = members.size
-        )
-        return summary
+        FakePartyFeedState.updateParty(partyId, stored.room.name, stored.challengeName, members.size)
+        return PartyStartResponseDto(partyId, "ONGOING", "2026-07-27T12:00:00")
     }
 
-    fun getInProgressParties(): List<PartySummaryDto> =
-        summaries.values.filter { it.status == "IN_PROGRESS" }
+    @Synchronized
+    fun getInProgressParties(): List<PartySummaryDto> = summaries.values.filter { it.status == "ONGOING" }
 
-    // 테스트 멤버 생성 시 반복되는 DTO 조립을 한곳에서 처리
-    private fun member(
-        id: String,
-        nickname: String,
-        role: String,
-        readyStatus: String,
-        joinedOrder: Int
-    ) = PartyMemberDto(
-        id = id,
+    private fun waitingRoom(
+        partyId: Long,
+        name: String,
+        goal: String,
+        inviteCode: String,
+        durationDays: Int,
+        depositAmount: Int,
+        maxMembers: Int,
+        members: List<PartyMemberDto>
+    ) = PartyWaitingRoomDto(
+        partyId = partyId,
+        name = name,
+        goal = goal,
+        status = "WAITING",
+        inviteCode = inviteCode,
+        currentMembers = members.size,
+        maxMembers = maxMembers,
+        durationDays = durationDays,
+        depositAmount = depositAmount,
+        members = members,
+        isHost = members.any { it.userId == CURRENT_USER_ID && it.role == "HOST" },
+        canStart = canStart(members)
+    )
+
+    private fun PartyWaitingRoomDto.withMembers(members: List<PartyMemberDto>) = copy(
+        currentMembers = members.size,
+        members = members,
+        isHost = members.any { it.userId == CURRENT_USER_ID && it.role == "HOST" },
+        canStart = canStart(members)
+    )
+
+    private fun canStart(members: List<PartyMemberDto>): Boolean =
+        members.size >= 2 && members.filter { it.role == "MEMBER" }.all { it.status == "READY" }
+
+    // Fake 생성 요청의 challengeId를 화면 테스트용 챌린지명으로 변환
+    private fun fakeChallengeName(challengeId: Long): String = when (challengeId) {
+        0L -> "새벽 6시 기상"
+        1L -> "30분 러닝"
+        2L -> "하루 독서 30분"
+        3L -> "영양제 챙기기"
+        4L -> "영단어 30개"
+        5L -> "명상 10분"
+        else -> "선택한 챌린지"
+    }
+
+    private fun member(userId: Long, nickname: String, role: String, status: String) = PartyMemberDto(
+        userId = userId,
         nickname = nickname,
         profileImageUrl = null,
         role = role,
-        readyStatus = readyStatus,
-        joinedOrder = joinedOrder
+        status = status
     )
 }
+
+class FakePartyJoinException(val reason: PartyJoinError) : IllegalStateException()

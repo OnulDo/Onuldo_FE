@@ -1,6 +1,5 @@
-package com.example.onuldo_fe.ui.component.party
+package com.example.onuldo_fe.ui.screen.party.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -10,14 +9,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.*
 import com.example.onuldo_fe.viewmodel.party.PartyMemberRole
 import com.example.onuldo_fe.viewmodel.party.PartyMemberUi
@@ -25,32 +21,12 @@ import com.example.onuldo_fe.viewmodel.party.PartyReadyStatus
 
 @Composable
 fun PartyWaitingMemberCard(member: PartyMemberUi, modifier: Modifier = Modifier) {
-    Row(
+    PartyMemberCard(
+        name = member.name,
+        profileImageUrl = member.profileImageUrl,
+        defaultCharacterId = member.defaultCharacterId,
         modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .background(White, RoundedCornerShape(12.dp))
-            .border(1.dp, DarkBrown40, RoundedCornerShape(12.dp))
-            .padding(horizontal = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(Modifier.size(40.dp).background(Persimmon10, CircleShape).border(1.dp, Persimmon, CircleShape), contentAlignment = Alignment.Center) {
-            PartyNetworkImage(
-                imageUrl = member.profileImageUrl,
-                fallbackImageRes = R.drawable.party_member_avatar,
-                contentDescription = "${member.name} 프로필",
-                modifier = Modifier.width(38.dp).height(37.dp).clip(CircleShape)
-            )
-        }
-        Text(
-            member.name,
-            Modifier.weight(1f).padding(start = 12.dp),
-            color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 12.sp,
-            lineHeight = 22.sp,
-            fontWeight = FontWeight.Bold
-        )
         when {
             member.role == PartyMemberRole.Leader -> PartyWaitingStatusChip("파티장", Persimmon10, Persimmon)
             member.readyStatus == PartyReadyStatus.Ready -> PartyWaitingStatusChip("준비완료", Persimmon, SourCream)

@@ -37,7 +37,8 @@ data class PartyMemberUi(
     val readyStatus: PartyReadyStatus,         // 준비완료 대상 여부와 현재 준비 상태
     val id: String = name,                     // 파티원 고유 ID
     val joinedOrder: Int = 0,                  // 방장 이탈 시 권한 승계를 결정하는 입장 순서
-    val profileImageUrl: String? = null        // 파티원 프로필 이미지 URL
+    val profileImageUrl: String? = null,       // 파티원 프로필 이미지 URL
+    val defaultCharacterId: Int? = null        // 프로필 이미지가 없을 때 표시할 기본 캐릭터 ID
 )
 
 // 파티 홈의 진행 중인 파티 카드에 표시할 정보
@@ -60,7 +61,8 @@ data class PartyFeedItemUi(
     val profileImageUrl: String? = null,       // 파티원 프로필 이미지 URL
     val verificationImageUrl: String? = null,  // 서버에서 전달받은 인증 이미지 URL
     @param:DrawableRes val imageRes: Int? = null, // fake 테스트용 로컬 인증 이미지
-    val memberId: String = name                // 인증한 파티원의 고유 ID
+    val memberId: String = name,               // 인증한 파티원의 고유 ID
+    val defaultCharacterId: Int? = null        // 프로필 이미지가 없을 때 표시할 기본 캐릭터 ID
 )
 
 // 파티 대기방 화면에 표시할 파티 정보와 참여자 상태

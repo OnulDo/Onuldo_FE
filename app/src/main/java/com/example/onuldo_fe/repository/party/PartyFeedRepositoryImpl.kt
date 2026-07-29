@@ -1,38 +1,40 @@
 package com.example.onuldo_fe.repository.party
 
 import com.example.onuldo_fe.data.party.api.PartyFeedApi
-import com.example.onuldo_fe.data.party.dto.PartyProgressDto
-import com.example.onuldo_fe.data.party.dto.PartyFeedItemDto
 import com.example.onuldo_fe.data.party.dto.PartyFeedDto
+import com.example.onuldo_fe.data.party.dto.PartyFeedItemDto
 import com.example.onuldo_fe.model.party.PartyFeed
 import com.example.onuldo_fe.model.party.PartyFeedItem
 import com.example.onuldo_fe.model.party.PartyProgress
+import java.time.Duration
+import java.time.LocalDateTime
 
-// 파티 피드 API 응답을 진행 현황과 인증 목록 모델로 변환
-class PartyFeedRepositoryImpl(
-    private val api: PartyFeedApi
-) : PartyFeedRepository {
+class PartyFeedRepositoryImpl(private val api: PartyFeedApi) : PartyFeedRepository {
     override suspend fun getPartyFeed(partyId: String): PartyFeed =
-        api.getPartyFeed(partyId).toModel()
+        api.getPartyFeed(partyId.toLong()).toModel()
 }
 
 private fun PartyFeedDto.toModel() = PartyFeed(
-    partyId = partyId,
-    partyName = partyName,
-    challengeName = challengeName,
-    progress = progress.toModel(),
-    items = items.map(PartyFeedItemDto::toModel)
-)
-
-private fun PartyProgressDto.toModel() = PartyProgress(
-    completedMemberCount = completedMemberCount,
-    totalMemberCount = totalMemberCount
+    partyId = partyId.toString(),
+    partyName = name,
+    challengeName = challengeTitle,
+    progress = PartyProgress(
+        completedMemberCount = verifiedMemberCount,
+        totalMemberCount = totalMemberCount
+    ),
+    items = members.map(PartyFeedItemDto::toModel)
 )
 
 private fun PartyFeedItemDto.toModel() = PartyFeedItem(
-    memberId = memberId,
+    memberId = userId.toString(),
     nickname = nickname,
     profileImageUrl = profileImageUrl,
-    verificationImageUrl = verificationImageUrl,
-    verifiedElapsedMinutes = verifiedElapsedMinutes
+    verificationImageUrl = verificationPhotoUrl,
+    verifiedElapsedMinutes = verifiedAt?.toElapsedMinutes(),
+    // TODO: 서버가 기본 캐릭터 정보를 제공하면 userId 기반 임시 배정을 제거한다.
+    defaultCharacterId = ((userId % 9) + 1).toInt()
 )
+
+private fun String.toElapsedMinutes(): Int? = runCatching {
+    Duration.between(LocalDateTime.parse(this), LocalDateTime.now()).toMinutes().coerceAtLeast(0).toInt()
+}.getOrNull()

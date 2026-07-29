@@ -72,7 +72,7 @@ fun PartyListScreen(
 ) {
     Column(modifier.fillMaxSize().background(SourCream)) {
         Text("파티", modifier = Modifier.padding(start = 24.dp, top = 16.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(21.dp))
         Row(Modifier.padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Button(
                 onClick = onCreateClick,
@@ -182,17 +182,17 @@ private fun PartyCardUi.toHomePartyChallenge() = HomePartyChallenge(
     title = partyName,
     subtitle = challengeName,
     remainingDays = dDay.filter(Char::isDigit).toIntOrNull() ?: 0,
-    deadlineAt = deadline.toLocalTimeOrDefault(),
+    deadlineAt = deadline.toLocalTimeOrNull(),
     completedMemberCount = completedMemberCount,
     totalMemberCount = totalMemberCount,
     remainingMinutes = remainingText.toRemainingMinutes()
 )
 
-private fun String.toLocalTimeOrDefault(): LocalTime {
-    val match = Regex("""(\d{1,2}):(\d{2})""").find(this) ?: return LocalTime.MIDNIGHT
+private fun String.toLocalTimeOrNull(): LocalTime? {
+    val match = Regex("""(\d{1,2}):(\d{2})""").find(this) ?: return null
     return runCatching {
         LocalTime.of(match.groupValues[1].toInt(), match.groupValues[2].toInt())
-    }.getOrDefault(LocalTime.MIDNIGHT)
+    }.getOrNull()
 }
 
 private fun String?.toRemainingMinutes(): Int? {
