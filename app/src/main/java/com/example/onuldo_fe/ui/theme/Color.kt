@@ -8,6 +8,8 @@ val White = Color(0xFFFFFFFF)
 val BlackBrown = Color(0xFF1B130C)
 val BlackBrown70 = BlackBrown.copy(alpha = 0.7f)
 val BlackBrown50 = BlackBrown.copy(alpha = 0.5f)
+val BlackBrown20 = BlackBrown.copy(alpha = 0.2f)
+val BlackBrown10 = BlackBrown.copy(alpha = 0.1f)
 
 //Background
 val SourCream = Color(0xFFFFFDF7)
