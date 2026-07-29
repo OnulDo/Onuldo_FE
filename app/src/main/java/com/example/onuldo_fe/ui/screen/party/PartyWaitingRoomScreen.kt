@@ -24,10 +24,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
-import com.example.onuldo_fe.ui.component.party.PartyInsufficientPointDialog
-import com.example.onuldo_fe.ui.component.party.PartyInviteCodeCard
-import com.example.onuldo_fe.ui.component.party.PartyWaitingEmptySlotCard
-import com.example.onuldo_fe.ui.component.party.PartyWaitingMemberCard
+import com.example.onuldo_fe.ui.screen.party.components.PartyInsufficientPointDialog
+import com.example.onuldo_fe.ui.screen.party.components.PartyInviteCodeCard
+import com.example.onuldo_fe.ui.screen.party.components.PartyWaitingEmptySlotCard
+import com.example.onuldo_fe.ui.screen.party.components.PartyWaitingMemberCard
 import com.example.onuldo_fe.ui.theme.*
 import com.example.onuldo_fe.viewmodel.party.PartyWaitingRoomUi
 

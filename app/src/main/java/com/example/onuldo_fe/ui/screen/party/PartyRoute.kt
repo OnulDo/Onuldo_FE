@@ -17,7 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.party.dummy.PartyTestConfig
 import com.example.onuldo_fe.model.party.CreatePartyCommand
-import com.example.onuldo_fe.ui.component.party.InviteCodeDialog
+import com.example.onuldo_fe.ui.screen.party.components.InviteCodeDialog
 import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryScreen
@@ -52,7 +52,8 @@ fun PartyRoute(
     partySettlementViewModel: PartySettlementViewModel = viewModel(),
     onBottomBarVisibilityChange: (Boolean) -> Unit = {},
     onCameraPermissionRequired: () -> Unit = {},
-    onCameraNavigate: () -> Unit = {}
+    onCameraNavigate: () -> Unit = {},
+    onHomeNavigate: () -> Unit = {}
 ) {
     val context = LocalContext.current
     // 현재 화면과 다이얼로그 노출 여부는 Route에서만 관리
@@ -224,12 +225,9 @@ fun PartyRoute(
                         partyViewModel.leaveParty { screen = PartyScreen.List }
                     },
                     onStartClick = {
-                        // 시작 API 성공 후 파티 피드 재조회
-                        partyViewModel.startParty { partyId ->
-                            // TODO 테스트 종료 후 명세대로 홈 이동으로 교체
-                            feedPartyId = partyId
-                            partyFeedViewModel.loadPartyFeed(partyId)
-                            screen = PartyScreen.Feed
+                        // 시작 API 성공 후 명세에 따라 홈 화면으로 이동
+                        partyViewModel.startParty {
+                            onHomeNavigate()
                         }
                     },
                     onReadyClick = partyViewModel::readyParty

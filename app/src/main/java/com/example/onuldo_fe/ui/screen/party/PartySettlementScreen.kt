@@ -41,7 +41,7 @@ import com.example.onuldo_fe.model.party.PartySettlementResult
 import com.example.onuldo_fe.model.party.PartySettlementStatus
 import com.example.onuldo_fe.repository.party.toModel
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
-import com.example.onuldo_fe.ui.component.party.PartyMemberCard
+import com.example.onuldo_fe.ui.screen.party.components.PartyMemberCard
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown50

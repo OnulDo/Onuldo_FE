@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.onuldo_fe.navigation.BottomTab
 import com.example.onuldo_fe.navigation.Routes
 import com.example.onuldo_fe.ui.component.OnuldoBottomBar
@@ -63,7 +64,16 @@ fun MainScreen(
                 PartyRoute(
                     onBottomBarVisibilityChange = { showBottomBar = it },
                     onCameraPermissionRequired = { onNavigate(Routes.CAMERA_PERMISSION) },
-                    onCameraNavigate = { onNavigate(Routes.CAMERA) }
+                    onCameraNavigate = { onNavigate(Routes.CAMERA) },
+                    onHomeNavigate = {
+                        navController.navigate(BottomTab.Home.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
             }
             composable(BottomTab.Record.route) {
