@@ -62,7 +62,7 @@ private fun HomeChallengeDto.toModel() = HomeChallenge(
     remainingDays = remainingDays,
     deadlineAt = LocalTime.parse(deadlineAt),
     status = status.toChallengeStatus(),
-    verifiedAt = verifiedAt?.let(LocalTime::parse),
+    verifiedAt = verifiedAt?.let { runCatching { LocalTime.parse(it) }.getOrNull() },
     remainingMinutes = remainingMinutes,
     canVerify = canVerify
 )
@@ -75,7 +75,7 @@ private fun HomePartyChallengeDto.toModel() = HomePartyChallenge(
     completedMemberCount = completedMemberCount,
     totalMemberCount = totalMemberCount,
     status = status.toChallengeStatus(),
-    verifiedAt = verifiedAt?.let(LocalTime::parse),
+    verifiedAt = verifiedAt?.let { runCatching { LocalTime.parse(it) }.getOrNull() },
     remainingMinutes = remainingMinutes,
     canVerify = canVerify,
     members = members.map {
