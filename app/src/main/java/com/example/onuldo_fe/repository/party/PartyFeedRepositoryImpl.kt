@@ -35,6 +35,6 @@ private fun PartyFeedItemDto.toModel() = PartyFeedItem(
     defaultCharacterId = ((userId % 9) + 1).toInt()
 )
 
-private fun String.toElapsedMinutes(): Int = runCatching {
+private fun String.toElapsedMinutes(): Int? = runCatching {
     Duration.between(LocalDateTime.parse(this), LocalDateTime.now()).toMinutes().coerceAtLeast(0).toInt()
-}.getOrDefault(0)
+}.getOrNull()
