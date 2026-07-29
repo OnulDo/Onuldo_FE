@@ -67,7 +67,7 @@ fun OnulDoMediumButton(
 @Composable
 private fun OnulDoMediumButtonPreview() {
     OnulDo_FETheme {
-        OnulDoButton(
+        OnulDoMediumButton(
             text = "클릭하세요",
             onClick = {},
         )
