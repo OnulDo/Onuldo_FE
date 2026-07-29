@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 val Black = Color(0xFF101010)
 val White = Color(0xFFFFFFFF)
 val BlackBrown = Color(0xFF1B130C)
+val BlackBrown70 = BlackBrown.copy(alpha = 0.7f)
 
 //Background
 val SourCream = Color(0xFFFFFDF7)
