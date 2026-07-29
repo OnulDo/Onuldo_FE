@@ -34,6 +34,7 @@ object FakePartyStore {
             room = waitingRoom(
                 partyId = 1L,
                 name = "새벽 러너 파티",
+                goal = "30분 러닝",
                 inviteCode = "START1",
                 durationDays = 12,
                 depositAmount = 30_000,
@@ -54,6 +55,7 @@ object FakePartyStore {
             room = waitingRoom(
                 partyId = 2L,
                 name = "책상 공부 인증 파티",
+                goal = "5시간 집중",
                 inviteCode = "START2",
                 durationDays = 20,
                 depositAmount = 20_000,
@@ -74,6 +76,7 @@ object FakePartyStore {
             room = waitingRoom(
                 partyId = 101L,
                 name = "갓생팟",
+                goal = "30일 헬스 챌린지",
                 inviteCode = PartyInviteDummyData.VALID_CODE,
                 durationDays = 28,
                 depositAmount = 30_000,
@@ -89,8 +92,28 @@ object FakePartyStore {
     )
 
     private val summaries = mutableMapOf(
-        1L to PartySummaryDto(1L, "새벽 러너 파티", "ONGOING", 12, 0.4, 2, 5),
-        2L to PartySummaryDto(2L, "책상 공부 인증 파티", "ONGOING", 20, 0.6, 3, 5)
+        1L to PartySummaryDto(
+            partyId = 1L,
+            name = "새벽 러너 파티",
+            goal = "30분 러닝",
+            deadline = "07:00",
+            status = "ONGOING",
+            dDay = 12,
+            progressRate = 0.4,
+            verifiedToday = 2,
+            totalMembers = 5
+        ),
+        2L to PartySummaryDto(
+            partyId = 2L,
+            name = "책상 공부 인증 파티",
+            goal = "5시간 집중",
+            deadline = null,
+            status = "ONGOING",
+            dDay = 20,
+            progressRate = 0.6,
+            verifiedToday = 3,
+            totalMembers = 5
+        )
     )
 
     @Synchronized
@@ -106,6 +129,7 @@ object FakePartyStore {
         val room = waitingRoom(
             partyId = partyId,
             name = request.name,
+            goal = fakeChallengeName(request.challengeId),
             inviteCode = inviteCode,
             durationDays = request.durationDays,
             depositAmount = request.depositAmount,
@@ -114,8 +138,7 @@ object FakePartyStore {
         )
         parties[partyId] = StoredParty(
             room = room,
-            // TODO: 대기방 API에 챌린지 정보가 추가되면 응답 DTO에서 사용한다.
-            challengeName = "챌린지",
+            challengeName = room.goal.orEmpty(),
             status = "WAITING"
         )
         return CreatePartyResponseDto(
@@ -216,7 +239,18 @@ object FakePartyStore {
             "모든 파티원이 준비되지 않았습니다."
         }
         parties[partyId] = stored.copy(status = "ONGOING")
-        summaries[partyId] = PartySummaryDto(partyId, stored.room.name, "ONGOING", stored.room.durationDays, 0.0, 0, members.size)
+        summaries[partyId] = PartySummaryDto(
+            partyId = partyId,
+            name = stored.room.name,
+            goal = stored.challengeName,
+            // 실제 API 명세에 마감 시간이 추가되기 전까지 Fake 생성 파티는 값 없음으로 유지
+            deadline = null,
+            status = "ONGOING",
+            dDay = stored.room.durationDays,
+            progressRate = 0.0,
+            verifiedToday = 0,
+            totalMembers = members.size
+        )
         FakePartyFeedState.updateParty(partyId, stored.room.name, stored.challengeName, members.size)
         return PartyStartResponseDto(partyId, "ONGOING", "2026-07-27T12:00:00")
     }
@@ -227,6 +261,7 @@ object FakePartyStore {
     private fun waitingRoom(
         partyId: Long,
         name: String,
+        goal: String,
         inviteCode: String,
         durationDays: Int,
         depositAmount: Int,
@@ -235,6 +270,7 @@ object FakePartyStore {
     ) = PartyWaitingRoomDto(
         partyId = partyId,
         name = name,
+        goal = goal,
         status = "WAITING",
         inviteCode = inviteCode,
         currentMembers = members.size,
@@ -255,6 +291,17 @@ object FakePartyStore {
 
     private fun canStart(members: List<PartyMemberDto>): Boolean =
         members.size >= 2 && members.filter { it.role == "MEMBER" }.all { it.status == "READY" }
+
+    // Fake 생성 요청의 challengeId를 화면 테스트용 챌린지명으로 변환
+    private fun fakeChallengeName(challengeId: Long): String = when (challengeId) {
+        0L -> "새벽 6시 기상"
+        1L -> "30분 러닝"
+        2L -> "하루 독서 30분"
+        3L -> "영양제 챙기기"
+        4L -> "영단어 30개"
+        5L -> "명상 10분"
+        else -> "선택한 챌린지"
+    }
 
     private fun member(userId: Long, nickname: String, role: String, status: String) = PartyMemberDto(
         userId = userId,

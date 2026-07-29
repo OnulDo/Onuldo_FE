@@ -88,8 +88,8 @@ internal fun PartySettlementResultDto.toModel() = PartySettlementResult(
 private fun PartyWaitingRoomDto.toModel() = PartyWaitingRoom(
     partyId = partyId.toString(),
     partyName = name,
-    // TODO: 대기방 응답에 챌린지 정보가 추가되면 실제 값으로 교체한다.
-    challengeName = "챌린지",
+    // 대기방 응답에 목표가 없으면 화면에서 빈 값으로 처리
+    challengeName = goal.orEmpty(),
     inviteCode = inviteCode,
     period = "${durationDays}일",
     deposit = depositAmount,
@@ -118,10 +118,11 @@ private fun PartyMemberDto.toModel(index: Int) = PartyMember(
 private fun PartySummaryDto.toModel() = PartySummary(
     partyId = partyId.toString(),
     partyName = name,
-    // TODO: 목록 응답에 챌린지명과 인증 마감 시각이 추가되면 실제 값으로 교체한다.
-    challengeName = "챌린지",
+    // API 명세의 goal을 화면에서 사용하는 챌린지명으로 변환
+    challengeName = goal,
     dDay = "D-$dDay",
-    deadline = "",
+    // 마감 시간은 API에서 제공하지 않을 수 있으므로 nullable 응답을 빈 값으로 변환
+    deadline = deadline.orEmpty(),
     remainingText = null,
     completedMemberCount = verifiedToday,
     totalMemberCount = totalMembers,

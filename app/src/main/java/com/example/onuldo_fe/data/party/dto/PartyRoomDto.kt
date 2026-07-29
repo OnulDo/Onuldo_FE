@@ -39,6 +39,7 @@ data class PartyMemberDto(
 data class PartyWaitingRoomDto(
     val partyId: Long,
     val name: String,
+    val goal: String?,
     val status: String,
     val inviteCode: String,
     val currentMembers: Int,
@@ -54,6 +55,8 @@ data class PartyWaitingRoomDto(
 data class PartySummaryDto(
     val partyId: Long,
     val name: String,
+    val goal: String,
+    val deadline: String?,
     val status: String,
     val dDay: Int,
     val progressRate: Double,
