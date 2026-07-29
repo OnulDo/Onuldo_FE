@@ -17,10 +17,58 @@ object FakePartyStore {
     private data class StoredParty(
         val room: PartyWaitingRoomDto,
         val challengeName: String,
-        val status: String
+        val status: String,
+        val verifiedMemberIds: Set<Long> = emptySet()
+    )
+
+    data class FeedSnapshot(
+        val partyName: String,
+        val challengeName: String,
+        val members: List<PartyMemberDto>,
+        val verifiedMemberIds: Set<Long>
     )
 
     private val parties = mutableMapOf(
+        1L to StoredParty(
+            room = waitingRoom(
+                partyId = 1L,
+                name = "새벽 러너 파티",
+                inviteCode = "START1",
+                durationDays = 12,
+                depositAmount = 30_000,
+                maxMembers = 5,
+                members = listOf(
+                    member(1L, "민지", "HOST", "WAITING"),
+                    member(2L, "서연", "MEMBER", "READY"),
+                    member(3L, "지호", "MEMBER", "READY"),
+                    member(4L, "수아", "MEMBER", "READY"),
+                    member(CURRENT_USER_ID, "하늘", "MEMBER", "READY")
+                )
+            ),
+            challengeName = "30분 러닝",
+            status = "ONGOING",
+            verifiedMemberIds = setOf(1L, 2L)
+        ),
+        2L to StoredParty(
+            room = waitingRoom(
+                partyId = 2L,
+                name = "책상 공부 인증 파티",
+                inviteCode = "START2",
+                durationDays = 20,
+                depositAmount = 20_000,
+                maxMembers = 5,
+                members = listOf(
+                    member(1L, "민지", "HOST", "WAITING"),
+                    member(2L, "서연", "MEMBER", "READY"),
+                    member(3L, "지호", "MEMBER", "READY"),
+                    member(4L, "수아", "MEMBER", "READY"),
+                    member(CURRENT_USER_ID, "하늘", "MEMBER", "READY")
+                )
+            ),
+            challengeName = "5시간 집중",
+            status = "ONGOING",
+            verifiedMemberIds = setOf(1L, 2L, 3L)
+        ),
         101L to StoredParty(
             room = waitingRoom(
                 partyId = 101L,
@@ -103,6 +151,18 @@ object FakePartyStore {
     @Synchronized
     fun getRoom(partyId: Long): PartyWaitingRoomDto =
         parties[partyId]?.room ?: error("존재하지 않는 파티입니다.")
+
+    // Fake 피드도 고정 인원 목록이 아닌 해당 파티에 실제 저장된 멤버와 인증 상태를 사용
+    @Synchronized
+    fun getFeedSnapshot(partyId: Long): FeedSnapshot {
+        val stored = parties[partyId] ?: error("존재하지 않는 파티입니다.")
+        return FeedSnapshot(
+            partyName = stored.room.name,
+            challengeName = stored.challengeName,
+            members = stored.room.members.toList(),
+            verifiedMemberIds = stored.verifiedMemberIds.toSet()
+        )
+    }
 
     @Synchronized
     fun ready(partyId: Long): PartyWaitingRoomDto {
