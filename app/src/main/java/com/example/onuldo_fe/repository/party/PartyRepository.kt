@@ -14,5 +14,5 @@ interface PartyRepository {
     suspend fun readyParty(partyId: String): PartyWaitingRoom
     suspend fun leaveParty(partyId: String)
     suspend fun startParty(partyId: String)
-    suspend fun getSettlementResult(partyId: String): PartySettlementResult
+    suspend fun getSettlementResult(partyId: Long): PartySettlementResult
 }

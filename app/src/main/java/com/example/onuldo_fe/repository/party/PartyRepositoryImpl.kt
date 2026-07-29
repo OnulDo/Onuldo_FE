@@ -51,7 +51,7 @@ class PartyRepositoryImpl(private val api: PartyApi) : PartyRepository {
         api.startParty(partyId.toLong())
     }
 
-    override suspend fun getSettlementResult(partyId: String): PartySettlementResult =
+    override suspend fun getSettlementResult(partyId: Long): PartySettlementResult =
         api.getSettlementResult(partyId).toModel()
 }
 

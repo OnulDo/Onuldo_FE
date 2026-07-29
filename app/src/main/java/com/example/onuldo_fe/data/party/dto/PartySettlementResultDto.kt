@@ -2,7 +2,7 @@ package com.example.onuldo_fe.data.party.dto
 
 // 파티 정산 결과 조회 API 응답
 data class PartySettlementResultDto(
-    val partyId: String,
+    val partyId: Long,
     val overallStatus: String,
     val overallTitle: String,
     val overallDescription: String,

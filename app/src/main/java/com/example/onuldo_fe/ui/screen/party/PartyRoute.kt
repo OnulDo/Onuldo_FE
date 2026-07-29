@@ -69,7 +69,7 @@ fun PartyRoute(
     var capacity by remember { mutableIntStateOf(5) }
 
     // 피드 재조회와 대기방 오류 재시도에 사용할 마지막 partyId 보관
-    var feedPartyId by remember { mutableStateOf("party-001") }
+    var feedPartyId by remember { mutableStateOf("1") }
     var waitingPartyId by remember { mutableStateOf<String?>(null) }
 
     // 로그인 사용자와 대기방 멤버 ID를 비교해 파티장/파티원 전용 UI 결정
@@ -252,14 +252,14 @@ fun PartyRoute(
 
         PartyScreen.Settlement -> {
             LaunchedEffect(feedPartyId) {
-                partySettlementViewModel.loadSettlementResult(feedPartyId)
+                partySettlementViewModel.loadSettlementResult(feedPartyId.toLong())
             }
             val settlementState = partySettlementViewModel.uiState
             val settlementResult = settlementState.result
             if (settlementResult == null) {
                 PartyLoadingScreen(
                     errorMessage = settlementState.errorMessage,
-                    onRetry = { partySettlementViewModel.loadSettlementResult(feedPartyId) },
+                    onRetry = { partySettlementViewModel.loadSettlementResult(feedPartyId.toLong()) },
                     onBack = { screen = PartyScreen.List }
                 )
             } else {

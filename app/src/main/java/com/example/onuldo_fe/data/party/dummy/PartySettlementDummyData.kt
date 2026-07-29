@@ -6,9 +6,9 @@ import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
 
 // 실제 정산 API 연결 전 세 가지 결과 화면을 확인하는 Fake 응답
 object PartySettlementDummyData {
-    const val ALL_SUCCESS_PARTY_ID = "settlement-all-success"
-    const val PARTIAL_SUCCESS_PARTY_ID = "settlement-partial-success"
-    const val ALL_FAILED_PARTY_ID = "settlement-all-failed"
+    const val ALL_SUCCESS_PARTY_ID = 1_001L
+    const val PARTIAL_SUCCESS_PARTY_ID = 1_002L
+    const val ALL_FAILED_PARTY_ID = 1_003L
 
     val allSuccess = PartySettlementResultDto(
         partyId = ALL_SUCCESS_PARTY_ID,
@@ -46,7 +46,7 @@ object PartySettlementDummyData {
         )
     )
 
-    fun get(partyId: String): PartySettlementResultDto = when (partyId) {
+    fun get(partyId: Long): PartySettlementResultDto = when (partyId) {
         PARTIAL_SUCCESS_PARTY_ID -> partialSuccess
         ALL_FAILED_PARTY_ID -> allFailed
         else -> allSuccess.copy(partyId = partyId)

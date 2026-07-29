@@ -16,7 +16,7 @@ class PartySettlementViewModel(
     var uiState by mutableStateOf(PartySettlementUiState())
         private set
 
-    fun loadSettlementResult(partyId: String) {
+    fun loadSettlementResult(partyId: Long) {
         uiState = PartySettlementUiState(isLoading = true)
         viewModelScope.launch {
             runCatching { repository.getSettlementResult(partyId) }

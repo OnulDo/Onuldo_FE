@@ -15,7 +15,7 @@ enum class PartySettlementMemberStatus {
 
 // 화면과 비즈니스 로직에서 사용하는 파티 정산 결과
 data class PartySettlementResult(
-    val partyId: String,
+    val partyId: Long,
     val status: PartySettlementStatus,
     val title: String,
     val description: String,

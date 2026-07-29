@@ -31,6 +31,6 @@ class FakePartyApi : PartyApi {
     override suspend fun startParty(partyId: Long): PartyStartResponseDto = FakePartyStore.start(partyId)
 
     // partyId에 따라 전원 성공·일부 성공·전원 실패 정산 결과 반환
-    override suspend fun getSettlementResult(partyId: String): PartySettlementResultDto =
+    override suspend fun getSettlementResult(partyId: Long): PartySettlementResultDto =
         PartySettlementDummyData.get(partyId)
 }
