@@ -57,7 +57,13 @@ fun PartyFeedCard(
                 )
             }
         }
-        Row(Modifier.fillMaxWidth().height(50.dp).padding(start = 10.dp, end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth().height(50.dp).padding(
+                start = LocalSpacing.current.spacing10,
+                end = LocalSpacing.current.spacing10
+            ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             PartyMemberProfileImage(
                 profileImageUrl = item.profileImageUrl,
                 defaultCharacterId = item.defaultCharacterId,
@@ -66,7 +72,7 @@ fun PartyFeedCard(
                 characterWidth = 22.dp,
                 characterHeight = 25.dp
             )
-            Column(Modifier.padding(start = 8.dp)) {
+            Column(Modifier.padding(start = LocalSpacing.current.spacing8)) {
                 Text(item.name, color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
                 Text(item.time, color = DarkBrown50, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Medium)
             }

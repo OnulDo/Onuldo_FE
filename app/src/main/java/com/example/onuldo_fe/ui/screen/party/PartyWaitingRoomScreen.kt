@@ -44,6 +44,7 @@ fun PartyWaitingRoomScreen(
     isActionInProgress: Boolean = false,
     errorMessage: String? = null
 ) {
+    val spacing = LocalSpacing.current
     val clipboard = LocalClipboardManager.current
     var showPointDialog by remember { mutableStateOf(false) }
 
@@ -58,17 +59,24 @@ fun PartyWaitingRoomScreen(
                 .weight(1f)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(start = 20.dp, top = 40.dp, end = 20.dp, bottom = 24.dp)
+                // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
+                .padding(
+                    start = spacing.spacing20,
+                    top = 40.dp,
+                    end = spacing.spacing20,
+                    bottom = spacing.spacing24
+                )
         ) {
             PartyWaitingRoomInfoCard(ui)
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(spacing.spacing16))
             PartyInviteCodeCard(
                 ui.inviteCode,
                 onCopyClick = { clipboard.setText(AnnotatedString(ui.inviteCode)) }
             )
-            Spacer(Modifier.height(21.dp))
+            Spacer(Modifier.height(spacing.spacing24))
             Text(
                 "파티원",
+                // TODO 디자인 시스템에 4dp 토큰이 추가되면 LocalSpacing으로 교체
                 Modifier.padding(start = 4.dp),
                 color = BlackBrown,
                 fontFamily = Pretendard,
@@ -76,16 +84,16 @@ fun PartyWaitingRoomScreen(
                 lineHeight = 22.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(Modifier.height(9.dp))
+            Spacer(Modifier.height(spacing.spacing12))
 
             ui.members.forEach { member ->
                 PartyWaitingMemberCard(member)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(spacing.spacing8))
             }
 
             repeat((ui.capacity - ui.members.size).coerceAtLeast(0)) {
                 PartyWaitingEmptySlotCard()
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(spacing.spacing8))
             }
 
         }
@@ -95,7 +103,8 @@ fun PartyWaitingRoomScreen(
                 text = errorMessage ?: "전원이 모이면 파티장이 시작할 수 있어요",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = spacing.spacing20)
+                    // TODO 디자인 시스템에 6dp 토큰이 추가되면 LocalSpacing으로 교체
                     .offset(y = 6.dp),
                 color = if (errorMessage == null) DarkBrown50 else Persimmon,
                 fontFamily = Pretendard,
@@ -112,7 +121,8 @@ fun PartyWaitingRoomScreen(
                     }
                 },
                 enabled = !isActionInProgress && if (isLeader) ui.canStart else !isCurrentUserReady,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 40.dp).height(52.dp),
+                // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
+                modifier = Modifier.fillMaxWidth().padding(horizontal = spacing.spacing20).padding(top = 40.dp).height(52.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Persimmon, contentColor = SourCream, disabledContainerColor = DarkBrown10, disabledContentColor = DarkBrown40)
             ) {
@@ -161,6 +171,7 @@ private fun PartyWaitingRoomInfoCard(ui: PartyWaitingRoomUi, modifier: Modifier 
         )
         Text(
             "모집중 · ${ui.members.size}/${ui.capacity}명 · ${ui.period} · 1인 ${"%,d".format(ui.deposit)}P",
+            // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
             Modifier.padding(top = 3.dp),
             color = DarkBrown,
             fontFamily = Pretendard,

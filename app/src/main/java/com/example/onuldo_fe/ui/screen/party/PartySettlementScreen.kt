@@ -46,6 +46,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Green
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
@@ -63,6 +64,7 @@ fun PartySettlementScreen(
     modifier: Modifier = Modifier,
     onConfirm: () -> Unit = onBack
 ) {
+    val spacing = LocalSpacing.current
     val content = result.status.content()
 
     Column(modifier.fillMaxSize().background(SourCream)) {
@@ -70,9 +72,10 @@ fun PartySettlementScreen(
 
         LazyColumn(
             modifier = Modifier.weight(1f).fillMaxWidth(),
-            contentPadding = PaddingValues(bottom = 16.dp)
+            contentPadding = PaddingValues(bottom = spacing.spacing16)
         ) {
             item {
+                // TODO 디자인 시스템에 47dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(47.dp))
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Box(
@@ -84,7 +87,7 @@ fun PartySettlementScreen(
                         PartySettlementCharacter()
                     }
                 }
-                Spacer(Modifier.height(7.dp))
+                Spacer(Modifier.height(spacing.spacing12))
                 Text(
                     text = result.title,
                     modifier = Modifier.fillMaxWidth(),
@@ -105,29 +108,29 @@ fun PartySettlementScreen(
                     fontWeight = FontWeight.Normal,
                     textAlign = TextAlign.Center
                 )
-                Spacer(Modifier.height(47.dp))
+                Spacer(Modifier.height(spacing.spacing50))
                 SettlementSectionTitle("내 정산 결과")
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(spacing.spacing8))
                 SettlementSummaryCard(
                     refundAmount = result.refundAmount.toPointText(),
                     adjustmentLabel = content.adjustmentLabel,
                     adjustmentAmount = result.adjustmentAmount.toSignedPointText(),
                     adjustmentColor = content.adjustmentColor,
                     refundLabelColor = content.refundLabelColor,
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                    modifier = Modifier.padding(horizontal = spacing.spacing20)
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(spacing.spacing16))
                 SettlementSectionTitle("파티원 결과")
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(spacing.spacing8))
             }
 
             items(result.members, key = { it.userId }) { member ->
                 PartySettlementMemberCard(
                     member = member,
                     showCompletionStatus = result.status == PartySettlementStatus.PartialSuccess,
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                    modifier = Modifier.padding(horizontal = spacing.spacing20)
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(spacing.spacing8))
             }
         }
 
@@ -139,7 +142,8 @@ fun PartySettlementScreen(
                 onClick = onConfirm,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = spacing.spacing20)
+                    // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
                     .padding(top = 40.dp)
                     .height(52.dp),
                 shape = RoundedCornerShape(14.dp),
@@ -161,7 +165,7 @@ fun PartySettlementScreen(
 private fun SettlementSectionTitle(text: String) {
     Text(
         text = text,
-        modifier = Modifier.padding(start = 24.dp),
+        modifier = Modifier.padding(start = LocalSpacing.current.spacing24),
         color = BlackBrown,
         fontFamily = Pretendard,
         fontSize = 12.sp,
@@ -220,6 +224,7 @@ private fun SettlementAmount(
         )
         Text(
             text = amount,
+            // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
             modifier = Modifier.padding(top = 3.dp),
             color = amountColor,
             fontFamily = Pretendard,

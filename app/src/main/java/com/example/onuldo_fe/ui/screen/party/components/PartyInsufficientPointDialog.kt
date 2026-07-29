@@ -39,17 +39,19 @@ fun PartyInsufficientPointDialog(
             Modifier.width(350.dp).height(380.dp).clip(RoundedCornerShape(20.dp)).background(SourCream),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // TODO 디자인 시스템에 34dp 토큰이 추가되면 LocalSpacing으로 교체
             Spacer(Modifier.height(34.dp))
             Box(Modifier.size(100.dp).clip(CircleShape).background(Red3), contentAlignment = Alignment.Center) {
                 Image(painterResource(R.drawable.challenge_sad_icon), null, Modifier.size(width = 58.dp, height = 76.dp))
             }
+            // TODO 디자인 시스템에 14dp 토큰이 추가되면 LocalSpacing으로 교체
             Spacer(Modifier.height(14.dp))
             Text("포인트가 부족해요", Modifier.fillMaxWidth(), color = BlackBrown, fontFamily = Pretendard, fontSize = 20.sp, lineHeight = 20.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(LocalSpacing.current.spacing8))
             Text("챌린지 시작을 위해 도전금이 필요해요", Modifier.fillMaxWidth(), color = DarkBrown, fontFamily = Pretendard, fontSize = 13.sp, lineHeight = 13.sp, textAlign = TextAlign.Center)
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(LocalSpacing.current.spacing20))
             Row(
-                Modifier.padding(horizontal = 16.dp).fillMaxWidth().height(78.dp).background(Persimmon10, RoundedCornerShape(14.dp)),
+                Modifier.padding(horizontal = LocalSpacing.current.spacing16).fillMaxWidth().height(78.dp).background(Persimmon10, RoundedCornerShape(14.dp)),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -59,8 +61,12 @@ fun PartyInsufficientPointDialog(
                 PartyPointOperator("=", 35.dp)
                 PartyPointColumn("부족분", "%,dP".format(shortage), Persimmon)
             }
+            // TODO 디자인 시스템에 19dp 토큰이 추가되면 LocalSpacing으로 교체
             Spacer(Modifier.height(19.dp))
-            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = LocalSpacing.current.spacing16),
+                horizontalArrangement = Arrangement.spacedBy(LocalSpacing.current.spacing16)
+            ) {
                 PartyDialogButton("취소", onDismiss, Modifier.width(144.dp), filled = false)
                 PartyDialogButton("포인트 충전", onChargeClick, Modifier.width(158.dp), filled = true)
             }
@@ -72,7 +78,7 @@ fun PartyInsufficientPointDialog(
 private fun PartyPointColumn(label: String, value: String, valueColor: Color) {
     Column(Modifier.width(80.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(label, color = DarkBrown70, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Medium)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(LocalSpacing.current.spacing8))
         Text(value, color = valueColor, fontFamily = Pretendard, fontSize = 14.sp, lineHeight = 14.sp, fontWeight = FontWeight.Bold)
     }
 }
