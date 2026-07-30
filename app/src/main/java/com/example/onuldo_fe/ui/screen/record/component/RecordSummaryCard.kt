@@ -38,7 +38,7 @@ private fun SummaryItem(
     ){
         Text(
             text = title,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.titleSmall,
             color = DarkBrown70
         )
 
@@ -97,7 +97,7 @@ fun RecordSummaryCard(
             SummaryItem(
                 title = "성공률",
                 value = "${successRate}%",
-                valueColor = Green
+                valueColor = if (successRate >= 85) Green else Red
             )
 
             SummaryItem(
@@ -117,7 +117,7 @@ fun RecordSummaryCardPreview() {
         RecordSummaryCard(
             completeCount = 12,
             successRate = 83,
-            totalPoint = 18000
+            totalPoint = 298000
         )
     }
 }

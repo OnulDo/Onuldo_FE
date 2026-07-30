@@ -89,7 +89,7 @@ private fun CompleteFilterChip(
                 horizontal = 16.dp,
                 vertical = 8.dp
             ),
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = if (selected) White else BlackBrown
         )
     }
