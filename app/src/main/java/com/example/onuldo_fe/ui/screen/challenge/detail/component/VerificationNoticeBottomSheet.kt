@@ -2,6 +2,7 @@ package com.example.onuldo_fe.ui.screen.challenge.detail.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -26,7 +28,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
@@ -36,6 +37,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown20
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
@@ -58,6 +60,7 @@ fun VerificationNoticeBottomSheet(
     // skipPartiallyExpanded = 처음부터 전체 펼침 → 확인 버튼까지 바로 보임
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    val spacing = LocalSpacing.current
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -81,7 +84,7 @@ fun VerificationNoticeBottomSheet(
         },
         modifier = modifier
     ) {
-        Spacer(Modifier.height(18.dp))
+        Spacer(Modifier.height(spacing.spacing18))
 
         Text(
             text = "인증 유의사항",
@@ -97,19 +100,19 @@ fun VerificationNoticeBottomSheet(
 
         HorizontalDivider(thickness = 1.dp, color = DarkBrown20)
 
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(13.dp))
 
         Text(
             text = challengeTitle,
             fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Normal,
             fontSize = 11.sp,
             lineHeight = 11.sp,
             color = DarkBrown,
             modifier = Modifier.padding(start = 24.dp)
         )
 
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(spacing.spacing12))
 
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             ConditionBox(
@@ -117,23 +120,21 @@ fun VerificationNoticeBottomSheet(
                 items = successConditions,
                 accent = Green,
                 background = Green2,
-                isSuccess = true,
-                bottomPadding = 32.dp
+                isSuccess = true
             )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(spacing.spacing24))
 
             ConditionBox(
                 title = "인증 실패 조건",
                 items = failureConditions,
                 accent = Red,
                 background = Red2,
-                isSuccess = false,
-                bottomPadding = 16.dp
+                isSuccess = false
             )
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(spacing.spacing36))   // 빨간 박스 ↔ 확인 버튼 36
 
         // 확인 — 내려가는 애니메이션 후 닫기 (클로드 추천)
         OnulDoButton(
@@ -145,7 +146,7 @@ fun VerificationNoticeBottomSheet(
             }
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(spacing.spacing24))
         Spacer(Modifier.navigationBarsPadding())
     }
 }
@@ -158,57 +159,52 @@ private fun ConditionBox(
     accent: Color,
     background: Color,
     isSuccess: Boolean,
-    bottomPadding: Dp,
     modifier: Modifier = Modifier
 ) {
+    // 고정 높이 대신 내용에 맞게 감싸도록 함 — 조건 개수/길이가 달라져도(실제 API 데이터)
+    // 잘리거나 간격이 깨지지 않고, 항목 간 간격은 항상 10dp로 일정하게 유지된다.
     Column(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxWidth()       // 시트 폭에 맞춤 (부모 padding 20 기준 = 390 프레임에서 350)
             .clip(RoundedCornerShape(14.dp))
             .background(background)
-            .padding(start = 16.dp, end = 16.dp, top = 17.dp, bottom = bottomPadding)
+            .padding(start = 16.dp, end = 16.dp, top = 17.dp, bottom = 16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (isSuccess) {
-                Image(
-                    painter = painterResource(R.drawable.challenge_check_icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-            } else {
-                Image(
-                    painter = painterResource(R.drawable.challenge_x_icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            Image(
+                painter = painterResource(
+                    if (isSuccess) R.drawable.challenge_check_icon else R.drawable.challenge_x_icon
+                ),
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
 
             Spacer(Modifier.width(6.dp))
 
             Text(
                 text = title,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                lineHeight = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,  // Body3
                 color = accent
             )
         }
 
-        Spacer(Modifier.height(19.dp))
+        Spacer(Modifier.height(12.dp))   // 헤더 ↔ 목록
 
-        items.forEachIndexed { index, item ->
-            if (index > 0) {
-                Spacer(Modifier.height(17.dp)) // 줄 간격 (박스 196에 맞춘 역산값) (클로드)
+        // 항목은 일정 간격(10dp)으로 배분 — 개수·줄바꿈에 따라 박스가 자연스럽게 늘어남
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            items.forEach { item ->
+                Text(
+                    text = item,
+                    fontFamily = Pretendard,
+                    fontWeight = FontWeight.Normal,  // Caption3: 12sp / 400 / lineHeight 20
+                    fontSize = 12.sp,
+                    lineHeight = 20.sp,
+                    color = BlackBrown
+                )
             }
-            Text(
-                text = item,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Normal,
-                fontSize = 12.sp,
-                lineHeight = 12.sp,
-                color = BlackBrown
-            )
         }
     }
 }
