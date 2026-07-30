@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -24,12 +25,20 @@ import com.example.onuldo_fe.viewmodel.home.HomeViewModel
 fun HomeRoute(
     viewModel: HomeViewModel = viewModel(),
     onSettlementResultClick: (String) -> Unit = {},
-    onCameraNavigate: () -> Unit = {}
+    onCameraNavigate: () -> Unit = {},
+    refreshKey: Int = 0
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showNotification by rememberSaveable { mutableStateOf(false) }
     var showCameraPermissionDialog by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(refreshKey) {
+        if (refreshKey > 0) {
+            // 파티 시작 후 홈 복귀 시 최신 참여 파티를 다시 조회
+            viewModel.loadHome()
+        }
+    }
 
     fun handleVerifyClick() {
         val isCameraPermissionGranted = ContextCompat.checkSelfPermission(
@@ -70,8 +79,13 @@ fun HomeRoute(
         HomeScreen(
             uiState = viewModel.uiState,
             onNotificationClick = { showNotification = true },
-            onSettlementResultClick = onSettlementResultClick,
-            onVerifyClick = ::handleVerifyClick
+            onSettlementResultClick = { resultId ->
+                // 결과 화면 이동을 요청한 뒤 현재 홈 세션에서 확인한 배너 제거
+                onSettlementResultClick(resultId)
+                viewModel.confirmSettlementResult()
+            },
+            onVerifyClick = ::handleVerifyClick,
+            scrollToTopKey = refreshKey
         )
     }
 

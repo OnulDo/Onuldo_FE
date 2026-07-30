@@ -1,33 +1,33 @@
 package com.example.onuldo_fe.ui.screen.home.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown80
-import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -39,43 +39,60 @@ fun SettlementCompleteCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val spacing = LocalSpacing.current
-    // TODO: 12sp Medium 글자 스타일과 15dp 여백 토큰 추가 후 교체
+    // TODO: 12sp Medium 글자 스타일 토큰 추가 후 교체
+    val shape = RoundedCornerShape(14.dp)
 
-    Row(
+    Box(
         modifier = modifier
             .height(64.dp)
-            .background(White, RoundedCornerShape(14.dp))
-            .border(BorderStroke(1.5.dp, Persimmon), RoundedCornerShape(14.dp))
+            .clip(shape)
+            .background(White, shape)
+            .border(BorderStroke(1.5.dp, Persimmon), shape)
             .clickable(onClick = onClick)
-            .padding(start = 15.dp, end = 46.dp),
-        verticalAlignment = Alignment.CenterVertically
     ) {
+        // Figma 프레임 좌표와 크기를 그대로 적용해 요소별 위치 고정
         Image(
             painter = painterResource(R.drawable.home_congratulation_icon),
             contentDescription = null,
-            modifier = Modifier.size(width = 22.dp, height = 22.dp)
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+                .offset(x = 17.dp, y = 20.dp)
+                .size(width = 22.dp, height = 21.17.dp)
         )
-        Spacer(Modifier.width(spacing.spacing8))
         Text(
             text = stringResource(R.string.home_settlement_complete_title),
             color = BlackBrown,
-            style = MaterialTheme.typography.bodyMedium
+            fontFamily = Pretendard,
+            fontSize = 14.sp,
+            lineHeight = 18.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .offset(x = 47.dp, y = 23.dp)
+                .size(width = 112.dp, height = 18.dp)
         )
-        Spacer(Modifier.weight(1f))
+        // API에서 긴 챌린지명이 들어오면 최대 69dp 안에서 한 줄 말줄임 처리
         Text(
             text = partyName,
             color = DarkBrown80,
             fontFamily = Pretendard,
             fontSize = 12.sp,
             lineHeight = 14.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = (-40).dp, y = 25.dp)
+                .widthIn(max = 69.dp)
         )
-        Spacer(Modifier.width(spacing.spacing12))
         Image(
             painter = painterResource(R.drawable.home_arrow_right),
             contentDescription = null,
-            modifier = Modifier.size(width = 6.dp, height = 11.dp)
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = (-24.5).dp, y = 26.dp)
+                .size(width = 5.5.dp, height = 11.05.dp)
         )
     }
 }
@@ -84,11 +101,10 @@ fun SettlementCompleteCard(
 @Composable
 private fun SettlementCompleteCardPreview() {
     OnulDo_FETheme {
-        val spacing = LocalSpacing.current
         SettlementCompleteCard(
             "새벽 러너 파티",
             {},
-            Modifier.fillMaxWidth().padding(horizontal = spacing.spacing20)
+            Modifier.width(350.dp)
         )
     }
 }

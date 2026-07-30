@@ -20,7 +20,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -41,6 +44,8 @@ import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeHeader(
@@ -52,6 +57,8 @@ fun HomeHeader(
     // TODO: 8sp SemiBold·18sp ExtraBold 글자 스타일 토큰 추가 후 교체
     val notificationInteractionSource = remember { MutableInteractionSource() }
     val isNotificationPressed by notificationInteractionSource.collectIsPressedAsState()
+    var isClickFeedbackActive by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Box(
@@ -97,7 +104,17 @@ fun HomeHeader(
                     interactionSource = notificationInteractionSource,
                     indication = null,
                     role = Role.Button,
-                    onClick = onNotificationClick
+                    onClick = {
+                        if (!isClickFeedbackActive) {
+                            // 짧게 눌러도 눌림 색상이 보이도록 100ms 유지
+                            isClickFeedbackActive = true
+                            coroutineScope.launch {
+                                delay(100L)
+                                isClickFeedbackActive = false
+                                onNotificationClick()
+                            }
+                        }
+                    }
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -105,7 +122,7 @@ fun HomeHeader(
                 painter = painterResource(id = R.drawable.home_bell_icon),
                 contentDescription = "알림",
                 modifier = Modifier.size(17.dp),
-                tint = if (isNotificationPressed) Persimmon else BlackBrown
+                tint = if (isNotificationPressed || isClickFeedbackActive) Persimmon else BlackBrown
             )
         }
     }

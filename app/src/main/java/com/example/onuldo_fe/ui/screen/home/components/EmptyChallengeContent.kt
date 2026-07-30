@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
@@ -37,9 +38,13 @@ fun EmptyChallengeContent(
     onBrowseChallengesClick: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
-    // TODO: Persimmon15 색상과 37dp 여백 토큰 추가 후 교체
+    // TODO: Persimmon15 색상 토큰 추가 후 교체
+    // TODO: 디자인 시스템에 없는 9·42dp 여백 토큰 추가 후 교체
 
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Box(
             modifier = Modifier
                 .size(120.dp)
@@ -56,23 +61,27 @@ fun EmptyChallengeContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(spacing.spacing16))
+        Spacer(Modifier.height(spacing.spacing16))
         Text(
             text = "아직 시작한 챌린지가 없어요",
+            modifier = Modifier.fillMaxWidth(),
             color = BlackBrown,
             style = MaterialTheme.typography.titleLarge,
-            lineHeight = 40.sp,
-            textAlign = TextAlign.Center
+            lineHeight = 26.sp,
+            textAlign = TextAlign.Center,
+            maxLines = 1
         )
+        Spacer(Modifier.height(9.dp))
         Text(
             text = "도전금을 걸고 작은 습관부터\n갓생을 시작해보세요!",
             color = DarkBrown,
-            modifier = Modifier.offset(y = (-10).dp),
+            modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.labelLarge,
             lineHeight = 18.sp,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            maxLines = 2
         )
-        Spacer(modifier = Modifier.height(37.dp))
+        Spacer(Modifier.height(42.dp))
         OnulDoButton(
             text = "챌린지 둘러보기",
             onClick = onBrowseChallengesClick,
@@ -80,7 +89,8 @@ fun EmptyChallengeContent(
             fontSize = 14.sp,
             horizontalPadding = 0.dp,
             pressedContainerColor = DarkBrown,
-            modifier = Modifier.fillMaxWidth()
+            // 제목·설명은 350dp를 사용하고 CTA만 Figma 기준 278dp로 제한
+            modifier = Modifier.width(278.dp)
         )
     }
 }

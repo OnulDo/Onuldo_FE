@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -51,6 +52,7 @@ fun HomeScreen(
     onBrowseChallengesClick: () -> Unit = {},
     onSettlementResultClick: (String) -> Unit = {},
     onVerifyClick: () -> Unit = {},
+    scrollToTopKey: Int = 0,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -65,7 +67,8 @@ fun HomeScreen(
                 uiState = uiState,
                 onNotificationClick = onNotificationClick,
                 onSettlementResultClick = onSettlementResultClick,
-                onVerifyClick = onVerifyClick
+                onVerifyClick = onVerifyClick,
+                scrollToTopKey = scrollToTopKey
             )
         } else {
             EmptyHomeContent(
@@ -103,7 +106,7 @@ private fun EmptyHomeContent(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
-                .padding(start = 56.dp, end = 56.dp, top = 216.dp)
+                .padding(start = spacing.spacing20, end = spacing.spacing20, top = 216.dp)
         )
     }
 }
@@ -113,16 +116,25 @@ private fun HomeContent(
     uiState: HomeUiState,
     onNotificationClick: () -> Unit,
     onSettlementResultClick: (String) -> Unit,
-    onVerifyClick: () -> Unit
+    onVerifyClick: () -> Unit,
+    scrollToTopKey: Int
 ) {
     val spacing = LocalSpacing.current
     val isAllCompleted = uiState.isAllCompleted
+    val scrollState = rememberScrollState()
     // TODO: 디자인 시스템에 없는 17·34dp 여백 토큰 추가 후 교체
+
+    LaunchedEffect(scrollToTopKey) {
+        if (scrollToTopKey > 0) {
+            // 파티 시작 후 홈으로 돌아오면 이전 스크롤 위치 대신 상단 표시
+            scrollState.scrollTo(0)
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .padding(bottom = spacing.spacing24)
     ) {
         // 모든 홈 상태에서 공통 헤더 유지
