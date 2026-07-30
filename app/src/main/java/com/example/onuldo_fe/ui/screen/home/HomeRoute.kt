@@ -25,6 +25,7 @@ import com.example.onuldo_fe.viewmodel.home.HomeViewModel
 fun HomeRoute(
     viewModel: HomeViewModel = viewModel(),
     onSettlementResultClick: (String) -> Unit = {},
+    onBrowseChallengesClick: () -> Unit = {},
     onCameraNavigate: () -> Unit = {},
     refreshKey: Int = 0
 ) {
@@ -84,6 +85,7 @@ fun HomeRoute(
                 onSettlementResultClick(resultId)
                 viewModel.confirmSettlementResult()
             },
+            onBrowseChallengesClick = onBrowseChallengesClick,
             onVerifyClick = ::handleVerifyClick,
             scrollToTopKey = refreshKey
         )

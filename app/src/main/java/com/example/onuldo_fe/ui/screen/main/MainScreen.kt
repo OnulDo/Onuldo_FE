@@ -61,6 +61,16 @@ fun MainScreen(
                 HomeRoute(
                     onCameraNavigate = { onNavigate(Routes.CAMERA) },
                     refreshKey = homeRefreshKey,
+                    onBrowseChallengesClick = {
+                        // 빈 홈 CTA에서 기존 챌린지 탭의 GalleryScreen으로 이동
+                        navController.navigate(BottomTab.Challenge.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                     onSettlementResultClick = { partyId ->
                         navController.navigate(Routes.partySettlement(partyId))
                     }
