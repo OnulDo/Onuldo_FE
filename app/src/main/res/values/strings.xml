@@ -2,6 +2,7 @@
     <string name="app_name">OnulDo_FE</string>
     <string name="home_today_challenge_title">오늘의 챌린지</string>
     <string name="home_completed_challenge_count">완료한 챌린지 %1$d개</string>
+    <string name="home_completed_challenge_title">완료한 챌린지</string>
     <string name="home_completed_party_result">%1$d/%2$d 인증</string>
     <string name="home_completed_personal_streak">%1$d일 연속</string>
     <string name="home_challenge_action_verify">인증하기</string>
@@ -13,6 +14,7 @@
     <string name="home_challenge_streak_broken">연속 끊김</string>
     <string name="home_challenge_d_day">D-%1$d</string>
     <string name="home_challenge_deadline">%1$s 마감</string>
+    <string name="home_challenge_deadline_unknown">시간 정보 없음</string>
     <string name="home_challenge_verified_at">%1$s 인증 완료</string>
     <string name="home_challenge_minutes_left">%1$d분 남음</string>
     <string name="home_challenge_hours_left">%1$d시간 남음</string>

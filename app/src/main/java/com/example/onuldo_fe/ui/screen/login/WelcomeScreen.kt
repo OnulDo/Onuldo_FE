@@ -1,0 +1,155 @@
+package com.example.onuldo_fe.ui.screen.login
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.component.OnulDoButton
+import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.ui.theme.Pretendard
+
+/** 히어로 카드 배경 — Figma `4310:1379` (#FFF4EC, 매칭 토큰 없어 로컬 정의). */
+private val HeroBackground = Color(0xFFFFF4EC)
+
+/** 히어로 카드 색종이 조각 — (히어로 기준 x, y, 색상). Figma `4310:1380~1386`. */
+private data class Confetti(val x: Int, val y: Int, val color: Color)
+
+private val confettiPieces = listOf(
+    Confetti(20, 27, Color(0xFFFF7233)),
+    Confetti(310, 37, Color(0xFFF9C955)),
+    Confetti(60, 57, Color(0xFFFF8E5A)),
+    Confetti(300, 97, Color(0xFFB23541)),
+    Confetti(40, 177, Color(0xFFFBDD8E)),
+    Confetti(280, 217, Color(0xFFFFAC7C)),
+    Confetti(100, 27, Color(0xFF18A77A)),
+)
+
+/**
+ * 가입 완료(환영) 화면 — 온보딩 마지막, Figma node `4310:1375`.
+ * 히어로 카드(파티 캐릭터 + 색종이) + "환영해요!" + 축하 문구 + "오늘두 시작하기".
+ * 온보딩 종료 화면이라 진행 헤더·뒤로가기 없음.
+ */
+@Composable
+fun WelcomeScreen(
+    onStart: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .navigationBarsPadding(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        // 상태바(44) 아래 히어로 top 79 → 여백 35
+        Spacer(Modifier.height(35.dp))
+
+        HeroCard()
+
+        Spacer(Modifier.height(20.dp))
+
+        Text(
+            text = "환영해요!",
+            fontFamily = Pretendard,
+            fontWeight = FontWeight.ExtraBold, // Figma는 Black(900)이나 Pretendard 최대 굵기가 ExtraBold
+            fontSize = 32.sp,
+            letterSpacing = (-0.8).sp,
+            color = BlackBrown,
+            textAlign = TextAlign.Center,
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            text = "오늘두 가족이 되신 걸 축하드려요\n이제 첫 챌린지를 등록해볼까요?",
+            fontFamily = Pretendard,
+            fontWeight = FontWeight.Normal,
+            fontSize = 14.sp,
+            lineHeight = 24.sp, // 1.7 배
+            color = DarkBrown70,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 20.dp),
+        )
+
+        Spacer(Modifier.weight(1f))
+
+        OnulDoButton(
+            text = "오늘두 시작하기",
+            onClick = onStart,
+        )
+
+        Spacer(Modifier.height(48.dp))
+    }
+}
+
+@Composable
+private fun HeroCard(
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .padding(horizontal = 20.dp)
+            .fillMaxWidth()
+            .height(320.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(HeroBackground),
+    ) {
+        // 색종이 조각 (6dp 사각형, -30도 회전)
+        confettiPieces.forEach { piece ->
+            Box(
+                modifier = Modifier
+                    .offset(x = piece.x.dp, y = piece.y.dp)
+                    .size(6.dp)
+                    .rotate(-30f)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(piece.color),
+            )
+        }
+
+        // 파티 캐릭터 (히어로 기준 left 69, top 54, 211×249)
+        Image(
+            painter = painterResource(R.drawable.img_character_party),
+            contentDescription = null,
+            modifier = Modifier
+                .offset(x = 69.dp, y = 54.dp)
+                .width(211.dp)
+                .height(249.dp),
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun WelcomeScreenPreview() {
+    OnulDo_FETheme {
+        WelcomeScreen(onStart = {})
+    }
+}

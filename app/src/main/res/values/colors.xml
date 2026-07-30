@@ -7,4 +7,6 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- 브랜드 주색 (스플래시 배경/윈도우 배경). Persimmon. -->
+    <color name="persimmon">#FFFC6B2B</color>
 </resources>

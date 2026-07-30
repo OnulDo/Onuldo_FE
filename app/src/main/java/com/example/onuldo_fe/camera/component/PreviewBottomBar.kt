@@ -1,0 +1,65 @@
+package com.example.onuldo_fe.camera.component
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.SourCream
+import com.example.onuldo_fe.ui.theme.White
+
+@Composable
+fun PreviewBottomBar(
+    onRetakeClick: () -> Unit = {},
+    onSubmitClick: () -> Unit = {}
+) {
+    val spacing = LocalSpacing.current
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = spacing.spacing20,
+                vertical = spacing.spacing48
+            ),
+        horizontalArrangement = Arrangement.spacedBy(spacing.spacing12)
+    ) {
+
+        OutlinedButton(
+            onClick = onRetakeClick,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                text = "재촬영",
+                style = MaterialTheme.typography.bodyLarge,
+                color = SourCream
+            )
+        }
+
+        Button(
+            onClick = onSubmitClick,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Persimmon
+            )
+        ) {
+            Text(
+                text = "인증 제출",
+                style = MaterialTheme.typography.bodyLarge,
+                color = SourCream
+            )
+        }
+    }
+}

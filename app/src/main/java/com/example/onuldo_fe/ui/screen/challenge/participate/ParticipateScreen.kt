@@ -59,9 +59,11 @@ fun ParticipateScreen(
     challenge: Challenge = Challenge(id = 0, title = "새벽 6시 기상", participantCount = 1234),
     category: String = "생활루틴 챌린지",               // TODO: 실제 데이터
     description: String = "매일 새벽 6시까지 기상하기",   // TODO: 실제 데이터
+    // TODO: 실제 보유 포인트와 선택 도전금 비교로 교체. true면 시작(완료 화면), false면 잔액 부족 팝업.
+    hasEnoughPoint: Boolean = true,
     onBackClick: () -> Unit = {},
     onStartClick: () -> Unit = {},
-    onChargePoint: () -> Unit = {},   // TODO: 포인트 충전 화면(다른 도메인?) 연결
+    onChargePoint: () -> Unit = {},   // 포인트 충전 화면 연결
     modifier: Modifier = Modifier
 ) {
     var selectedPeriod by remember { mutableStateOf<String?>(null) }
@@ -76,10 +78,13 @@ fun ParticipateScreen(
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
     ) {
-        // → 12 + (48-19)/2 ≈ 26 이 되도록 보정
-        Spacer(Modifier.height(12.dp))
 
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            contentAlignment = Alignment.Center
+        ) {
             OnulDoBackButton(
                 onClick = onBackClick,
                 modifier = Modifier
@@ -154,7 +159,8 @@ fun ParticipateScreen(
                 OptionChip(
                     text = option,
                     onClick = { selectedPeriod = option },
-                    selected = selectedPeriod == option
+                    selected = selectedPeriod == option,
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -209,7 +215,8 @@ fun ParticipateScreen(
                 OptionChip(
                     text = option,
                     onClick = { selectedPoint = option },
-                    selected = selectedPoint == option
+                    selected = selectedPoint == option,
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -242,10 +249,12 @@ fun ParticipateScreen(
         // 진행 기간 + 도전금 둘 다 선택돼야 활성화
         val canStart = selectedPeriod != null && selectedPoint != null
 
-        // TODO: 실제 보유 포인트와 비교하도록 교체 (지금은 항상 부족 처리)
         OnulDoButton(
             text = "도전 시작하기",
-            onClick = { showInsufficientDialog = true },
+            onClick = {
+                // 도전금 충분하면 시작 완료 화면으로, 부족하면 잔액 부족 팝업 노출
+                if (hasEnoughPoint) onStartClick() else showInsufficientDialog = true
+            },
             enabled = canStart
         )
 
