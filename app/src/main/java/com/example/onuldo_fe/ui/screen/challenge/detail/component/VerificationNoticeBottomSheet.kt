@@ -28,7 +28,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
@@ -121,9 +120,7 @@ fun VerificationNoticeBottomSheet(
                 items = successConditions,
                 accent = Green,
                 background = Green2,
-                isSuccess = true,
-                boxHeight = 167.dp,
-                bottomPadding = 12.dp
+                isSuccess = true
             )
 
             Spacer(Modifier.height(spacing.spacing24))
@@ -133,9 +130,7 @@ fun VerificationNoticeBottomSheet(
                 items = failureConditions,
                 accent = Red,
                 background = Red2,
-                isSuccess = false,
-                boxHeight = 188.dp,
-                bottomPadding = 12.dp
+                isSuccess = false
             )
         }
 
@@ -164,32 +159,25 @@ private fun ConditionBox(
     accent: Color,
     background: Color,
     isSuccess: Boolean,
-    boxHeight: Dp,
-    bottomPadding: Dp,
     modifier: Modifier = Modifier
 ) {
+    // 고정 높이 대신 내용에 맞게 감싸도록 함 — 조건 개수/길이가 달라져도(실제 API 데이터)
+    // 잘리거나 간격이 깨지지 않고, 항목 간 간격은 항상 10dp로 일정하게 유지된다.
     Column(
         modifier = modifier
             .fillMaxWidth()       // 시트 폭에 맞춤 (부모 padding 20 기준 = 390 프레임에서 350)
-            .height(boxHeight)    // 디자인 스펙: 성공 167 / 실패 188
             .clip(RoundedCornerShape(14.dp))
             .background(background)
-            .padding(start = 16.dp, end = 16.dp, top = 17.dp, bottom = bottomPadding)
+            .padding(start = 16.dp, end = 16.dp, top = 17.dp, bottom = 16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (isSuccess) {
-                Image(
-                    painter = painterResource(R.drawable.challenge_check_icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-            } else {
-                Image(
-                    painter = painterResource(R.drawable.challenge_x_icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            Image(
+                painter = painterResource(
+                    if (isSuccess) R.drawable.challenge_check_icon else R.drawable.challenge_x_icon
+                ),
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
 
             Spacer(Modifier.width(6.dp))
 
@@ -200,14 +188,12 @@ private fun ConditionBox(
             )
         }
 
-        Spacer(Modifier.height(12.dp))   // 헤더↔목록 (19 → 12, 공간 확보)
+        Spacer(Modifier.height(12.dp))   // 헤더 ↔ 목록
 
-        // 헤더 제외한 조건 목록만 남은 높이에서 SpaceBetween으로 균등 배분 (박스 높이 꽉 채움)
+        // 항목은 일정 간격(10dp)으로 배분 — 개수·줄바꿈에 따라 박스가 자연스럽게 늘어남
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            verticalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             items.forEach { item ->
                 Text(
