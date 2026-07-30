@@ -26,7 +26,6 @@ import com.example.onuldo_fe.ui.screen.mypage.WithdrawAccountScreen
 import com.example.onuldo_fe.ui.screen.mypage.SettingScreen
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.example.onuldo_fe.camera.CameraPermissionScreen
 import com.example.onuldo_fe.camera.PhotoPreviewScreen
 import com.example.onuldo_fe.ui.screen.verification.ChallengeVerificationScreen
 import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
@@ -122,17 +121,6 @@ fun OnuldoApp() {
         // 알림 설정(시온)  //화면이 상태 자체 보유 → 등록만. 뒤로가기 → 마이로 복귀
         composable(Routes.MYPAGE_NOTIFICATION) {
             SettingScreen(onBackClick = { navController.popBackStack() })
-        }
-
-        composable(Routes.CAMERA_PERMISSION) {
-            CameraPermissionScreen(
-                onBack = { navController.popBackStack() },
-                onPermissionGranted = {
-                    navController.navigate(Routes.CAMERA) {
-                        popUpTo(Routes.CAMERA_PERMISSION) { inclusive = true }
-                    }
-                }
-            )
         }
 
         // 카메라 화면

@@ -1,6 +1,10 @@
 package com.example.onuldo_fe.ui.screen.party
 
 import android.Manifest
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -17,11 +21,14 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.party.dummy.PartyTestConfig
 import com.example.onuldo_fe.model.party.CreatePartyCommand
-import com.example.onuldo_fe.ui.screen.party.components.InviteCodeDialog
 import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
+import com.example.onuldo_fe.ui.component.PermissionDialogType
+import com.example.onuldo_fe.ui.component.PermissionSettingDialog
+import com.example.onuldo_fe.ui.screen.party.components.InviteCodeDialog
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryScreen
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.util.moveToAppSettings
 import com.example.onuldo_fe.viewmodel.party.PartyAction
 import com.example.onuldo_fe.viewmodel.party.PartyFeedViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyInviteViewModel
@@ -51,15 +58,18 @@ fun PartyRoute(
     partyFeedViewModel: PartyFeedViewModel = viewModel(),
     partySettlementViewModel: PartySettlementViewModel = viewModel(),
     onBottomBarVisibilityChange: (Boolean) -> Unit = {},
-    onCameraPermissionRequired: () -> Unit = {},
     onCameraNavigate: () -> Unit = {},
     onHomeNavigate: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     // 현재 화면과 다이얼로그 노출 여부는 Route에서만 관리
     var screen by remember { mutableStateOf(PartyScreen.List) }
     var showInviteDialog by remember { mutableStateOf(false) }
-
+    var showCameraPermissionDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
     // pendingChallenge는 상세 확인 중인 임시 선택, selectedChallenge는 생성 화면에서 확정된 선택
     var selectedChallenge by remember { mutableStateOf<Challenge?>(null) }
     var pendingChallenge by remember { mutableStateOf<Challenge?>(null) }
@@ -88,8 +98,27 @@ fun PartyRoute(
         if (isCameraPermissionGranted) {
             onCameraNavigate()
         } else {
-            onCameraPermissionRequired()
+            showCameraPermissionDialog = true
         }
+    }
+
+    DisposableEffect(lifecycleOwner, showCameraPermissionDialog) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && showCameraPermissionDialog) {
+                val isCameraPermissionGranted = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CAMERA
+                ) == PackageManager.PERMISSION_GRANTED
+
+                if (isCameraPermissionGranted) {
+                    showCameraPermissionDialog = false
+                    onCameraNavigate()
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     LaunchedEffect(screen) {
@@ -296,6 +325,14 @@ fun PartyRoute(
             partyViewModel.loadWaitingRoom(partyId)
             inviteViewModel.reset()
         }
+    }
+
+    if (showCameraPermissionDialog) {
+        PermissionSettingDialog(
+            type = PermissionDialogType.CAMERA,
+            onDismiss = { showCameraPermissionDialog = false },
+            onMoveToSettings = { moveToAppSettings(context) }
+        )
     }
 }
 
