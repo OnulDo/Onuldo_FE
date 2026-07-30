@@ -40,7 +40,7 @@ fun OnulDoMediumButton(
     Button(
         onClick = onClick,
         modifier = modifier
-            .padding(horizontal = 56.dp)
+            .padding(horizontal = 36.dp)
             .fillMaxWidth()
             .height(52.dp),
         enabled = enabled,
