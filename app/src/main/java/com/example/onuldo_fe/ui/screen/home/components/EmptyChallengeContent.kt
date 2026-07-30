@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.component.home
+package com.example.onuldo_fe.ui.screen.home.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,16 +26,19 @@ import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
-import com.example.onuldo_fe.ui.theme.SourCream
 
 @Composable
 fun EmptyChallengeContent(
     modifier: Modifier = Modifier,
     onBrowseChallengesClick: () -> Unit = {}
 ) {
+    val spacing = LocalSpacing.current
+    // TODO: Persimmon15 색상과 37dp 여백 토큰 추가 후 교체
+
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
@@ -52,24 +56,20 @@ fun EmptyChallengeContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(spacing.spacing16))
         Text(
             text = "아직 시작한 챌린지가 없어요",
             color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 22.sp,
+            style = MaterialTheme.typography.titleLarge,
             lineHeight = 40.sp,
-            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
         Text(
             text = "도전금을 걸고 작은 습관부터\n갓생을 시작해보세요!",
             color = DarkBrown,
             modifier = Modifier.offset(y = (-10).dp),
-            fontFamily = Pretendard,
-            fontSize = 13.sp,
+            style = MaterialTheme.typography.labelLarge,
             lineHeight = 18.sp,
-            fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(37.dp))

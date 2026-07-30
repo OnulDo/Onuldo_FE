@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.component.home
+package com.example.onuldo_fe.ui.screen.home.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown80
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -37,13 +39,16 @@ fun SettlementCompleteCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val spacing = LocalSpacing.current
+    // TODO: 12sp Medium 글자 스타일과 15·46dp 여백 토큰 추가 후 교체
+
     Row(
         modifier = modifier
             .height(64.dp)
             .background(White, RoundedCornerShape(14.dp))
             .border(BorderStroke(1.5.dp, Persimmon), RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 15.dp),
+            .padding(start = 15.dp, end = 46.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
@@ -51,14 +56,11 @@ fun SettlementCompleteCard(
             contentDescription = null,
             modifier = Modifier.size(width = 22.dp, height = 22.dp)
         )
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(spacing.spacing8))
         Text(
             text = stringResource(R.string.home_settlement_complete_title),
             color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 14.sp,
-            lineHeight = 22.sp,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.bodyMedium
         )
         Spacer(Modifier.weight(1f))
         Text(
@@ -69,7 +71,7 @@ fun SettlementCompleteCard(
             lineHeight = 14.sp,
             fontWeight = FontWeight.Medium
         )
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(spacing.spacing12))
         Image(
             painter = painterResource(R.drawable.home_arrow_right),
             contentDescription = null,
@@ -82,6 +84,11 @@ fun SettlementCompleteCard(
 @Composable
 private fun SettlementCompleteCardPreview() {
     OnulDo_FETheme {
-        SettlementCompleteCard("새벽 러너 파티", {}, Modifier.fillMaxWidth().padding(horizontal = 20.dp))
+        val spacing = LocalSpacing.current
+        SettlementCompleteCard(
+            "새벽 러너 파티",
+            {},
+            Modifier.fillMaxWidth().padding(horizontal = spacing.spacing20)
+        )
     }
 }

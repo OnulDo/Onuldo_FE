@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.component.home
+package com.example.onuldo_fe.ui.screen.home.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -32,7 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.BlackBrown70
 import com.example.onuldo_fe.ui.theme.DarkBrown20
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon20
@@ -46,6 +48,8 @@ fun HomeHeader(
     modifier: Modifier = Modifier,
     onNotificationClick: () -> Unit = {}
 ) {
+    val spacing = LocalSpacing.current
+    // TODO: 8sp SemiBold·18sp ExtraBold 글자 스타일 토큰 추가 후 교체
     val notificationInteractionSource = remember { MutableInteractionSource() }
     val isNotificationPressed by notificationInteractionSource.collectIsPressedAsState()
 
@@ -59,16 +63,16 @@ fun HomeHeader(
             Image(
                 painter = painterResource(id = R.drawable.home_run_light_icon),
                 contentDescription = null,
-                modifier = Modifier.size(width = 38.dp, height = 37.dp),
+                modifier = Modifier.size(width = 28.dp, height = 33.dp),
                 contentScale = ContentScale.Fit
             )
         }
 
-        Spacer(modifier = Modifier.width(10.dp))
+        Spacer(modifier = Modifier.width(spacing.spacing10))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "오늘두 함께 도전!",
-                color = BlackBrown.copy(alpha = 0.7f),
+                color = BlackBrown70,
                 fontFamily = Pretendard,
                 fontSize = 8.sp,
                 lineHeight = 8.sp,
@@ -111,12 +115,13 @@ fun HomeHeader(
 @Composable
 private fun HomeHeaderPreview() {
     OnulDo_FETheme {
+        val spacing = LocalSpacing.current
         HomeHeader(
             userName = "김민지",
             modifier = Modifier
                 .fillMaxWidth()
                 .background(SourCream)
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = spacing.spacing20)
         )
     }
 }
