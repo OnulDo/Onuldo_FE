@@ -55,6 +55,8 @@ fun DetailScreen(
     verificationDescription: String = "침대와 개어진 이불 사진이 나오게 촬영하기",
     onBackClick: () -> Unit = {},
     onJoinClick: () -> Unit = {},
+    // 파티 생성 흐름에서 상세 화면을 재사용할 때 CTA 문구만 변경할 수 있도록 외부에서 전달
+    ctaText: String = "참여하기",
     modifier: Modifier = Modifier
 ) {
     // 바텀시트는 화면 이동(Navigation)이 아니라 이 화면의 상태(State)
@@ -214,7 +216,7 @@ fun DetailScreen(
 
         // 참여하기 버튼
         OnulDoButton(
-            text = "참여하기",
+            text = ctaText,
             onClick = onJoinClick,
             modifier = Modifier.padding(bottom = 48.dp)
         )

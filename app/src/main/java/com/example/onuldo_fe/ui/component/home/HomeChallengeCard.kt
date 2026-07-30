@@ -1,7 +1,6 @@
 package com.example.onuldo_fe.ui.component.home
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -20,8 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -42,6 +39,7 @@ import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
+import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.SourCream
@@ -52,7 +50,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun HomeChallengeCard(
     challenge: HomeChallenge,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onVerifyClick: () -> Unit = {}
 ) {
     val actionColors = challenge.actionColors()
 
@@ -78,6 +77,7 @@ fun HomeChallengeCard(
                 Text(
                     text = challenge.title,
                     color = BlackBrown,
+                    fontFamily = Pretendard,
                     fontSize = 18.sp,
                     lineHeight = 21.sp,
                     fontWeight = FontWeight.Bold
@@ -87,8 +87,10 @@ fun HomeChallengeCard(
                     // 서버의 상태와 연속 성공 일수로 카드 보조 문구 구성
                     text = challenge.subtitleText(),
                     color = DarkBrown50,
+                    fontFamily = Pretendard,
                     fontSize = 12.sp,
                     lineHeight = 16.sp,
+                    fontWeight = FontWeight.Medium,
                     maxLines = 1
                 )
             }
@@ -96,6 +98,7 @@ fun HomeChallengeCard(
             Text(
                 text = stringResource(R.string.home_challenge_d_day, challenge.remainingDays),
                 color = DarkBrown80,
+                fontFamily = Pretendard,
                 fontSize = 12.sp,
                 lineHeight = 14.sp,
                 fontWeight = FontWeight.Bold
@@ -115,9 +118,10 @@ fun HomeChallengeCard(
                         stringResource(R.string.home_challenge_verified_at, it.toDisplayText())
                     } ?: stringResource(R.string.home_challenge_deadline, challenge.deadlineAt.toDisplayText()),
                     color = challenge.deadlineColor(),
+                    fontFamily = Pretendard,
                     fontSize = 13.sp,
-                    lineHeight = 16.sp,
-                    fontWeight = FontWeight.Normal
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Medium
                 )
                 //인증 마감 1시간 전부터 표시
                 challenge.remainingMinutes?.takeIf { it in 0..60 }?.let { minutes ->
@@ -127,38 +131,39 @@ fun HomeChallengeCard(
                             .background(Persimmon10, RoundedCornerShape(10.dp))
                             .padding(horizontal = 10.dp, vertical = 2.dp)
                     ) {
-                        Text(minutes.toRemainingTimeText(), color = Persimmon, fontSize = 13.sp, lineHeight = 16.sp)
+                        Text(
+                            text = minutes.toRemainingTimeText(),
+                            color = Persimmon,
+                            fontFamily = Pretendard,
+                            fontSize = 13.sp,
+                            lineHeight = 20.sp,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }
 
-            if (challenge.status != ChallengeStatus.NeedCertification || challenge.canVerify) Box(
-                modifier = Modifier
-                    .background(actionColors.background, RoundedCornerShape(50))
-                    .border(
-                        border = BorderStroke(
-                            width = if (challenge.status == ChallengeStatus.NeedCertification) 1.dp else 0.dp,
-                            color = if (challenge.status == ChallengeStatus.NeedCertification) Persimmon else actionColors.background
-                        ),
-                        shape = RoundedCornerShape(50)
-                    )
-                    .width(78.dp)
-                    .height(26.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (challenge.status == ChallengeStatus.NeedCertification) {
-                        Image(
-                            painter = painterResource(id = R.drawable.home_camera_icon),
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            contentScale = ContentScale.Fit
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                    }
+            if (challenge.status == ChallengeStatus.NeedCertification && challenge.canVerify) {
+                HomeVerifyButton(
+                    onClick = onVerifyClick,
+                    width = 78.dp,
+                    height = 26.dp,
+                    iconSize = 12.dp,
+                    fontSize = 10.sp,
+                    lineHeight = 12.sp
+                )
+            } else if (challenge.status != ChallengeStatus.NeedCertification) {
+                Box(
+                    modifier = Modifier
+                        .background(actionColors.background, RoundedCornerShape(50))
+                        .width(78.dp)
+                        .height(26.dp),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
                         text = stringResource(challenge.status.actionTextRes()),
                         color = actionColors.text,
+                        fontFamily = Pretendard,
                         fontSize = 10.sp,
                         lineHeight = 12.sp,
                         fontWeight = FontWeight.Bold,

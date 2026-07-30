@@ -10,27 +10,33 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import com.example.onuldo_fe.camera.component.CameraBottomBar
 import com.example.onuldo_fe.camera.component.CameraPreview
 import com.example.onuldo_fe.camera.component.CameraTopBar
+import com.example.onuldo_fe.ui.screen.challenge.detail.component.VerificationNoticeBottomSheet
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 
 @Composable
 fun CameraScreen(
     category: String,
     title: String,
-    onPhotoCaptured: (Uri?) -> Unit
-) {
+    onPhotoCaptured: (Uri?) -> Unit,
+    onCloseClick: () -> Unit
+){
     val imageCapture = remember {
         ImageCapture.Builder().build()
     }
+    var showVerificationNotice by remember { mutableStateOf(false) }
+    
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -49,7 +55,7 @@ fun CameraScreen(
             category = category,
             title = title,
             showFlashButton = true,
-            onCloseClick = {},
+            onCloseClick = onCloseClick,
             onFlashClick = {  }
         )
         Box(
@@ -57,6 +63,9 @@ fun CameraScreen(
         ) {
             val context = LocalContext.current
             CameraBottomBar(
+                onNoteClick = {
+                    showVerificationNotice = true
+                },
                 onCaptureClick = {
                     val name = System.currentTimeMillis().toString()
                     val contentValues = ContentValues().apply {
@@ -97,11 +106,18 @@ fun CameraScreen(
                         }
                     )
                 }
+
+            )
+        }
+
+        if (showVerificationNotice) {
+            VerificationNoticeBottomSheet(
+                challengeTitle = title,
+                onDismiss = { showVerificationNotice = false }
             )
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 private fun CameraScreenPreview() {
@@ -109,7 +125,8 @@ private fun CameraScreenPreview() {
         CameraScreen(
             category = "외국어",
             title = "영단어 100개 암기",
-            onPhotoCaptured = {}
+            onPhotoCaptured = {},
+            onCloseClick = {}
         )
     }
 }

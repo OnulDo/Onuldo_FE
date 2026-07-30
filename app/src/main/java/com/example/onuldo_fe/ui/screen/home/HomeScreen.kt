@@ -49,6 +49,7 @@ fun HomeScreen(
     onNotificationClick: () -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
     onSettlementResultClick: (String) -> Unit = {},
+    onVerifyClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -60,7 +61,12 @@ fun HomeScreen(
     ) {
         // 홈 API 상태에 따라 기본 홈과 빈 홈 분기
         if (uiState.hasHomeContent) {
-            HomeContent(uiState, onNotificationClick, onSettlementResultClick)
+            HomeContent(
+                uiState = uiState,
+                onNotificationClick = onNotificationClick,
+                onSettlementResultClick = onSettlementResultClick,
+                onVerifyClick = onVerifyClick
+            )
         } else {
             EmptyHomeContent(
                 userName = uiState.userName,
@@ -103,7 +109,8 @@ private fun EmptyHomeContent(
 private fun HomeContent(
     uiState: HomeUiState,
     onNotificationClick: () -> Unit,
-    onSettlementResultClick: (String) -> Unit
+    onSettlementResultClick: (String) -> Unit,
+    onVerifyClick: () -> Unit
 ) {
     val isAllCompleted = uiState.isAllCompleted
 
@@ -151,7 +158,11 @@ private fun HomeContent(
             topSpacing = if (uiState.settlementBanner != null) 18.dp else 28.dp
         ) {
             uiState.partyChallenges.forEach { partyChallenge ->
-                HomePartyCard(partyChallenge, Modifier.fillMaxWidth())
+                HomePartyCard(
+                    partyChallenge = partyChallenge,
+                    modifier = Modifier.fillMaxWidth(),
+                    onVerifyClick = onVerifyClick
+                )
             }
         }
 
@@ -162,16 +173,17 @@ private fun HomeContent(
             topSpacing = if (uiState.partyChallenges.isNotEmpty()) 18.dp else 28.dp
         ) {
             uiState.challenges.forEach { challenge ->
-                HomeChallengeCard(challenge, Modifier.fillMaxWidth())
+                HomeChallengeCard(
+                    challenge = challenge,
+                    modifier = Modifier.fillMaxWidth(),
+                    onVerifyClick = onVerifyClick
+                )
             }
         }
 
         // 완료 상태일 때 완료 챌린지 목록 노출
         ChallengeSection(
-            title = stringResource(
-                R.string.home_completed_challenge_count,
-                uiState.completedChallenges.size
-            ),
+            title = stringResource(R.string.home_completed_challenge_title),
             visible = isAllCompleted,
             topSpacing = 26.dp,
             itemSpacing = 8.dp
@@ -226,6 +238,19 @@ private fun SectionTitle(text: String, modifier: Modifier = Modifier) {
 @Preview(name = "Home With Content", showBackground = true, showSystemUi = true, widthDp = 390, heightDp = 938)
 @Composable
 private fun HomeScreenPreview() {
+    HomeScenarioPreview(FakeHomeScenario.Default)
+}
+
+@Preview(
+    name = "Home Party Integrated",
+    showBackground = true,
+    showSystemUi = true,
+    widthDp = 390,
+    heightDp = 1338
+)
+@Composable
+private fun HomeScreenPartyPreview() {
+    // Default 더미 데이터에 파티 챌린지와 정산 완료 배너가 포함되어 파티 통합 상태 확인
     HomeScenarioPreview(FakeHomeScenario.Default)
 }
 

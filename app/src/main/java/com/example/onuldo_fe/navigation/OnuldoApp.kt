@@ -35,11 +35,9 @@ import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
 @Composable
 fun OnuldoApp() {
     val navController = rememberNavController()
-    /**
-    *화면 연동 테스트를 위해 로그인 화면을 건너 뜀
-     */
-    //val debugStartDestination = Routes.LANDING
-    val debugStartDestination = Routes.MAIN
+    // 앱 진입점은 랜딩. 특정 화면만 확인하고 싶을 땐 이 값을 잠시 바꿔 쓰되,
+    // 커밋에는 반드시 LANDING 상태로 되돌린다.
+    val debugStartDestination = Routes.LANDING
 
     //카메라 -> previewScreen
     val cameraViewModel: CameraViewModel = viewModel()
@@ -133,6 +131,9 @@ fun OnuldoApp() {
                 onPhotoCaptured = { uri ->
                     cameraViewModel.setImageUri(uri)
                     navController.navigate(Routes.PHOTO_PREVIEW)
+                },
+                onCloseClick = {
+                    navController.popBackStack()
                 }
             )
         }
@@ -182,7 +183,12 @@ fun OnuldoApp() {
 
         composable(Routes.VERIFICATION_WAITING) {
             ChallengeVerificationScreen(
-                status = VerificationStatus.WAITING
+                status = VerificationStatus.WAITING,
+                onConfirmClick = {
+                    navController.navigate(Routes.MAIN) {
+                        popUpTo(Routes.MAIN) { inclusive = true }
+                    }
+                }
             )
         }
 
