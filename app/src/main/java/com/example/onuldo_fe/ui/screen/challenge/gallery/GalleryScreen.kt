@@ -189,33 +189,36 @@ private fun ChallengeCard(
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(130.dp)            // 디자인 스펙: 이미지 높이 130 (폭은 유동, Crop)
+                .height(130.dp)            // 디자인 스펙: 이미지 높이 130
                 .background(DarkBrown10)   // 로딩/여백 대비 회색 배경 유지
         )
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)   // 디자인 스펙: 글씨 영역 50 (이미지 130 + 50 = 카드 180)
-                .padding(start = spacing.spacing12, end = spacing.spacing10),
-            verticalArrangement = Arrangement.Center
+                .height(50.dp)
+                .padding(
+                    start = spacing.spacing12,
+                    end = spacing.spacing10,
+                    top = spacing.spacing12,
+                    bottom = spacing.spacing10
+                )
         ) {
             Text(
                 text = challenge.title,
                 style = MaterialTheme.typography.bodySmall,  // Body4 (12sp Bold)
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis  // 카드 폭 넘치면 … 처리
+                overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(R.drawable.challenge_person),
                     contentDescription = null,
                     tint = Persimmon,
-                    modifier = Modifier.size(12.dp)
+                    modifier = Modifier.size(10.dp)
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(

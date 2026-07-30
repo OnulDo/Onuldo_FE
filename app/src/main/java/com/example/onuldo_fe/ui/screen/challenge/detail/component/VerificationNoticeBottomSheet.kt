@@ -2,6 +2,7 @@ package com.example.onuldo_fe.ui.screen.challenge.detail.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -100,7 +101,7 @@ fun VerificationNoticeBottomSheet(
 
         HorizontalDivider(thickness = 1.dp, color = DarkBrown20)
 
-        Spacer(Modifier.height(spacing.spacing10))
+        Spacer(Modifier.height(13.dp))
 
         Text(
             text = challengeTitle,
@@ -112,8 +113,7 @@ fun VerificationNoticeBottomSheet(
             modifier = Modifier.padding(start = 24.dp)
         )
 
-        //여백 수정 6 -> 8
-        Spacer(Modifier.height(spacing.spacing8))
+        Spacer(Modifier.height(spacing.spacing12))
 
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             ConditionBox(
@@ -123,10 +123,10 @@ fun VerificationNoticeBottomSheet(
                 background = Green2,
                 isSuccess = true,
                 boxHeight = 167.dp,
-                bottomPadding = 32.dp
+                bottomPadding = 12.dp
             )
 
-            Spacer(Modifier.height(spacing.spacing16))
+            Spacer(Modifier.height(spacing.spacing24))
 
             ConditionBox(
                 title = "인증 실패 조건",
@@ -135,11 +135,11 @@ fun VerificationNoticeBottomSheet(
                 background = Red2,
                 isSuccess = false,
                 boxHeight = 188.dp,
-                bottomPadding = 16.dp
+                bottomPadding = 12.dp
             )
         }
 
-        Spacer(Modifier.height(spacing.spacing16))
+        Spacer(Modifier.height(spacing.spacing36))   // 빨간 박스 ↔ 확인 버튼 36
 
         // 확인 — 내려가는 애니메이션 후 닫기 (클로드 추천)
         OnulDoButton(
@@ -170,7 +170,7 @@ private fun ConditionBox(
 ) {
     Column(
         modifier = modifier
-            .width(350.dp)        // 디자인 스펙: width 350
+            .fillMaxWidth()       // 시트 폭에 맞춤 (부모 padding 20 기준 = 390 프레임에서 350)
             .height(boxHeight)    // 디자인 스펙: 성공 167 / 실패 188
             .clip(RoundedCornerShape(14.dp))
             .background(background)
@@ -200,20 +200,25 @@ private fun ConditionBox(
             )
         }
 
-        Spacer(Modifier.height(19.dp))
+        Spacer(Modifier.height(12.dp))   // 헤더↔목록 (19 → 12, 공간 확보)
 
-        items.forEachIndexed { index, item ->
-            if (index > 0) {
-                Spacer(Modifier.height(17.dp)) // 줄 간격 (박스 196에 맞춘 역산값) (클로드)
+        // 헤더 제외한 조건 목록만 남은 높이에서 SpaceBetween으로 균등 배분 (박스 높이 꽉 채움)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            items.forEach { item ->
+                Text(
+                    text = item,
+                    fontFamily = Pretendard,
+                    fontWeight = FontWeight.Normal,  // Caption3: 12sp / 400 / lineHeight 20
+                    fontSize = 12.sp,
+                    lineHeight = 20.sp,
+                    color = BlackBrown
+                )
             }
-            Text(
-                text = item,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Normal,
-                fontSize = 12.sp,
-                lineHeight = 12.sp,
-                color = BlackBrown
-            )
         }
     }
 }
