@@ -86,7 +86,7 @@ private fun EmptyHomeContent(
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
-    // TODO: 디자인 시스템에 없는 34·56·216dp 여백 토큰 추가 후 교체
+    // TODO: 디자인 시스템에 없는 34·56dp 여백 토큰 추가 후 교체
 
     Box(modifier = modifier) {
         HomeHeader(

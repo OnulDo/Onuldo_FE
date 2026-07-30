@@ -40,7 +40,7 @@ fun SettlementCompleteCard(
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
-    // TODO: 12sp Medium 글자 스타일과 15·46dp 여백 토큰 추가 후 교체
+    // TODO: 12sp Medium 글자 스타일과 15dp 여백 토큰 추가 후 교체
 
     Row(
         modifier = modifier
