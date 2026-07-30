@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -51,29 +53,21 @@ fun VerificationMethodCard(
     ) {
         Text(
             text = "인증 방법",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
-            lineHeight = 22.sp,
+            style = MaterialTheme.typography.bodyMedium,  // Body3
             color = BlackBrown
         )
 
         Text(
             text = title,
             modifier = Modifier.padding(top = 8.dp),
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
-            lineHeight = 22.sp,
+            style = MaterialTheme.typography.bodyMedium,  // Body3
             color = Persimmon
         )
 
         Text(
             text = description,
             modifier = Modifier.padding(top = 2.dp),
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Normal,
-            fontSize = 13.sp,
+            style = MaterialTheme.typography.labelLarge,  // Caption1
             color = BlackBrown
         )
 
@@ -102,25 +96,36 @@ fun VerificationMethodCard(
                 .clickable(onClick = onShowNotice)
         ) {
             Spacer(Modifier.height(15.dp))
-            Row(
+            Box(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.challenge_info),
+                // 정보 아이콘 + 텍스트 (가운데)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(R.drawable.challenge_info),
+                        contentDescription = null,
+                        tint = Persimmon,
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Spacer(Modifier.width(7.dp))
+                    Text(
+                        text = "인증 유의사항 보기",
+                        fontFamily = Pretendard,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        lineHeight = 13.sp,
+                        color = BlackBrown
+                    )
+                }
+                // 화살표 — 오른쪽 끝에서 22
+                Image(
+                    painter = painterResource(R.drawable.challenge_arrow_right),
                     contentDescription = null,
-                    tint = Persimmon,
-                    modifier = Modifier.size(13.dp)
-                )
-                Spacer(Modifier.width(7.dp))
-                Text(
-                    text = "인증 유의사항 보기",
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
-                    lineHeight = 13.sp,
-                    color = BlackBrown
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 22.dp)
+                        .size(width = 5.dp, height = 11.dp)
                 )
             }
         }

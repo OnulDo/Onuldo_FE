@@ -42,6 +42,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 
@@ -70,6 +71,7 @@ fun ParticipateScreen(
     var selectedPoint by remember { mutableStateOf<String?>(null) }
     // 잔액 부족 다이얼로그도 화면 이동이 아니라 이 화면의 상태(State)
     var showInsufficientDialog by remember { mutableStateOf(false) }
+    val spacing = LocalSpacing.current
 
     Column(
         modifier = modifier
@@ -87,9 +89,8 @@ fun ParticipateScreen(
         ) {
             OnulDoBackButton(
                 onClick = onBackClick,
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = 8.dp)
+                // 패딩 없이 정렬만 — IconButton 중앙정렬로 화살표가 가로 20에 맞음(본문과 정렬)
+                modifier = Modifier.align(Alignment.CenterStart)
             )
             Text(
                 text = "챌린지 참여",
@@ -106,7 +107,7 @@ fun ParticipateScreen(
             )
         }
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(spacing.spacing20))
 
         ChallengeInfoBox(
             height = 100.dp,
@@ -143,7 +144,7 @@ fun ParticipateScreen(
             }
         }
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(spacing.spacing20))
 
         SectionLabel(text = "진행 기간")
 
@@ -221,7 +222,7 @@ fun ParticipateScreen(
             }
         }
 
-        Spacer(Modifier.height(26.dp))
+        Spacer(Modifier.height(spacing.spacing26))
 
         NoticeBox(
             title = "성공 시 100% 환급 + 보상금",
@@ -230,7 +231,7 @@ fun ParticipateScreen(
             topPadding = 12.dp // TODO: 내부 위 여백 미지정 — 60에 맞춘 추정값
         )
 
-        Spacer(Modifier.height(30.dp))
+        Spacer(Modifier.height(spacing.spacing30))
 
         ChallengeInfoBox(
             height = 90.dp,
@@ -238,7 +239,7 @@ fun ParticipateScreen(
         ) {
             Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp)) {
                 summaryItems.forEachIndexed { index, (label, value) ->
-                    if (index > 0) Spacer(Modifier.height(8.dp))
+                    if (index > 0) Spacer(Modifier.height(spacing.spacing8))
                     ChallengeSummaryRow(label = label, value = value)
                 }
             }

@@ -40,6 +40,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.Green3
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 
@@ -60,6 +61,7 @@ fun StartDoneScreen(
     onHomeClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val spacing = LocalSpacing.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -97,7 +99,7 @@ fun StartDoneScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(spacing.spacing8))
 
         Text(
             text = subtitle,
@@ -110,14 +112,14 @@ fun StartDoneScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(spacing.spacing48))
 
         ChallengeInfoBox(
             height = 184.dp,
             modifier = Modifier.padding(horizontal = 20.dp)
         ) {
             Column {
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(spacing.spacing16))
 
                 Text(
                     text = challenge.title,
@@ -155,7 +157,7 @@ fun StartDoneScreen(
 
                 Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                     startDoneSummaryItems.forEachIndexed { index, (label, value) ->
-                        if (index > 0) Spacer(Modifier.height(8.dp))
+                        if (index > 0) Spacer(Modifier.height(spacing.spacing8))
                         ChallengeSummaryRow(label = label, value = value)
                     }
                 }

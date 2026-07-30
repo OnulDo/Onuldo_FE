@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -36,6 +37,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown20
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
@@ -58,6 +60,7 @@ fun VerificationNoticeBottomSheet(
     // skipPartiallyExpanded = 처음부터 전체 펼침 → 확인 버튼까지 바로 보임
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    val spacing = LocalSpacing.current
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -81,7 +84,7 @@ fun VerificationNoticeBottomSheet(
         },
         modifier = modifier
     ) {
-        Spacer(Modifier.height(18.dp))
+        Spacer(Modifier.height(spacing.spacing18))
 
         Text(
             text = "인증 유의사항",
@@ -97,19 +100,20 @@ fun VerificationNoticeBottomSheet(
 
         HorizontalDivider(thickness = 1.dp, color = DarkBrown20)
 
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(spacing.spacing10))
 
         Text(
             text = challengeTitle,
             fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Normal,
             fontSize = 11.sp,
             lineHeight = 11.sp,
             color = DarkBrown,
             modifier = Modifier.padding(start = 24.dp)
         )
 
-        Spacer(Modifier.height(6.dp))
+        //여백 수정 6 -> 8
+        Spacer(Modifier.height(spacing.spacing8))
 
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             ConditionBox(
@@ -118,10 +122,11 @@ fun VerificationNoticeBottomSheet(
                 accent = Green,
                 background = Green2,
                 isSuccess = true,
+                boxHeight = 167.dp,
                 bottomPadding = 32.dp
             )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(spacing.spacing16))
 
             ConditionBox(
                 title = "인증 실패 조건",
@@ -129,11 +134,12 @@ fun VerificationNoticeBottomSheet(
                 accent = Red,
                 background = Red2,
                 isSuccess = false,
+                boxHeight = 188.dp,
                 bottomPadding = 16.dp
             )
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(spacing.spacing16))
 
         // 확인 — 내려가는 애니메이션 후 닫기 (클로드 추천)
         OnulDoButton(
@@ -145,7 +151,7 @@ fun VerificationNoticeBottomSheet(
             }
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(spacing.spacing24))
         Spacer(Modifier.navigationBarsPadding())
     }
 }
@@ -158,12 +164,14 @@ private fun ConditionBox(
     accent: Color,
     background: Color,
     isSuccess: Boolean,
+    boxHeight: Dp,
     bottomPadding: Dp,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
+            .width(350.dp)        // 디자인 스펙: width 350
+            .height(boxHeight)    // 디자인 스펙: 성공 167 / 실패 188
             .clip(RoundedCornerShape(14.dp))
             .background(background)
             .padding(start = 16.dp, end = 16.dp, top = 17.dp, bottom = bottomPadding)
@@ -187,10 +195,7 @@ private fun ConditionBox(
 
             Text(
                 text = title,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                lineHeight = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,  // Body3
                 color = accent
             )
         }
