@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -34,7 +35,7 @@ fun OnulDoButton(
     height: Dp = 56.dp,
     fontSize: TextUnit = 16.sp,
     horizontalPadding: Dp = 20.dp,
-    pressedContainerColor: Color = Persimmon
+    pressedContainerColor: Color = DarkBrown
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
