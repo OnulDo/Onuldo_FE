@@ -131,7 +131,7 @@ private fun RecordCompletePreview() {
                     title = "독서 30분",
                     progress = 100,
                     completeDate = "2026.07.22",
-                    point = 2000
+                    point = 1002000
                 )
             ),
             initialTab = RecordTab.COMPLETE

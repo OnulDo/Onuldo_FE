@@ -56,7 +56,7 @@ fun EmptyRecordView(
 
         Text(
             text = description,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.labelLarge,
             color = DarkBrown,
             textAlign = TextAlign.Center
         )
@@ -66,7 +66,6 @@ fun EmptyRecordView(
         OnulDoMediumButton(
             text = "챌린지 둘러보기",
             onClick = {},
-            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
     }
 }

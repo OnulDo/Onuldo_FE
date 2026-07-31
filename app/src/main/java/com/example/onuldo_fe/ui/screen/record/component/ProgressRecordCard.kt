@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
@@ -46,8 +47,8 @@ fun ProgressRecordCard(
 
     Surface(
         shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, DarkBrown40),
         color = White,
-        border = BorderStroke(1.dp, Persimmon20),
         modifier = Modifier
             .height(170.dp)
     ) {
@@ -80,7 +81,7 @@ fun ProgressRecordCard(
                 color = BlackBrown
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(spacing.spacing8))
 
             Text(
                 text = if (isTodayVerified) "오늘 인증 완료"
@@ -89,7 +90,7 @@ fun ProgressRecordCard(
                 color = if (isTodayVerified) Green else Persimmon
             )
 
-            Spacer(modifier = Modifier.height(11.dp))
+            Spacer(modifier = Modifier.height(spacing.spacing12))
 
             // 달성률 뱃지
             Surface(
