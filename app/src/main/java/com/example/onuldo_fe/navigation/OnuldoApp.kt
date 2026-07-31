@@ -126,8 +126,8 @@ fun OnuldoApp() {
         // 카메라 화면
         composable(Routes.CAMERA) {
             CameraScreen(
-                category = "",
-                title = "",
+                category = "시간 챌린지",
+                title = "30분 러닝",
                 onPhotoCaptured = { uri ->
                     cameraViewModel.setImageUri(uri)
                     navController.navigate(Routes.PHOTO_PREVIEW)
@@ -144,8 +144,8 @@ fun OnuldoApp() {
             val imageUri by cameraViewModel.imageUri.collectAsState()
 
             PhotoPreviewScreen(
-                category = "",
-                title = "",
+                category = "시간 챌린지",
+                title = "30분 러닝",
                 imageUri = imageUri,
 
                 onCloseClick = {

@@ -4,7 +4,9 @@ import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,8 +40,11 @@ fun PhotoPreviewScreen(
         AsyncImage(
             model = imageUri,
             contentDescription = "촬영한 사진",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(3f/4f)
+                .align(Alignment.Center),
+            contentScale = ContentScale.Fit
         )
 
         CameraTopBar(
