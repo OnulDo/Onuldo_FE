@@ -45,8 +45,8 @@ fun GalleryFilterChips(
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         contentPadding = contentPadding,
-        // 칩 사이 13dp 간격 (가로 스크롤은 LazyRow라 기본 지원)
-        horizontalArrangement = Arrangement.spacedBy(13.dp)
+        // 칩 사이 12dp 간격 (가로 스크롤은 LazyRow라 기본 지원)
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(categories) { category ->
             CategoryChip(

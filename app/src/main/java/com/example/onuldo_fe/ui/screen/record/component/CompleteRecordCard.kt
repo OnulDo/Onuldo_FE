@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
@@ -45,9 +46,8 @@ fun CompleteRecordCard(
 
     Surface(
         shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, DarkBrown40),
         color = White,
-        shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, Persimmon20),
         modifier = Modifier
             .fillMaxWidth()
             .height(104.dp),
@@ -92,7 +92,7 @@ fun CompleteRecordCard(
                 )
 
                 Text(
-                    text = "${if (isSuccess) "+" else "-"}${point}P",
+                    text = "${if (isSuccess) "+" else ""}${point}P",
                     style = MaterialTheme.typography.bodyMedium,
                     color = cardTextColor
                 )
@@ -142,7 +142,7 @@ fun CompleteRecordCardFalsePreview() {
             title = "독서30분",
             progress = 92,
             completeDate = "2026.04.15",
-            point = 18400,
+            point = -18400,
         )
     }
 }
