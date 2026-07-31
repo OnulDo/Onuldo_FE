@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 @Composable
 fun CameraPreview(
     imageCapture: ImageCapture,
+    lensFacing: Int,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -46,7 +47,9 @@ fun CameraPreview(
                     it.surfaceProvider = previewView.surfaceProvider
                 }
 
-                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                val cameraSelector = CameraSelector.Builder()
+                    .requireLensFacing(lensFacing)
+                    .build()
 
                 try {
                     cameraProvider.unbindAll()

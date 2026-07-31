@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.camera.core.AspectRatio
+import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.compose.foundation.background
@@ -14,8 +15,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,23 +42,35 @@ fun CameraScreen(
     val imageCapture = remember {
         ImageCapture.Builder()
             .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+            .setFlashMode(ImageCapture.FLASH_MODE_OFF)
             .build()
     }
     var showVerificationNotice by remember { mutableStateOf(false) }
-    
+
+    var lensFacing by rememberSaveable {
+        mutableStateOf(CameraSelector.LENS_FACING_BACK)
+    }
+
+    var flashMode by rememberSaveable {
+        mutableStateOf(ImageCapture.FLASH_MODE_OFF)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
         // 카메라 프리뷰
-         CameraPreview(
-            imageCapture = imageCapture,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(3f/4f)
-                .align(Alignment.Center)
-        )
+        key(lensFacing) {
+            CameraPreview(
+                imageCapture = imageCapture,
+                lensFacing = lensFacing,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(3f / 4f)
+                    .align(Alignment.Center)
+            )
+        }
        /* Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -65,9 +80,20 @@ fun CameraScreen(
         CameraTopBar(
             category = category,
             title = title,
-            showFlashButton = true,
+            showFlashButton =
+                lensFacing == CameraSelector.LENS_FACING_BACK,
             onCloseClick = onCloseClick,
-            onFlashClick = {  }
+            onFlashClick = {
+                val newFlashMode =
+                    if (flashMode == ImageCapture.FLASH_MODE_OFF) {
+                        ImageCapture.FLASH_MODE_ON
+                    } else {
+                        ImageCapture.FLASH_MODE_OFF
+                    }
+
+                flashMode = newFlashMode
+                imageCapture.flashMode = newFlashMode
+            }
         )
         Box(
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -116,8 +142,18 @@ fun CameraScreen(
                             }
                         }
                     )
-                }
+                },
+                onSwitchClick = {
+                    lensFacing =
+                        if (lensFacing == CameraSelector.LENS_FACING_BACK) {
+                            CameraSelector.LENS_FACING_FRONT
+                        } else {
+                            CameraSelector.LENS_FACING_BACK
+                        }
 
+                    flashMode = ImageCapture.FLASH_MODE_OFF
+                    imageCapture.flashMode = ImageCapture.FLASH_MODE_OFF
+                }
             )
         }
 
