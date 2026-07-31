@@ -20,7 +20,6 @@ class FakeHomeApi(
 
     private fun defaultHomeWithCreatedParties(): HomeResponseDto {
         val base = HomeDummyData.withChallenges
-        val existingKeys = base.partyChallenges.map { it.title to it.subtitle }.toSet()
         val createdParties = FakePartyStore.getCreatedInProgressParties()
             .map { party ->
                 HomePartyChallengeDto(
@@ -32,7 +31,6 @@ class FakeHomeApi(
                     totalMemberCount = party.totalMembers
                 )
             }
-            .filterNot { (it.title to it.subtitle) in existingKeys }
 
         // 파티 시작 후 저장된 항목을 홈 상단에 추가하고 오늘 활동 분모도 함께 갱신
         return base.copy(
