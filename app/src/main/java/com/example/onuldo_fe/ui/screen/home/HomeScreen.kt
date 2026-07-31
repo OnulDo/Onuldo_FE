@@ -50,7 +50,7 @@ fun HomeScreen(
     uiState: HomeUiState,
     onNotificationClick: () -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
-    onSettlementResultClick: (String) -> Unit = {},
+    onSettlementResultClick: (Long) -> Unit = {},
     onVerifyClick: () -> Unit = {},
     scrollToTopKey: Int = 0,
     modifier: Modifier = Modifier
@@ -115,7 +115,7 @@ private fun EmptyHomeContent(
 private fun HomeContent(
     uiState: HomeUiState,
     onNotificationClick: () -> Unit,
-    onSettlementResultClick: (String) -> Unit,
+    onSettlementResultClick: (Long) -> Unit,
     onVerifyClick: () -> Unit,
     scrollToTopKey: Int
 ) {
@@ -161,7 +161,7 @@ private fun HomeContent(
             Spacer(modifier = Modifier.height(spacing.spacing18))
             SettlementCompleteCard(
                 partyName = banner.partyName,
-                onClick = { onSettlementResultClick(banner.resultId) },
+                onClick = { onSettlementResultClick(banner.partyId) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = spacing.spacing20)

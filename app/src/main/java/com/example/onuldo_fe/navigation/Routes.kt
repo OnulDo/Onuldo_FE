@@ -26,7 +26,7 @@ object Routes {
     const val CHALLENGE_START_DONE = "challenge_start_done"
     const val PARTY_SETTLEMENT = "party_settlement/{partyId}"
 
-    fun partySettlement(partyId: String) = "party_settlement/$partyId"
+    fun partySettlement(partyId: Long) = "party_settlement/$partyId"
     // 추후: PASSWORD_RESET, 알림 설정, 약관 3종 등
 
     //카메라

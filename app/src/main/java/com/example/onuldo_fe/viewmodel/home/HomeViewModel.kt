@@ -10,7 +10,7 @@ import com.example.onuldo_fe.repository.home.HomeRepositoryProvider
 class HomeViewModel(
     private val repository: HomeRepository = HomeRepositoryProvider.provide()
 ) : ViewModel() {
-    private val confirmedSettlementResultIds = mutableSetOf<String>()
+    private val confirmedSettlementPartyIds = mutableSetOf<Long>()
 
     var uiState by mutableStateOf(HomeUiState())
         private set
@@ -19,10 +19,10 @@ class HomeViewModel(
 
     fun loadHome() {
         val loadedState = repository.getHome().toUiState()
-        val settlementResultId = loadedState.settlementBanner?.resultId
+        val settlementPartyId = loadedState.settlementBanner?.partyId
 
         // 현재 실행 중 이미 확인한 정산 결과는 홈을 다시 불러와도 숨김
-        uiState = if (settlementResultId in confirmedSettlementResultIds) {
+        uiState = if (settlementPartyId in confirmedSettlementPartyIds) {
             loadedState.copy(settlementBanner = null)
         } else {
             loadedState
@@ -30,10 +30,10 @@ class HomeViewModel(
     }
 
     fun confirmSettlementResult() {
-        val resultId = uiState.settlementBanner?.resultId ?: return
+        val partyId = uiState.settlementBanner?.partyId ?: return
 
         // TODO: 실제 API 연동 후 서버의 정산 결과 확인 처리로 교체
-        confirmedSettlementResultIds += resultId
+        confirmedSettlementPartyIds += partyId
         uiState = uiState.copy(settlementBanner = null)
     }
 }

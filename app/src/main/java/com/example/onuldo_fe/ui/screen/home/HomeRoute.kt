@@ -24,7 +24,7 @@ import com.example.onuldo_fe.viewmodel.home.HomeViewModel
 @Composable
 fun HomeRoute(
     viewModel: HomeViewModel = viewModel(),
-    onSettlementResultClick: (String) -> Unit = {},
+    onSettlementResultClick: (Long) -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
     onCameraNavigate: () -> Unit = {},
     refreshKey: Int = 0
@@ -80,9 +80,9 @@ fun HomeRoute(
         HomeScreen(
             uiState = viewModel.uiState,
             onNotificationClick = { showNotification = true },
-            onSettlementResultClick = { resultId ->
+            onSettlementResultClick = { partyId ->
                 // 결과 화면 이동을 요청한 뒤 현재 홈 세션에서 확인한 배너 제거
-                onSettlementResultClick(resultId)
+                onSettlementResultClick(partyId)
                 viewModel.confirmSettlementResult()
             },
             onBrowseChallengesClick = onBrowseChallengesClick,
