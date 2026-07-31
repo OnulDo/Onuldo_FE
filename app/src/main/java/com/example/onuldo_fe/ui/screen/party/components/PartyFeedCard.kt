@@ -17,7 +17,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
-import com.example.onuldo_fe.ui.component.home.HomeVerifyButton
 import com.example.onuldo_fe.viewmodel.party.PartyFeedItemUi
 import com.example.onuldo_fe.ui.theme.*
 
@@ -28,8 +27,6 @@ fun PartyFeedCard(
     isCurrentUser: Boolean = false,
     onVerifyClick: () -> Unit = {}
 ) {
-    val shouldShowVerifyButton = isCurrentUser && item.verificationImageUrl == null
-
     Column(
         modifier
             .fillMaxWidth()
@@ -69,17 +66,6 @@ fun PartyFeedCard(
             Column(Modifier.padding(start = 8.dp)) {
                 Text(item.name, color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
                 Text(item.time, color = DarkBrown50, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Medium)
-            }
-            if (shouldShowVerifyButton) {
-                Spacer(Modifier.weight(1f))
-                HomeVerifyButton(
-                    onClick = onVerifyClick,
-                    width = 78.dp,
-                    height = 26.dp,
-                    iconSize = 12.dp,
-                    fontSize = 10.sp,
-                    lineHeight = 12.sp
-                )
             }
         }
     }
