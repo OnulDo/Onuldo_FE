@@ -3,6 +3,7 @@ package com.example.onuldo_fe.data.challenge.mapper
 import com.example.onuldo_fe.data.challenge.dto.ChallengeItemDto
 import com.example.onuldo_fe.data.challenge.dto.ChallengeListResultDto
 import com.example.onuldo_fe.model.challenge.ChallengeCategory
+import com.example.onuldo_fe.model.challenge.ChallengeDetail
 import com.example.onuldo_fe.model.challenge.ChallengePage
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 
@@ -28,4 +29,17 @@ fun ChallengeListResultDto.toModel(): ChallengePage = ChallengePage(
     challenges = challenges.map { it.toModel() },
     page = page,
     hasNext = hasNext
+)
+
+// 상세 응답 DTO → 상세 도메인 모델.
+// 서버가 null로 내려줄 수 있는 안내 문구는 빈 문자열로 안전 처리하고,
+// 화면(DetailScreen/VerificationMethodCard)에서 비어있으면 해당 섹션을 숨긴다.
+fun ChallengeItemDto.toDetailModel(): ChallengeDetail = ChallengeDetail(
+    id = id,
+    title = name,
+    participantCount = participantCount,
+    category = category.toChallengeCategory(),
+    summary = explainContent.orEmpty(),
+    verificationDescription = verifyMethodContent.orEmpty(),
+    verificationExampleImageUrl = verificationExamplePhotoUrl
 )

@@ -1,6 +1,7 @@
 package com.example.onuldo_fe.repository.challenge
 
 import com.example.onuldo_fe.model.challenge.ChallengeCategory
+import com.example.onuldo_fe.model.challenge.ChallengeDetail
 import com.example.onuldo_fe.model.challenge.ChallengePage
 
 interface ChallengeRepository {
@@ -11,4 +12,7 @@ interface ChallengeRepository {
         category: ChallengeCategory?,
         search: String?
     ): ChallengePage
+
+    // 챌린지 상세 조회 — 활성 상태 챌린지 1건
+    suspend fun getChallengeDetail(challengeId: Long): ChallengeDetail
 }

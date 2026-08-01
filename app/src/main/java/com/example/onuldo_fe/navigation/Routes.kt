@@ -21,7 +21,10 @@ object Routes {
     const val MYPAGE_NOTIFICATION = "mypage_notification"
 
     // 챌린지 상세 흐름: 갤러리 → 상세 → 참여 → 시작 완료
-    const val CHALLENGE_DETAIL = "challenge_detail"
+    // 상세는 challengeId를 경로 인자로 받는다. (네비 등록용 패턴 + 이동용 빌더 함께 사용)
+    const val CHALLENGE_DETAIL_ARG = "challengeId"
+    const val CHALLENGE_DETAIL = "challenge_detail/{$CHALLENGE_DETAIL_ARG}"
+    fun challengeDetail(challengeId: Long) = "challenge_detail/$challengeId"
     const val CHALLENGE_PARTICIPATE = "challenge_participate"
     const val CHALLENGE_START_DONE = "challenge_start_done"
     // 추후: PASSWORD_RESET, 알림 설정, 약관 3종 등

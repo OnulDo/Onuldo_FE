@@ -2,12 +2,14 @@ package com.example.onuldo_fe.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.onuldo_fe.camera.CameraScreen
 import com.example.onuldo_fe.camera.CameraViewModel
-import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
+import com.example.onuldo_fe.ui.screen.challenge.detail.DetailRoute
 import com.example.onuldo_fe.ui.screen.challenge.participate.ParticipateScreen
 import com.example.onuldo_fe.ui.screen.challenge.participate.StartDoneScreen
 import com.example.onuldo_fe.ui.screen.login.LandingScreen
@@ -195,9 +197,14 @@ fun OnuldoApp() {
 
 
         // --- 챌린지 상세 흐름 (챌린지 탭 위 풀스크린): 상세 → 참여 → 시작 완료 ---
-        // 콜백만으로 화면끼리 연동. 각 화면은 자체 더미 데이터 표시(id 전달·조회 없음).
-        composable(Routes.CHALLENGE_DETAIL) {
-            DetailScreen(
+        // 상세는 challengeId를 받아 API로 조회(DetailRoute). 참여/완료는 콜백으로 연동.
+        composable(
+            route = Routes.CHALLENGE_DETAIL,
+            arguments = listOf(navArgument(Routes.CHALLENGE_DETAIL_ARG) { type = NavType.LongType })
+        ) { backStackEntry ->
+            val challengeId = backStackEntry.arguments?.getLong(Routes.CHALLENGE_DETAIL_ARG) ?: 0L
+            DetailRoute(
+                challengeId = challengeId,
                 onBackClick = { navController.popBackStack() },
                 onJoinClick = { navController.navigate(Routes.CHALLENGE_PARTICIPATE) },
             )
