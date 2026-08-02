@@ -4,9 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.screen.challenge.participate.component.InsufficientPointDialog
 import com.example.onuldo_fe.ui.screen.party.components.PartyCapacitySelector
 import com.example.onuldo_fe.ui.screen.party.components.PartyChallengeSelector
@@ -135,7 +133,8 @@ fun PartyCreateScreen(
                     fontSize = 11.sp
                 )
             }
-            Button(
+            OnulDoButton(
+                text = if (isSubmitting) "만드는 중..." else "파티 만들기",
                 onClick = {
                     if (!partyNamePattern.matches(normalizedPartyName)) {
                         isPartyNameError = true
@@ -152,23 +151,11 @@ fun PartyCreateScreen(
                 },
                 enabled = enabled && !isSubmitting,
                 // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
-                modifier = Modifier.fillMaxWidth().padding(horizontal = spacing.spacing20).padding(top = 40.dp).height(52.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Persimmon,
-                    contentColor = SourCream,
-                    disabledContainerColor = BlackBrown.copy(alpha = 0.1f),
-                    disabledContentColor = BlackBrown.copy(alpha = 0.2f)
-                )
-            ) {
-                Text(
-                    if (isSubmitting) "만드는 중..." else "파티 만들기",
-                    fontFamily = Pretendard,
-                    fontSize = 17.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                modifier = Modifier.padding(top = 40.dp),
+                height = 52.dp,
+                fontSize = 17.sp,
+                lineHeight = 20.sp
+            )
         }
     }
 

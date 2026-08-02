@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.screen.challenge.participate.component.InsufficientPointDialog
 import com.example.onuldo_fe.ui.screen.party.components.PartyInviteCodeCard
 import com.example.onuldo_fe.ui.screen.party.components.PartyLeaveConfirmDialog
@@ -118,7 +117,13 @@ fun PartyWaitingRoomScreen(
                 lineHeight = 13.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
-            Button(
+            OnulDoButton(
+                text = when {
+                    isActionInProgress -> "처리 중..."
+                    isLeader -> "시작하기"
+                    isReadySubmitted -> "준비완료"
+                    else -> "준비하기"
+                },
                 onClick = {
                     when {
                         isLeader -> onStartClick()
@@ -130,29 +135,16 @@ fun PartyWaitingRoomScreen(
                 // 준비 상태에서도 버튼을 활성화해 다시 대기 상태로 전환할 수 있다.
                 enabled = !isActionInProgress && if (isLeader) ui.canStart else true,
                 // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
-                modifier = Modifier.fillMaxWidth().padding(horizontal = spacing.spacing20).padding(top = 40.dp).height(52.dp),
-                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.padding(top = 40.dp),
+                height = 52.dp,
+                fontSize = 17.sp,
+                lineHeight = 20.sp,
                 // 파티원 준비 상태는 회색, 대기 상태는 주황색 버튼으로 구분한다.
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (!isLeader && isReadySubmitted) BlackBrown10 else Persimmon,
-                    contentColor = if (!isLeader && isReadySubmitted) DarkBrown40 else SourCream,
-                    disabledContainerColor = DarkBrown10,
-                    disabledContentColor = DarkBrown40
-                )
-            ) {
-                Text(
-                    when {
-                        isActionInProgress -> "처리 중..."
-                        isLeader -> "시작하기"
-                        isReadySubmitted -> "준비완료"
-                        else -> "준비하기"
-                    },
-                    fontFamily = Pretendard,
-                    fontSize = 17.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                containerColor = if (!isLeader && isReadySubmitted) BlackBrown10 else Persimmon,
+                contentColor = if (!isLeader && isReadySubmitted) DarkBrown40 else SourCream,
+                disabledContainerColor = DarkBrown10,
+                disabledContentColor = DarkBrown40
+            )
         }
     }
 
