@@ -1,14 +1,12 @@
 package com.example.onuldo_fe.data.party.network
 
-import com.example.onuldo_fe.BuildConfig
-
 /**
- * 로그인 연동 전에는 Gradle 속성 또는 환경 변수 PARTY_API_ACCESS_TOKEN으로 토큰을 주입한다.
- * 공통 인증 계층이 추가되면 해당 토큰 제공자로 교체한다.
+ * 로그인 성공 후 전달받은 사용자별 access token만 메모리에 보관한다.
+ * 정적 토큰을 앱 바이너리에 포함하지 않으며, 로그아웃 시 clear()로 즉시 제거한다.
  */
 object PartyAccessTokenStore {
     @Volatile
-    private var accessToken: String? = BuildConfig.PARTY_API_ACCESS_TOKEN.takeIf(String::isNotBlank)
+    private var accessToken: String? = null
 
     fun get(): String? = accessToken
 

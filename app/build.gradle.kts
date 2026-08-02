@@ -3,12 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-val partyApiAccessToken = providers.gradleProperty("PARTY_API_ACCESS_TOKEN")
-    .orElse(providers.environmentVariable("PARTY_API_ACCESS_TOKEN"))
-    .getOrElse("")
-    .replace("\\", "\\\\")
-    .replace("\"", "\\\"")
-
 android {
     namespace = "com.example.onuldo_fe"
     compileSdk {
@@ -25,7 +19,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "PARTY_API_ACCESS_TOKEN", "\"$partyApiAccessToken\"")
     }
 
     buildTypes {
@@ -43,7 +36,6 @@ android {
     }
     buildFeatures {
         compose = true
-        buildConfig = true
     }
 }
 
