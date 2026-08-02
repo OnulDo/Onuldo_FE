@@ -29,12 +29,10 @@ fun PartyFeedScreen(
     challengeName: String,
     progress: PartyProgressUiState,
     feedItems: List<PartyFeedItemUi>,
-    currentUserId: String = "",
     isLoading: Boolean = false,
     errorMessage: String? = null,
     onRetry: () -> Unit = {},
-    onBack: () -> Unit,
-    onVerifyClick: () -> Unit = {}
+    onBack: () -> Unit
 ) {
     val spacing = LocalSpacing.current
     Column(Modifier.fillMaxSize().background(SourCream)) {
@@ -100,11 +98,7 @@ fun PartyFeedScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(feedItems, key = { it.memberId }) { item ->
-                    PartyFeedCard(
-                        item = item,
-                        isCurrentUser = item.memberId == currentUserId,
-                        onVerifyClick = onVerifyClick
-                    )
+                    PartyFeedCard(item = item)
                 }
             }
         }
@@ -183,7 +177,6 @@ private fun PartyFeedScreenPreview() {
                 PartyFeedItemUi("민지", "2시간 전", imageRes = R.drawable.party_feed_minji),
                 PartyFeedItemUi("하늘", "미인증", memberId = "current-user")
             ),
-            currentUserId = "current-user",
             onBack = {}
         )
     }

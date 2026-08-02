@@ -263,12 +263,10 @@ fun PartyRoute(
             challengeName = partyFeedViewModel.uiState.challengeName,
             progress = partyFeedViewModel.uiState.progress,
             feedItems = partyFeedViewModel.uiState.feedItems,
-            currentUserId = partyViewModel.currentUserId,
             isLoading = partyFeedViewModel.uiState.isLoading,
             errorMessage = partyFeedViewModel.uiState.errorMessage,
             onRetry = { partyFeedViewModel.loadPartyFeed(feedPartyId) },
-            onBack = { screen = PartyScreen.List },
-            onVerifyClick = ::handleVerifyClick
+            onBack = { screen = PartyScreen.List }
         )
 
         PartyScreen.Settlement -> {

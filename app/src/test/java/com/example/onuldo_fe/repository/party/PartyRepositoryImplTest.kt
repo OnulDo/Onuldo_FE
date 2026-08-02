@@ -6,6 +6,7 @@ import com.example.onuldo_fe.data.party.api.RealPartyApi
 import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
 import com.example.onuldo_fe.data.party.dto.RealPartyMemberDto
 import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
+import com.example.onuldo_fe.data.party.dto.PartyFeedDto
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -66,6 +67,9 @@ class PartyRepositoryImplTest {
 
         override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("Fake 모드에서 실제 대기방 API가 호출되면 안 됩니다.")
+
+        override suspend fun getPartyFeed(partyId: Long): Response<ApiResponse<PartyFeedDto>> =
+            error("파티 Repository 테스트에서 피드 API가 호출되면 안 됩니다.")
     }
 
     private object SuccessfulRealPartyApi : RealPartyApi {
@@ -91,6 +95,9 @@ class PartyRepositoryImplTest {
 
         override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("목록 테스트에서 실제 대기방 API가 호출되면 안 됩니다.")
+
+        override suspend fun getPartyFeed(partyId: Long): Response<ApiResponse<PartyFeedDto>> =
+            error("목록 테스트에서 피드 API가 호출되면 안 됩니다.")
     }
 
     private object SuccessfulWaitingRoomApi : RealPartyApi {
@@ -121,5 +128,8 @@ class PartyRepositoryImplTest {
                     )
                 )
             )
+
+        override suspend fun getPartyFeed(partyId: Long): Response<ApiResponse<PartyFeedDto>> =
+            error("대기방 테스트에서 피드 API가 호출되면 안 됩니다.")
     }
 }

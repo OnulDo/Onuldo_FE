@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.onuldo_fe.data.party.dummy.FakePartyStore
 import com.example.onuldo_fe.model.party.CreatePartyCommand
 import com.example.onuldo_fe.model.party.PartyLifecycleStatus
 import com.example.onuldo_fe.model.party.PartyMember
@@ -38,9 +37,7 @@ data class PartyUiState(
 
 // 파티 생성부터 대기방 시작·이탈까지 파티의 핵심 상태 변경 관리
 class PartyViewModel(
-    private val repository: PartyRepository = PartyRepositoryProvider.provide(),
-    // TODO 실제 API 연동 시 Fake 사용자 ID 대신 인증 계층의 사용자 ID를 전달하고 방장 여부는 대기방 응답의 isHost 사용
-    val currentUserId: String = FakePartyStore.CURRENT_USER_ID.toString()
+    private val repository: PartyRepository = PartyRepositoryProvider.provide()
 ) : ViewModel() {
     var uiState by mutableStateOf(PartyUiState())
         private set

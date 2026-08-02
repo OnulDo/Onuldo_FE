@@ -61,8 +61,7 @@ data class PartyFeedItemUi(
     val profileImageUrl: String? = null,       // 파티원 프로필 이미지 URL
     val verificationImageUrl: String? = null,  // 서버에서 전달받은 인증 이미지 URL
     @param:DrawableRes val imageRes: Int? = null, // fake 테스트용 로컬 인증 이미지
-    val memberId: String = name,               // 인증한 파티원의 고유 ID
-    val defaultCharacterId: Int? = null        // 프로필 이미지가 없을 때 표시할 기본 캐릭터 ID
+    val memberId: String = name                // 인증한 파티원의 고유 ID
 )
 
 // 파티 대기방 화면에 표시할 파티 정보와 참여자 상태

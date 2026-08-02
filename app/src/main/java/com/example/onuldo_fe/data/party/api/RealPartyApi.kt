@@ -3,6 +3,7 @@ package com.example.onuldo_fe.data.party.api
 import com.example.onuldo_fe.data.common.ApiResponse
 import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
 import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
+import com.example.onuldo_fe.data.party.dto.PartyFeedDto
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -18,4 +19,10 @@ interface RealPartyApi {
     suspend fun getWaitingRoom(
         @Path("partyId") partyId: Long
     ): Response<ApiResponse<RealPartyWaitingRoomDto>>
+
+    /** 파티의 오늘 인증 진행률과 파티원별 인증 현황을 조회한다. */
+    @GET("api/parties/{partyId}/feed")
+    suspend fun getPartyFeed(
+        @Path("partyId") partyId: Long
+    ): Response<ApiResponse<PartyFeedDto>>
 }
