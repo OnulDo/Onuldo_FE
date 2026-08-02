@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.component.home
+package com.example.onuldo_fe.ui.screen.home.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -20,7 +20,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -32,13 +35,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.BlackBrown70
 import com.example.onuldo_fe.ui.theme.DarkBrown20
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeHeader(
@@ -46,8 +53,12 @@ fun HomeHeader(
     modifier: Modifier = Modifier,
     onNotificationClick: () -> Unit = {}
 ) {
+    val spacing = LocalSpacing.current
+    // TODO: 8sp SemiBold·18sp ExtraBold 글자 스타일 토큰 추가 후 교체
     val notificationInteractionSource = remember { MutableInteractionSource() }
     val isNotificationPressed by notificationInteractionSource.collectIsPressedAsState()
+    var isClickFeedbackActive by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Box(
@@ -59,16 +70,16 @@ fun HomeHeader(
             Image(
                 painter = painterResource(id = R.drawable.home_run_light_icon),
                 contentDescription = null,
-                modifier = Modifier.size(width = 38.dp, height = 37.dp),
+                modifier = Modifier.size(width = 28.dp, height = 33.dp),
                 contentScale = ContentScale.Fit
             )
         }
 
-        Spacer(modifier = Modifier.width(10.dp))
+        Spacer(modifier = Modifier.width(spacing.spacing10))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "오늘두 함께 도전!",
-                color = BlackBrown.copy(alpha = 0.7f),
+                color = BlackBrown70,
                 fontFamily = Pretendard,
                 fontSize = 8.sp,
                 lineHeight = 8.sp,
@@ -93,7 +104,17 @@ fun HomeHeader(
                     interactionSource = notificationInteractionSource,
                     indication = null,
                     role = Role.Button,
-                    onClick = onNotificationClick
+                    onClick = {
+                        if (!isClickFeedbackActive) {
+                            // 짧게 눌러도 눌림 색상이 보이도록 100ms 유지
+                            isClickFeedbackActive = true
+                            coroutineScope.launch {
+                                delay(100L)
+                                isClickFeedbackActive = false
+                                onNotificationClick()
+                            }
+                        }
+                    }
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -101,7 +122,7 @@ fun HomeHeader(
                 painter = painterResource(id = R.drawable.home_bell_icon),
                 contentDescription = "알림",
                 modifier = Modifier.size(17.dp),
-                tint = if (isNotificationPressed) Persimmon else BlackBrown
+                tint = if (isNotificationPressed || isClickFeedbackActive) Persimmon else BlackBrown
             )
         }
     }
@@ -111,12 +132,13 @@ fun HomeHeader(
 @Composable
 private fun HomeHeaderPreview() {
     OnulDo_FETheme {
+        val spacing = LocalSpacing.current
         HomeHeader(
             userName = "김민지",
             modifier = Modifier
                 .fillMaxWidth()
                 .background(SourCream)
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = spacing.spacing20)
         )
     }
 }

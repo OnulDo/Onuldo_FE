@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.component.home
+package com.example.onuldo_fe.ui.screen.home.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

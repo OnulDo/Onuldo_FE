@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.component.home
+package com.example.onuldo_fe.ui.screen.home.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,9 +28,12 @@ import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.model.home.TodayChallenge
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
+import com.example.onuldo_fe.ui.theme.Persimmon20
+import com.example.onuldo_fe.ui.theme.Persimmon50
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 
@@ -38,6 +42,9 @@ fun TodayChallengeCard(
     todayChallenge: TodayChallenge,
     modifier: Modifier = Modifier
 ) {
+    val spacing = LocalSpacing.current
+    // TODO: 완료 수 조합 글자 스타일과 42dp 여백 토큰 추가 후 교체
+
     Column(
         modifier = modifier
             .background(
@@ -45,19 +52,17 @@ fun TodayChallengeCard(
                 shape = RoundedCornerShape(14.dp)
             )
             .border(
-                border = BorderStroke(1.dp, Persimmon.copy(alpha = 0.5f)),
+                border = BorderStroke(1.dp, Persimmon50),
                 shape = RoundedCornerShape(14.dp)
             )
             .height(148.dp)
-            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .padding(horizontal = spacing.spacing16, vertical = spacing.spacing16)
     ) {
         Text(
             text = todayChallenge.date,
             color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 20.sp,
+            style = MaterialTheme.typography.titleMedium,
             lineHeight = 20.sp,
-            fontWeight = FontWeight.ExtraBold
         )
 
         Spacer(modifier = Modifier.height(42.dp))
@@ -70,10 +75,8 @@ fun TodayChallengeCard(
             Text(
                 text = stringResource(R.string.home_today_challenge_title),
                 color = BlackBrown,
-                fontFamily = Pretendard,
-                fontSize = 17.sp,
+                style = MaterialTheme.typography.bodyLarge,
                 lineHeight = 20.sp,
-                fontWeight = FontWeight.Bold
             )
             Text(
                 text = buildAnnotatedString {
@@ -84,13 +87,12 @@ fun TodayChallengeCard(
                         append("/${todayChallenge.totalCount} 완료")
                     }
                 },
-                fontFamily = Pretendard,
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.labelMedium,
                 lineHeight = 14.sp,
             )
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(spacing.spacing10))
 
         Row(
             modifier = Modifier
@@ -98,7 +100,7 @@ fun TodayChallengeCard(
                 .height(8.dp)
                 .background(SourCream, RoundedCornerShape(50))
                 .border(
-                    BorderStroke(1.dp, Persimmon.copy(alpha = 0.2f)),
+                    BorderStroke(1.dp, Persimmon20),
                     RoundedCornerShape(50)
                 )
         ) {

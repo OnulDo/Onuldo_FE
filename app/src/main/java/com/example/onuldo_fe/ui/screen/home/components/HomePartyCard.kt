@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.component.home
+package com.example.onuldo_fe.ui.screen.home.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,11 +37,14 @@ import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown10
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.DarkBrown80
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
+import com.example.onuldo_fe.ui.theme.Persimmon80
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
@@ -54,22 +58,23 @@ fun HomePartyCard(
     modifier: Modifier = Modifier,
     onVerifyClick: () -> Unit = {}
 ) {
+    val spacing = LocalSpacing.current
+    // TODO: 13sp Medium·11sp Bold 글자 스타일과 2·5·6·7·14·17dp 여백 토큰 추가 후 교체
+
     Column(
         modifier = modifier
             .height(140.dp)
             .background(White, RoundedCornerShape(14.dp))
             .border(BorderStroke(1.dp, DarkBrown40), RoundedCornerShape(14.dp))
-            .padding(start = 14.dp, top = 14.dp, end = 10.dp, bottom = 17.dp)
+            .padding(start = 14.dp, top = 14.dp, end = spacing.spacing10, bottom = 17.dp)
     ) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = partyChallenge.title,
                     color = BlackBrown,
-                    fontFamily = Pretendard,
-                    fontSize = 17.sp,
+                    style = MaterialTheme.typography.bodyLarge,
                     lineHeight = 20.sp,
-                    fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -86,7 +91,7 @@ fun HomePartyCard(
             }
             Text(
                 text = stringResource(R.string.home_challenge_d_day, partyChallenge.remainingDays),
-                color = DarkBrown.copy(alpha = 0.8f),
+                color = DarkBrown80,
                 modifier = Modifier
                     .padding(end = 6.dp)
                     .offset(y = (-3).dp),
@@ -97,7 +102,7 @@ fun HomePartyCard(
             )
         }
 
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(spacing.spacing10))
         Row(verticalAlignment = Alignment.CenterVertically) {
             val deadlineText = partyChallenge.verifiedAt?.let {
                 stringResource(R.string.home_challenge_verified_at, it.toDisplayText())
@@ -113,8 +118,8 @@ fun HomePartyCard(
                 fontWeight = FontWeight.Medium
             )
             partyChallenge.remainingMinutes?.takeIf { it in 0..60 }?.let { remainingMinutes ->
-                Spacer(Modifier.width(10.dp))
-                Box(Modifier.background(Persimmon10, RoundedCornerShape(10.dp)).padding(horizontal = 10.dp, vertical = 2.dp)) {
+                Spacer(Modifier.width(spacing.spacing10))
+                Box(Modifier.background(Persimmon10, RoundedCornerShape(10.dp)).padding(horizontal = spacing.spacing10, vertical = 2.dp)) {
                     Text(
                         text = stringResource(R.string.home_challenge_minutes_left, remainingMinutes),
                         color = Persimmon,
@@ -202,7 +207,7 @@ private fun PartyAction(
 private fun ChallengeStatus.statusColor() = when (this) {
     ChallengeStatus.Success -> Green
     ChallengeStatus.WaitingReview, ChallengeStatus.Failed -> Red
-    ChallengeStatus.NeedCertification -> Persimmon.copy(alpha = 0.8f)
+    ChallengeStatus.NeedCertification -> Persimmon80
 }
 
 private fun ChallengeStatus.actionTextRes(): Int = when (this) {
@@ -220,9 +225,10 @@ private fun LocalTime.toDisplayText(): String = format(homeTimeFormatter)
 @Composable
 private fun HomePartyCardPreview() {
     OnulDo_FETheme {
+        val spacing = LocalSpacing.current
         HomePartyCard(
             HomePartyChallenge("새벽 러너 파티", "30분 러닝", 12, LocalTime.of(7, 0), 2, 5, remainingMinutes = 45),
-            Modifier.fillMaxWidth().padding(horizontal = 20.dp)
+            Modifier.fillMaxWidth().padding(horizontal = spacing.spacing20)
         )
     }
 }

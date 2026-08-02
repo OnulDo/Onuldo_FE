@@ -14,6 +14,7 @@ import java.util.Locale
 object FakePartyStore {
     const val CURRENT_USER_ID = 99L
     private var createdPartySequence = 200L
+    private val createdPartyIds = mutableSetOf<Long>()
 
     private data class StoredParty(
         val room: PartyWaitingRoomDto,
@@ -141,6 +142,7 @@ object FakePartyStore {
             challengeName = room.goal.orEmpty(),
             status = "WAITING"
         )
+        createdPartyIds += partyId
         return CreatePartyResponseDto(
             partyId = partyId,
             name = request.name,
@@ -257,6 +259,11 @@ object FakePartyStore {
 
     @Synchronized
     fun getInProgressParties(): List<PartySummaryDto> = summaries.values.filter { it.status == "ONGOING" }
+
+    // 홈 Fake 응답에는 기본 샘플을 제외하고 이번 실행에서 생성·시작한 파티만 전달
+    @Synchronized
+    fun getCreatedInProgressParties(): List<PartySummaryDto> =
+        summaries.filterKeys { it in createdPartyIds }.values.filter { it.status == "ONGOING" }
 
     private fun waitingRoom(
         partyId: Long,

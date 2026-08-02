@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.ui.component.home
+package com.example.onuldo_fe.ui.screen.home.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +27,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
@@ -35,6 +37,9 @@ fun HomeCompletedChallengeCard(
     completedChallenge: HomeCompletedChallenge,
     modifier: Modifier = Modifier
 ) {
+    val spacing = LocalSpacing.current
+    // TODO: 10sp Regular·11sp Bold·12sp Medium 글자 스타일과 15·17·27dp 여백 토큰 추가 후 교체
+
     Box(
         modifier = modifier
             .height(56.dp)
@@ -44,7 +49,7 @@ fun HomeCompletedChallengeCard(
         Text(
             text = completedChallenge.time,
             color = DarkBrown50,
-            modifier = Modifier.padding(start = 15.dp, top = 12.dp),
+            modifier = Modifier.padding(start = 15.dp, top = spacing.spacing12),
             fontFamily = Pretendard,
             fontSize = 10.sp,
             lineHeight = 20.sp,
@@ -53,11 +58,8 @@ fun HomeCompletedChallengeCard(
         Text(
             text = completedChallenge.title,
             color = BlackBrown,
-            modifier = Modifier.padding(start = 15.dp, top = 26.dp),
-            fontFamily = Pretendard,
-            fontSize = 14.sp,
-            lineHeight = 22.sp,
-            fontWeight = FontWeight.Bold
+            modifier = Modifier.padding(start = 15.dp, top = spacing.spacing26),
+            style = MaterialTheme.typography.bodyMedium
         )
 
         CompletedChallengeResult(completedChallenge)
@@ -66,6 +68,8 @@ fun HomeCompletedChallengeCard(
 
 @Composable
 private fun BoxScope.CompletedChallengeResult(completedChallenge: HomeCompletedChallenge) {
+    val spacing = LocalSpacing.current
+
     when (completedChallenge) {
         is HomeCompletedChallenge.Party -> Box(
             modifier = Modifier
@@ -98,7 +102,7 @@ private fun BoxScope.CompletedChallengeResult(completedChallenge: HomeCompletedC
             color = Green,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(top = 20.dp, end = 27.dp),
+                .padding(top = spacing.spacing20, end = 27.dp),
             fontFamily = Pretendard,
             fontSize = 12.sp,
             lineHeight = 14.sp,
@@ -111,9 +115,10 @@ private fun BoxScope.CompletedChallengeResult(completedChallenge: HomeCompletedC
 @Composable
 private fun HomeCompletedChallengeCardPreview() {
     OnulDo_FETheme {
+        val spacing = LocalSpacing.current
         HomeCompletedChallengeCard(
             HomeCompletedChallenge.Party("06:30", "새벽 러너 파티", 3, 3),
-            Modifier.fillMaxWidth().padding(horizontal = 20.dp)
+            Modifier.fillMaxWidth().padding(horizontal = spacing.spacing20)
         )
     }
 }

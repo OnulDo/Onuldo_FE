@@ -10,19 +10,30 @@ import com.example.onuldo_fe.repository.home.HomeRepositoryProvider
 class HomeViewModel(
     private val repository: HomeRepository = HomeRepositoryProvider.provide()
 ) : ViewModel() {
+    private val confirmedSettlementPartyIds = mutableSetOf<Long>()
+
     var uiState by mutableStateOf(HomeUiState())
         private set
 
     init { loadHome() }
 
     fun loadHome() {
-        // 홈 응답 전체로 동일 시점의 UI 상태 생성
-        uiState = repository.getHome().toUiState()
+        val loadedState = repository.getHome().toUiState()
+        val settlementPartyId = loadedState.settlementBanner?.partyId
+
+        // 현재 실행 중 이미 확인한 정산 결과는 홈을 다시 불러와도 숨김
+        uiState = if (settlementPartyId in confirmedSettlementPartyIds) {
+            loadedState.copy(settlementBanner = null)
+        } else {
+            loadedState
+        }
     }
 
     fun confirmSettlementResult() {
-        // 정산 결과 화면 진입이 확인된 뒤 배너 제거
-        if (uiState.settlementBanner == null) return
+        val partyId = uiState.settlementBanner?.partyId ?: return
+
+        // TODO: 실제 API 연동 후 서버의 정산 결과 확인 처리로 교체
+        confirmedSettlementPartyIds += partyId
         uiState = uiState.copy(settlementBanner = null)
     }
 }
