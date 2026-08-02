@@ -23,7 +23,8 @@ import com.example.onuldo_fe.ui.theme.White
 fun PreviewBottomBar(
     modifier: Modifier = Modifier,
     onRetakeClick: () -> Unit = {},
-    onSubmitClick: () -> Unit = {}
+    onSubmitClick: () -> Unit = {},
+    enabled: Boolean = true
 ) {
     val spacing = LocalSpacing.current
 
@@ -36,6 +37,7 @@ fun PreviewBottomBar(
 
         OutlinedButton(
             onClick = onRetakeClick,
+            enabled = enabled,
             modifier = Modifier
                 .weight(1f)
                 .heightIn(min = 56.dp),
@@ -50,6 +52,7 @@ fun PreviewBottomBar(
 
         Button(
             onClick = onSubmitClick,
+            enabled = enabled,
             modifier = Modifier
                 .weight(1f)
                 .heightIn(min = 56.dp),

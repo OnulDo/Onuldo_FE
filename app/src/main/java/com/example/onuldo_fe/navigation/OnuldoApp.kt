@@ -1,6 +1,7 @@
 package com.example.onuldo_fe.navigation
 
 import androidx.compose.runtime.Composable
+import com.example.onuldo_fe.camera.VerificationSubmitState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -133,6 +134,7 @@ fun OnuldoApp() {
                     navController.navigate(Routes.PHOTO_PREVIEW)
                 },
                 onCloseClick = {
+                    cameraViewModel.discardPhoto()
                     navController.popBackStack()
                 }
             )
@@ -142,22 +144,30 @@ fun OnuldoApp() {
         composable(Routes.PHOTO_PREVIEW) {
 
             val imageUri by cameraViewModel.imageUri.collectAsState()
-
+            val submitState by cameraViewModel.submitState.collectAsState()
             PhotoPreviewScreen(
                 category = "시간 챌린지",
                 title = "30분 러닝",
                 imageUri = imageUri,
 
                 onCloseClick = {
+                    cameraViewModel.discardPhoto()
                     navController.popBackStack()
                 },
 
                 onRetakeClick = {
+                    cameraViewModel.discardPhoto()
                     navController.popBackStack()
                 },
 
                 onSubmitClick = {
-                    navController.navigate(Routes.VERIFICATION_WAITING)
+                    cameraViewModel.uploadImage()
+                },
+                submitState = submitState,
+                onRetry = cameraViewModel::uploadImage,
+                onUploadComplete = {
+                    cameraViewModel.clearSubmitState()
+                    navController.popBackStack()
                 }
             )
         }

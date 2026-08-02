@@ -1,13 +1,14 @@
 package com.example.onuldo_fe.camera
 
-import android.content.ContentValues
 import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
-import androidx.camera.core.AspectRatio
+import android.util.Size
+import java.io.File
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -46,7 +47,17 @@ fun CameraScreen(
 ){
     val imageCapture = remember {
         ImageCapture.Builder()
-            .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+            .setResolutionSelector(
+                ResolutionSelector.Builder()
+                    .setAspectRatioStrategy(AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY)
+                    .setResolutionStrategy(
+                        ResolutionStrategy(
+                            Size(1920, 1440),
+                            ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
+                        )
+                    )
+                    .build()
+            )
             .setFlashMode(ImageCapture.FLASH_MODE_OFF)
             .build()
     }
@@ -128,24 +139,9 @@ fun CameraScreen(
                     showVerificationNotice = true
                 },
                 onCaptureClick = {
-                    val name = System.currentTimeMillis().toString()
-                    val contentValues = ContentValues().apply {
-                        put(MediaStore.MediaColumns.DISPLAY_NAME, name)
-                        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            put(
-                                MediaStore.Images.Media.RELATIVE_PATH,
-                                "Pictures/OnulDo"
-                            )
-                        }
-                    }
-                    val outputOptions =
-                        ImageCapture.OutputFileOptions.Builder(
-                            context.contentResolver,
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                            contentValues
-                        ).build()
+                    val photoDirectory = File(context.cacheDir, "verification_photos").apply { mkdirs() }
+                    val photoFile = File(photoDirectory, "verification_${System.currentTimeMillis()}.jpg")
+                    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
                     imageCapture.takePicture(
                         outputOptions,
@@ -155,13 +151,14 @@ fun CameraScreen(
                             override fun onImageSaved(
                                 outputFileResults: ImageCapture.OutputFileResults
                             ) {
-                                val savedUri = outputFileResults.savedUri
+                                val savedUri = outputFileResults.savedUri ?: Uri.fromFile(photoFile)
                                 onPhotoCaptured(savedUri)
                             }
 
                             override fun onError(
                                 exception: ImageCaptureException
                             ) {
+                                photoFile.delete()
                                 exception.printStackTrace()
                             }
                         }
