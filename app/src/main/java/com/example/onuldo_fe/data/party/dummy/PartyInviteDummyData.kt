@@ -7,5 +7,4 @@ object PartyInviteDummyData {
     const val STARTED_CODE = "START1"               // 이미 시작된 파티 오류 테스트 코드
     const val FULL_CODE = "FULL01"                  // 인원 초과 오류 모달 테스트 코드
     const val EXPIRED_CODE = "OLD123"               // 만료된 초대코드 오류 테스트 코드
-    const val VALID_PARTY_ID = "party-001"          // 정상 참여 테스트 파티 ID
 }
