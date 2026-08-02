@@ -4,6 +4,8 @@ import com.example.onuldo_fe.data.common.ApiResponse
 import com.example.onuldo_fe.data.party.api.FakePartyApi
 import com.example.onuldo_fe.data.party.api.RealPartyApi
 import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
+import com.example.onuldo_fe.data.party.dto.RealPartyMemberDto
+import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -40,9 +42,30 @@ class PartyRepositoryImplTest {
         assertEquals(4, party.totalMemberCount)
     }
 
+    @Test
+    fun `대기방 설정이 true이면 서버 권한과 시작 가능 여부를 전달한다`() = runBlocking {
+        val repository = PartyRepositoryImpl(
+            fakeApi = FakePartyApi(),
+            realApi = SuccessfulWaitingRoomApi,
+            useRealPartyListApi = false,
+            useRealPartyWaitingRoomApi = true
+        )
+
+        val room = repository.getWaitingRoom("101")
+
+        assertEquals("101", room.partyId)
+        assertEquals("갓생팟", room.partyName)
+        assertEquals(true, room.isHost)
+        assertEquals(false, room.canStart)
+        assertEquals(2, room.members.size)
+    }
+
     private object ThrowingRealPartyApi : RealPartyApi {
         override suspend fun getParties(): Response<ApiResponse<List<RealPartySummaryDto>>> =
             error("Fake 모드에서 실제 API가 호출되면 안 됩니다.")
+
+        override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
+            error("Fake 모드에서 실제 대기방 API가 호출되면 안 됩니다.")
     }
 
     private object SuccessfulRealPartyApi : RealPartyApi {
@@ -62,6 +85,39 @@ class PartyRepositoryImplTest {
                             verifiedToday = 3,
                             totalMembers = 4
                         )
+                    )
+                )
+            )
+
+        override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
+            error("목록 테스트에서 실제 대기방 API가 호출되면 안 됩니다.")
+    }
+
+    private object SuccessfulWaitingRoomApi : RealPartyApi {
+        override suspend fun getParties(): Response<ApiResponse<List<RealPartySummaryDto>>> =
+            error("대기방 테스트에서 목록 API가 호출되면 안 됩니다.")
+
+        override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
+            Response.success(
+                ApiResponse(
+                    timestamp = "2026-07-23T13:00:00",
+                    code = "SUCCESS",
+                    message = "요청에 성공하였습니다.",
+                    result = RealPartyWaitingRoomDto(
+                        partyId = partyId,
+                        name = "갓생팟",
+                        status = "WAITING",
+                        inviteCode = "82K3H9",
+                        currentMembers = 2,
+                        maxMembers = 4,
+                        durationDays = 28,
+                        depositAmount = 30_000,
+                        members = listOf(
+                            RealPartyMemberDto(1, "방장", null, "HOST", "WAITING"),
+                            RealPartyMemberDto(2, "파티원", null, "MEMBER", "READY")
+                        ),
+                        isHost = true,
+                        canStart = false
                     )
                 )
             )

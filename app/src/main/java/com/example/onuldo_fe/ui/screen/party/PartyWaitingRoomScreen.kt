@@ -34,9 +34,7 @@ import com.example.onuldo_fe.viewmodel.party.PartyWaitingRoomUi
 @Composable
 fun PartyWaitingRoomScreen(
     ui: PartyWaitingRoomUi,
-    isLeader: Boolean,
     availablePoint: Int = 5_000,
-    isCurrentUserReady: Boolean = false,
     onBack: () -> Unit,
     onStartClick: () -> Unit = {},
     onReadyClick: () -> Unit = {},
@@ -47,6 +45,8 @@ fun PartyWaitingRoomScreen(
     val spacing = LocalSpacing.current
     val clipboard = LocalClipboardManager.current
     var showPointDialog by remember { mutableStateOf(false) }
+    // 로그인 사용자 기준 서버 판정값으로 파티장/파티원 버튼을 구분한다.
+    val isLeader = ui.isHost
 
     // 상단 뒤로가기와 시스템 뒤로가기 모두 동일한 파티 탈퇴 로직 실행
     BackHandler(onBack = onBack)
@@ -120,7 +120,7 @@ fun PartyWaitingRoomScreen(
                         else -> onReadyClick()
                     }
                 },
-                enabled = !isActionInProgress && if (isLeader) ui.canStart else !isCurrentUserReady,
+                enabled = !isActionInProgress && if (isLeader) ui.canStart else true,
                 // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
                 modifier = Modifier.fillMaxWidth().padding(horizontal = spacing.spacing20).padding(top = 40.dp).height(52.dp),
                 shape = RoundedCornerShape(14.dp),
@@ -192,10 +192,10 @@ private fun PartyWaitingRoomInfoCardPreview() {
 
 @Preview(name = "대기방 - 파티장", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable private fun PartyWaitingRoomLeaderPreview() {
-    OnulDo_FETheme { PartyWaitingRoomScreen(ui = PartyWaitingRoomUi(), isLeader = true, onBack = {}) }
+    OnulDo_FETheme { PartyWaitingRoomScreen(ui = PartyWaitingRoomUi(isHost = true), onBack = {}) }
 }
 
 @Preview(name = "대기방 - 파티원", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable private fun PartyWaitingRoomMemberPreview() {
-    OnulDo_FETheme { PartyWaitingRoomScreen(ui = PartyWaitingRoomUi(), isLeader = false, onBack = {}) }
+    OnulDo_FETheme { PartyWaitingRoomScreen(ui = PartyWaitingRoomUi(isHost = false, canStart = false), onBack = {}) }
 }

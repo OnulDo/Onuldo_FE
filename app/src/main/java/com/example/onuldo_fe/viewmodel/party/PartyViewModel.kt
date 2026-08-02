@@ -188,12 +188,14 @@ class PartyViewModel(
 private fun PartyWaitingRoom.toUi() = PartyWaitingRoomUi(
     partyId = partyId,
     partyName = partyName,
-    challengeName = challengeName,
     inviteCode = inviteCode,
     period = period,
     deposit = deposit,
     capacity = capacity,
-    members = members.map(PartyMember::toUi)
+    members = members.map(PartyMember::toUi),
+    // Repository가 Fake/Real 차이를 통일했으므로 ViewModel은 응답값만 전달한다.
+    isHost = isHost,
+    canStart = canStart
 )
 
 // 서버 문자열 상태가 변환된 도메인 enum을 화면에서 사용하는 enum으로 매핑

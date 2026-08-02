@@ -33,8 +33,6 @@ import com.example.onuldo_fe.viewmodel.party.PartyAction
 import com.example.onuldo_fe.viewmodel.party.PartyFeedViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyInviteViewModel
 import com.example.onuldo_fe.viewmodel.party.PartySettlementViewModel
-import com.example.onuldo_fe.viewmodel.party.PartyMemberRole
-import com.example.onuldo_fe.viewmodel.party.PartyReadyStatus
 import com.example.onuldo_fe.viewmodel.party.PartyStatus
 import com.example.onuldo_fe.viewmodel.party.PartyViewModel
 import java.text.Normalizer
@@ -82,12 +80,8 @@ fun PartyRoute(
     var feedPartyId by remember { mutableStateOf("1") }
     var waitingPartyId by remember { mutableStateOf<String?>(null) }
 
-    // 로그인 사용자와 대기방 멤버 ID를 비교해 파티장/파티원 전용 UI 결정
     val partyState = partyViewModel.uiState
     val waitingRoom = partyState.waitingRoom
-    val currentMember = waitingRoom?.members?.firstOrNull { it.id == partyViewModel.currentUserId }
-    val isCurrentUserLeader = currentMember?.role == PartyMemberRole.Leader
-    val isCurrentUserReady = currentMember?.readyStatus == PartyReadyStatus.Ready
 
     fun handleVerifyClick() {
         val isCameraPermissionGranted = ContextCompat.checkSelfPermission(
@@ -245,10 +239,8 @@ fun PartyRoute(
             } else {
                 PartyWaitingRoomScreen(
                     ui = waitingRoom,
-                    isLeader = isCurrentUserLeader,
                     // 파티원 준비완료 시에도 파티 생성과 동일한 fake 포인트 설정 사용
                     availablePoint = PartyTestConfig.AVAILABLE_POINT,
-                    isCurrentUserReady = isCurrentUserReady,
                     isActionInProgress = partyState.action != PartyAction.Idle,
                     errorMessage = partyState.errorMessage,
                     onBack = {

@@ -5,6 +5,8 @@ import com.example.onuldo_fe.data.party.api.RealPartyApi
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyMemberDto
 import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
+import com.example.onuldo_fe.data.party.dto.RealPartyMemberDto
+import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
 import com.example.onuldo_fe.data.party.dto.PartySummaryDto
 import com.example.onuldo_fe.data.party.dto.PartyWaitingRoomDto
 import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
@@ -27,7 +29,8 @@ import java.io.IOException
 class PartyRepositoryImpl(
     private val fakeApi: PartyApi,
     private val realApi: RealPartyApi,
-    private val useRealPartyListApi: Boolean
+    private val useRealPartyListApi: Boolean,
+    private val useRealPartyWaitingRoomApi: Boolean = false
 ) : PartyRepository {
     // 서버의 진행 중 파티 응답 목록을 도메인 요약 모델 목록으로 변환
     override suspend fun getParties(): List<PartySummary> = if (useRealPartyListApi) {
@@ -54,8 +57,17 @@ class PartyRepositoryImpl(
         return CreatedParty(response.partyId.toString(), response.inviteCode)
     }
 
-    override suspend fun getWaitingRoom(partyId: String): PartyWaitingRoom =
-        fakeApi.getWaitingRoom(partyId.toLong()).toModel()
+    override suspend fun getWaitingRoom(partyId: String): PartyWaitingRoom {
+        // 대기방 조회만 독립적으로 Real/Fake를 바꿔 다른 파티 기능에 영향을 주지 않는다.
+        if (!useRealPartyWaitingRoomApi) {
+            return fakeApi.getWaitingRoom(partyId.toLong()).toModel()
+        }
+
+        val response = realApi.getWaitingRoom(partyId.toLong())
+        if (!response.isSuccessful) throw HttpException(response)
+        val body = response.body() ?: throw IOException("파티 대기방 응답 본문이 비어 있습니다.")
+        return body.result.toModel()
+    }
 
     override suspend fun readyParty(partyId: String): PartyWaitingRoom =
         fakeApi.readyParty(partyId.toLong()).toModel()
@@ -103,13 +115,27 @@ internal fun PartySettlementResultDto.toModel() = PartySettlementResult(
 private fun PartyWaitingRoomDto.toModel() = PartyWaitingRoom(
     partyId = partyId.toString(),
     partyName = name,
-    // 대기방 응답에 목표가 없으면 화면에서 빈 값으로 처리
-    challengeName = goal.orEmpty(),
     inviteCode = inviteCode,
     period = "${durationDays}일",
     deposit = depositAmount,
     capacity = maxMembers,
-    members = members.mapIndexed { index, member -> member.toModel(index) }
+    members = members.mapIndexed { index, member -> member.toModel(index) },
+    isHost = isHost,
+    canStart = canStart
+)
+
+/** 실제 대기방 응답을 화면과 분리된 도메인 모델로 변환한다. */
+private fun RealPartyWaitingRoomDto.toModel() = PartyWaitingRoom(
+    partyId = partyId.toString(),
+    partyName = name,
+    inviteCode = inviteCode,
+    period = "${durationDays}일",
+    deposit = depositAmount,
+    capacity = maxMembers,
+    members = members.mapIndexed { index, member -> member.toModel(index) },
+    // 클라이언트 추측값 대신 서버가 로그인 사용자 기준으로 계산한 값을 전달한다.
+    isHost = isHost,
+    canStart = canStart
 )
 
 // 서버의 역할·준비 상태 문자열을 앱 내부 enum으로 변환
@@ -146,6 +172,20 @@ private fun PartySummaryDto.toModel() = PartySummary(
         "DISBANDED" -> PartyLifecycleStatus.Disbanded
         else -> PartyLifecycleStatus.Recruiting
     }
+)
+
+private fun RealPartyMemberDto.toModel(index: Int) = PartyMember(
+    id = userId.toString(),
+    nickname = nickname,
+    profileImageUrl = profileImageUrl,
+    defaultCharacterId = ((userId % 9) + 1).toInt(),
+    role = if (role == "HOST") PartyRole.Leader else PartyRole.Member,
+    readyStatus = when (status) {
+        "READY" -> PartyMemberReadyStatus.Ready
+        "WAITING" -> PartyMemberReadyStatus.Waiting
+        else -> PartyMemberReadyStatus.NotApplicable
+    },
+    joinedOrder = index
 )
 
 /**
