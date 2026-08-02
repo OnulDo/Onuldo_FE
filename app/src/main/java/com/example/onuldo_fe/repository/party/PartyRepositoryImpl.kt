@@ -25,6 +25,7 @@ import com.example.onuldo_fe.model.party.PartySettlementStatus
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 // 파티 생성·대기방 API 요청과 DTO의 도메인 모델 변환 담당
@@ -227,7 +228,9 @@ private fun RealPartySummaryDto.toModel() = PartySummary(
     // 서버 종료일과 오늘 날짜의 차이를 카드의 D-Day 문구로 변환한다.
     dDay = "D-${daysUntil(endDate)}",
     deadline = verificationDeadline,
-    remainingText = null,
+    // 인증 마감 시각과 현재 시각의 차이를 분 단위로 전달한다.
+    // HomePartyCard에서 0~60분일 때만 "N분 남음" 배지를 표시한다.
+    remainingText = remainingTextUntil(verificationDeadline),
     completedMemberCount = verifiedMemberCount,
     totalMemberCount = totalMemberCount,
     status = if (status == "ONGOING") {
@@ -240,3 +243,9 @@ private fun RealPartySummaryDto.toModel() = PartySummary(
 private fun daysUntil(endDate: String): Long = runCatching {
     ChronoUnit.DAYS.between(LocalDate.now(), LocalDate.parse(endDate)).coerceAtLeast(0)
 }.getOrDefault(0)
+
+private fun remainingTextUntil(deadline: String): String? = runCatching {
+    ChronoUnit.MINUTES.between(LocalTime.now(), LocalTime.parse(deadline))
+        .takeIf { it >= 0 }
+        ?.let { "${it}분 남음" }
+}.getOrNull()
