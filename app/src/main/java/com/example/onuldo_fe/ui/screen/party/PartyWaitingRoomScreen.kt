@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.onuldo_fe.ui.screen.party.components.PartyInsufficientPointDialog
+import com.example.onuldo_fe.ui.screen.challenge.participate.component.InsufficientPointDialog
 import com.example.onuldo_fe.ui.screen.party.components.PartyInviteCodeCard
 import com.example.onuldo_fe.ui.screen.party.components.PartyTopBar
 import com.example.onuldo_fe.ui.screen.party.components.PartyWaitingEmptySlotCard
@@ -138,11 +138,11 @@ fun PartyWaitingRoomScreen(
     }
 
     if (showPointDialog) {
-        PartyInsufficientPointDialog(
+        InsufficientPointDialog(
             ownedPoint = availablePoint,
             requiredPoint = ui.deposit,
             onDismiss = { showPointDialog = false },
-            onChargeClick = {
+            onCharge = {
                 showPointDialog = false
                 onChargePoint()
             }

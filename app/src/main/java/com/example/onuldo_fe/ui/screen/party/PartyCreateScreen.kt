@@ -20,9 +20,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.ui.screen.challenge.participate.component.InsufficientPointDialog
 import com.example.onuldo_fe.ui.screen.party.components.PartyCapacitySelector
 import com.example.onuldo_fe.ui.screen.party.components.PartyChallengeSelector
-import com.example.onuldo_fe.ui.screen.party.components.PartyInsufficientPointDialog
 import com.example.onuldo_fe.ui.screen.party.components.PartyNameTextField
 import com.example.onuldo_fe.ui.screen.party.components.PartyOptionSelector
 import com.example.onuldo_fe.ui.screen.party.components.PartyTopBar
@@ -173,11 +173,11 @@ fun PartyCreateScreen(
     }
 
     if (showPointDialog) {
-        PartyInsufficientPointDialog(
+        InsufficientPointDialog(
             ownedPoint = availablePoint,
             requiredPoint = deposits[selectedDeposit],
             onDismiss = { showPointDialog = false },
-            onChargeClick = {
+            onCharge = {
                 showPointDialog = false
                 onChargePoint()
             }
