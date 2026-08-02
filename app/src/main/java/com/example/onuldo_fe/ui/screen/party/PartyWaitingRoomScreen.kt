@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.screen.challenge.participate.component.InsufficientPointDialog
 import com.example.onuldo_fe.ui.screen.party.components.PartyInviteCodeCard
+import com.example.onuldo_fe.ui.screen.party.components.PartyLeaveConfirmDialog
 import com.example.onuldo_fe.ui.screen.party.components.PartyTopBar
 import com.example.onuldo_fe.ui.screen.party.components.PartyWaitingEmptySlotCard
 import com.example.onuldo_fe.ui.screen.party.components.PartyWaitingMemberCard
@@ -46,14 +47,18 @@ fun PartyWaitingRoomScreen(
     val spacing = LocalSpacing.current
     val clipboard = LocalClipboardManager.current
     var showPointDialog by remember { mutableStateOf(false) }
+    var showLeaveConfirmDialog by remember { mutableStateOf(false) }
     // 로그인 사용자 기준 서버 판정값으로 파티장/파티원 버튼을 구분한다.
     val isLeader = ui.isHost
 
-    // 상단 뒤로가기와 시스템 뒤로가기 모두 동일한 파티 탈퇴 로직 실행
-    BackHandler(onBack = onBack)
+    // 시스템 뒤로가기와 상단 뒤로가기는 즉시 탈퇴하지 않고 확인 모달을 표시
+    BackHandler { showLeaveConfirmDialog = true }
 
     Column(Modifier.fillMaxSize().background(SourCream)) {
-        PartyTopBar(title = "파티 대기방", onBack = onBack)
+        PartyTopBar(
+            title = "파티 대기방",
+            onBack = { showLeaveConfirmDialog = true }
+        )
 
         Column(
             modifier = Modifier
@@ -159,6 +164,18 @@ fun PartyWaitingRoomScreen(
             onCharge = {
                 showPointDialog = false
                 onChargePoint()
+            }
+        )
+    }
+
+    if (showLeaveConfirmDialog) {
+        PartyLeaveConfirmDialog(
+            // 취소 또는 모달 바깥 영역 선택 시 대기방을 유지
+            onDismiss = { showLeaveConfirmDialog = false },
+            onConfirm = {
+                // 모달을 닫고 실제 탈퇴 요청을 PartyRoute에 위임
+                showLeaveConfirmDialog = false
+                onBack()
             }
         )
     }
