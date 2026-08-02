@@ -117,20 +117,21 @@ fun PartyWaitingRoomScreen(
                 onClick = {
                     when {
                         isLeader -> onStartClick()
-                        availablePoint < ui.deposit -> showPointDialog = true
+                        // 대기 중에서 준비 상태로 바뀔 때만 보유 포인트를 검사한다.
+                        !isReadySubmitted && availablePoint < ui.deposit -> showPointDialog = true
                         else -> onReadyClick()
                     }
                 },
-                // 준비 완료 성공 후에는 단방향 상태로 고정해 다시 WAITING으로 전환하지 않는다.
-                enabled = !isActionInProgress && if (isLeader) ui.canStart else !isReadySubmitted,
+                // 준비 상태에서도 버튼을 활성화해 다시 대기 상태로 전환할 수 있다.
+                enabled = !isActionInProgress && if (isLeader) ui.canStart else true,
                 // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
                 modifier = Modifier.fillMaxWidth().padding(horizontal = spacing.spacing20).padding(top = 40.dp).height(52.dp),
                 shape = RoundedCornerShape(14.dp),
-                // 준비 완료 상태의 비활성 버튼은 W&B/BlackBrown 10으로 표현한다.
+                // 파티원 준비 상태는 회색, 대기 상태는 주황색 버튼으로 구분한다.
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Persimmon,
-                    contentColor = SourCream,
-                    disabledContainerColor = if (!isLeader && isReadySubmitted) BlackBrown10 else DarkBrown10,
+                    containerColor = if (!isLeader && isReadySubmitted) BlackBrown10 else Persimmon,
+                    contentColor = if (!isLeader && isReadySubmitted) DarkBrown40 else SourCream,
+                    disabledContainerColor = DarkBrown10,
                     disabledContentColor = DarkBrown40
                 )
             ) {
@@ -138,7 +139,8 @@ fun PartyWaitingRoomScreen(
                     when {
                         isActionInProgress -> "처리 중..."
                         isLeader -> "시작하기"
-                        else -> "준비완료"
+                        isReadySubmitted -> "준비완료"
+                        else -> "준비하기"
                     },
                     fontFamily = Pretendard,
                     fontSize = 17.sp,
