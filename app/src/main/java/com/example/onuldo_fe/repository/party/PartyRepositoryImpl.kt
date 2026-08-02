@@ -31,7 +31,8 @@ class PartyRepositoryImpl(
     private val realApi: RealPartyApi,
     private val useRealPartyListApi: Boolean,
     private val useRealPartyWaitingRoomApi: Boolean = false,
-    private val useRealPartyCreateApi: Boolean = false
+    private val useRealPartyCreateApi: Boolean = false,
+    private val useRealPartyReadyApi: Boolean = false
 ) : PartyRepository {
     // 서버의 진행 중 파티 응답 목록을 도메인 요약 모델 목록으로 변환
     override suspend fun getParties(): List<PartySummary> = if (useRealPartyListApi) {
@@ -70,8 +71,15 @@ class PartyRepositoryImpl(
         return body.result.toModel()
     }
 
-    override suspend fun readyParty(partyId: String): PartyWaitingRoom =
-        fakeApi.readyParty(partyId.toLong()).toModel()
+    override suspend fun readyParty(partyId: String): PartyWaitingRoom {
+        // 준비 완료만 독립적으로 전환해 아직 Fake인 시작·이탈 API에 영향을 주지 않는다.
+        if (!useRealPartyReadyApi) return fakeApi.readyParty(partyId.toLong()).toModel()
+
+        val response = realApi.readyParty(partyId.toLong())
+        if (!response.isSuccessful) throw HttpException(response)
+        val body = response.body() ?: throw IOException("준비 완료 응답 본문이 비어 있습니다.")
+        return body.result.toModel()
+    }
 
     override suspend fun leaveParty(partyId: String) = fakeApi.leaveParty(partyId.toLong())
 
@@ -122,7 +130,7 @@ internal fun PartySettlementResultDto.toModel() = PartySettlementResult(
 )
 
 // 대기방 응답과 중첩된 파티원 DTO를 도메인 모델로 함께 변환
-private fun PartyWaitingRoomDto.toModel() = PartyWaitingRoom(
+internal fun PartyWaitingRoomDto.toModel() = PartyWaitingRoom(
     partyId = partyId.toString(),
     partyName = name,
     inviteCode = inviteCode,
@@ -135,7 +143,7 @@ private fun PartyWaitingRoomDto.toModel() = PartyWaitingRoom(
 )
 
 /** 실제 대기방 응답을 화면과 분리된 도메인 모델로 변환한다. */
-private fun RealPartyWaitingRoomDto.toModel() = PartyWaitingRoom(
+internal fun RealPartyWaitingRoomDto.toModel() = PartyWaitingRoom(
     partyId = partyId.toString(),
     partyName = name,
     inviteCode = inviteCode,

@@ -241,8 +241,8 @@ fun PartyRoute(
             } else {
                 PartyWaitingRoomScreen(
                     ui = waitingRoom,
-                    // 파티원 준비완료 시에도 파티 생성과 동일한 fake 포인트 설정 사용
-                    availablePoint = PartyTestConfig.AVAILABLE_POINT,
+                    // Real 준비 완료에서는 서버가 포인트를 검증하므로 Fake 포인트로 요청을 막지 않는다.
+                    availablePoint = if (PartyApiConfig.USE_REAL_READY) Int.MAX_VALUE else PartyTestConfig.AVAILABLE_POINT,
                     isReadySubmitted = partyState.isReadySubmitted,
                     isActionInProgress = partyState.action != PartyAction.Idle,
                     errorMessage = partyState.errorMessage,
@@ -296,14 +296,13 @@ fun PartyRoute(
         )
     }
 
-    LaunchedEffect(inviteViewModel.uiState.joinedPartyId) {
-        // 참여 성공 상태가 새로 전달될 때 한 번만 대기방 조회와 화면 이동 실행
-        inviteViewModel.uiState.joinedPartyId?.let { partyId ->
-            // 초대코드 참여 성공 후 partyId로 대기방 전체 정보 재조회
+    LaunchedEffect(inviteViewModel.uiState.joinedWaitingRoom) {
+        // 참여 POST 성공 응답의 대기방을 그대로 적용해 추가 GET 없이 이동한다.
+        inviteViewModel.uiState.joinedWaitingRoom?.let { room ->
             showInviteDialog = false
-            waitingPartyId = partyId
+            waitingPartyId = room.partyId
+            partyViewModel.applyJoinedWaitingRoom(room)
             screen = PartyScreen.WaitingRoom
-            partyViewModel.loadWaitingRoom(partyId)
             inviteViewModel.reset()
         }
     }

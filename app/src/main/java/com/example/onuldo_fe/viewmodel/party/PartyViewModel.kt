@@ -124,6 +124,16 @@ class PartyViewModel(
         }
     }
 
+    /** 초대코드 참여 응답의 최신 대기방을 추가 조회 없이 화면 상태에 적용한다. */
+    fun applyJoinedWaitingRoom(room: PartyWaitingRoom) {
+        uiState = uiState.copy(
+            waitingRoom = room.toUi(),
+            isReadySubmitted = false,
+            action = PartyAction.Idle,
+            errorMessage = null
+        )
+    }
+
     fun readyParty() {
         // 준비완료 요청 성공 응답에 포함된 최신 멤버 목록으로 대기방 갱신
         // 포인트 부족 여부는 화면에서 먼저 확인하고 실제 연동 후 서버에서도 최종 검증
