@@ -3,6 +3,7 @@ package com.example.onuldo_fe.camera.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -20,24 +21,24 @@ import com.example.onuldo_fe.ui.theme.White
 
 @Composable
 fun PreviewBottomBar(
+    modifier: Modifier = Modifier,
     onRetakeClick: () -> Unit = {},
     onSubmitClick: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(
-                horizontal = spacing.spacing20,
-                vertical = spacing.spacing48
-            ),
+            .padding(horizontal = spacing.spacing20),
         horizontalArrangement = Arrangement.spacedBy(spacing.spacing12)
     ) {
 
         OutlinedButton(
             onClick = onRetakeClick,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .heightIn(min = 56.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(
@@ -49,7 +50,9 @@ fun PreviewBottomBar(
 
         Button(
             onClick = onSubmitClick,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .heightIn(min = 56.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Persimmon

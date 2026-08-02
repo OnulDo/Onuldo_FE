@@ -10,9 +10,13 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -25,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.onuldo_fe.camera.component.CameraBottomBar
 import com.example.onuldo_fe.camera.component.CameraPreview
@@ -55,11 +60,16 @@ fun CameraScreen(
         mutableStateOf(ImageCapture.FLASH_MODE_OFF)
     }
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
+        val cameraHeight = maxWidth * 4f / 3f
+        val cameraTop = (maxHeight - cameraHeight) / 2f
+        val cameraBottom = cameraTop + cameraHeight
+        val bottomAreaHeight = (maxHeight - cameraBottom).coerceAtLeast(0.dp)
+
         // 카메라 프리뷰
         key(lensFacing) {
             CameraPreview(
@@ -77,26 +87,40 @@ fun CameraScreen(
                 .background(Color.Black)
         )*/
 
-        CameraTopBar(
-            category = category,
-            title = title,
-            showFlashButton =
-                lensFacing == CameraSelector.LENS_FACING_BACK,
-            onCloseClick = onCloseClick,
-            onFlashClick = {
-                val newFlashMode =
-                    if (flashMode == ImageCapture.FLASH_MODE_OFF) {
-                        ImageCapture.FLASH_MODE_ON
-                    } else {
-                        ImageCapture.FLASH_MODE_OFF
-                    }
-
-                flashMode = newFlashMode
-                imageCapture.flashMode = newFlashMode
-            }
-        )
         Box(
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(cameraTop.coerceAtLeast(0.dp))
+                .align(Alignment.TopCenter)
+                .statusBarsPadding(),
+            contentAlignment = Alignment.Center
+        ) {
+            CameraTopBar(
+                category = category,
+                title = title,
+                showFlashButton =
+                    lensFacing == CameraSelector.LENS_FACING_BACK,
+                onCloseClick = onCloseClick,
+                onFlashClick = {
+                    val newFlashMode =
+                        if (flashMode == ImageCapture.FLASH_MODE_OFF) {
+                            ImageCapture.FLASH_MODE_ON
+                        } else {
+                            ImageCapture.FLASH_MODE_OFF
+                        }
+
+                    flashMode = newFlashMode
+                    imageCapture.flashMode = newFlashMode
+                }
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(bottomAreaHeight)
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding(),
+            contentAlignment = Alignment.Center
         ) {
             val context = LocalContext.current
             CameraBottomBar(

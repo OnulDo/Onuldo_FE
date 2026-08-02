@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -24,6 +25,7 @@ import com.example.onuldo_fe.ui.theme.White
 fun CameraTopBar(
     category: String,
     title: String,
+    modifier: Modifier = Modifier,
     showFlashButton: Boolean = true,
     onCloseClick: () -> Unit = {},
     onFlashClick: () -> Unit = {}
@@ -31,14 +33,10 @@ fun CameraTopBar(
     val spacing = LocalSpacing.current
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(
-                start = spacing.spacing8,
-                top = spacing.spacing50,
-                end = spacing.spacing8,
-                bottom = spacing.spacing12
-            ),
+            .height(48.dp)
+            .padding(horizontal = spacing.spacing8),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
