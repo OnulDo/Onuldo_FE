@@ -33,7 +33,7 @@ interface RealPartyApi {
     suspend fun getParties(): Response<ApiResponse<List<RealPartySummaryDto>>>
 
     /** 로그인 사용자가 참여 중인 파티의 대기방 상태를 조회 */
-    @GET("api/parties/{partyId}/waiting")
+    @GET("api/parties/{partyId}/waiting-room")
     suspend fun getWaitingRoom(
         @Path("partyId") partyId: Long
     ): Response<ApiResponse<RealPartyWaitingRoomDto>>

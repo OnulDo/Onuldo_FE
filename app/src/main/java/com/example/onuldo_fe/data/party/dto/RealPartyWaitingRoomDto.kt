@@ -1,7 +1,7 @@
 package com.example.onuldo_fe.data.party.dto
 
 /**
- * GET /api/parties/{partyId}/waiting 응답의 result.
+ * GET /api/parties/{partyId}/waiting-room 응답의 result.
  *
  * 화면에 서버 DTO를 직접 전달하지 않고 Repository에서 PartyWaitingRoom으로 변환
  * Swagger 응답에는 챌린지 이름이 없으므로 화면 모델에는 빈 문자열로 전달
