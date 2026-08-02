@@ -11,6 +11,7 @@ import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
+import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
 import com.example.onuldo_fe.model.party.CreatePartyCommand
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -43,7 +44,8 @@ class PartyRepositoryImplTest {
 
         assertEquals("101", party.partyId)
         assertEquals("30일 헬스 챌린지 파티", party.partyName)
-        assertEquals("", party.challengeName)
+        assertEquals("30일 헬스", party.challengeName)
+        assertEquals("21:00:00", party.deadline)
         assertEquals(3, party.completedMemberCount)
         assertEquals(4, party.totalMemberCount)
     }
@@ -117,7 +119,7 @@ class PartyRepositoryImplTest {
         override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> =
             error("Fake 모드에서 실제 생성 API가 호출되면 안 됩니다.")
 
-        override suspend fun getParties(): Response<ApiResponse<List<RealPartySummaryDto>>> =
+        override suspend fun getParties(cursor: String?, size: Int): Response<PartyListPageResponseDto> =
             error("Fake 모드에서 실제 API가 호출되면 안 됩니다.")
 
         override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
@@ -136,23 +138,27 @@ class PartyRepositoryImplTest {
         override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> =
             error("목록 테스트에서 생성 API가 호출되면 안 됩니다.")
 
-        override suspend fun getParties(): Response<ApiResponse<List<RealPartySummaryDto>>> =
+        override suspend fun getParties(cursor: String?, size: Int): Response<PartyListPageResponseDto> =
             Response.success(
-                ApiResponse(
+                PartyListPageResponseDto(
                     timestamp = "2026-07-23T13:00:00",
                     code = "SUCCESS",
                     message = "요청에 성공하였습니다.",
-                    result = listOf(
+                    content = listOf(
                         RealPartySummaryDto(
                             partyId = 101,
                             name = "30일 헬스 챌린지 파티",
+                            challengeTitle = "30일 헬스",
                             status = "ONGOING",
-                            dDay = 12,
+                            endDate = "2026-08-20",
+                            verificationDeadline = "21:00:00",
                             progressRate = 0.72,
-                            verifiedToday = 3,
-                            totalMembers = 4
+                            verifiedMemberCount = 3,
+                            totalMemberCount = 4
                         )
-                    )
+                    ),
+                    nextCursor = null,
+                    hasNext = false
                 )
             )
 
@@ -172,7 +178,7 @@ class PartyRepositoryImplTest {
         override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> =
             error("대기방 테스트에서 생성 API가 호출되면 안 됩니다.")
 
-        override suspend fun getParties(): Response<ApiResponse<List<RealPartySummaryDto>>> =
+        override suspend fun getParties(cursor: String?, size: Int): Response<PartyListPageResponseDto> =
             error("대기방 테스트에서 목록 API가 호출되면 안 됩니다.")
 
         override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
@@ -235,7 +241,7 @@ class PartyRepositoryImplTest {
             )
         }
 
-        override suspend fun getParties(): Response<ApiResponse<List<RealPartySummaryDto>>> =
+        override suspend fun getParties(cursor: String?, size: Int): Response<PartyListPageResponseDto> =
             error("생성 테스트에서 목록 API가 호출되면 안 됩니다.")
 
         override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
@@ -287,7 +293,7 @@ class PartyRepositoryImplTest {
         override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> =
             error("준비 테스트에서 생성 API가 호출되면 안 됩니다.")
 
-        override suspend fun getParties(): Response<ApiResponse<List<RealPartySummaryDto>>> =
+        override suspend fun getParties(cursor: String?, size: Int): Response<PartyListPageResponseDto> =
             error("준비 테스트에서 목록 API가 호출되면 안 됩니다.")
 
         override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =

@@ -5,12 +5,12 @@ import com.example.onuldo_fe.data.party.api.PartyFeedApi
 import com.example.onuldo_fe.data.party.api.RealPartyApi
 import com.example.onuldo_fe.data.party.dto.PartyFeedDto
 import com.example.onuldo_fe.data.party.dto.PartyFeedItemDto
-import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
 import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
+import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -47,7 +47,7 @@ class PartyFeedRepositoryImplTest {
         override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> =
             error("피드 테스트에서 생성 API가 호출되면 안 됩니다.")
 
-        override suspend fun getParties(): Response<ApiResponse<List<RealPartySummaryDto>>> =
+        override suspend fun getParties(cursor: String?, size: Int): Response<PartyListPageResponseDto> =
             error("피드 테스트에서 목록 API가 호출되면 안 됩니다.")
 
         override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
