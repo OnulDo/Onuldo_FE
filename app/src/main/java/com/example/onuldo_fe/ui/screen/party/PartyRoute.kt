@@ -280,23 +280,11 @@ fun PartyRoute(
         )
 
         PartyScreen.Settlement -> {
-            LaunchedEffect(feedPartyId) {
-                partySettlementViewModel.loadSettlementResult(feedPartyId.toLong())
-            }
-            val settlementState = partySettlementViewModel.uiState
-            val settlementResult = settlementState.result
-            if (settlementResult == null) {
-                PartyLoadingScreen(
-                    errorMessage = settlementState.errorMessage,
-                    onRetry = { partySettlementViewModel.loadSettlementResult(feedPartyId.toLong()) },
-                    onBack = { screen = PartyScreen.List }
-                )
-            } else {
-                PartySettlementScreen(
-                    result = settlementResult,
-                    onBack = { screen = PartyScreen.List }
-                )
-            }
+            PartySettlementRoute(
+                partyId = feedPartyId.toLong(),
+                onBack = { screen = PartyScreen.List },
+                viewModel = partySettlementViewModel
+            )
         }
     }
 
@@ -337,7 +325,7 @@ fun PartyRoute(
 }
 
 @Composable
-private fun PartyLoadingScreen(
+internal fun PartyLoadingScreen(
     errorMessage: String?,
     onRetry: () -> Unit,
     onBack: () -> Unit
