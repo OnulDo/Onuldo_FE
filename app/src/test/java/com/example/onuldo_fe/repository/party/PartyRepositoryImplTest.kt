@@ -10,6 +10,7 @@ import com.example.onuldo_fe.data.party.dto.PartyFeedDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
+import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.model.party.CreatePartyCommand
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -98,7 +99,20 @@ class PartyRepositoryImplTest {
         assertEquals(true, room.canStart)
     }
 
+    @Test
+    fun `시작 설정이 true이면 실제 POST 성공 응답을 완료 처리한다`() = runBlocking {
+        val repository = PartyRepositoryImpl(
+            fakeApi = FakePartyApi(),
+            realApi = SuccessfulReadyRealApi,
+            useRealPartyListApi = false,
+            useRealPartyStartApi = true
+        )
+
+        repository.startParty("101")
+    }
+
     private object ThrowingRealPartyApi : RealPartyApi {
+        override suspend fun startParty(partyId: Long): Response<ApiResponse<PartyStartResponseDto>> = error("테스트에서 시작 API가 호출되면 안 됩니다.")
         override suspend fun joinParty(request: PartyJoinRequestDto): Response<ApiResponse<RealPartyWaitingRoomDto>> = error("테스트에서 참여 API가 호출되면 안 됩니다.")
         override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> =
             error("Fake 모드에서 실제 생성 API가 호출되면 안 됩니다.")
@@ -117,6 +131,7 @@ class PartyRepositoryImplTest {
     }
 
     private object SuccessfulRealPartyApi : RealPartyApi {
+        override suspend fun startParty(partyId: Long): Response<ApiResponse<PartyStartResponseDto>> = error("목록 테스트에서 시작 API가 호출되면 안 됩니다.")
         override suspend fun joinParty(request: PartyJoinRequestDto): Response<ApiResponse<RealPartyWaitingRoomDto>> = error("목록 테스트에서 참여 API가 호출되면 안 됩니다.")
         override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> =
             error("목록 테스트에서 생성 API가 호출되면 안 됩니다.")
@@ -152,6 +167,7 @@ class PartyRepositoryImplTest {
     }
 
     private object SuccessfulWaitingRoomApi : RealPartyApi {
+        override suspend fun startParty(partyId: Long): Response<ApiResponse<PartyStartResponseDto>> = error("대기방 테스트에서 시작 API가 호출되면 안 됩니다.")
         override suspend fun joinParty(request: PartyJoinRequestDto): Response<ApiResponse<RealPartyWaitingRoomDto>> = error("대기방 테스트에서 참여 API가 호출되면 안 됩니다.")
         override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> =
             error("대기방 테스트에서 생성 API가 호출되면 안 됩니다.")
@@ -192,6 +208,7 @@ class PartyRepositoryImplTest {
     }
 
     private object SuccessfulCreateRealApi : RealPartyApi {
+        override suspend fun startParty(partyId: Long): Response<ApiResponse<PartyStartResponseDto>> = error("생성 테스트에서 시작 API가 호출되면 안 됩니다.")
         override suspend fun joinParty(request: PartyJoinRequestDto): Response<ApiResponse<RealPartyWaitingRoomDto>> = error("생성 테스트에서 참여 API가 호출되면 안 됩니다.")
         override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> {
             assertEquals("갓생팟", request.name)
@@ -232,6 +249,15 @@ class PartyRepositoryImplTest {
     }
 
     private object SuccessfulReadyRealApi : RealPartyApi {
+        override suspend fun startParty(partyId: Long): Response<ApiResponse<PartyStartResponseDto>> =
+            Response.success(
+                ApiResponse(
+                    timestamp = "2026-07-23T13:00:00",
+                    code = "SUCCESS",
+                    message = "요청에 성공하였습니다.",
+                    result = PartyStartResponseDto(partyId, "ONGOING", "2026-07-23T13:00:00")
+                )
+            )
         override suspend fun joinParty(request: PartyJoinRequestDto): Response<ApiResponse<RealPartyWaitingRoomDto>> = error("준비 테스트에서 참여 API가 호출되면 안 됩니다.")
         override suspend fun readyParty(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             Response.success(

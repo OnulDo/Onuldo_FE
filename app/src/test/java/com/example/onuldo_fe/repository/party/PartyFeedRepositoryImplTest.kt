@@ -10,6 +10,7 @@ import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
+import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -39,6 +40,8 @@ class PartyFeedRepositoryImplTest {
     }
 
     private object SuccessfulRealFeedApi : RealPartyApi {
+        override suspend fun startParty(partyId: Long): Response<ApiResponse<PartyStartResponseDto>> =
+            error("피드 테스트에서 시작 API가 호출되면 안 됩니다.")
         override suspend fun joinParty(request: PartyJoinRequestDto): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("피드 테스트에서 참여 API가 호출되면 안 됩니다.")
         override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> =

@@ -7,6 +7,7 @@ import com.example.onuldo_fe.data.party.dto.PartyFeedDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
+import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -42,6 +43,12 @@ interface RealPartyApi {
     suspend fun readyParty(
         @Path("partyId") partyId: Long
     ): Response<ApiResponse<RealPartyWaitingRoomDto>>
+
+    /** 방장이 파티를 시작해 상태 전환과 전원의 도전금 차감을 요청한다. */
+    @POST("api/parties/{partyId}/start")
+    suspend fun startParty(
+        @Path("partyId") partyId: Long
+    ): Response<ApiResponse<PartyStartResponseDto>>
 
     /** 파티의 오늘 인증 진행률과 파티원별 인증 현황을 조회한다. */
     @GET("api/parties/{partyId}/feed")

@@ -32,7 +32,8 @@ class PartyRepositoryImpl(
     private val useRealPartyListApi: Boolean,
     private val useRealPartyWaitingRoomApi: Boolean = false,
     private val useRealPartyCreateApi: Boolean = false,
-    private val useRealPartyReadyApi: Boolean = false
+    private val useRealPartyReadyApi: Boolean = false,
+    private val useRealPartyStartApi: Boolean = false
 ) : PartyRepository {
     // 서버의 진행 중 파티 응답 목록을 도메인 요약 모델 목록으로 변환
     override suspend fun getParties(): List<PartySummary> = if (useRealPartyListApi) {
@@ -84,7 +85,16 @@ class PartyRepositoryImpl(
     override suspend fun leaveParty(partyId: String) = fakeApi.leaveParty(partyId.toLong())
 
     override suspend fun startParty(partyId: String) {
-        fakeApi.startParty(partyId.toLong())
+        if (!useRealPartyStartApi) {
+            fakeApi.startParty(partyId.toLong())
+            return
+        }
+
+        // 성공 응답 본문까지 확인한 뒤에만 ViewModel이 홈 화면으로 이동하도록 완료 처리한다.
+        val response = realApi.startParty(partyId.toLong())
+        if (!response.isSuccessful) throw HttpException(response)
+        response.body()?.result ?: throw IOException("파티 시작 응답 본문이 비어 있습니다.")
+        // TODO: 도전금 차감 실패 code가 명세되면 포인트 부족 오류로 변환한다.
     }
 
     override suspend fun getSettlementResult(partyId: Long): PartySettlementResult =

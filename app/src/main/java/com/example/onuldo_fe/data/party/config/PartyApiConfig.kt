@@ -9,4 +9,5 @@ object PartyApiConfig {
     const val USE_REAL_CREATE = false // 파티 생성만 실제 POST API로 전환
     const val USE_REAL_READY = false // 파티원 준비 완료만 실제 POST API로 전환
     const val USE_REAL_JOIN = false // 초대코드 파티 참여만 실제 POST API로 전환
+    const val USE_REAL_START = false // 파티 시작만 실제 POST API로 전환
 }

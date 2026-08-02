@@ -66,7 +66,7 @@ data class PartySummaryDto(
 
 /** POST /api/parties/{partyId}/start 응답의 result. */
 data class PartyStartResponseDto(
-    val partyId: Long,
-    val status: String,
-    val startTriggeredAt: String
+    val partyId: Long,                        // 시작된 파티 ID
+    val status: String,                       // 시작 후 파티 상태(ONGOING)
+    val startTriggeredAt: String              // 서버에서 시작 처리가 완료된 시각
 )
