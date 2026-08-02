@@ -7,6 +7,9 @@ import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
 import com.example.onuldo_fe.data.party.dto.RealPartyMemberDto
 import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
 import com.example.onuldo_fe.data.party.dto.PartyFeedDto
+import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
+import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
+import com.example.onuldo_fe.model.party.CreatePartyCommand
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -61,7 +64,27 @@ class PartyRepositoryImplTest {
         assertEquals(2, room.members.size)
     }
 
+    @Test
+    fun `생성 설정이 true이면 POST 요청값을 변환하고 생성 결과를 전달한다`() = runBlocking {
+        val repository = PartyRepositoryImpl(
+            fakeApi = FakePartyApi(),
+            realApi = SuccessfulCreateRealApi,
+            useRealPartyListApi = false,
+            useRealPartyCreateApi = true
+        )
+
+        val created = repository.createParty(
+            CreatePartyCommand("갓생팟", "12", "새벽 6시 기상", "4주", 30_000, 4)
+        )
+
+        assertEquals("101", created.partyId)
+        assertEquals("82K3H9", created.inviteCode)
+    }
+
     private object ThrowingRealPartyApi : RealPartyApi {
+        override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> =
+            error("Fake 모드에서 실제 생성 API가 호출되면 안 됩니다.")
+
         override suspend fun getParties(): Response<ApiResponse<List<RealPartySummaryDto>>> =
             error("Fake 모드에서 실제 API가 호출되면 안 됩니다.")
 
@@ -73,6 +96,9 @@ class PartyRepositoryImplTest {
     }
 
     private object SuccessfulRealPartyApi : RealPartyApi {
+        override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> =
+            error("목록 테스트에서 생성 API가 호출되면 안 됩니다.")
+
         override suspend fun getParties(): Response<ApiResponse<List<RealPartySummaryDto>>> =
             Response.success(
                 ApiResponse(
@@ -101,6 +127,9 @@ class PartyRepositoryImplTest {
     }
 
     private object SuccessfulWaitingRoomApi : RealPartyApi {
+        override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> =
+            error("대기방 테스트에서 생성 API가 호출되면 안 됩니다.")
+
         override suspend fun getParties(): Response<ApiResponse<List<RealPartySummaryDto>>> =
             error("대기방 테스트에서 목록 API가 호출되면 안 됩니다.")
 
@@ -131,5 +160,41 @@ class PartyRepositoryImplTest {
 
         override suspend fun getPartyFeed(partyId: Long): Response<ApiResponse<PartyFeedDto>> =
             error("대기방 테스트에서 피드 API가 호출되면 안 됩니다.")
+    }
+
+    private object SuccessfulCreateRealApi : RealPartyApi {
+        override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> {
+            assertEquals("갓생팟", request.name)
+            assertEquals(12L, request.challengeId)
+            assertEquals(28, request.durationDays)
+            assertEquals(30_000, request.depositAmount)
+            assertEquals(4, request.maxMembers)
+            return Response.success(
+                ApiResponse(
+                    timestamp = "2026-07-23T13:00:00",
+                    code = "SUCCESS",
+                    message = "요청에 성공하였습니다.",
+                    result = CreatePartyResponseDto(
+                        partyId = 101,
+                        name = request.name,
+                        inviteCode = "82K3H9",
+                        inviteExpiresAt = "2026-08-20T00:00:00",
+                        status = "WAITING",
+                        hostUserId = 5,
+                        maxMembers = request.maxMembers,
+                        createdAt = "2026-07-23T13:00:00"
+                    )
+                )
+            )
+        }
+
+        override suspend fun getParties(): Response<ApiResponse<List<RealPartySummaryDto>>> =
+            error("생성 테스트에서 목록 API가 호출되면 안 됩니다.")
+
+        override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
+            error("생성 테스트에서 대기방 API가 호출되면 안 됩니다.")
+
+        override suspend fun getPartyFeed(partyId: Long): Response<ApiResponse<PartyFeedDto>> =
+            error("생성 테스트에서 피드 API가 호출되면 안 됩니다.")
     }
 }

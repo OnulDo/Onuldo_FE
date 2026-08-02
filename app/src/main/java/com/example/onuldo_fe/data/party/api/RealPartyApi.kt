@@ -4,11 +4,21 @@ import com.example.onuldo_fe.data.common.ApiResponse
 import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
 import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
 import com.example.onuldo_fe.data.party.dto.PartyFeedDto
+import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
+import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Body
+import retrofit2.http.POST
 
 interface RealPartyApi {
+
+    /** 입력값을 JSON Body로 전송해 로그인 사용자를 방장으로 하는 파티를 생성한다. */
+    @POST("api/parties")
+    suspend fun createParty(
+        @Body request: CreatePartyRequestDto
+    ): Response<ApiResponse<CreatePartyResponseDto>>
 
     /** 나의 파티 목록 조회 */
     @GET("api/parties")

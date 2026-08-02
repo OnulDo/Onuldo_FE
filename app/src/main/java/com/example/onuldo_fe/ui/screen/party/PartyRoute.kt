@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.party.dummy.PartyTestConfig
+import com.example.onuldo_fe.data.party.config.PartyApiConfig
 import com.example.onuldo_fe.model.party.CreatePartyCommand
 import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
 import com.example.onuldo_fe.ui.component.PermissionDialogType
@@ -173,7 +174,8 @@ fun PartyRoute(
             isSubmitting = partyState.action == PartyAction.Creating,
             errorMessage = partyState.errorMessage,
             // fake 포인트 부족 테스트 시 PartyTestConfig.AVAILABLE_POINT를 5_000으로 변경
-            availablePoint = PartyTestConfig.AVAILABLE_POINT,
+            // Real 생성에서는 서버가 보유 포인트를 최종 검증하므로 Fake 포인트로 요청을 막지 않는다.
+            availablePoint = if (PartyApiConfig.USE_REAL_CREATE) Int.MAX_VALUE else PartyTestConfig.AVAILABLE_POINT,
             onCreate = { period, deposit ->
                 // 필수 선택값이 모두 준비된 경우에만 ViewModel에 생성 명령 전달
                 val challenge = selectedChallenge ?: return@PartyCreateScreen

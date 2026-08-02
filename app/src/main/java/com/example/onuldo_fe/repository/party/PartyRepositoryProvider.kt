@@ -12,11 +12,13 @@ object PartyRepositoryProvider {
         fakeApi: PartyApi = FakePartyApi(),
         realApi: RealPartyApi = PartyNetworkClient.create(RealPartyApi::class.java),
         useRealPartyListApi: Boolean = PartyApiConfig.USE_REAL_LIST,
-        useRealPartyWaitingRoomApi: Boolean = PartyApiConfig.USE_REAL_WAITING_ROOM
+        useRealPartyWaitingRoomApi: Boolean = PartyApiConfig.USE_REAL_WAITING_ROOM,
+        useRealPartyCreateApi: Boolean = PartyApiConfig.USE_REAL_CREATE
     ): PartyRepository = PartyRepositoryImpl(
         fakeApi = fakeApi,
         realApi = realApi,
         useRealPartyListApi = useRealPartyListApi,
-        useRealPartyWaitingRoomApi = useRealPartyWaitingRoomApi
+        useRealPartyWaitingRoomApi = useRealPartyWaitingRoomApi,
+        useRealPartyCreateApi = useRealPartyCreateApi
     )
 }

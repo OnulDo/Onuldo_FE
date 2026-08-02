@@ -30,7 +30,8 @@ class PartyRepositoryImpl(
     private val fakeApi: PartyApi,
     private val realApi: RealPartyApi,
     private val useRealPartyListApi: Boolean,
-    private val useRealPartyWaitingRoomApi: Boolean = false
+    private val useRealPartyWaitingRoomApi: Boolean = false,
+    private val useRealPartyCreateApi: Boolean = false
 ) : PartyRepository {
     // 서버의 진행 중 파티 응답 목록을 도메인 요약 모델 목록으로 변환
     override suspend fun getParties(): List<PartySummary> = if (useRealPartyListApi) {
@@ -43,18 +44,18 @@ class PartyRepositoryImpl(
     }
 
     override suspend fun createParty(command: CreatePartyCommand): CreatedParty {
-        // 화면에서 조합한 생성 명령을 서버 요청 DTO로 변환
-        val response = fakeApi.createParty(
-            CreatePartyRequestDto(
-                name = command.name,
-                challengeId = command.challengeId.toLong(),
-                durationDays = command.period.filter(Char::isDigit).toInt() * 7,
-                depositAmount = command.deposit,
-                maxMembers = command.capacity
-            )
-        )
-        // 화면 이동에 생성된 파티 ID와 초대코드만 노출
-        return CreatedParty(response.partyId.toString(), response.inviteCode)
+        // Fake와 Real이 동일한 JSON Body를 사용하도록 요청 변환은 한 번만 수행한다.
+        val request = command.toCreateRequestDto()
+        val result = if (useRealPartyCreateApi) {
+            val response = realApi.createParty(request)
+            if (!response.isSuccessful) throw HttpException(response)
+            response.body()?.result ?: throw IOException("파티 생성 응답 본문이 비어 있습니다.")
+        } else {
+            fakeApi.createParty(request)
+        }
+
+        // 이후 화면은 생성된 ID로 대기방을 다시 조회하므로 필요한 식별값만 전달한다.
+        return CreatedParty(result.partyId.toString(), result.inviteCode)
     }
 
     override suspend fun getWaitingRoom(partyId: String): PartyWaitingRoom {
@@ -81,6 +82,15 @@ class PartyRepositoryImpl(
     override suspend fun getSettlementResult(partyId: Long): PartySettlementResult =
         fakeApi.getSettlementResult(partyId).toModel()
 }
+
+/** 화면의 주 단위 기간을 Swagger가 요구하는 일 단위 POST Body로 변환한다. */
+private fun CreatePartyCommand.toCreateRequestDto() = CreatePartyRequestDto(
+    name = name,
+    challengeId = challengeId.toLong(),
+    durationDays = period.filter(Char::isDigit).toInt() * 7,
+    depositAmount = deposit,
+    maxMembers = capacity
+)
 
 // 서버 정산 상태와 파티원 결과를 앱에서 사용하는 도메인 모델로 변환
 internal fun PartySettlementResultDto.toModel() = PartySettlementResult(
