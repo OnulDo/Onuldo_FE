@@ -35,6 +35,7 @@ import com.example.onuldo_fe.viewmodel.party.PartyWaitingRoomUi
 fun PartyWaitingRoomScreen(
     ui: PartyWaitingRoomUi,
     availablePoint: Int = 5_000,
+    isReadySubmitted: Boolean = false,
     onBack: () -> Unit,
     onStartClick: () -> Unit = {},
     onReadyClick: () -> Unit = {},
@@ -120,14 +121,25 @@ fun PartyWaitingRoomScreen(
                         else -> onReadyClick()
                     }
                 },
-                enabled = !isActionInProgress && if (isLeader) ui.canStart else true,
+                // 준비 완료 성공 후에는 단방향 상태로 고정해 다시 WAITING으로 전환하지 않는다.
+                enabled = !isActionInProgress && if (isLeader) ui.canStart else !isReadySubmitted,
                 // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
                 modifier = Modifier.fillMaxWidth().padding(horizontal = spacing.spacing20).padding(top = 40.dp).height(52.dp),
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Persimmon, contentColor = SourCream, disabledContainerColor = DarkBrown10, disabledContentColor = DarkBrown40)
+                // 준비 완료 상태의 비활성 버튼은 W&B/BlackBrown 10으로 표현한다.
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Persimmon,
+                    contentColor = SourCream,
+                    disabledContainerColor = if (!isLeader && isReadySubmitted) BlackBrown10 else DarkBrown10,
+                    disabledContentColor = DarkBrown40
+                )
             ) {
                 Text(
-                    if (isActionInProgress) "처리 중..." else if (isLeader) "시작하기" else "준비완료",
+                    when {
+                        isActionInProgress -> "처리 중..."
+                        isLeader -> "시작하기"
+                        else -> "준비완료"
+                    },
                     fontFamily = Pretendard,
                     fontSize = 17.sp,
                     lineHeight = 20.sp,

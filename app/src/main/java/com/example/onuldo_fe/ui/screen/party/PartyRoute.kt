@@ -243,6 +243,7 @@ fun PartyRoute(
                     ui = waitingRoom,
                     // 파티원 준비완료 시에도 파티 생성과 동일한 fake 포인트 설정 사용
                     availablePoint = PartyTestConfig.AVAILABLE_POINT,
+                    isReadySubmitted = partyState.isReadySubmitted,
                     isActionInProgress = partyState.action != PartyAction.Idle,
                     errorMessage = partyState.errorMessage,
                     onBack = {

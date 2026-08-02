@@ -30,6 +30,7 @@ enum class PartyAction {
 data class PartyUiState(
     val parties: List<PartyCardUi> = emptyList(),        // 파티 홈에 표시할 진행 중인 파티 목록
     val waitingRoom: PartyWaitingRoomUi? = null,         // 현재 입장한 파티의 최신 대기방 정보
+    val isReadySubmitted: Boolean = false,               // 현재 화면에서 준비 완료 요청이 성공했는지 여부
     val isListLoading: Boolean = false,                  // 파티 목록을 불러오는 중인지 여부
     val action: PartyAction = PartyAction.Idle,          // 현재 진행 중인 파티 요청
     val errorMessage: String? = null                     // API 요청 실패 시 화면에 표시할 문구
@@ -82,6 +83,7 @@ class PartyViewModel(
                 .onSuccess { created ->
                     uiState = uiState.copy(
                         waitingRoom = null,
+                        isReadySubmitted = false,
                         action = PartyAction.Idle
                     )
                     onSuccess(created.partyId)
@@ -98,7 +100,12 @@ class PartyViewModel(
 
     fun loadWaitingRoom(partyId: String, onSuccess: () -> Unit = {}) {
         // 방장과 파티원이 동일한 API 응답을 사용해 역할·준비 상태·정원 표시
-        uiState = uiState.copy(waitingRoom = null, action = PartyAction.LoadingRoom, errorMessage = null)
+        uiState = uiState.copy(
+            waitingRoom = null,
+            isReadySubmitted = false,
+            action = PartyAction.LoadingRoom,
+            errorMessage = null
+        )
         viewModelScope.launch {
             runCatching { repository.getWaitingRoom(partyId) }
                 .onSuccess { room ->
@@ -126,7 +133,12 @@ class PartyViewModel(
         viewModelScope.launch {
             runCatching { repository.readyParty(partyId) }
                 .onSuccess { room ->
-                    uiState = uiState.copy(waitingRoom = room.toUi(), action = PartyAction.Idle)
+                    // 현재 화면에서는 준비 완료를 단방향으로 처리해 성공 후 재요청을 막는다.
+                    uiState = uiState.copy(
+                        waitingRoom = room.toUi(),
+                        isReadySubmitted = true,
+                        action = PartyAction.Idle
+                    )
                 }
                 .onFailure {
                     uiState = uiState.copy(
