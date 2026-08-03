@@ -1,6 +1,8 @@
 package com.example.onuldo_fe.ui.screen.record.data
 
 data class CompleteRecord(
+    val participationId: Long = 0,
+    val challengeId: Long = 0,
     val isSuccess: Boolean,
     val title: String,
     val progress: Int,

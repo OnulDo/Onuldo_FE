@@ -28,7 +28,7 @@ fun ProgressRecordScreen(
                 title = record.title,
                 dDay = record.dDay,
                 progress = record.progress,
-                point = record.point,
+                depositAmount = record.depositAmount,
                 isTodayVerified = record.isTodayVerified
             )
         }
@@ -46,7 +46,7 @@ private fun ProgressRecordScreenPreview() {
                     title = "매일 만보 걷기",
                     dDay = 7,
                     progress = 65,
-                    point = 2000,
+                    depositAmount = 2000,
                     isTodayVerified = true
                 ),
                 ProgressRecord(
@@ -54,7 +54,7 @@ private fun ProgressRecordScreenPreview() {
                     title = "영단어 외우기",
                     dDay = 3,
                     progress = 40,
-                    point = 1000,
+                    depositAmount = 1000,
                     isTodayVerified = false
                 )
             )

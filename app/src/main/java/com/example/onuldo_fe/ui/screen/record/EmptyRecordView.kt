@@ -26,7 +26,8 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 fun EmptyRecordView(
     modifier: Modifier = Modifier,
     title: String,
-    description: String
+    description: String,
+    onBrowseChallenges: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
 

@@ -21,56 +21,44 @@ import com.example.onuldo_fe.ui.screen.record.component.RecordSummaryCard
 import com.example.onuldo_fe.ui.screen.record.data.CompleteRecord
 import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
-import kotlin.collections.filter
 
 @Composable
 fun CompleteRecordScreen(
-    completeList: List<CompleteRecord>
+    completeList: List<CompleteRecord>,
+    totalCompletedCount: Int,
+    successRate: Int,
+    totalSavedAmount: Int
 ) {
     val spacing = LocalSpacing.current
-
-    var selectedFilter by remember {
-        mutableStateOf(CompleteFilter.ALL)
-    }
-
+    var selectedFilter by remember { mutableStateOf(CompleteFilter.ALL) }
+    val successCount = completeList.count { it.isSuccess }
+    val failCount = completeList.count { !it.isSuccess }
     val filteredList = when (selectedFilter) {
         CompleteFilter.ALL -> completeList
         CompleteFilter.SUCCESS -> completeList.filter { it.isSuccess }
         CompleteFilter.FAIL -> completeList.filter { !it.isSuccess }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Column(Modifier.fillMaxSize()) {
         RecordSummaryCard(
-            completeCount = completeList.size,
-            successRate = if (completeList.isEmpty()) {
-                0
-            } else {
-                (completeList.count { it.isSuccess } * 100) / completeList.size
-            },
-            totalPoint = completeList.sumOf { it.point }
+            completeCount = totalCompletedCount,
+            successRate = successRate,
+            totalPoint = totalSavedAmount
         )
-
-        Spacer(modifier = Modifier.height(spacing.spacing24))
-
+        Spacer(Modifier.height(spacing.spacing24))
         CompleteFilterRow(
             selectedFilter = selectedFilter,
             allCount = completeList.size,
-            successCount = completeList.count { it.isSuccess },
-            failCount = completeList.count { !it.isSuccess },
-            onFilterSelected = {
-                selectedFilter = it
-            }
+            successCount = successCount,
+            failCount = failCount,
+            onFilterSelected = { selectedFilter = it }
         )
-
-        Spacer(modifier = Modifier.height(spacing.spacing16))
-
+        Spacer(Modifier.height(spacing.spacing16))
         LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
         ) {
-            items(filteredList) { record ->
+            items(filteredList, key = { it.participationId }) { record ->
                 CompleteRecordCard(
                     isSuccess = record.isSuccess,
                     title = record.title,
@@ -89,21 +77,12 @@ private fun CompleteRecordScreenPreview() {
     OnulDo_FETheme {
         CompleteRecordScreen(
             completeList = listOf(
-                CompleteRecord(
-                    isSuccess = true,
-                    title = "하루 물 2L 마시기",
-                    progress = 100,
-                    completeDate = "2026.07.22",
-                    point = 5000
-                ),
-                CompleteRecord(
-                    isSuccess = false,
-                    title = "매일 만보 걷기",
-                    progress = 70,
-                    completeDate = "2026.07.18",
-                    point = -1000
-                )
-            )
+                CompleteRecord(isSuccess = true, title = "매일 6시 기상", progress = 92,
+                    completeDate = "2026-08-10", point = 30000)
+            ),
+            totalCompletedCount = 8,
+            successRate = 75,
+            totalSavedAmount = 210000
         )
     }
 }
