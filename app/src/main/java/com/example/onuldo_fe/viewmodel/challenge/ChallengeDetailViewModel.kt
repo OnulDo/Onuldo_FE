@@ -22,9 +22,6 @@ class ChallengeDetailViewModel(
 
     init { load() }
 
-    // 조회 실패(에러 화면)에서 "다시 시도" 시 재호출
-    fun retry() = load()
-
     private fun load() {
         uiState = uiState.copy(isLoading = true, isError = false)
         viewModelScope.launch {
@@ -32,7 +29,8 @@ class ChallengeDetailViewModel(
                 .onSuccess { detail ->
                     uiState = uiState.copy(detail = detail, isLoading = false)
                 }
-                .onFailure {
+                .onFailure { e ->
+                    logChallengeError("ch_dt", e)
                     uiState = uiState.copy(isLoading = false, isError = true)
                 }
         }

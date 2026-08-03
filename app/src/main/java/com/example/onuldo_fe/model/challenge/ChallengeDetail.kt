@@ -7,7 +7,9 @@ data class ChallengeDetail(
     val title: String,               // name
     val participantCount: Int,
     val category: ChallengeCategory,
-    val summary: String,             // explainContent — "이 챌린지는?" 본문
+    val content: List<ContentBlock>, // description(블록 JSON)을 파싱한 본문 블록들
     val verificationDescription: String,  // verifyMethodContent — 인증 방법 안내
-    val verificationExampleImageUrl: String? = null  // verificationExamplePhotoUrl
+    val verificationExampleImageUrl: String? = null,  // verificationExamplePhotoUrl
+    val successConditions: List<String> = emptyList(),  // successConditionList — 인증 유의사항 시트
+    val failureConditions: List<String> = emptyList()   // failureConditionList
 )

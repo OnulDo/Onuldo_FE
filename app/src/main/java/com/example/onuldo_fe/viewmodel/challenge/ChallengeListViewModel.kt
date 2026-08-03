@@ -53,7 +53,8 @@ class ChallengeListViewModel(
                 )
             }.onSuccess { page ->
                 uiState = uiState.copy(challenges = page.challenges, isLoading = false)
-            }.onFailure {
+            }.onFailure { e ->
+                logChallengeError("ch_ls", e)
                 uiState = uiState.copy(isLoading = false, isError = true)
             }
         }

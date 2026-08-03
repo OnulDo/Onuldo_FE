@@ -1,24 +1,18 @@
 package com.example.onuldo_fe.ui.screen.challenge.detail
 
+import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.onuldo_fe.model.challenge.ChallengeDetail
-import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
-import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.Persimmon
-import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.viewmodel.challenge.ChallengeDetailViewModel
 
@@ -38,31 +32,42 @@ fun DetailRoute(
     )
 ) {
     val uiState = viewModel.uiState
+    val context = LocalContext.current
 
-    when {
-        uiState.detail != null -> {
-            val detail = uiState.detail!!
-            DetailScreen(
-                challenge = Challenge(
-                    id = detail.id.toInt(),
-                    title = detail.title,
-                    participantCount = detail.participantCount,
-                    category = detail.category
-                ),
-                category = detail.category.displayName,
-                summary = detail.summary,
-                verificationDescription = detail.verificationDescription,
-                verificationImageUrl = detail.verificationExampleImageUrl,
-                onBackClick = onBackClick,
-                onJoinClick = onJoinClick,
-                modifier = modifier
-            )
+    // 예외: 상세 데이터 로드 실패 시 토스트로 안내하고 챌린지 목록(갤러리)으로 되돌린다.
+    LaunchedEffect(uiState.isError) {
+        if (uiState.isError) {
+            Toast.makeText(
+                context,
+                "상세 정보를 불러오지 못했어요. 다시 시도해주세요",
+                Toast.LENGTH_SHORT
+            ).show()
+            onBackClick()
         }
+    }
 
-        uiState.isLoading -> DetailLoading(modifier)
-
-        // 로딩도 아니고 데이터도 없으면 에러 상태
-        else -> DetailError(onRetry = viewModel::retry, modifier = modifier)
+    val detail = uiState.detail
+    if (detail != null) {
+        DetailScreen(
+            challenge = Challenge(
+                id = detail.id.toInt(),
+                title = detail.title,
+                participantCount = detail.participantCount,
+                category = detail.category
+            ),
+            category = detail.category.displayName,
+            content = detail.content,
+            verificationDescription = detail.verificationDescription,
+            verificationImageUrl = detail.verificationExampleImageUrl,
+            successConditions = detail.successConditions,
+            failureConditions = detail.failureConditions,
+            onBackClick = onBackClick,
+            onJoinClick = onJoinClick,
+            modifier = modifier
+        )
+    } else {
+        // 로딩 중이거나, 에러 직후(곧 위 LaunchedEffect가 목록으로 되돌림)
+        DetailLoading(modifier)
     }
 }
 
@@ -75,34 +80,5 @@ private fun DetailLoading(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(color = Persimmon)
-    }
-}
-
-@Composable
-private fun DetailError(
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(SourCream),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            Text(
-                text = "챌린지 정보를 불러오지 못했어요",
-                fontFamily = Pretendard,
-                color = BlackBrown
-            )
-            OnulDoButton(
-                text = "다시 시도",
-                onClick = onRetry,
-                modifier = Modifier.padding(horizontal = 40.dp)
-            )
-        }
     }
 }

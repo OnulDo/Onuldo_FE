@@ -25,7 +25,12 @@ object Routes {
     const val CHALLENGE_DETAIL_ARG = "challengeId"
     const val CHALLENGE_DETAIL = "challenge_detail/{$CHALLENGE_DETAIL_ARG}"
     fun challengeDetail(challengeId: Long) = "challenge_detail/$challengeId"
-    const val CHALLENGE_PARTICIPATE = "challenge_participate"
+
+    // 참여 화면도 challengeId를 경로 인자로 받는다.
+    const val CHALLENGE_PARTICIPATE_ARG = "challengeId"
+    const val CHALLENGE_PARTICIPATE = "challenge_participate/{$CHALLENGE_PARTICIPATE_ARG}"
+    fun challengeParticipate(challengeId: Long) = "challenge_participate/$challengeId"
+
     const val CHALLENGE_START_DONE = "challenge_start_done"
     // 추후: PASSWORD_RESET, 알림 설정, 약관 3종 등
 

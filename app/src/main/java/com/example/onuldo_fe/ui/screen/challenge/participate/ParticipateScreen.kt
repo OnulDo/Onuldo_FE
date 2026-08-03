@@ -60,17 +60,19 @@ fun ParticipateScreen(
     challenge: Challenge = Challenge(id = 0, title = "새벽 6시 기상", participantCount = 1234),
     category: String = "생활루틴 챌린지",               // TODO: 실제 데이터
     description: String = "매일 새벽 6시까지 기상하기",   // TODO: 실제 데이터
-    // TODO: 실제 보유 포인트와 선택 도전금 비교로 교체. true면 시작(완료 화면), false면 잔액 부족 팝업.
-    hasEnoughPoint: Boolean = true,
+    // 참여 API 요청 중이면 버튼 비활성 (중복 제출 방지)
+    isSubmitting: Boolean = false,
+    // 포인트 부족 팝업 표시 여부(서버 INSUFFICIENT_POINT 응답 시) + 닫기 콜백
+    showInsufficientDialog: Boolean = false,
+    onDismissInsufficient: () -> Unit = {},
     onBackClick: () -> Unit = {},
-    onStartClick: () -> Unit = {},
+    // 선택한 기간(주)·도전금(P)을 상위(Route)로 전달 → 실제 참여 API 호출
+    onStartClick: (durationWeeks: Int, depositAmount: Int) -> Unit = { _, _ -> },
     onChargePoint: () -> Unit = {},   // 포인트 충전 화면 연결
     modifier: Modifier = Modifier
 ) {
     var selectedPeriod by remember { mutableStateOf<String?>(null) }
     var selectedPoint by remember { mutableStateOf<String?>(null) }
-    // 잔액 부족 다이얼로그도 화면 이동이 아니라 이 화면의 상태(State)
-    var showInsufficientDialog by remember { mutableStateOf(false) }
     val spacing = LocalSpacing.current
 
     Column(
@@ -253,10 +255,12 @@ fun ParticipateScreen(
         OnulDoButton(
             text = "도전 시작하기",
             onClick = {
-                // 도전금 충분하면 시작 완료 화면으로, 부족하면 잔액 부족 팝업 노출
-                if (hasEnoughPoint) onStartClick() else showInsufficientDialog = true
+                // 칩 선택값("4주","10,000P")을 API용 int로 변환해 참여 요청 (포인트 검사는 서버가 수행)
+                val weeks = selectedPeriod?.removeSuffix("주")?.toIntOrNull()
+                val deposit = selectedPoint?.filter { it.isDigit() }?.toIntOrNull()
+                if (weeks != null && deposit != null) onStartClick(weeks, deposit)
             },
-            enabled = canStart
+            enabled = canStart && !isSubmitting
         )
 
         Spacer(Modifier.height(42.dp))
@@ -264,7 +268,7 @@ fun ParticipateScreen(
 
     if (showInsufficientDialog) {
         InsufficientPointDialog(
-            onDismiss = { showInsufficientDialog = false },
+            onDismiss = onDismissInsufficient,
             onCharge = onChargePoint
         )
     }

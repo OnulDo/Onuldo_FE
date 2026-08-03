@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -145,21 +147,32 @@ fun GalleryScreen(
 
         Spacer(Modifier.height(spacing.spacing12))
 
-        // 카드 목록
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+        // 카드 목록 — 로딩 중엔 기본 인디케이터만 표시(상세 로딩/빈 상태 UI는 추후)
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
+                .weight(1f)
         ) {
-            items(uiState.challenges, key = { it.id }) { challenge ->
-                ChallengeCard(
-                    challenge = challenge,
-                    onClick = { onChallengeClick(challenge) }
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    color = Persimmon,
+                    modifier = Modifier.align(Alignment.Center)
                 )
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
+                ) {
+                    items(uiState.challenges, key = { it.id }) { challenge ->
+                        ChallengeCard(
+                            challenge = challenge,
+                            onClick = { onChallengeClick(challenge) }
+                        )
+                    }
+                }
             }
         }
     }

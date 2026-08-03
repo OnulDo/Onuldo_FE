@@ -10,7 +10,7 @@ import androidx.navigation.navArgument
 import com.example.onuldo_fe.camera.CameraScreen
 import com.example.onuldo_fe.camera.CameraViewModel
 import com.example.onuldo_fe.ui.screen.challenge.detail.DetailRoute
-import com.example.onuldo_fe.ui.screen.challenge.participate.ParticipateScreen
+import com.example.onuldo_fe.ui.screen.challenge.participate.ParticipateRoute
 import com.example.onuldo_fe.ui.screen.challenge.participate.StartDoneScreen
 import com.example.onuldo_fe.ui.screen.login.LandingScreen
 import com.example.onuldo_fe.ui.screen.login.LoginScreen
@@ -206,13 +206,18 @@ fun OnuldoApp() {
             DetailRoute(
                 challengeId = challengeId,
                 onBackClick = { navController.popBackStack() },
-                onJoinClick = { navController.navigate(Routes.CHALLENGE_PARTICIPATE) },
+                onJoinClick = { navController.navigate(Routes.challengeParticipate(challengeId)) },
             )
         }
-        composable(Routes.CHALLENGE_PARTICIPATE) {
-            ParticipateScreen(
+        composable(
+            route = Routes.CHALLENGE_PARTICIPATE,
+            arguments = listOf(navArgument(Routes.CHALLENGE_PARTICIPATE_ARG) { type = NavType.LongType })
+        ) { backStackEntry ->
+            val challengeId = backStackEntry.arguments?.getLong(Routes.CHALLENGE_PARTICIPATE_ARG) ?: 0L
+            ParticipateRoute(
+                challengeId = challengeId,
                 onBackClick = { navController.popBackStack() },
-                onStartClick = { navController.navigate(Routes.CHALLENGE_START_DONE) },
+                onSuccess = { navController.navigate(Routes.CHALLENGE_START_DONE) },
                 // 잔액 부족 팝업의 "충전하기" → 포인트 충전 화면
                 onChargePoint = { navController.navigate(Routes.MYPAGE_CHARGE) },
             )
