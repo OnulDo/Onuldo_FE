@@ -17,10 +17,8 @@ import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
 
 /**
- * 사용자가 선택한 기본 캐릭터 ID를 파티 화면에서 동일한 규격으로 표시합니다.
- * profileImageUrl은 API 호환을 위해 전달받지만 캐릭터 선택 정책에 따라 화면에서는 사용하지 않습니다.
+ * 서버 프로필 이미지 URL을 우선 표시하고, URL이 없거나 로드에 실패하면 기본 캐릭터를 표시합니다.
  */
-@Suppress("UNUSED_PARAMETER")
 @Composable
 fun PartyMemberProfileImage(
     profileImageUrl: String?,
@@ -54,7 +52,7 @@ fun PartyMemberProfileImage(
 
     Box(containerModifier, contentAlignment = Alignment.Center) {
         PartyNetworkImage(
-            imageUrl = null,
+            imageUrl = profileImageUrl,
             fallbackImageRes = partyCharacterDrawable(defaultCharacterId),
             contentDescription = contentDescription,
             modifier = Modifier.size(width = characterWidth, height = characterHeight),

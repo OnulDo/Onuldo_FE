@@ -40,6 +40,7 @@ import com.example.onuldo_fe.model.home.HomePartyChallenge
 import com.example.onuldo_fe.ui.screen.home.components.HomePartyCard
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -70,10 +71,12 @@ fun PartyListScreen(
         )
     }
 ) {
+    val spacing = LocalSpacing.current
     Column(modifier.fillMaxSize().background(SourCream)) {
-        Text("파티", modifier = Modifier.padding(start = 24.dp, top = 16.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Text("파티", modifier = Modifier.padding(start = spacing.spacing24, top = spacing.spacing16), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        // TODO 디자인 시스템에 21dp 토큰이 추가되면 LocalSpacing으로 교체
         Spacer(Modifier.height(21.dp))
-        Row(Modifier.padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.padding(horizontal = spacing.spacing20), horizontalArrangement = Arrangement.spacedBy(spacing.spacing10)) {
             Button(
                 onClick = onCreateClick,
                 modifier = Modifier.weight(10f).height(52.dp),
@@ -89,7 +92,8 @@ fun PartyListScreen(
                     contentDescription = null,
                     modifier = Modifier.size(12.dp)
                 )
-                Spacer(Modifier.width(6.dp))
+                // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
+                Spacer(Modifier.width(3.dp))
                 Text("파티 만들기", fontFamily = Pretendard, fontSize = 14.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
             }
             OutlinedButton(
@@ -101,12 +105,13 @@ fun PartyListScreen(
                 contentPadding = PaddingValues(0.dp)
             ) { Text("초대코드 입력", color = Persimmon, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold) }
         }
-        Spacer(Modifier.height(24.dp))
-        Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+        Spacer(Modifier.height(spacing.spacing24))
+        Row(Modifier.padding(horizontal = spacing.spacing20), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(width = 4.dp, height = 19.dp).background(Persimmon, RoundedCornerShape(4.dp)))
             Spacer(Modifier.width(5.dp))
             Text("나의 파티", color = BlackBrown, fontFamily = Pretendard, fontSize = 17.sp, lineHeight = 20.sp, fontWeight = FontWeight.Bold)
         }
+        // TODO 디자인 시스템에 14dp 토큰이 추가되면 LocalSpacing으로 교체
         Spacer(Modifier.height(14.dp))
         if (isLoading) {
             Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
@@ -139,7 +144,9 @@ fun PartyListScreen(
 
 @Composable
 private fun PartyListEmptyContent(modifier: Modifier = Modifier) {
+    val spacing = LocalSpacing.current
     Column(
+        // TODO 디자인 시스템에 96dp 토큰이 추가되면 LocalSpacing으로 교체
         modifier = modifier.padding(top = 96.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -156,7 +163,7 @@ private fun PartyListEmptyContent(modifier: Modifier = Modifier) {
                 contentScale = ContentScale.Fit
             )
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(spacing.spacing8))
         Text(
             text = "아직 시작한 파티가 없어요",
             color = BlackBrown,

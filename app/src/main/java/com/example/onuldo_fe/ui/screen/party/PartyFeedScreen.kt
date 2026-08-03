@@ -29,13 +29,12 @@ fun PartyFeedScreen(
     challengeName: String,
     progress: PartyProgressUiState,
     feedItems: List<PartyFeedItemUi>,
-    currentUserId: String = "",
     isLoading: Boolean = false,
     errorMessage: String? = null,
     onRetry: () -> Unit = {},
-    onBack: () -> Unit,
-    onVerifyClick: () -> Unit = {}
+    onBack: () -> Unit
 ) {
+    val spacing = LocalSpacing.current
     Column(Modifier.fillMaxSize().background(SourCream)) {
         Box(
             modifier = Modifier
@@ -45,12 +44,14 @@ fun PartyFeedScreen(
             OnulDoBackButton(
                 modifier = Modifier
                     .align(Alignment.TopStart)
+                    // TODO 디자인 시스템에 13dp 토큰이 추가되면 LocalSpacing으로 교체
                     .offset(y = 13.dp),
                 onClick = onBack
             )
             Text(
                 text = partyName,
-                modifier = Modifier.offset(x = 20.dp, y = 47.dp),
+                // TODO 디자인 시스템에 47dp 토큰이 추가되면 LocalSpacing으로 교체
+                modifier = Modifier.offset(x = spacing.spacing20, y = 47.dp),
                 color = BlackBrown,
                 fontFamily = Pretendard,
                 fontSize = 24.sp,
@@ -58,7 +59,8 @@ fun PartyFeedScreen(
             )
             Text(
                 text = challengeName,
-                modifier = Modifier.offset(x = 20.dp, y = 79.dp),
+                // TODO 디자인 시스템에 79dp 토큰이 추가되면 LocalSpacing으로 교체
+                modifier = Modifier.offset(x = spacing.spacing20, y = 79.dp),
                 color = DarkBrown70,
                 fontFamily = Pretendard,
                 fontSize = 10.sp,
@@ -69,7 +71,11 @@ fun PartyFeedScreen(
             progressPercent = progress.progressPercent,
             completedMemberCount = progress.completedMemberCount,
             totalMemberCount = progress.totalMemberCount,
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp)
+            modifier = Modifier.padding(
+                start = spacing.spacing20,
+                end = spacing.spacing20,
+                bottom = spacing.spacing16
+            )
         )
         when {
             isLoading -> Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
@@ -86,16 +92,13 @@ fun PartyFeedScreen(
             else -> LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                // TODO 디자인 시스템에 4dp 토큰이 추가되면 LocalSpacing으로 교체
+                contentPadding = PaddingValues(horizontal = spacing.spacing20, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(spacing.spacing12),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(feedItems, key = { it.memberId }) { item ->
-                    PartyFeedCard(
-                        item = item,
-                        isCurrentUser = item.memberId == currentUserId,
-                        onVerifyClick = onVerifyClick
-                    )
+                    PartyFeedCard(item = item)
                 }
             }
         }
@@ -116,7 +119,8 @@ private fun TeamProgressCard(
             .height(88.dp)
             .background(Persimmon10, RoundedCornerShape(14.dp))
             .border(1.dp, Persimmon.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
-            .padding(horizontal = 20.dp, vertical = 14.dp)
+            // TODO 디자인 시스템에 14dp 토큰이 추가되면 LocalSpacing으로 교체
+            .padding(horizontal = LocalSpacing.current.spacing20, vertical = 14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -173,7 +177,6 @@ private fun PartyFeedScreenPreview() {
                 PartyFeedItemUi("민지", "2시간 전", imageRes = R.drawable.party_feed_minji),
                 PartyFeedItemUi("하늘", "미인증", memberId = "current-user")
             ),
-            currentUserId = "current-user",
             onBack = {}
         )
     }

@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.party.dummy.PartyTestConfig
+import com.example.onuldo_fe.data.party.config.PartyApiConfig
 import com.example.onuldo_fe.model.party.CreatePartyCommand
 import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
 import com.example.onuldo_fe.ui.component.PermissionDialogType
@@ -33,8 +34,6 @@ import com.example.onuldo_fe.viewmodel.party.PartyAction
 import com.example.onuldo_fe.viewmodel.party.PartyFeedViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyInviteViewModel
 import com.example.onuldo_fe.viewmodel.party.PartySettlementViewModel
-import com.example.onuldo_fe.viewmodel.party.PartyMemberRole
-import com.example.onuldo_fe.viewmodel.party.PartyReadyStatus
 import com.example.onuldo_fe.viewmodel.party.PartyStatus
 import com.example.onuldo_fe.viewmodel.party.PartyViewModel
 import java.text.Normalizer
@@ -82,12 +81,8 @@ fun PartyRoute(
     var feedPartyId by remember { mutableStateOf("1") }
     var waitingPartyId by remember { mutableStateOf<String?>(null) }
 
-    // 로그인 사용자와 대기방 멤버 ID를 비교해 파티장/파티원 전용 UI 결정
     val partyState = partyViewModel.uiState
     val waitingRoom = partyState.waitingRoom
-    val currentMember = waitingRoom?.members?.firstOrNull { it.id == partyViewModel.currentUserId }
-    val isCurrentUserLeader = currentMember?.role == PartyMemberRole.Leader
-    val isCurrentUserReady = currentMember?.readyStatus == PartyReadyStatus.Ready
 
     fun handleVerifyClick() {
         val isCameraPermissionGranted = ContextCompat.checkSelfPermission(
@@ -179,7 +174,8 @@ fun PartyRoute(
             isSubmitting = partyState.action == PartyAction.Creating,
             errorMessage = partyState.errorMessage,
             // fake 포인트 부족 테스트 시 PartyTestConfig.AVAILABLE_POINT를 5_000으로 변경
-            availablePoint = PartyTestConfig.AVAILABLE_POINT,
+            // Real 생성에서는 서버가 보유 포인트를 최종 검증하므로 Fake 포인트로 요청을 막지 않는다.
+            availablePoint = if (PartyApiConfig.USE_REAL_CREATE) Int.MAX_VALUE else PartyTestConfig.AVAILABLE_POINT,
             onCreate = { period, deposit ->
                 // 필수 선택값이 모두 준비된 경우에만 ViewModel에 생성 명령 전달
                 val challenge = selectedChallenge ?: return@PartyCreateScreen
@@ -218,7 +214,7 @@ fun PartyRoute(
                     challenge = challenge,
                     onBackClick = { screen = PartyScreen.ChallengeSelect },
                     // 파티 생성 경로에서는 즉시 참여하지 않고 선택 결과를 생성 화면으로 전달
-                    ctaText = "이 챌린지로 파티 만들기",
+                    ctaText = "파티 만들기",
                     onJoinClick = {
                         // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정
                         selectedChallenge = pendingChallenge
@@ -245,10 +241,9 @@ fun PartyRoute(
             } else {
                 PartyWaitingRoomScreen(
                     ui = waitingRoom,
-                    isLeader = isCurrentUserLeader,
-                    // 파티원 준비완료 시에도 파티 생성과 동일한 fake 포인트 설정 사용
-                    availablePoint = PartyTestConfig.AVAILABLE_POINT,
-                    isCurrentUserReady = isCurrentUserReady,
+                    // Real 준비 완료에서는 서버가 포인트를 검증하므로 Fake 포인트로 요청을 막지 않는다.
+                    availablePoint = if (PartyApiConfig.USE_REAL_READY) Int.MAX_VALUE else PartyTestConfig.AVAILABLE_POINT,
+                    isReadySubmitted = partyState.isReadySubmitted,
                     isActionInProgress = partyState.action != PartyAction.Idle,
                     errorMessage = partyState.errorMessage,
                     onBack = {
@@ -271,12 +266,10 @@ fun PartyRoute(
             challengeName = partyFeedViewModel.uiState.challengeName,
             progress = partyFeedViewModel.uiState.progress,
             feedItems = partyFeedViewModel.uiState.feedItems,
-            currentUserId = partyViewModel.currentUserId,
             isLoading = partyFeedViewModel.uiState.isLoading,
             errorMessage = partyFeedViewModel.uiState.errorMessage,
             onRetry = { partyFeedViewModel.loadPartyFeed(feedPartyId) },
-            onBack = { screen = PartyScreen.List },
-            onVerifyClick = ::handleVerifyClick
+            onBack = { screen = PartyScreen.List }
         )
 
         PartyScreen.Settlement -> {
@@ -303,14 +296,13 @@ fun PartyRoute(
         )
     }
 
-    LaunchedEffect(inviteViewModel.uiState.joinedPartyId) {
-        // 참여 성공 상태가 새로 전달될 때 한 번만 대기방 조회와 화면 이동 실행
-        inviteViewModel.uiState.joinedPartyId?.let { partyId ->
-            // 초대코드 참여 성공 후 partyId로 대기방 전체 정보 재조회
+    LaunchedEffect(inviteViewModel.uiState.joinedWaitingRoom) {
+        // 참여 POST 성공 응답의 대기방을 그대로 적용해 추가 GET 없이 이동한다.
+        inviteViewModel.uiState.joinedWaitingRoom?.let { room ->
             showInviteDialog = false
-            waitingPartyId = partyId
+            waitingPartyId = room.partyId
+            partyViewModel.applyJoinedWaitingRoom(room)
             screen = PartyScreen.WaitingRoom
-            partyViewModel.loadWaitingRoom(partyId)
             inviteViewModel.reset()
         }
     }

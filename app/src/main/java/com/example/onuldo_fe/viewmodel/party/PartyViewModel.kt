@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.onuldo_fe.data.party.dummy.FakePartyStore
 import com.example.onuldo_fe.model.party.CreatePartyCommand
 import com.example.onuldo_fe.model.party.PartyLifecycleStatus
 import com.example.onuldo_fe.model.party.PartyMember
@@ -31,6 +30,7 @@ enum class PartyAction {
 data class PartyUiState(
     val parties: List<PartyCardUi> = emptyList(),        // 파티 홈에 표시할 진행 중인 파티 목록
     val waitingRoom: PartyWaitingRoomUi? = null,         // 현재 입장한 파티의 최신 대기방 정보
+    val isReadySubmitted: Boolean = false,               // 로그인 파티원의 현재 준비 상태
     val isListLoading: Boolean = false,                  // 파티 목록을 불러오는 중인지 여부
     val action: PartyAction = PartyAction.Idle,          // 현재 진행 중인 파티 요청
     val errorMessage: String? = null                     // API 요청 실패 시 화면에 표시할 문구
@@ -38,9 +38,7 @@ data class PartyUiState(
 
 // 파티 생성부터 대기방 시작·이탈까지 파티의 핵심 상태 변경 관리
 class PartyViewModel(
-    private val repository: PartyRepository = PartyRepositoryProvider.provide(),
-    // TODO 실제 API 연동 시 Fake 사용자 ID 대신 인증 계층의 사용자 ID를 전달하고 방장 여부는 대기방 응답의 isHost 사용
-    val currentUserId: String = FakePartyStore.CURRENT_USER_ID.toString()
+    private val repository: PartyRepository = PartyRepositoryProvider.provide()
 ) : ViewModel() {
     var uiState by mutableStateOf(PartyUiState())
         private set
@@ -85,6 +83,7 @@ class PartyViewModel(
                 .onSuccess { created ->
                     uiState = uiState.copy(
                         waitingRoom = null,
+                        isReadySubmitted = false,
                         action = PartyAction.Idle
                     )
                     onSuccess(created.partyId)
@@ -101,7 +100,12 @@ class PartyViewModel(
 
     fun loadWaitingRoom(partyId: String, onSuccess: () -> Unit = {}) {
         // 방장과 파티원이 동일한 API 응답을 사용해 역할·준비 상태·정원 표시
-        uiState = uiState.copy(waitingRoom = null, action = PartyAction.LoadingRoom, errorMessage = null)
+        uiState = uiState.copy(
+            waitingRoom = null,
+            isReadySubmitted = false,
+            action = PartyAction.LoadingRoom,
+            errorMessage = null
+        )
         viewModelScope.launch {
             runCatching { repository.getWaitingRoom(partyId) }
                 .onSuccess { room ->
@@ -120,6 +124,16 @@ class PartyViewModel(
         }
     }
 
+    /** 초대코드 참여 응답의 최신 대기방을 추가 조회 없이 화면 상태에 적용한다. */
+    fun applyJoinedWaitingRoom(room: PartyWaitingRoom) {
+        uiState = uiState.copy(
+            waitingRoom = room.toUi(),
+            isReadySubmitted = false,
+            action = PartyAction.Idle,
+            errorMessage = null
+        )
+    }
+
     fun readyParty() {
         // 준비완료 요청 성공 응답에 포함된 최신 멤버 목록으로 대기방 갱신
         // 포인트 부족 여부는 화면에서 먼저 확인하고 실제 연동 후 서버에서도 최종 검증
@@ -129,7 +143,12 @@ class PartyViewModel(
         viewModelScope.launch {
             runCatching { repository.readyParty(partyId) }
                 .onSuccess { room ->
-                    uiState = uiState.copy(waitingRoom = room.toUi(), action = PartyAction.Idle)
+                    // 서버의 토글 결과에 맞춰 준비하기와 대기 상태를 전환한다.
+                    uiState = uiState.copy(
+                        waitingRoom = room.toUi(),
+                        isReadySubmitted = !uiState.isReadySubmitted,
+                        action = PartyAction.Idle
+                    )
                 }
                 .onFailure {
                     uiState = uiState.copy(
@@ -188,12 +207,14 @@ class PartyViewModel(
 private fun PartyWaitingRoom.toUi() = PartyWaitingRoomUi(
     partyId = partyId,
     partyName = partyName,
-    challengeName = challengeName,
     inviteCode = inviteCode,
     period = period,
     deposit = deposit,
     capacity = capacity,
-    members = members.map(PartyMember::toUi)
+    members = members.map(PartyMember::toUi),
+    // Repository가 Fake/Real 차이를 통일했으므로 ViewModel은 응답값만 전달한다.
+    isHost = isHost,
+    canStart = canStart
 )
 
 // 서버 문자열 상태가 변환된 도메인 enum을 화면에서 사용하는 enum으로 매핑
