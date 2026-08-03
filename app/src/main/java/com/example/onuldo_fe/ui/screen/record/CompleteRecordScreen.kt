@@ -77,7 +77,8 @@ private fun CompleteRecordScreenPreview() {
     OnulDo_FETheme {
         CompleteRecordScreen(
             completeList = listOf(
-                CompleteRecord(isSuccess = true, title = "매일 6시 기상", progress = 92,
+                CompleteRecord(participationId = 1, challengeId = 12, isSuccess = true,
+                    title = "매일 6시 기상", progress = 92,
                     completeDate = "2026-08-10", point = 30000)
             ),
             totalCompletedCount = 8,

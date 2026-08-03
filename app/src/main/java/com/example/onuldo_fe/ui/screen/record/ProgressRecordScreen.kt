@@ -22,7 +22,7 @@ fun ProgressRecordScreen(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
     ) {
-        items(progressList) { record ->
+        items(progressList, key = { it.participationId }) { record ->
             ProgressRecordCard(
                 category = record.category,
                 title = record.title,
@@ -42,6 +42,8 @@ private fun ProgressRecordScreenPreview() {
         ProgressRecordScreen(
             progressList = listOf(
                 ProgressRecord(
+                    participationId = 1,
+                    challengeId = 101,
                     category = "운동",
                     title = "매일 만보 걷기",
                     dDay = 7,
@@ -50,6 +52,8 @@ private fun ProgressRecordScreenPreview() {
                     isTodayVerified = true
                 ),
                 ProgressRecord(
+                    participationId = 2,
+                    challengeId = 102,
                     category = "공부",
                     title = "영단어 외우기",
                     dDay = 3,
