@@ -8,7 +8,6 @@ import com.example.onuldo_fe.model.record.CompletedChallenge
 import com.example.onuldo_fe.model.record.CompletedRecordSummary
 import com.example.onuldo_fe.model.record.CompletedResultStatus
 import com.example.onuldo_fe.model.record.OngoingChallenge
-import kotlin.math.absoluteValue
 
 class RecordRepositoryImpl(private val api: RecordApi) : RecordRepository {
     override suspend fun getOngoingChallenges(): List<OngoingChallenge> {
@@ -70,11 +69,7 @@ class RecordRepositoryImpl(private val api: RecordApi) : RecordRepository {
             challengeId = validChallengeId,
             title = validTitle,
             resultStatus = status,
-            netAmount = if (status == CompletedResultStatus.SUCCESS) {
-                amount.absoluteValue
-            } else {
-                -amount.absoluteValue
-            },
+            netAmount = amount,
             endedDate = endedDate.requireText("endedDate"),
             achievementRate = achievementRate?.coerceIn(0, 100) ?: 0
         )
