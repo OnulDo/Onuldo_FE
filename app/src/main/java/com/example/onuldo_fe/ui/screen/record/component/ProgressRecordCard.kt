@@ -69,7 +69,7 @@ fun ProgressRecordCard(
             )
             Spacer(Modifier.height(spacing.spacing12))
             Text(
-                "예치금 ${"%,d".format(depositAmount)}P · 예상 환급 계산 예정",
+                "예치 : ${"%,d".format(depositAmount)}P",
                 style = MaterialTheme.typography.labelSmall,
                 color = DarkBrown50
             )
