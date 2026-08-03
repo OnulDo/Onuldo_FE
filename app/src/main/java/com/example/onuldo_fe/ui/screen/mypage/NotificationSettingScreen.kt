@@ -30,8 +30,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.onuldo_fe.model.notificationsetting.NotificationSettingType
-import com.example.onuldo_fe.repository.notificationsetting.NotificationSettingsRepositoryProvider
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.component.OnulDoSwitch
 import com.example.onuldo_fe.ui.theme.BlackBrown
@@ -54,14 +52,11 @@ fun SettingScreen(
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
-    val repository = remember { NotificationSettingsRepositoryProvider.provide() }
-    // GET /api/users/me/notification-settings — 진입 시 서버(더미) 값으로 초기화
-    var state by remember { mutableStateOf(repository.getSettings()) }
+    var state by remember { mutableStateOf(NotificationSettingsState()) }
 
-    // 개별 토글 변경 → PATCH(타입별 on/off) + 로컬 상태 갱신
-    fun updateSetting(type: NotificationSettingType, enabled: Boolean) {
-        repository.updateSetting(type, enabled)
-        state = repository.getSettings()
+    fun updateState(update: NotificationSettingsState.() -> NotificationSettingsState) {
+        // 알림 설정 조회/변경 API는 별도 구현되어 있어 여기선 로컬 상태만 관리
+        state = state.update()
     }
 
     // 전체 알림이 꺼지면 개별 알림은 값을 유지한 채 비활성 표시만 한다! (버튼 누르기 비활성)
@@ -103,8 +98,7 @@ fun SettingScreen(
             title = "전체 알림 수신",
             description = "모든 알림을 한 번에 끄거나 켤 수 있어요",
             checked = state.all,
-            // 마스터: PATCH 타입 목록에 없음 → 로컬만 (TODO: 백엔드 저장 방식 확인)
-            onCheckedChange = { state = state.copy(all = it) },
+            onCheckedChange = { updateState { copy(all = it) } },
             height = 80.dp,
             backgroundColor = Persimmon10,
             borderColor = Persimmon20
@@ -120,7 +114,7 @@ fun SettingScreen(
             title = "챌린지 시작 알림",
             description = "챌린지 시작 시각 알림",
             checked = state.challengeStart,
-            onCheckedChange = { updateSetting(NotificationSettingType.ChallengeStart, it) },
+            onCheckedChange = { updateState { copy(challengeStart = it) } },
             enabled = subEnabled
         )
 
@@ -130,7 +124,7 @@ fun SettingScreen(
             title = "인증 마감 알림",
             description = "인증 마감 30분 전 알림",
             checked = state.deadline,
-            onCheckedChange = { updateSetting(NotificationSettingType.VerificationDeadline, it) },
+            onCheckedChange = { updateState { copy(deadline = it) } },
             enabled = subEnabled
         )
 
@@ -140,7 +134,7 @@ fun SettingScreen(
             title = "인증 결과 알림",
             description = "인증 성공/실패 결과 알림",
             checked = state.result,
-            onCheckedChange = { updateSetting(NotificationSettingType.VerificationResult, it) },
+            onCheckedChange = { updateState { copy(result = it) } },
             enabled = subEnabled
         )
 
@@ -154,7 +148,7 @@ fun SettingScreen(
             title = "환급 완료 알림",
             description = "챌린지 종료 후 환급 알림",
             checked = state.refund,
-            onCheckedChange = { updateSetting(NotificationSettingType.RefundComplete, it) },
+            onCheckedChange = { updateState { copy(refund = it) } },
             enabled = subEnabled
         )
 
@@ -164,7 +158,7 @@ fun SettingScreen(
             title = "차감 알림",
             description = "인증 실패로 도전금 차감 시",
             checked = state.deduction,
-            onCheckedChange = { updateSetting(NotificationSettingType.DeductionAlert, it) },
+            onCheckedChange = { updateState { copy(deduction = it) } },
             enabled = subEnabled
         )
 
