@@ -7,8 +7,8 @@ import retrofit2.http.GET
 
 interface RecordApi {
     @GET("api/users/me/challenges/records/ongoing")
-    suspend fun getOngoingChallenges(): ApiResponse<List<OngoingChallengeDto>>
+    suspend fun getOngoingChallenges(): ApiResponse<List<OngoingChallengeDto>?>
 
     @GET("api/users/me/challenges/records/completed")
-    suspend fun getCompletedChallenges(): ApiResponse<CompletedRecordResponseDto>
+    suspend fun getCompletedChallenges(): ApiResponse<CompletedRecordResponseDto?>
 }
