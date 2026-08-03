@@ -118,7 +118,11 @@ fun MainScreen(
                 RecordRoute(
                     onBrowseChallenges = {
                         navController.navigate(BottomTab.Challenge.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
                             launchSingleTop = true
+                            restoreState = true
                         }
                     }
                 )

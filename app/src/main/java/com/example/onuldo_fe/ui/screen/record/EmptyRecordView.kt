@@ -66,7 +66,7 @@ fun EmptyRecordView(
 
         OnulDoMediumButton(
             text = "챌린지 둘러보기",
-            onClick = {},
+            onClick = onBrowseChallenges
         )
     }
 }
