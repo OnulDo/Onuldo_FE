@@ -30,11 +30,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.model.notificationsetting.NotificationSettingType
+import com.example.onuldo_fe.repository.notificationsetting.NotificationSettingsRepositoryProvider
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.component.OnulDoSwitch
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Persimmon20
@@ -50,13 +53,15 @@ fun SettingScreen(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var state by remember { mutableStateOf(NotificationSettingsState()) }
+    val spacing = LocalSpacing.current
+    val repository = remember { NotificationSettingsRepositoryProvider.provide() }
+    // GET /api/users/me/notification-settings — 진입 시 서버(더미) 값으로 초기화
+    var state by remember { mutableStateOf(repository.getSettings()) }
 
-    fun updateState(update: NotificationSettingsState.() -> NotificationSettingsState) {
-        state = state.update()
-
-        // TODO(API 연동 시)
-        // repository.saveNotificationSetting(state)
+    // 개별 토글 변경 → PATCH(타입별 on/off) + 로컬 상태 갱신
+    fun updateSetting(type: NotificationSettingType, enabled: Boolean) {
+        repository.updateSetting(type, enabled)
+        state = repository.getSettings()
     }
 
     // 전체 알림이 꺼지면 개별 알림은 값을 유지한 채 비활성 표시만 한다! (버튼 누르기 비활성)
@@ -79,7 +84,7 @@ fun SettingScreen(
             OnulDoBackButton(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(start = 8.dp),
+                    .padding(start = spacing.spacing8),
                 onClick = onBackClick
             )
             Text(
@@ -98,7 +103,8 @@ fun SettingScreen(
             title = "전체 알림 수신",
             description = "모든 알림을 한 번에 끄거나 켤 수 있어요",
             checked = state.all,
-            onCheckedChange = { updateState { copy(all = it) } },
+            // 마스터: PATCH 타입 목록에 없음 → 로컬만 (TODO: 백엔드 저장 방식 확인)
+            onCheckedChange = { state = state.copy(all = it) },
             height = 80.dp,
             backgroundColor = Persimmon10,
             borderColor = Persimmon20
@@ -114,27 +120,27 @@ fun SettingScreen(
             title = "챌린지 시작 알림",
             description = "챌린지 시작 시각 알림",
             checked = state.challengeStart,
-            onCheckedChange = { updateState { copy(challengeStart = it) } },
+            onCheckedChange = { updateSetting(NotificationSettingType.ChallengeStart, it) },
             enabled = subEnabled
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(spacing.spacing8))
 
         SettingToggleRow(
             title = "인증 마감 알림",
             description = "인증 마감 30분 전 알림",
             checked = state.deadline,
-            onCheckedChange = { updateState { copy(deadline = it) } },
+            onCheckedChange = { updateSetting(NotificationSettingType.VerificationDeadline, it) },
             enabled = subEnabled
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(spacing.spacing8))
 
         SettingToggleRow(
             title = "인증 결과 알림",
             description = "인증 성공/실패 결과 알림",
             checked = state.result,
-            onCheckedChange = { updateState { copy(result = it) } },
+            onCheckedChange = { updateSetting(NotificationSettingType.VerificationResult, it) },
             enabled = subEnabled
         )
 
@@ -148,17 +154,17 @@ fun SettingScreen(
             title = "환급 완료 알림",
             description = "챌린지 종료 후 환급 알림",
             checked = state.refund,
-            onCheckedChange = { updateState { copy(refund = it) } },
+            onCheckedChange = { updateSetting(NotificationSettingType.RefundComplete, it) },
             enabled = subEnabled
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(spacing.spacing8))
 
         SettingToggleRow(
             title = "차감 알림",
             description = "인증 실패로 도전금 차감 시",
             checked = state.deduction,
-            onCheckedChange = { updateState { copy(deduction = it) } },
+            onCheckedChange = { updateSetting(NotificationSettingType.DeductionAlert, it) },
             enabled = subEnabled
         )
 
@@ -171,6 +177,7 @@ private fun SettingSectionHeader(
     text: String,
     modifier: Modifier = Modifier
 ) {
+    val spacing = LocalSpacing.current
     Text(
         text = text,
         fontFamily = Pretendard,
@@ -180,7 +187,7 @@ private fun SettingSectionHeader(
         color = DarkBrown50,
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 24.dp)
+            .padding(start = spacing.spacing24)
     )
 }
 
@@ -196,16 +203,17 @@ private fun SettingToggleRow(
     backgroundColor: Color = White,
     borderColor: Color = DarkBrown40
 ) {
+    val spacing = LocalSpacing.current
     Row(
         modifier = modifier
             //사이즈가 작게 나와서 가로 padding기준으로 바꿈
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = spacing.spacing20)
             .height(height)
             .clip(RoundedCornerShape(14.dp))
             .background(backgroundColor)
             .border(1.dp, borderColor, RoundedCornerShape(14.dp))
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = spacing.spacing16),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -230,7 +238,7 @@ private fun SettingToggleRow(
             )
         }
 
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(spacing.spacing12))
 
         //버튼 전환
         OnulDoSwitch(
