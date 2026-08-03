@@ -13,6 +13,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -38,10 +39,11 @@ class RecordViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
-                val ongoingRequest = async { repository.getOngoingChallenges() }
-                val completedRequest = async { repository.getCompletedChallenges() }
-                val ongoing = ongoingRequest.await()
-                val completed = completedRequest.await()
+                val (ongoing, completed) = supervisorScope {
+                    val ongoingRequest = async { repository.getOngoingChallenges() }
+                    val completedRequest = async { repository.getCompletedChallenges() }
+                    ongoingRequest.await() to completedRequest.await()
+                }
 
                 _uiState.value = RecordUiState(
                     ongoingRecords = ongoing.map { item ->
@@ -88,7 +90,7 @@ class RecordViewModel(
     private fun Throwable.toMessage(): String = when (this) {
         is IOException -> "네트워크 연결을 확인해 주세요."
         is HttpException -> when (code()) {
-            401 -> "로그인이 만료되었습니다. 다시 로그인해 주세요."
+            401 -> "로그인이 만료되었습니다.\n다시 로그인해 주세요."
             in 500..599 -> "서버에 문제가 생겼습니다. 잠시 후 다시 시도해 주세요."
             else -> "챌린지 기록을 불러오지 못했습니다."
         }

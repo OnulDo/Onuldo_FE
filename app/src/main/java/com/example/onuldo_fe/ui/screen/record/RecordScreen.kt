@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.ui.component.OnulDoMediumButton
@@ -55,7 +56,12 @@ fun RecordScreen(
         when {
             isLoading -> CenteredContent { CircularProgressIndicator() }
             errorMessage != null -> CenteredContent {
-                Text(errorMessage, style = MaterialTheme.typography.titleMedium, color = BlackBrown)
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = BlackBrown,
+                    textAlign = TextAlign.Center
+                )
                 Spacer(Modifier.height(spacing.spacing16))
                 OnulDoMediumButton(text = "다시 시도", onClick = onRetry)
             }
