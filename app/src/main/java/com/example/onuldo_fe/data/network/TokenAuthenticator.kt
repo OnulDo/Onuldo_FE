@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.data.network
 
+import android.util.Log
 import java.io.IOException
 import okhttp3.Authenticator
 import okhttp3.Request
@@ -47,6 +48,12 @@ class TokenAuthenticator(
                 return null
             }
 
+            // 방금 같은 토큰으로 재발급이 통신 실패했다면 다시 시도하지 않는다.
+            // 연결이 끊긴 상태에서 401이 여러 개 몰리면 요청 수만큼 30초씩 직렬로 대기하게 된다.
+            if (isRecentTransientFailure(refreshToken)) {
+                return null
+            }
+
             // 3. 재발급 시도.
             return when (val outcome = requestNewTokens(refreshToken)) {
                 is RefreshOutcome.Success -> {
@@ -62,9 +69,29 @@ class TokenAuthenticator(
 
                 // 통신 자체가 실패했다. 리프레시 토큰은 아직 유효할 수 있으므로 세션을 지우지 않고
                 // 이 요청만 실패시킨다. (토큰이 메모리에만 있어 지우면 복구 경로가 없다.)
-                RefreshOutcome.Transient -> null
+                // 뒤따르는 요청들이 같은 실패를 반복하지 않도록 결과를 잠시 기억해 둔다.
+                RefreshOutcome.Transient -> {
+                    markTransientFailure(refreshToken)
+                    null
+                }
             }
         }
+    }
+
+    /**
+     * 직전에 통신 실패한 리프레시 토큰과 그 시각. 동시에 몰린 401들이 같은 실패를
+     * 반복하지 않도록 짧은 시간 동안 공유한다. 접근은 [authenticate]의 synchronized 블록 안에서만 한다.
+     */
+    private var lastFailedRefreshToken: String? = null
+    private var lastFailedAtMillis: Long = 0L
+
+    private fun isRecentTransientFailure(refreshToken: String): Boolean =
+        lastFailedRefreshToken == refreshToken &&
+            System.currentTimeMillis() - lastFailedAtMillis < TRANSIENT_FAILURE_WINDOW_MS
+
+    private fun markTransientFailure(refreshToken: String) {
+        lastFailedRefreshToken = refreshToken
+        lastFailedAtMillis = System.currentTimeMillis()
     }
 
     /** 재발급 시도 결과. 서버의 거부와 통신 실패를 구분해야 세션을 잘못 만료시키지 않는다. */
@@ -86,10 +113,13 @@ class TokenAuthenticator(
             if (tokens != null) RefreshOutcome.Success(tokens) else RefreshOutcome.Rejected
         } catch (e: IOException) {
             // 연결 끊김·타임아웃 등. 서버 판단이 아니므로 세션을 유지한다.
+            Log.w(TAG, "토큰 재발급 통신 실패 — 세션 유지", e)
             RefreshOutcome.Transient
         } catch (e: Exception) {
-            // 응답 파싱 실패 등 예상 밖의 오류. 재발급으로 회복할 수 없다고 본다.
-            RefreshOutcome.Rejected
+            // 응답 파싱 실패 등. 서버가 리프레시 토큰을 거부했다는 근거가 아니므로
+            // 세션을 지우지 않는다(잘못 지우면 메모리 저장소 특성상 복구할 수 없다).
+            Log.w(TAG, "토큰 재발급 응답 처리 실패 — 세션 유지", e)
+            RefreshOutcome.Transient
         }
 
     /**
@@ -124,6 +154,10 @@ class TokenAuthenticator(
     }
 
     companion object {
+        private const val TAG = "TokenAuthenticator"
         private const val MAX_RETRY_COUNT = 1
+
+        /** 통신 실패한 재발급을 다시 시도하지 않고 넘기는 시간. */
+        private const val TRANSIENT_FAILURE_WINDOW_MS = 3_000L
     }
 }

@@ -27,10 +27,12 @@ data class UserProfile(
  * 내리면 안 된다(그러면 하나만 꺼도 나머지가 전부 잠긴다).
  *
  * ⚠️ 서버 한계: `PATCH /notification-settings`의 type enum에 `ALL`이 없고
- * `NotificationSetting.apply()`도 `all_enabled`를 건드리지 않아, **마스터 스위치를 끈 상태가
- * 서버에 저장되지 않는다**(항상 기본값 `true`로 조회됨). 앱은 마스터를 끌 때 개별 5종을 모두
- * 꺼서 실제 알림 수신은 차단하지만, 화면 재진입 시 마스터는 다시 켜진 것으로 보인다.
- * 백엔드에 `ALL` 타입 추가 요청 필요.
+ * `NotificationSetting.apply()`도 `all_enabled`를 건드리지 않아, **마스터 스위치 자체는
+ * 저장할 수 없다**(항상 기본값 `true`로 조회됨). [allEnabled]는 조회 응답을 그대로 담을 뿐이므로
+ * 화면 표시에 쓰지 말 것 — 화면은 개별 5종에서 마스터 상태를 파생한다
+ * (`NotificationSettingsViewModel`의 변환 참고).
+ *
+ * 백엔드에 `ALL` 타입이 추가되면 이 값을 그대로 쓰도록 되돌릴 수 있다.
  */
 data class NotificationSettings(
     val allEnabled: Boolean,
