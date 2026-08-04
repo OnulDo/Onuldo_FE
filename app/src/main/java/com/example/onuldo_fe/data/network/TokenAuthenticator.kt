@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.data.network
 
+import android.os.SystemClock
 import android.util.Log
 import java.io.IOException
 import okhttp3.Authenticator
@@ -85,13 +86,15 @@ class TokenAuthenticator(
     private var lastFailedRefreshToken: String? = null
     private var lastFailedAtMillis: Long = 0L
 
+    // 경과 시간 측정에는 단조 시계를 쓴다. 벽시계(currentTimeMillis)는 시간 동기화나 사용자
+    // 설정으로 역행할 수 있어, 그 경우 윈도우가 지났는데도 재발급을 계속 건너뛰게 된다.
     private fun isRecentTransientFailure(refreshToken: String): Boolean =
         lastFailedRefreshToken == refreshToken &&
-            System.currentTimeMillis() - lastFailedAtMillis < TRANSIENT_FAILURE_WINDOW_MS
+            SystemClock.elapsedRealtime() - lastFailedAtMillis < TRANSIENT_FAILURE_WINDOW_MS
 
     private fun markTransientFailure(refreshToken: String) {
         lastFailedRefreshToken = refreshToken
-        lastFailedAtMillis = System.currentTimeMillis()
+        lastFailedAtMillis = SystemClock.elapsedRealtime()
     }
 
     /** 재발급 시도 결과. 서버의 거부와 통신 실패를 구분해야 세션을 잘못 만료시키지 않는다. */
