@@ -118,8 +118,8 @@ fun LoginScreen(
             label = "비밀번호",
             placeholder = "비밀번호를 입력해주세요",
             isPassword = true,
+            // 에러 문구는 아래 배너가 담당한다. 여기서도 보여주면 같은 문구가 두 번 노출된다.
             isError = isError,
-            supportingText = state.errorMessage,
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Done,
         )

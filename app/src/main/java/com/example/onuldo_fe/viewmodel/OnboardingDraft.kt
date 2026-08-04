@@ -33,19 +33,32 @@ object OnboardingDraft {
     var socialAccessToken: String = ""
         private set
 
+    /**
+     * 이메일 회원가입 경로 진입. 남아 있던 소셜 정보를 지운다.
+     *
+     * 지우지 않으면 소셜 신규 가입 도중 뒤로 나가 이메일로 가입할 때
+     * [ProfileSetupViewModel]이 여전히 소셜 경로로 판단해 입력한 이메일·비밀번호를 버린다.
+     */
     fun saveCredentials(email: String, password: String, agreedRequiredTerms: Boolean) {
         this.email = email.trim()
         this.password = password
         this.agreedRequiredTerms = agreedRequiredTerms
+        socialProvider = null
+        socialAccessToken = ""
     }
 
     /**
-     * 소셜 로그인에서 신규 회원으로 판정됐을 때 호출.
-     * 소셜 가입은 이메일·비밀번호 없이 소셜 토큰으로 진행되므로 약관 동의는 가입 화면에서 따로 받는다.
+     * 소셜 로그인에서 신규 회원으로 판정됐을 때 호출. 남아 있던 이메일 가입 정보를 지운다.
+     *
+     * 소셜 가입은 이메일·비밀번호 없이 소셜 토큰으로 진행되고, 약관 동의는
+     * 소셜 약관 화면에서 새로 받으므로 함께 초기화한다.
      */
     fun saveSocial(provider: SocialProvider, accessToken: String) {
         socialProvider = provider
         socialAccessToken = accessToken
+        email = ""
+        password = ""
+        agreedRequiredTerms = false
     }
 
     fun setAgreedRequiredTerms(agreed: Boolean) {

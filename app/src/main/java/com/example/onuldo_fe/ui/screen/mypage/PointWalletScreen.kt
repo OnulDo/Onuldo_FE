@@ -20,10 +20,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -63,6 +67,9 @@ private enum class TxCategory(
     예치("예치", Color(0xFFFFEBE0), Color(0xFFFF6B36), TxDark),
     차감("차감", Color(0xFFFCE3DE), Color(0xFFD95247), Color(0xFFD95247)),
     출금("출금", Color(0xFFF0EBE3), TxSubText, TxDark),
+
+    /** 서버가 새 거래 종류를 추가해 앱이 해석하지 못할 때 쓰는 중립 표기. */
+    기타("기타", Color(0xFFF0EBE3), TxSubText, TxDark),
 }
 
 private data class Tx(
@@ -80,7 +87,8 @@ private fun PointTransaction.toTx(): Tx {
         PointTransactionTypeDto.WITHDRAW -> TxCategory.출금
         PointTransactionTypeDto.DEPOSIT -> TxCategory.예치
         PointTransactionTypeDto.REFUND -> TxCategory.환급
-        null -> TxCategory.예치
+        // 알 수 없는 종류를 특정 배지로 표시하면 사용자에게 잘못된 정보가 된다.
+        null -> TxCategory.기타
     }
     return Tx(
         category = category,
@@ -115,6 +123,17 @@ fun PointWalletScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val visibleTx = state.transactions.map { it.toTx() }
+
+    // 충전 화면에서 돌아오면 잔액·내역이 바뀌어 있다. ViewModel은 백스택에 살아 있어
+    // init의 load()가 다시 불리지 않으므로, 화면이 다시 보일 때마다 새로 읽는다.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.load()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     Column(
         modifier = Modifier

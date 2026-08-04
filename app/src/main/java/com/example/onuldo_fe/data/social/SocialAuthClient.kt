@@ -166,8 +166,19 @@ object SocialAuthClient {
                     }
 
                     override fun onError(errorCode: Int, message: String) {
-                        // 사용자가 뒤로가기로 취소하면 여기로 들어온다.
-                        continuation.resume(SocialAuthResult.Cancelled)
+                        // 네이버 SDK는 사용자 취소와 실제 오류를 모두 onError로 전달한다.
+                        // 취소일 때만 조용히 넘기고, 나머지는 오류 문구를 보여준다.
+                        val cancelled = message.equals(NAVER_USER_CANCEL, ignoreCase = true) ||
+                            NaverIdLoginSDK.getLastErrorCode().code
+                                .equals(NAVER_USER_CANCEL, ignoreCase = true)
+
+                        continuation.resume(
+                            if (cancelled) {
+                                SocialAuthResult.Cancelled
+                            } else {
+                                SocialAuthResult.Failure(message.ifBlank { DEFAULT_FAILURE_MESSAGE })
+                            }
+                        )
                     }
                 },
             )
@@ -185,6 +196,8 @@ object SocialAuthClient {
 
     /** 카카오톡 로그인 실패 시 웹 로그인으로 넘어가라는 내부 신호. */
     private const val FALLBACK_TO_ACCOUNT = "__fallback_to_kakao_account__"
+    /** 네이버 SDK가 사용자 취소를 나타낼 때 쓰는 코드. */
+    private const val NAVER_USER_CANCEL = "user_cancel"
     private const val DEFAULT_FAILURE_MESSAGE = "소셜 로그인에 실패했어요. 잠시 후 다시 시도해주세요."
     private const val NOT_CONFIGURED_MESSAGE = "소셜 로그인 설정이 없어요. 관리자에게 문의해주세요."
 }

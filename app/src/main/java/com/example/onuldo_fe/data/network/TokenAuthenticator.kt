@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.data.network
 
+import java.io.IOException
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
@@ -47,29 +48,48 @@ class TokenAuthenticator(
             }
 
             // 3. 재발급 시도.
-            val newTokens = requestNewTokens(refreshToken)
-            if (newTokens == null) {
-                expireSession()
-                return null
-            }
+            return when (val outcome = requestNewTokens(refreshToken)) {
+                is RefreshOutcome.Success -> {
+                    tokenStore.update(outcome.tokens)
+                    response.request.withToken(outcome.tokens.accessToken)
+                }
 
-            tokenStore.update(newTokens)
-            return response.request.withToken(newTokens.accessToken)
+                // 서버가 재발급을 거부했다 — 리프레시 토큰도 만료됐으므로 재로그인이 필요하다.
+                RefreshOutcome.Rejected -> {
+                    expireSession()
+                    null
+                }
+
+                // 통신 자체가 실패했다. 리프레시 토큰은 아직 유효할 수 있으므로 세션을 지우지 않고
+                // 이 요청만 실패시킨다. (토큰이 메모리에만 있어 지우면 복구 경로가 없다.)
+                RefreshOutcome.Transient -> null
+            }
         }
     }
 
+    /** 재발급 시도 결과. 서버의 거부와 통신 실패를 구분해야 세션을 잘못 만료시키지 않는다. */
+    private sealed interface RefreshOutcome {
+        data class Success(val tokens: AuthTokens) : RefreshOutcome
+        data object Rejected : RefreshOutcome
+        data object Transient : RefreshOutcome
+    }
+
     /** 동기 호출. Authenticator는 코루틴이 아닌 OkHttp 워커 스레드에서 실행된다. */
-    private fun requestNewTokens(refreshToken: String): AuthTokens? =
+    private fun requestNewTokens(refreshToken: String): RefreshOutcome =
         try {
             val body = refreshApiProvider()
                 .refresh(RefreshTokenRequest(refreshToken))
                 .execute()
                 .body()
 
-            if (body?.isSuccess == true) body.result?.toTokensOrNull() else null
+            val tokens = if (body?.isSuccess == true) body.result?.toTokensOrNull() else null
+            if (tokens != null) RefreshOutcome.Success(tokens) else RefreshOutcome.Rejected
+        } catch (e: IOException) {
+            // 연결 끊김·타임아웃 등. 서버 판단이 아니므로 세션을 유지한다.
+            RefreshOutcome.Transient
         } catch (e: Exception) {
-            // 네트워크 오류로 재발급에 실패한 경우도 여기로 온다. 세션은 만료 처리한다.
-            null
+            // 응답 파싱 실패 등 예상 밖의 오류. 재발급으로 회복할 수 없다고 본다.
+            RefreshOutcome.Rejected
         }
 
     /**

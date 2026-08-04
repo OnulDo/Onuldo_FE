@@ -26,10 +26,12 @@ data class LoginUiState(
     /** 소셜 로그인 진행 중인 제공자. 버튼 중복 탭을 막고 로딩 표시에 쓴다. */
     val socialInProgress: SocialProvider? = null,
 ) {
-    val isLoginEnabled: Boolean
-        get() = email.isNotBlank() && password.isNotBlank() && !isLoading
-
     val isBusy: Boolean get() = isLoading || socialInProgress != null
+
+    // 소셜 로그인이 진행 중일 때도 비활성화한다. 두 인증이 동시에 끝나면
+    // 어느 쪽 토큰이 최종으로 남는지 불확정해지기 때문이다.
+    val isLoginEnabled: Boolean
+        get() = email.isNotBlank() && password.isNotBlank() && !isBusy
 }
 
 class LoginViewModel(
@@ -56,16 +58,18 @@ class LoginViewModel(
      */
     fun login(onSuccess: () -> Unit) {
         val state = _uiState.value
-        if (state.isLoading) return
+        if (state.isBusy) return
 
         if (!Validators.isValidEmail(state.email)) {
             _uiState.update { it.copy(errorMessage = INVALID_CREDENTIAL_MESSAGE) }
             return
         }
 
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        // 로딩 표시는 launch 밖에서 동기적으로 세운다. launch 안에서 세우면 코루틴이 실행되기
+        // 전에 버튼을 다시 눌러 요청이 두 번 나갈 수 있다.
+        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
+        viewModelScope.launch {
             authRepository.login(state.email, state.password)
                 .onSuccess {
                     _uiState.update { it.copy(isLoading = false) }
@@ -106,9 +110,10 @@ class LoginViewModel(
     ) {
         if (_uiState.value.isBusy) return
 
-        viewModelScope.launch {
-            _uiState.update { it.copy(socialInProgress = provider, errorMessage = null) }
+        // 로그인 시작 표시도 launch 밖에서 세워 중복 실행을 막는다.
+        _uiState.update { it.copy(socialInProgress = provider, errorMessage = null) }
 
+        viewModelScope.launch {
             when (val social = SocialAuthClient.login(context, provider)) {
                 is SocialAuthResult.Cancelled ->
                     _uiState.update { it.copy(socialInProgress = null) }

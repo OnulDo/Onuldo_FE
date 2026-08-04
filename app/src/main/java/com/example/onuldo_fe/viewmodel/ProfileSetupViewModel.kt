@@ -94,9 +94,11 @@ class ProfileSetupViewModel(
         val characterIndex = state.selectedCharacterIndex ?: return
         val profileImageUrl = ProfileAsset.fromCharacterIndex(characterIndex)
 
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        // 로딩 표시는 launch 밖에서 동기적으로 세운다. launch 안에서 세우면 코루틴이 실행되기 전에
+        // "계속"을 다시 눌러 회원가입이 두 번 요청될 수 있다(가입은 비멱등 쓰기).
+        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
+        viewModelScope.launch {
             val signupResult = if (socialProvider != null) {
                 authRepository.oauthSignup(
                     provider = socialProvider,

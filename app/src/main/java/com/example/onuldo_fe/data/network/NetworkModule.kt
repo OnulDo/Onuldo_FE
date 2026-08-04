@@ -76,8 +76,13 @@ object NetworkModule {
 
     fun <T> create(service: Class<T>): T = retrofit.create(service)
 
+    /**
+     * 공통 설정. [followSslRedirects]를 끄는 이유는, 서버가 307/308로 HTTP 주소를 돌려줄 경우
+     * 비밀번호·소셜 토큰·리프레시 토큰이 담긴 POST 본문이 평문으로 재전송될 수 있기 때문이다.
+     */
     private fun OkHttpClient.Builder.applyTimeouts(): OkHttpClient.Builder =
         connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .followSslRedirects(false)
 }
