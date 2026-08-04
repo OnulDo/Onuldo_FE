@@ -17,7 +17,7 @@ import com.example.onuldo_fe.ui.screen.login.LandingScreen
 import com.example.onuldo_fe.ui.screen.login.LoginScreen
 import com.example.onuldo_fe.ui.screen.login.ProfileSetupScreen
 import com.example.onuldo_fe.ui.screen.login.SignupScreen
-import com.example.onuldo_fe.ui.screen.login.SocialTermsScreen
+import com.example.onuldo_fe.ui.screen.login.TermsAgreementScreen
 import com.example.onuldo_fe.ui.screen.login.WelcomeScreen
 import com.example.onuldo_fe.ui.screen.main.MainScreen
 import com.example.onuldo_fe.ui.screen.mypage.NicknameEditScreen
@@ -83,11 +83,12 @@ fun OnuldoApp() {
                 },
                 onSignupClick = { navController.navigate(Routes.SIGNUP) },
                 // 소셜 로그인 결과 신규 회원 → 약관 동의 → 프로필 설정 → oauth/signup
-                onSocialSignupNeeded = { navController.navigate(Routes.SOCIAL_TERMS) },
+                onSocialSignupNeeded = { navController.navigate(Routes.TERMS_AGREEMENT) },
             )
         }
-        composable(Routes.SOCIAL_TERMS) {
-            SocialTermsScreen(
+        // 약관 동의. 이메일 가입과 소셜 신규 가입이 공통으로 거친다.
+        composable(Routes.TERMS_AGREEMENT) {
+            TermsAgreementScreen(
                 onBack = { navController.popBackStack() },
                 onNext = { navController.navigate(Routes.PROFILE_SETUP) },
                 onTermClick = { termType -> navController.navigate(Routes.mypageTerm(termType.name)) },
@@ -96,8 +97,8 @@ fun OnuldoApp() {
         composable(Routes.SIGNUP) {
             SignupScreen(
                 onBack = { navController.popBackStack() },
-                // 회원가입 완료 → 프로필 설정으로 바로 진행(이메일 인증·권한 화면 제거됨).
-                onNext = { navController.navigate(Routes.PROFILE_SETUP) },
+                // 회원가입 입력 → 약관 동의 → 프로필 설정 순으로 진행한다.
+                onNext = { navController.navigate(Routes.TERMS_AGREEMENT) },
             )
         }
         composable(Routes.PROFILE_SETUP) {

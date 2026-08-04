@@ -7,8 +7,8 @@ object Routes {
     const val LANDING = "landing"
     const val LOGIN = "login"
     const val SIGNUP = "signup"
-    /** 소셜 신규 회원 약관 동의 (소셜 로그인에서 isNewUser=true일 때만 진입) */
-    const val SOCIAL_TERMS = "social_terms"
+    /** 약관 동의. 이메일 회원가입과 소셜 신규 가입이 공통으로 거친다. */
+    const val TERMS_AGREEMENT = "terms_agreement"
     const val PROFILE_SETUP = "profile_setup"
     const val WELCOME = "welcome"
     const val MAIN = "main"
