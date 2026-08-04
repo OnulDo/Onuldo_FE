@@ -60,6 +60,10 @@ object Routes {
         "&$CHALLENGE_PARTICIPATE_ARG_TIME_END=${Uri.encode(timeEnd)}"
 
     // 참여 완료 화면(StartDone)은 별도 목적지가 아니라 ParticipateRoute 내부 상태로 렌더한다.
+
+    // 파티 정산 화면 (develop 머지분)
+    const val PARTY_SETTLEMENT = "party_settlement/{partyId}"
+    fun partySettlement(partyId: Long) = "party_settlement/$partyId"
     // 추후: PASSWORD_RESET, 알림 설정, 약관 3종 등
 
     //카메라

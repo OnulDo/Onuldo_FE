@@ -11,7 +11,7 @@ enum class PartyJoinError {
 // 초대코드 파티 참여 요청의 성공 또는 정책 오류 결과
 sealed interface PartyJoinResult {
     data class Success(
-        val partyId: String                    // 참여에 성공한 파티 고유 ID
+        val waitingRoom: PartyWaitingRoom      // 참여 성공 응답으로 받은 최신 대기방 정보
     ) : PartyJoinResult
 
     data class Failure(

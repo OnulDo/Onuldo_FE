@@ -42,7 +42,7 @@ fun PartyWaitingEmptySlotCard(modifier: Modifier = Modifier) {
             .height(56.dp)
             .background(White, RoundedCornerShape(12.dp))
             .border(1.dp, DarkBrown20, RoundedCornerShape(12.dp))
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = LocalSpacing.current.spacing20),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -52,7 +52,7 @@ fun PartyWaitingEmptySlotCard(modifier: Modifier = Modifier) {
         )
         Text(
             text = "파티원 모집 중",
-            modifier = Modifier.padding(start = 12.dp),
+            modifier = Modifier.padding(start = LocalSpacing.current.spacing12),
             color = DarkBrown50,
             fontFamily = Pretendard,
             fontSize = 13.sp,

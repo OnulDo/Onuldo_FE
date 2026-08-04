@@ -61,15 +61,13 @@ data class PartyFeedItemUi(
     val profileImageUrl: String? = null,       // 파티원 프로필 이미지 URL
     val verificationImageUrl: String? = null,  // 서버에서 전달받은 인증 이미지 URL
     @param:DrawableRes val imageRes: Int? = null, // fake 테스트용 로컬 인증 이미지
-    val memberId: String = name,               // 인증한 파티원의 고유 ID
-    val defaultCharacterId: Int? = null        // 프로필 이미지가 없을 때 표시할 기본 캐릭터 ID
+    val memberId: String = name                // 인증한 파티원의 고유 ID
 )
 
 // 파티 대기방 화면에 표시할 파티 정보와 참여자 상태
 data class PartyWaitingRoomUi(
     val partyId: String = "party-001",         // 현재 대기 중인 파티의 고유 ID
     val partyName: String = "갓생팟",           // 파티 이름
-    val challengeName: String = "30일 헬스 챌린지", // 파티와 연계된 챌린지 이름
     val inviteCode: String = "82K3H9",         // 파티 참여에 사용하는 6자리 초대코드
     val period: String = "4주",                 // 파티원 전체에 동일하게 적용할 진행 기간
     val deposit: Int = 30_000,                 // 파티원 1인당 예치할 도전금
@@ -78,12 +76,12 @@ data class PartyWaitingRoomUi(
         PartyMemberUi("민지", PartyMemberRole.Leader, PartyReadyStatus.NotApplicable, "leader-001", 0),
         PartyMemberUi("서연", PartyMemberRole.Member, PartyReadyStatus.Ready, "member-001", 1),
         PartyMemberUi("준호", PartyMemberRole.Member, PartyReadyStatus.Ready, "member-current", 2)
-    )
-) {
-    // 방장을 포함해 2명 이상이고 일반 파티원이 모두 준비완료했을 때 true
-    val canStart: Boolean
-        get() = members.size >= 2 && members.filter { it.role == PartyMemberRole.Member }.all { it.readyStatus == PartyReadyStatus.Ready }
-}
+    ),
+    // 서버 응답값을 그대로 사용해 로그인 사용자의 파티장 UI를 결정한다.
+    val isHost: Boolean = true,
+    // 서버가 인원과 준비 상태를 검증해 내려준 시작 가능 여부다.
+    val canStart: Boolean = true
+)
 
 // 파티 목록 화면과 Preview에서 사용하는 fake 파티 카드 데이터
 val samplePartyCards = listOf(

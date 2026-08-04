@@ -45,7 +45,7 @@ private fun HomeResponseDto.toModel(): HomeData {
         completedChallenges = completedModels,
         settlementBanner = settlementBanner
             ?.takeUnless { it.isChecked }
-            ?.let { SettlementBanner(it.partyName, it.resultId) }
+            ?.let { SettlementBanner(it.partyName, it.partyId) }
     )
 }
 
