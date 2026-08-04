@@ -32,6 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.ui.component.AuthErrorBanner
 import com.example.onuldo_fe.ui.screen.mypage.component.AmountChip
 import com.example.onuldo_fe.ui.screen.mypage.component.AmountInputBox
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
@@ -41,6 +44,8 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.utils.formatPoint
+import com.example.onuldo_fe.viewmodel.mypage.PointChargeViewModel
 
 private data class AmountPreset(val label: String, val value: Int)
 
@@ -63,12 +68,15 @@ private val payMethods = listOf(
  * 포인트 충전 (v2) — Figma node `4019:4241`.
  * 금액 입력 + 프리셋 칩 + 결제 수단 선택.
  *
- * 값은 더미. TODO: 실제 결제(PG) 연동.
+ * 충전은 `POST /wallet/charges`로 처리한다.
+ * 결제 수단은 서버가 받지 않아 표시용이다 — TODO: 실제 결제(PG) 연동.
  */
 @Composable
 fun PointChargeScreen(
     onBack: () -> Unit,
+    viewModel: PointChargeViewModel = viewModel(),
 ) {
+    val state by viewModel.uiState.collectAsState()
     var selectedPreset by remember { mutableIntStateOf(1) } // 기본 +3만 = 30,000
     var selectedMethod by remember { mutableIntStateOf(0) } // 기본 토스페이
 
@@ -91,7 +99,7 @@ fun PointChargeScreen(
         ) {
             Spacer(Modifier.height(24.dp))
             Text(
-                text = "보유 52,000P",
+                text = "보유 ${formatPoint(state.balance)}",
                 fontFamily = Pretendard,
                 fontWeight = FontWeight.Medium,
                 fontSize = 13.sp,
@@ -155,13 +163,18 @@ fun PointChargeScreen(
                 color = MySubText,
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
+            state.errorMessage?.let { message ->
+                Spacer(Modifier.height(12.dp))
+                AuthErrorBanner(text = message, modifier = Modifier.padding(horizontal = 20.dp))
+            }
+
             Spacer(Modifier.height(24.dp))
         }
 
         PointCtaButton(
-            text = "${amountText}원 충전",
-            enabled = true,
-            onClick = { /* TODO: 결제 처리 후 지갑으로 복귀 */ onBack() },
+            text = if (state.isLoading) "충전 중..." else "${amountText}원 충전",
+            enabled = !state.isLoading,
+            onClick = { viewModel.charge(amount, onBack) },
         )
     }
 }

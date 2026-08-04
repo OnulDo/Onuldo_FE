@@ -1,8 +1,10 @@
 package com.example.onuldo_fe.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -15,6 +17,7 @@ import com.example.onuldo_fe.ui.screen.login.LandingScreen
 import com.example.onuldo_fe.ui.screen.login.LoginScreen
 import com.example.onuldo_fe.ui.screen.login.ProfileSetupScreen
 import com.example.onuldo_fe.ui.screen.login.SignupScreen
+import com.example.onuldo_fe.ui.screen.login.SocialTermsScreen
 import com.example.onuldo_fe.ui.screen.login.WelcomeScreen
 import com.example.onuldo_fe.ui.screen.main.MainScreen
 import com.example.onuldo_fe.ui.screen.mypage.NicknameEditScreen
@@ -25,11 +28,23 @@ import com.example.onuldo_fe.ui.screen.mypage.PointWithdrawScreen
 import com.example.onuldo_fe.ui.screen.mypage.ProfileSettingsScreen
 import com.example.onuldo_fe.ui.screen.mypage.WithdrawAccountScreen
 import com.example.onuldo_fe.ui.screen.mypage.SettingScreen
+import com.example.onuldo_fe.ui.screen.mypage.TermScreen
+import com.example.onuldo_fe.data.auth.dto.TermType
+import com.example.onuldo_fe.data.network.SessionEvents
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.onuldo_fe.camera.PhotoPreviewScreen
 import com.example.onuldo_fe.ui.screen.verification.ChallengeVerificationScreen
 import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
+
+/** 마이 메뉴 이름. 서버가 약관 제목을 주기 전까지 상단바에 쓴다. */
+private fun termTitleOf(termType: TermType): String = when (termType) {
+    TermType.SERVICE -> "서비스 이용약관"
+    TermType.PRIVACY -> "개인정보 처리방침"
+    TermType.REFUND -> "환급 정책"
+    TermType.AGE_14 -> "만 14세 이상"
+    TermType.MARKETING -> "마케팅 수신 동의"
+}
 
 /** 앱 전체 내비게이션 그래프. 랜딩 → 로그인/회원가입 → 프로필 설정 → 환영 → 메인(탭).
  *  (스플래시는 별도 화면이 아니라 시스템 스플래시로 처리 — [MainActivity]) */
@@ -42,6 +57,16 @@ fun OnuldoApp() {
 
     //카메라 -> previewScreen
     val cameraViewModel: CameraViewModel = viewModel()
+
+    // 리프레시 토큰까지 만료돼 자동 재발급이 실패하면 랜딩으로 되돌린다.
+    LaunchedEffect(Unit) {
+        SessionEvents.sessionExpired.collect {
+            SessionEvents.consume()
+            navController.navigate(Routes.LANDING) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
 
     NavHost(navController = navController, startDestination = debugStartDestination) {
         composable(Routes.LANDING) {
@@ -59,6 +84,15 @@ fun OnuldoApp() {
                     }
                 },
                 onSignupClick = { navController.navigate(Routes.SIGNUP) },
+                // 소셜 로그인 결과 신규 회원 → 약관 동의 → 프로필 설정 → oauth/signup
+                onSocialSignupNeeded = { navController.navigate(Routes.SOCIAL_TERMS) },
+            )
+        }
+        composable(Routes.SOCIAL_TERMS) {
+            SocialTermsScreen(
+                onBack = { navController.popBackStack() },
+                onNext = { navController.navigate(Routes.PROFILE_SETUP) },
+                onTermClick = { termType -> navController.navigate(Routes.mypageTerm(termType.name)) },
             )
         }
         composable(Routes.SIGNUP) {
@@ -86,7 +120,15 @@ fun OnuldoApp() {
             )
         }
         composable(Routes.MAIN) {
-            MainScreen(onNavigate = { route -> navController.navigate(route) })
+            MainScreen(
+                onNavigate = { route -> navController.navigate(route) },
+                // 로그아웃 시 온보딩 백스택을 모두 비우고 랜딩으로 되돌린다.
+                onLoggedOut = {
+                    navController.navigate(Routes.LANDING) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+            )
         }
 
         // --- 마이페이지 하위 화면 (메인 탭 위 풀스크린) ---
@@ -122,6 +164,19 @@ fun OnuldoApp() {
         // 알림 설정(시온)  //화면이 상태 자체 보유 → 등록만. 뒤로가기 → 마이로 복귀
         composable(Routes.MYPAGE_NOTIFICATION) {
             SettingScreen(onBackClick = { navController.popBackStack() })
+        }
+        // 약관 상세. termType(SERVICE/PRIVACY/REFUND)에 따라 본문을 서버에서 받아 표시한다.
+        composable(
+            route = Routes.MYPAGE_TERM,
+            arguments = listOf(navArgument("termType") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val raw = backStackEntry.arguments?.getString("termType").orEmpty()
+            val termType = TermType.entries.firstOrNull { it.name == raw } ?: TermType.SERVICE
+            TermScreen(
+                termType = termType,
+                fallbackTitle = termTitleOf(termType),
+                onBack = { navController.popBackStack() },
+            )
         }
 
         // 카메라 화면

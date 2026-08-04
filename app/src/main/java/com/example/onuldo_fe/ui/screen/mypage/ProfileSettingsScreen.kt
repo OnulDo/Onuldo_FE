@@ -26,7 +26,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.screen.login.ProfileCharacters
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageMenuRow
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.ui.theme.BlackBrown
@@ -34,6 +38,7 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.viewmodel.mypage.ProfileSettingsViewModel
 
 /** 프로필 아바타 원형 배경 (#FFEBDE). */
 private val AvatarBackground = Color(0xFFFFEBDE)
@@ -42,16 +47,24 @@ private val AvatarBackground = Color(0xFFFFEBDE)
  * 프로필 설정 (마이 진입) — Figma node `4019:4672`.
  * 아바타 + 닉네임/이메일 + 기본 정보(닉네임 변경·이메일·비밀번호 변경) 행.
  *
- * 값은 더미. TODO: ViewModel/API 연동. 아바타 편집(📷)은 TODO 스텁.
+ * 표시값은 `GET /api/users/me/profile`로 채운다.
+ * 아바타 편집(📷)은 서버에 프로필 수정 API가 없어 아직 동작하지 않는다.
  */
 @Composable
 fun ProfileSettingsScreen(
     onBack: () -> Unit,
     onNicknameClick: () -> Unit,
     onPasswordClick: () -> Unit,
-    nickname: String = "오늘두",
-    email: String = "user@example.com",
+    viewModel: ProfileSettingsViewModel = viewModel(),
 ) {
+    val state by viewModel.uiState.collectAsState()
+    val nickname = state.nickname
+    val email = state.email
+    // 서버가 배정한 캐릭터가 앱 목록에 있으면 그 캐릭터를, 없으면 기본 아바타를 쓴다.
+    val avatarRes = state.characterIndex
+        ?.let { ProfileCharacters.getOrNull(it) }
+        ?: R.drawable.img_avatar_running
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -78,7 +91,7 @@ fun ProfileSettingsScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.img_avatar_running),
+                        painter = painterResource(avatarRes),
                         contentDescription = null,
                         modifier = Modifier.size(84.dp),
                     )

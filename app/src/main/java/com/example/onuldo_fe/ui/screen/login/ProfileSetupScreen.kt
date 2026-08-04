@@ -34,6 +34,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.ui.component.AuthErrorBanner
 import com.example.onuldo_fe.ui.component.OnboardingBackHeader
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.component.OnuldoTextField
@@ -180,8 +181,22 @@ fun ProfileSetupScreen(
 
         Spacer(Modifier.weight(1f))
 
+        // 회원가입 API가 이 화면에서 호출되므로 서버 실패 문구도 여기에 노출된다.
+        // 이메일 중복처럼 이 화면에서 못 고치는 오류는 회원가입 화면으로 되돌아가도록 안내한다.
+        state.errorMessage?.let { message ->
+            AuthErrorBanner(
+                text = if (state.requiresEmailChange) {
+                    "$message\n회원가입 화면으로 돌아가 이메일을 변경해주세요."
+                } else {
+                    message
+                },
+                modifier = Modifier.padding(horizontal = 20.dp),
+            )
+            Spacer(Modifier.height(12.dp))
+        }
+
         OnulDoButton(
-            text = "계속",
+            text = if (state.isLoading) "가입 중..." else "계속",
             onClick = { viewModel.submit(onDone) },
             enabled = state.isContinueEnabled,
         )

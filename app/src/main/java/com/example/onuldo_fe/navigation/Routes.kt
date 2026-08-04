@@ -7,6 +7,8 @@ object Routes {
     const val LANDING = "landing"
     const val LOGIN = "login"
     const val SIGNUP = "signup"
+    /** 소셜 신규 회원 약관 동의 (소셜 로그인에서 isNewUser=true일 때만 진입) */
+    const val SOCIAL_TERMS = "social_terms"
     const val PROFILE_SETUP = "profile_setup"
     const val WELCOME = "welcome"
     const val MAIN = "main"
@@ -21,6 +23,10 @@ object Routes {
     const val MYPAGE_ACCOUNT = "mypage_account"
     //알림 설정 -> 알림 설정페이지 추가 (시온)
     const val MYPAGE_NOTIFICATION = "mypage_notification"
+
+    // 약관 상세 (서비스 이용약관·개인정보 처리방침·환급 정책) — termType을 인자로 받는다.
+    const val MYPAGE_TERM = "mypage_term/{termType}"
+    fun mypageTerm(termType: String) = "mypage_term/$termType"
 
     // 챌린지 상세 흐름: 갤러리 → 상세 → 참여 → 시작 완료
     // 상세는 challengeId를 경로 인자로 받는다. (네비 등록용 패턴 + 이동용 빌더 함께 사용)

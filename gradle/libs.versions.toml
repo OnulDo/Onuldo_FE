@@ -1,5 +1,5 @@
 [versions]
-agp = "9.3.0"
+agp = "9.3.1"
 coreKtx = "1.18.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -14,6 +14,8 @@ runtime = "1.11.4"
 cameraX = "1.4.2"
 retrofit = "3.0.0"
 okhttp = "4.12.0"
+kakaoSdk = "2.21.1"
+naverOauth = "5.10.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +44,9 @@ androidx-camera-view = { group = "androidx.camera", name = "camera-view", versio
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+kakao-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakaoSdk" }
+naver-oauth = { group = "com.navercorp.nid", name = "oauth", version.ref = "naverOauth" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
