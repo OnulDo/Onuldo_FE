@@ -1,0 +1,21 @@
+<!--
+  프로필 사진 추가용 플러스 아이콘.
+  텍스트 '+'는 폰트 baseline 때문에 원 안에서 미세하게 위로 치우쳐, 도형으로 그려 정확히 중앙에 맞춘다.
+  선 두께 4, 끝 라운드 처리(24 그리드 기준).
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M12,4 L12,20"
+        android:strokeColor="#FC6B2B"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M4,12 L20,12"
+        android:strokeColor="#FC6B2B"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+</vector>

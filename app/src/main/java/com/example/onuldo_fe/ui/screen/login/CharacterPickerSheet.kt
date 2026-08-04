@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +62,9 @@ fun CharacterPickerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = SourCream,
+        // 기본 시트는 절반 높이에서 멈춰 9개가 한 화면에 안 들어온다.
+        // skipPartiallyExpanded로 처음부터 전체 높이로 펼친다.
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
         Text(
             text = "프로필 사진 선택",
@@ -108,7 +112,8 @@ private fun CharacterCell(
         modifier = Modifier
             .size(90.dp)
             .clip(CircleShape)
-            .background(if (selected) Persimmon10 else White)
+            // Figma: 셀 배경은 흰색이 아니라 아이보리(SourCream).
+            .background(if (selected) Persimmon10 else SourCream)
             .border(
                 width = if (selected) 2.dp else 1.dp,
                 color = if (selected) Persimmon else DarkBrown40,
