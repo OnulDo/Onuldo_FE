@@ -33,7 +33,6 @@ import com.example.onuldo_fe.data.auth.dto.TermType
 import com.example.onuldo_fe.data.network.SessionEvents
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.example.onuldo_fe.camera.CameraPermissionScreen
 import com.example.onuldo_fe.camera.PhotoPreviewScreen
 import com.example.onuldo_fe.ui.screen.verification.ChallengeVerificationScreen
 import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
@@ -177,17 +176,6 @@ fun OnuldoApp() {
                 termType = termType,
                 fallbackTitle = termTitleOf(termType),
                 onBack = { navController.popBackStack() },
-            )
-        }
-
-        composable(Routes.CAMERA_PERMISSION) {
-            CameraPermissionScreen(
-                onBack = { navController.popBackStack() },
-                onPermissionGranted = {
-                    navController.navigate(Routes.CAMERA) {
-                        popUpTo(Routes.CAMERA_PERMISSION) { inclusive = true }
-                    }
-                }
             )
         }
 

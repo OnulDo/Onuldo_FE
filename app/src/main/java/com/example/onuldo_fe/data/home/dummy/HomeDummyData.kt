@@ -31,7 +31,7 @@ object HomeDummyData {
         ),
         settlementBanner = SettlementBannerDto(
             partyName = "새벽 러너 파티",
-            resultId = "settlement-001"
+            partyId = 1L
         )
     )
 

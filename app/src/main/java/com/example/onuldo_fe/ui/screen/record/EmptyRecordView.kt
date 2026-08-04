@@ -26,7 +26,8 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 fun EmptyRecordView(
     modifier: Modifier = Modifier,
     title: String,
-    description: String
+    description: String,
+    onBrowseChallenges: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
 
@@ -56,7 +57,7 @@ fun EmptyRecordView(
 
         Text(
             text = description,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.labelLarge,
             color = DarkBrown,
             textAlign = TextAlign.Center
         )
@@ -65,8 +66,7 @@ fun EmptyRecordView(
 
         OnulDoMediumButton(
             text = "챌린지 둘러보기",
-            onClick = {},
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            onClick = onBrowseChallenges
         )
     }
 }

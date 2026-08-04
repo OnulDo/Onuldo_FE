@@ -1,52 +1,72 @@
 package com.example.onuldo_fe.data.party.dto
 
-// 새로운 파티를 생성할 때 서버로 전달하는 요청
+/** POST /api/parties 요청. */
 data class CreatePartyRequestDto(
-    val name: String,                          // 생성할 파티 이름
-    val challengeId: String,                   // 연계할 챌린지 ID
-    val challengeName: String,                 // 연계할 챌린지 이름
-    val period: String,                        // 파티 공통 진행 기간
-    val deposit: Int,                          // 파티원 1인당 도전금
-    val capacity: Int                          // 방장을 포함한 모집 최대 인원
+    val name: String,                          // 파티 이름
+    val challengeId: Long,                    // 서버에 등록된 챌린지 ID
+    val durationDays: Int,                    // 파티 진행 기간(일)
+    val depositAmount: Int,                   // 파티원 1인당 도전금
+    val maxMembers: Int                       // 파티장을 포함한 최대 모집 인원
 )
 
-// 파티 생성 성공 후 발급된 파티 정보 응답
+/** POST /api/parties 응답의 result. */
 data class CreatePartyResponseDto(
-    val partyId: String,                       // 생성된 파티 ID
-    val inviteCode: String                     // 서버에서 발급한 6자리 초대코드
+    val partyId: Long,                        // 생성된 파티 ID
+    val name: String,                         // 생성된 파티 이름
+    val inviteCode: String,                   // 서버가 발급한 초대 코드
+    val inviteExpiresAt: String,              // 초대 코드 만료 시각
+    val status: String,                       // 생성 직후 파티 상태
+    val hostUserId: Long,                     // 파티장 사용자 ID
+    val maxMembers: Int,                      // 최대 모집 인원
+    val createdAt: String                     // 파티 생성 시각
 )
 
-// 파티 대기방에 참여 중인 파티원 정보 응답
+/** POST /api/parties/join 요청. */
+data class PartyJoinRequestDto(
+    val inviteCode: String
+)
+
+/** 대기방 응답에 포함되는 파티원. */
 data class PartyMemberDto(
-    val id: String,                            // 파티원 고유 ID
-    val nickname: String,                      // 파티원 닉네임
-    val profileImageUrl: String?,              // 파티원 프로필 이미지 URL
-    val role: String,                          // 파티 역할(LEADER 또는 MEMBER)
-    val readyStatus: String,                   // 준비 상태(NOT_APPLICABLE, WAITING, READY)
-    val joinedOrder: Int                       // 방장 승계를 위한 파티 입장 순서
+    val userId: Long,
+    val nickname: String,
+    val profileImageUrl: String?,
+    val role: String,
+    val status: String
 )
 
-// 파티원 모집과 준비 상태를 표시하기 위한 대기방 정보 응답
+/** 대기방 조회·참여·준비 상태 토글 응답의 result. */
 data class PartyWaitingRoomDto(
-    val partyId: String,                       // 대기 중인 파티 ID
-    val partyName: String,                     // 파티 이름
-    val challengeName: String,                 // 연계된 챌린지 이름
-    val inviteCode: String,                    // 파티 참여용 6자리 초대코드
-    val period: String,                        // 파티 공통 진행 기간
-    val deposit: Int,                          // 파티원 1인당 도전금
-    val capacity: Int,                         // 방장을 포함한 모집 최대 인원
-    val members: List<PartyMemberDto>           // 현재 대기방에 참여한 파티원 목록
+    val partyId: Long,
+    val name: String,
+    val goal: String?,
+    val status: String,
+    val inviteCode: String,
+    val currentMembers: Int,
+    val maxMembers: Int,
+    val durationDays: Int,
+    val depositAmount: Int,
+    val members: List<PartyMemberDto>,
+    val isHost: Boolean,
+    val canStart: Boolean
 )
 
-// 파티 홈의 진행 중인 파티 카드에 표시할 요약 정보 응답
+/** GET /api/parties 응답의 result 항목. */
 data class PartySummaryDto(
-    val partyId: String,                       // 파티 고유 ID
-    val partyName: String,                     // 파티 이름
-    val challengeName: String,                 // 연계된 챌린지 이름
-    val dDay: String,                          // 챌린지 종료일까지 남은 기간
-    val deadline: String,                      // 오늘 인증 마감 시간
-    val remainingText: String?,                // 오늘 인증 마감까지 남은 시간 문구
-    val completedMemberCount: Int,             // 오늘 인증을 완료한 파티원 수
-    val totalMemberCount: Int,                 // 현재 참여 중인 전체 파티원 수
-    val status: String                         // 파티 상태(RECRUITING, IN_PROGRESS, DISBANDED)
+    val partyId: Long,
+    val name: String,
+    val goal: String,
+    val deadline: String?,
+    val status: String,
+    val dDay: Int,
+    val progressRate: Double,
+    val verifiedToday: Int,
+    val totalMembers: Int
+)
+
+/** POST /api/parties/{partyId}/start 응답의 result. */
+data class PartyStartResponseDto(
+    val partyId: Long,                        // 시작된 파티 ID
+    val status: String,                       // 시작 후 파티 상태(ONGOING)
+    val startTriggeredAt: String              // 서버에서 시작 처리가 완료된 시각
 )

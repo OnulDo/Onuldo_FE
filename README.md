@@ -15,7 +15,7 @@
 - **Architecture**: MVVM
 - **UI**: Jetpack Compose
 - **Asynchronous**: Kotlin Coroutines
-- **Image Loading**: Glide
+- **Image Loading**: Coil
 - **Camera**: CameraX
 
 ## 📂 프로젝트 구조

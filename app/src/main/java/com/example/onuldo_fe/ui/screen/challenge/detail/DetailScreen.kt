@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +37,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 
@@ -53,10 +55,13 @@ fun DetailScreen(
     verificationDescription: String = "침대와 개어진 이불 사진이 나오게 촬영하기",
     onBackClick: () -> Unit = {},
     onJoinClick: () -> Unit = {},
+    // 파티 생성 흐름에서 상세 화면을 재사용할 때 CTA 문구만 변경할 수 있도록 외부에서 전달
+    ctaText: String = "참여하기",
     modifier: Modifier = Modifier
 ) {
     // 바텀시트는 화면 이동(Navigation)이 아니라 이 화면의 상태(State)
     var showNoticeSheet by remember { mutableStateOf(false) }
+    val spacing = LocalSpacing.current
 
     Column(
         modifier = modifier
@@ -74,9 +79,8 @@ fun DetailScreen(
         ) {
             OnulDoBackButton(
                 onClick = onBackClick,
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = 8.dp)
+                // 패딩 없이 정렬만 — IconButton 중앙정렬로 화살표가 가로 20에 맞음(본문과 정렬)
+                modifier = Modifier.align(Alignment.CenterStart)
             )
         }
 
@@ -166,10 +170,7 @@ fun DetailScreen(
                         // 갈색 제목
                         Text(
                             text = benefit.title,
-                            fontFamily = Pretendard,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp,
-                            lineHeight = 22.sp,
+                            style = MaterialTheme.typography.bodyMedium,  // Body3
                             color = DarkBrown
                         )
                         // 제목 밑 설명 한 줄
@@ -203,7 +204,7 @@ fun DetailScreen(
                 }
             }
 
-            Spacer(Modifier.height(30.dp))
+            Spacer(Modifier.height(spacing.spacing30))
             VerificationMethodCard(
                 title = verificationTitle,
                 description = verificationDescription,
@@ -211,11 +212,11 @@ fun DetailScreen(
             )
         }
 
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(spacing.spacing10))
 
         // 참여하기 버튼
         OnulDoButton(
-            text = "참여하기",
+            text = ctaText,
             onClick = onJoinClick,
             modifier = Modifier.padding(bottom = 48.dp)
         )
