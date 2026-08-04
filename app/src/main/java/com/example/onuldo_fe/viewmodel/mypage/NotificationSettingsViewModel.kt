@@ -18,9 +18,11 @@ import kotlinx.coroutines.launch
 /**
  * 마이 - 알림 설정.
  *
- * 서버는 `allEnabled`를 개별 5종에서 **계산해 내려주는 읽기 전용 값**이고,
- * `PATCH`는 개별 항목 하나씩만 받는다. 그래서 "전체 알림 수신" 토글은 5종을 모두 같은 값으로
- * 바꾸는 것으로 구현한다("모든 알림을 한 번에 끄거나 켤 수 있어요" 문구와도 일치).
+ * 서버 `PATCH`는 개별 항목 하나씩만 받고 "전체" 타입이 없다. 그래서 "전체 알림 수신" 토글은
+ * 5종을 모두 같은 값으로 바꾸는 것으로 구현한다("모든 알림을 한 번에 끄거나 켤 수 있어요" 문구와 일치).
+ * 개별 항목을 바꿀 때는 마스터 스위치를 건드리지 않는다(화면이 마스터로 개별 토글을 잠그기 때문).
+ *
+ * ⚠️ 마스터 스위치를 끈 상태는 서버에 저장되지 않는다 — [NotificationSettings] 주석 참고.
  *
  * 화면은 기존 [NotificationSettingsState]를 그대로 쓰고, 여기서 서버 모델과 상호 변환한다.
  */
@@ -98,7 +100,6 @@ class NotificationSettingsViewModel(
     fun consumeError() = _errorMessage.update { null }
 }
 
-/** 전체 토글이 켜지면 개별 5종도 모두 켜진 것으로 본다(서버가 allEnabled를 그렇게 계산한다). */
 private fun NotificationSettings.toUiState() = NotificationSettingsState(
     all = allEnabled,
     challengeStart = challengeStart,
