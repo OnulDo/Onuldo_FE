@@ -1,5 +1,10 @@
 package com.example.onuldo_fe.ui.screen.mypage
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -17,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,15 +31,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.collectAsState
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.component.OnulDoSwitch
+import com.example.onuldo_fe.ui.component.PermissionDialogType
+import com.example.onuldo_fe.ui.component.PermissionSettingDialog
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
@@ -54,6 +64,8 @@ fun SettingScreen(
     modifier: Modifier = Modifier,
     viewModel: NotificationSettingsViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+
     // 서버 값(GET /api/users/me/notification-settings)으로 채우고, 변경 시 PATCH로 저장한다.
     val state by viewModel.state.collectAsState()
 
@@ -61,7 +73,23 @@ fun SettingScreen(
         viewModel.apply(state.update())
     }
 
-    // 전체 알림이 꺼지면 개별 알림은 값을 유지한 채 비활성 표시만 한다! (버튼 누르기 비활성)
+    // 진입 시 알림 권한이 없으면 안내 팝업을 띄운다(권한 없을 때 진입할 때마다).
+    //TODO: API 33 미만은 런타임 알림 권한이 없어 항상 허용된 것으로 봄( 예외를 어떻게 할것?)
+    var showNotificationPermissionDialog by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        val granted =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            } else {
+                true
+            }
+        showNotificationPermissionDialog = !granted
+    }
+
+    // 전체 알림이 꺼지면 개별 알림도 모두 꺼짐 + 비활성
     val subEnabled = state.all
 
     Column(
@@ -71,7 +99,6 @@ fun SettingScreen(
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
     ) {
-        // 헤더 — 다른 마이 화면과 같은 56dp 높이
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -79,7 +106,6 @@ fun SettingScreen(
             contentAlignment = Alignment.Center
         ) {
             OnulDoBackButton(
-                // 패딩 없이 정렬만 — IconButton 중앙정렬로 화살표가 가로 20에 맞음(본문과 정렬)
                 modifier = Modifier.align(Alignment.CenterStart),
                 onClick = onBackClick
             )
@@ -99,7 +125,19 @@ fun SettingScreen(
             title = "전체 알림 수신",
             description = "모든 알림을 한 번에 끄거나 켤 수 있어요",
             checked = state.all,
-            onCheckedChange = { updateState { copy(all = it) } },
+            // 전체 토글은 개별 5종을 모두 같은 값으로 전파한다(끄면 전부 off, 켜면 전부 on)
+            onCheckedChange = { checked ->
+                updateState {
+                    copy(
+                        all = checked,
+                        challengeStart = checked,
+                        deadline = checked,
+                        result = checked,
+                        refund = checked,
+                        deduction = checked
+                    )
+                }
+            },
             height = 80.dp,
             backgroundColor = Persimmon10,
             borderColor = Persimmon20
@@ -164,6 +202,21 @@ fun SettingScreen(
         )
 
         Spacer(Modifier.height(40.dp))
+    }
+
+    // 알림 권한 안내 팝업(권한x) → "설정으로 이동"이면 시스템 알림설정으로
+    if (showNotificationPermissionDialog) {
+        PermissionSettingDialog(
+            type = PermissionDialogType.NOTIFICATION,
+            onDismiss = { showNotificationPermissionDialog = false },
+            onMoveToSettings = {
+                showNotificationPermissionDialog = false
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+                context.startActivity(intent)
+            }
+        )
     }
 }
 
