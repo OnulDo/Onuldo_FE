@@ -27,7 +27,6 @@ import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
-import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.White
@@ -37,80 +36,44 @@ fun CompleteRecordCard(
     isSuccess: Boolean,
     title: String,
     progress: Int,
-    completeDate:String,
-    point: Int,
+    completeDate: String,
+    point: Int
 ) {
-    val chipText = if(isSuccess) "성공" else "실패"
-    val chipBackground = if(isSuccess) Green2 else Red2
-    val cardTextColor = if(isSuccess) Green else Red
-
+    val statusColor = if (isSuccess) Green else Red
     Surface(
         shape = RoundedCornerShape(14.dp),
         border = BorderStroke(1.dp, DarkBrown40),
         color = White,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(104.dp),
-        ) {
-        Column(
-            modifier = Modifier.padding(15.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(15.dp)) {
+            Surface(
+                modifier = Modifier.width(52.dp).height(22.dp),
+                shape = RoundedCornerShape(11.dp),
+                color = if (isSuccess) Green2 else Red2
             ) {
-                Surface(
-                    modifier = Modifier
-                        .width(52.dp)
-                        .height(22.dp),
-                    shape = RoundedCornerShape(11.dp),
-                    color = chipBackground
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = chipText,
-                            style = MaterialTheme.typography.titleSmall,
-                            color = cardTextColor
-                        )
-                    }
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = if (isSuccess) "성공" else "실패",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = statusColor
+                    )
                 }
             }
-
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Spacer(Modifier.height(8.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(title, style = MaterialTheme.typography.bodyMedium, color = BlackBrown)
                 Text(
-                    text = title,
+                    text = "${if (point > 0) "+" else ""}${"%,d".format(point)}P",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = BlackBrown
-                )
-
-                Text(
-                    text = "${if (isSuccess) "+" else ""}${point}P",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = cardTextColor
+                    color = statusColor
                 )
             }
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Spacer(Modifier.height(15.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("달성률 $progress%", style = MaterialTheme.typography.labelMedium, color = DarkBrown)
                 Text(
-                    text = "달성률 $progress%",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = DarkBrown
-                )
-                Text(
-                    text = completeDate + if (isSuccess) " 완료" else " 실패",
+                    "$completeDate ${if (isSuccess) "완료" else "실패"}",
                     style = MaterialTheme.typography.labelMedium,
                     color = DarkBrown50
                 )
@@ -121,29 +84,6 @@ fun CompleteRecordCard(
 
 @Preview(showBackground = true)
 @Composable
-fun CompleteRecordCardTruePreview() {
-    OnulDo_FETheme {
-        CompleteRecordCard(
-            isSuccess = true,
-            title = "독서30분",
-            progress = 92,
-            completeDate = "2026.04.15",
-            point = 18400,
-        )
-    }
+private fun CompleteRecordCardPreview() {
+    OnulDo_FETheme { CompleteRecordCard(true, "매일 6시 기상", 92, "2026-08-10", 30000) }
 }
-
-@Preview(showBackground = false)
-@Composable
-fun CompleteRecordCardFalsePreview() {
-    OnulDo_FETheme {
-        CompleteRecordCard(
-            isSuccess = false,
-            title = "독서30분",
-            progress = 92,
-            completeDate = "2026.04.15",
-            point = -18400,
-        )
-    }
-}
-

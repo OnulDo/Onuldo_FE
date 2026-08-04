@@ -42,7 +42,6 @@ class LoginViewModel : ViewModel() {
         val state = _uiState.value
 
         if (!Validators.isValidEmail(state.email)) {
-            // 설계(에러 화면): 비번 필드 빨간 테두리 + 인라인 문구 + 배너. 입력값은 유지.
             _uiState.update {
                 it.copy(errorMessage = "이메일 또는 비밀번호가 일치하지 않습니다")
             }

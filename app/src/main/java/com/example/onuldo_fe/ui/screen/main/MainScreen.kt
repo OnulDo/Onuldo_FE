@@ -26,7 +26,7 @@ import com.example.onuldo_fe.ui.screen.home.HomeRoute
 import com.example.onuldo_fe.ui.screen.mypage.MyMainScreen
 import com.example.onuldo_fe.ui.screen.party.PartyRoute
 import com.example.onuldo_fe.ui.screen.party.PartySettlementRoute
-import com.example.onuldo_fe.ui.screen.record.RecordScreen
+import com.example.onuldo_fe.ui.screen.record.RecordRoute
 import com.example.onuldo_fe.ui.screen.record.data.CompleteRecord
 import kotlin.collections.emptyList
 
@@ -115,24 +115,16 @@ fun MainScreen(
                 )
             }
             composable(BottomTab.Record.route) {
-                RecordScreen(
-                    progressList = emptyList(),
-                    completeList = listOf(
-                        CompleteRecord(
-                            isSuccess = true,
-                            title = "운동 30분 하기",
-                            progress = 100,
-                            completeDate = "2026.07.22",
-                            point = 5000
-                        ),
-                        CompleteRecord(
-                            isSuccess = false,
-                            title = "책 50페이지 읽기",
-                            progress = 70,
-                            completeDate = "2026.07.18",
-                            point = -1000
-                        )
-                    )
+                RecordRoute(
+                    onBrowseChallenges = {
+                        navController.navigate(BottomTab.Challenge.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
             }
             composable(BottomTab.My.route) {
