@@ -53,9 +53,9 @@ fun VerificationNoticeBottomSheet(
     challengeTitle: String,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    // TODO: 실제 데이터(챌린지별 인증 조건)로 교체 / 더미 데이터 — API 연동 시 교체
-    successConditions: List<String> = defaultSuccessConditions,
-    failureConditions: List<String> = defaultFailureConditions
+    // 성공/실패 조건. 비어 있으면(미전달/서버 데이터 없음) 아래에서 기본 조건으로 폴백한다.
+    successConditions: List<String> = emptyList(),
+    failureConditions: List<String> = emptyList()
 ) {
     // skipPartiallyExpanded = 처음부터 전체 펼침 → 확인 버튼까지 바로 보임
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -114,24 +114,31 @@ fun VerificationNoticeBottomSheet(
 
         Spacer(Modifier.height(spacing.spacing12))
 
+        // 조건 리스트는 명세상 optional(required=false) → 비어 있으면 빈 박스 대신 섹션 자체를 숨긴다
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-            ConditionBox(
-                title = "인증 성공 조건",
-                items = successConditions,
-                accent = Green,
-                background = Green2,
-                isSuccess = true
-            )
+            if (successConditions.isNotEmpty()) {
+                ConditionBox(
+                    title = "인증 성공 조건",
+                    items = successConditions,
+                    accent = Green,
+                    background = Green2,
+                    isSuccess = true
+                )
+            }
 
-            Spacer(Modifier.height(spacing.spacing24))
+            if (successConditions.isNotEmpty() && failureConditions.isNotEmpty()) {
+                Spacer(Modifier.height(spacing.spacing24))
+            }
 
-            ConditionBox(
-                title = "인증 실패 조건",
-                items = failureConditions,
-                accent = Red,
-                background = Red2,
-                isSuccess = false
-            )
+            if (failureConditions.isNotEmpty()) {
+                ConditionBox(
+                    title = "인증 실패 조건",
+                    items = failureConditions,
+                    accent = Red,
+                    background = Red2,
+                    isSuccess = false
+                )
+            }
         }
 
         Spacer(Modifier.height(spacing.spacing36))   // 빨간 박스 ↔ 확인 버튼 36
@@ -209,18 +216,3 @@ private fun ConditionBox(
     }
 }
 
-// 더미 데이터 — 나중에 DB
-private val defaultSuccessConditions = listOf(
-    "침대와 개어진 이불이 사진에 함께 보여요",
-    "인증 가능 시간(05:00 - 07:00) 내에 촬영",
-    "카메라로 직접 촬영한 사진만 인정돼요",
-    "본인 침대가 명확히 식별돼요"
-)
-
-private val defaultFailureConditions = listOf(
-    "갤러리에서 업로드한 사진",
-    "침대 또는 이불이 보이지 않음",
-    "이불이 정돈되지 않은 상태",
-    "미션 조건(개어진 이불) 미충족",
-    "동일/유사 사진 재사용"
-)
