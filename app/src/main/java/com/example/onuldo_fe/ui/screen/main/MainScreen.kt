@@ -95,7 +95,9 @@ fun MainScreen(
             }
             composable(BottomTab.Challenge.route) {
                 GalleryScreen(
-                    onChallengeClick = { onNavigate(Routes.CHALLENGE_DETAIL) },
+                    onChallengeClick = { challenge ->
+                        onNavigate(Routes.challengeDetail(challenge.id))
+                    },
                 )
             }
             composable(BottomTab.Party.route) {

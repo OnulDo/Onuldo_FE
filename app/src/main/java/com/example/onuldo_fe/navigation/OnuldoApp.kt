@@ -8,11 +8,11 @@ import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.onuldo_fe.camera.CameraScreen
 import com.example.onuldo_fe.camera.CameraViewModel
-import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
-import com.example.onuldo_fe.ui.screen.challenge.participate.ParticipateScreen
-import com.example.onuldo_fe.ui.screen.challenge.participate.StartDoneScreen
+import com.example.onuldo_fe.ui.screen.challenge.detail.DetailRoute
+import com.example.onuldo_fe.ui.screen.challenge.participate.ParticipateRoute
 import com.example.onuldo_fe.ui.screen.login.LandingScreen
 import com.example.onuldo_fe.ui.screen.login.LoginScreen
 import com.example.onuldo_fe.ui.screen.login.ProfileSetupScreen
@@ -251,29 +251,53 @@ fun OnuldoApp() {
 
 
         // --- 챌린지 상세 흐름 (챌린지 탭 위 풀스크린): 상세 → 참여 → 시작 완료 ---
-        // 콜백만으로 화면끼리 연동. 각 화면은 자체 더미 데이터 표시(id 전달·조회 없음).
-        composable(Routes.CHALLENGE_DETAIL) {
-            DetailScreen(
+        // 상세는 challengeId를 받아 API로 조회(DetailRoute). 참여/완료는 콜백으로 연동.
+        composable(
+            route = Routes.CHALLENGE_DETAIL,
+            arguments = listOf(navArgument(Routes.CHALLENGE_DETAIL_ARG) { type = NavType.LongType })
+        ) { backStackEntry ->
+            val challengeId = backStackEntry.arguments?.getLong(Routes.CHALLENGE_DETAIL_ARG) ?: 0L
+            DetailRoute(
+                challengeId = challengeId,
                 onBackClick = { navController.popBackStack() },
-                onJoinClick = { navController.navigate(Routes.CHALLENGE_PARTICIPATE) },
+                onJoinClick = { title, description, category, timeStart, timeEnd ->
+                    navController.navigate(
+                        Routes.challengeParticipate(
+                            challengeId, title, description, category, timeStart, timeEnd
+                        )
+                    )
+                },
             )
         }
-        composable(Routes.CHALLENGE_PARTICIPATE) {
-            ParticipateScreen(
-                onBackClick = { navController.popBackStack() },
-                onStartClick = { navController.navigate(Routes.CHALLENGE_START_DONE) },
-                // 잔액 부족 팝업의 "충전하기" → 포인트 충전 화면
-                onChargePoint = { navController.navigate(Routes.MYPAGE_CHARGE) },
+        composable(
+            route = Routes.CHALLENGE_PARTICIPATE,
+            arguments = listOf(
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG) { type = NavType.LongType },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_TITLE) { type = NavType.StringType; defaultValue = "" },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_DESC) { type = NavType.StringType; defaultValue = "" },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_CATEGORY) { type = NavType.StringType; defaultValue = "" },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_START) { type = NavType.StringType; defaultValue = "" },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_END) { type = NavType.StringType; defaultValue = "" }
             )
-        }
-        composable(Routes.CHALLENGE_START_DONE) {
-            StartDoneScreen(
-                // "홈으로 가기" → 상세 흐름 백스택 정리하고 메인(홈)으로
-                onHomeClick = {
+        ) { backStackEntry ->
+            val challengeId = backStackEntry.arguments?.getLong(Routes.CHALLENGE_PARTICIPATE_ARG) ?: 0L
+            val args = backStackEntry.arguments
+            ParticipateRoute(
+                challengeId = challengeId,
+                title = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_TITLE).orEmpty(),
+                description = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_DESC).orEmpty(),
+                category = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_CATEGORY).orEmpty(),
+                timeStart = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_START).orEmpty(),
+                timeEnd = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_END).orEmpty(),
+                onBackClick = { navController.popBackStack() },
+                // 참여 성공 완료 화면(StartDone)의 "홈으로 가기" → 상세 흐름 백스택 정리하고 메인(홈)으로
+                onHome = {
                     navController.navigate(Routes.MAIN) {
                         popUpTo(Routes.MAIN) { inclusive = true }
                     }
                 },
+                // 잔액 부족 팝업의 "충전하기" → 포인트 충전 화면
+                onChargePoint = { navController.navigate(Routes.MYPAGE_CHARGE) },
             )
         }
     }

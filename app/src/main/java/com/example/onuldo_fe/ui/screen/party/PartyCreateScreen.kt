@@ -188,4 +188,4 @@ private fun SectionTitle(text: String, size: Int) = Text(
 @Composable private fun PartyCreateEmptyPreview() { OnulDo_FETheme { PartyCreateScreen("", {}, 5, {}, null, {}, {}, { _, _ -> }) } }
 
 @Preview(name = "파티 생성 - 챌린지 선택", showBackground = true, widthDp = 390, heightDp = 844)
-@Composable private fun PartyCreateSelectedPreview() { OnulDo_FETheme { PartyCreateScreen("갓생팟", {}, 5, {}, Challenge(1, "30일 헬스 챌린지", 0), {}, {}, { _, _ -> }) } }
+@Composable private fun PartyCreateSelectedPreview() { OnulDo_FETheme { PartyCreateScreen("갓생팟", {}, 5, {}, Challenge(1L, "30일 헬스 챌린지", 0), {}, {}, { _, _ -> }) } }

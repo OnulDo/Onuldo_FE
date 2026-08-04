@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.Persimmon
@@ -41,7 +42,9 @@ fun VerificationMethodCard(
     title: String,
     description: String,
     onShowNotice: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // 서버 인증 예시 사진(verificationExamplePhotoUrl). null이면 로컬 drawable로 폴백.
+    imageUrl: String? = null
 ) {
     Column(
         modifier = modifier
@@ -64,17 +67,23 @@ fun VerificationMethodCard(
             color = Persimmon
         )
 
-        Text(
-            text = description,
-            modifier = Modifier.padding(top = 2.dp),
-            style = MaterialTheme.typography.labelLarge,  // Caption1
-            color = BlackBrown
-        )
+        // 서버 인증 안내가 비어있으면 줄을 숨긴다(빈 줄 방지).
+        if (description.isNotBlank()) {
+            Text(
+                text = description,
+                modifier = Modifier.padding(top = 2.dp),
+                style = MaterialTheme.typography.labelLarge,  // Caption1
+                color = BlackBrown
+            )
+        }
 
-        // 인증 예시 사진
-        Image(
-            painter = painterResource(R.drawable.challenge_detail_verification),
+        // 인증 예시 사진 — 서버 URL 우선, 없으면 로컬 drawable 폴백 (Coil은 String/Int 둘 다 model로 받음)
+        // URL이 있어도 로딩 중/로드 실패 시 로컬 이미지로 폴백해 빈 영역이 남지 않게 한다.
+        AsyncImage(
+            model = imageUrl ?: R.drawable.challenge_detail_verification,
             contentDescription = "인증 예시 사진",
+            placeholder = painterResource(R.drawable.challenge_detail_verification),
+            error = painterResource(R.drawable.challenge_detail_verification),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 16.dp)

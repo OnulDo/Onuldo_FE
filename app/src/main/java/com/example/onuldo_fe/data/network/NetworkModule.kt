@@ -66,7 +66,8 @@ object NetworkModule {
             .build()
     }
 
-    private val retrofit: Retrofit by lazy {
+    /** 공통 Retrofit 인스턴스. 직접 쓰기보다 [create]를 권장하며, [RetrofitClient]가 이 값을 노출한다. */
+    val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
