@@ -1,7 +1,21 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
+
+/**
+ * 소셜 로그인 키는 `local.properties`에서 읽는다(이 파일은 커밋되지 않는다).
+ * 값이 없으면 빈 문자열로 두어 빌드는 통과시키고, 소셜 로그인만 비활성화된다.
+ * 팀원이 키 없이 클론해도 앱이 빌드되도록 하기 위함이다.
+ */
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+
+fun secret(key: String): String = localProperties.getProperty(key).orEmpty()
 
 android {
     namespace = "com.example.onuldo_fe"
@@ -19,6 +33,14 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val kakaoNativeAppKey = secret("KAKAO_NATIVE_APP_KEY")
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", "\"$kakaoNativeAppKey\"")
+        buildConfigField("String", "NAVER_CLIENT_ID", "\"${secret("NAVER_CLIENT_ID")}\"")
+        buildConfigField("String", "NAVER_CLIENT_SECRET", "\"${secret("NAVER_CLIENT_SECRET")}\"")
+
+        // 카카오톡 앱으로 로그인할 때 결과를 돌려받는 커스텀 스킴 (kakao{네이티브앱키})
+        manifestPlaceholders["kakaoNativeAppKey"] = kakaoNativeAppKey
     }
 
     buildTypes {
@@ -36,6 +58,8 @@ android {
     }
     buildFeatures {
         compose = true
+        // 네트워크 로깅을 디버그 빌드에서만 켜기 위해 BuildConfig.DEBUG 사용
+        buildConfig = true
     }
 }
 
@@ -57,6 +81,12 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.kakao.user)
+    implementation(libs.naver.oauth)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
