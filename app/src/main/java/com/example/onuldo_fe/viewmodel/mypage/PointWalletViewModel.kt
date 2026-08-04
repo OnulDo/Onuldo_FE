@@ -23,11 +23,12 @@ import kotlinx.coroutines.launch
  * (차감 내역은 지갑 요약의 `totalPenalty`로만 확인 가능 — 백엔드에 타입 추가 확인 필요.)
  */
 enum class WalletFilter(val label: String, val type: PointTransactionTypeDto?) {
+    // 순서는 Figma(5652:2948) 기준: 전체 · 충전 · 출금 · 예치 · 환급
     ALL("전체", null),
     CHARGE("충전", PointTransactionTypeDto.CHARGE),
+    WITHDRAW("출금", PointTransactionTypeDto.WITHDRAW),
     DEPOSIT("예치", PointTransactionTypeDto.DEPOSIT),
     REFUND("환급", PointTransactionTypeDto.REFUND),
-    WITHDRAW("출금", PointTransactionTypeDto.WITHDRAW),
 }
 
 data class PointWalletUiState(

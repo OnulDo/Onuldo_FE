@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,24 +47,27 @@ private data class WithdrawPreset(val label: String, val value: Int)
 
 private val withdrawPresets = listOf(
     WithdrawPreset("전액", 45_000),
-    WithdrawPreset("1만", 10_000),
-    WithdrawPreset("3만", 30_000),
-    WithdrawPreset("4.5만", 45_000),
+    WithdrawPreset("10,000P", 10_000),
+    WithdrawPreset("30,000P", 30_000),
+    WithdrawPreset("45,000P", 45_000),
 )
 
 /**
- * 포인트 출금 (v2) — Figma node `4019:4313`.
- * 출금 가능 금액 + 금액 입력/칩 + 보낼 계좌 + 도착 예정 안내.
+ * 포인트 출금 — Figma node `5154:3517`.
+ * 출금 가능 금액 + 금액 입력/칩 + 보낼 곳.
  *
- * 값은 더미. TODO: 실제 출금(이체) 연동.
+ * 출금은 충전과 달리 칩이 **금액을 지정**한다(가산이 아님).
+ * 값은 더미. TODO: 서버에 출금 API가 없어 실제 이체는 미연동.
  */
 @Composable
 fun PointWithdrawScreen(
     onBack: () -> Unit,
 ) {
-    var selectedPreset by remember { mutableIntStateOf(2) } // 기본 3만 = 30,000
+    // 0에서 시작해 칩으로 금액을 지정한다(Figma 기본 상태가 0P).
+    var selectedPreset by remember { mutableStateOf<Int?>(null) }
 
-    val amountText = "%,d".format(withdrawPresets[selectedPreset].value)
+    val amount = selectedPreset?.let { withdrawPresets[it].value } ?: 0
+    val amountText = "%,d".format(amount)
 
     Column(
         modifier = Modifier
@@ -130,9 +134,9 @@ fun PointWithdrawScreen(
         }
 
         PointCtaButton(
-            text = "${amountText}원 출금",
-            enabled = true,
-            onClick = { /* TODO: 출금 신청 처리 후 지갑으로 복귀 */ onBack() },
+            text = "출금하기",
+            enabled = amount > 0,
+            onClick = { /* TODO: 서버 출금 API 추가 후 연결 */ onBack() },
         )
     }
 }

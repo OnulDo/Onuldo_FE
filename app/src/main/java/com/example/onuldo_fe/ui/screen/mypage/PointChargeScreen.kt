@@ -50,10 +50,10 @@ import com.example.onuldo_fe.viewmodel.mypage.PointChargeViewModel
 private data class AmountPreset(val label: String, val value: Int)
 
 private val chargePresets = listOf(
-    AmountPreset("+1만", 10_000),
-    AmountPreset("+3만", 30_000),
-    AmountPreset("+5만", 50_000),
-    AmountPreset("+10만", 100_000),
+    AmountPreset("+10,000", 10_000),
+    AmountPreset("+30,000", 30_000),
+    AmountPreset("+50,000", 50_000),
+    AmountPreset("+100,000", 100_000),
 )
 
 private data class PayMethod(val emoji: String, val name: String)
@@ -77,10 +77,10 @@ fun PointChargeScreen(
     viewModel: PointChargeViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
-    var selectedPreset by remember { mutableIntStateOf(1) } // 기본 +3만 = 30,000
+    // 칩은 누를 때마다 금액을 더한다(Figma 5154:3439). 0에서 시작해 사용자가 쌓아 올린다.
+    var amount by remember { mutableIntStateOf(0) }
     var selectedMethod by remember { mutableIntStateOf(0) } // 기본 토스페이
 
-    val amount = chargePresets[selectedPreset].value
     val amountText = "%,d".format(amount)
 
     Column(
@@ -125,11 +125,10 @@ fun PointChargeScreen(
                     .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                chargePresets.forEachIndexed { i, preset ->
+                chargePresets.forEach { preset ->
                     AmountChip(
                         text = preset.label,
-                        selected = selectedPreset == i,
-                        onClick = { selectedPreset = i },
+                        onClick = { amount += preset.value },
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -172,8 +171,9 @@ fun PointChargeScreen(
         }
 
         PointCtaButton(
-            text = if (state.isLoading) "충전 중..." else "${amountText}원 충전",
-            enabled = !state.isLoading,
+            text = if (state.isLoading) "충전 중..." else "충전하기",
+            // 금액을 하나도 고르지 않으면 충전할 수 없다.
+            enabled = amount > 0 && !state.isLoading,
             onClick = { viewModel.charge(amount, onBack) },
         )
     }
