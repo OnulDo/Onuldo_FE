@@ -21,12 +21,10 @@ import com.example.onuldo_fe.ui.screen.login.SocialTermsScreen
 import com.example.onuldo_fe.ui.screen.login.WelcomeScreen
 import com.example.onuldo_fe.ui.screen.main.MainScreen
 import com.example.onuldo_fe.ui.screen.mypage.NicknameEditScreen
-import com.example.onuldo_fe.ui.screen.mypage.PasswordChangeScreen
 import com.example.onuldo_fe.ui.screen.mypage.PointChargeScreen
 import com.example.onuldo_fe.ui.screen.mypage.PointWalletScreen
 import com.example.onuldo_fe.ui.screen.mypage.PointWithdrawScreen
 import com.example.onuldo_fe.ui.screen.mypage.ProfileSettingsScreen
-import com.example.onuldo_fe.ui.screen.mypage.WithdrawAccountScreen
 import com.example.onuldo_fe.ui.screen.mypage.SettingScreen
 import com.example.onuldo_fe.ui.screen.mypage.TermScreen
 import com.example.onuldo_fe.data.auth.dto.TermType
@@ -136,14 +134,10 @@ fun OnuldoApp() {
             ProfileSettingsScreen(
                 onBack = { navController.popBackStack() },
                 onNicknameClick = { navController.navigate(Routes.MYPAGE_NICKNAME) },
-                onPasswordClick = { navController.navigate(Routes.MYPAGE_PASSWORD) },
             )
         }
         composable(Routes.MYPAGE_NICKNAME) {
             NicknameEditScreen(onBack = { navController.popBackStack() })
-        }
-        composable(Routes.MYPAGE_PASSWORD) {
-            PasswordChangeScreen(onBack = { navController.popBackStack() })
         }
         composable(Routes.MYPAGE_WALLET) {
             PointWalletScreen(
@@ -157,9 +151,6 @@ fun OnuldoApp() {
         }
         composable(Routes.MYPAGE_WITHDRAW) {
             PointWithdrawScreen(onBack = { navController.popBackStack() })
-        }
-        composable(Routes.MYPAGE_ACCOUNT) {
-            WithdrawAccountScreen(onBack = { navController.popBackStack() })
         }
         // 알림 설정(시온)  //화면이 상태 자체 보유 → 등록만. 뒤로가기 → 마이로 복귀
         composable(Routes.MYPAGE_NOTIFICATION) {

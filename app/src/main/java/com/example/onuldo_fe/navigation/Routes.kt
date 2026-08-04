@@ -16,11 +16,9 @@ object Routes {
     // 마이페이지 하위 화면 (메인 탭 위에 풀스크린으로 올라감)
     const val MYPAGE_PROFILE = "mypage_profile"
     const val MYPAGE_NICKNAME = "mypage_nickname"
-    const val MYPAGE_PASSWORD = "mypage_password"
     const val MYPAGE_WALLET = "mypage_wallet"
     const val MYPAGE_CHARGE = "mypage_charge"
     const val MYPAGE_WITHDRAW = "mypage_withdraw"
-    const val MYPAGE_ACCOUNT = "mypage_account"
     //알림 설정 -> 알림 설정페이지 추가 (시온)
     const val MYPAGE_NOTIFICATION = "mypage_notification"
 

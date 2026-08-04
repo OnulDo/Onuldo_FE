@@ -54,7 +54,6 @@ private val AvatarBackground = Color(0xFFFFEBDE)
 fun ProfileSettingsScreen(
     onBack: () -> Unit,
     onNicknameClick: () -> Unit,
-    onPasswordClick: () -> Unit,
     viewModel: ProfileSettingsViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -142,8 +141,6 @@ fun ProfileSettingsScreen(
         RowCard { MyPageMenuRow(title = "닉네임", value = nickname, onClick = onNicknameClick) }
         Spacer(Modifier.height(10.dp))
         RowCard { MyPageMenuRow(title = "이메일", value = email, showChevron = false) }
-        Spacer(Modifier.height(10.dp))
-        RowCard { MyPageMenuRow(title = "비밀번호 변경", onClick = onPasswordClick) }
     }
 }
 
@@ -164,6 +161,6 @@ private fun RowCard(content: @Composable () -> Unit) {
 @Composable
 private fun ProfileSettingsScreenPreview() {
     OnulDo_FETheme {
-        ProfileSettingsScreen(onBack = {}, onNicknameClick = {}, onPasswordClick = {})
+        ProfileSettingsScreen(onBack = {}, onNicknameClick = {})
     }
 }

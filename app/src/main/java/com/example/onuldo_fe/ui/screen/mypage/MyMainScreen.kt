@@ -61,7 +61,6 @@ fun MyMainScreen(
     onWalletClick: () -> Unit,
     onChargeClick: () -> Unit,
     onWithdrawClick: () -> Unit,
-    onAccountClick: () -> Unit,
     onNotificationClick: () -> Unit,
     onTermClick: (TermType) -> Unit = {},
     onLoggedOut: () -> Unit = {},
@@ -99,8 +98,6 @@ fun MyMainScreen(
         SectionLabel("설정")
         //알림 이동 추가 (시온)
         MenuCard(title = "알림 설정", onClick = onNotificationClick)
-        Spacer(Modifier.height(10.dp))
-        MenuCard(title = "출금 계좌 관리", onClick = onAccountClick)
 
         Spacer(Modifier.height(20.dp))
 
@@ -322,7 +319,7 @@ private fun MyMainScreenPreview() {
     OnulDo_FETheme {
         MyMainScreen(
             onProfileClick = {}, onWalletClick = {}, onChargeClick = {},
-            onWithdrawClick = {}, onAccountClick = {}, onNotificationClick = {},
+            onWithdrawClick = {}, onNotificationClick = {},
         )
     }
 }
