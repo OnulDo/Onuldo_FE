@@ -57,7 +57,7 @@ fun DetailRoute(
     if (detail != null) {
         DetailScreen(
             challenge = Challenge(
-                id = detail.id.toInt(),
+                id = detail.id,
                 title = detail.title,
                 participantCount = detail.participantCount,
                 category = detail.category

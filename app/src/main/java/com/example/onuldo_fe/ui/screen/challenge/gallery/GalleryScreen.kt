@@ -63,7 +63,7 @@ import com.example.onuldo_fe.viewmodel.challenge.ChallengeListViewModel
 
 //챌린지 탐색 화면
 data class Challenge(
-    val id: Int,
+    val id: Long,
     val title: String,
     val participantCount: Int,
     val category: ChallengeCategory = ChallengeCategory.LIFESTYLE_ROUTINE,
@@ -82,6 +82,14 @@ fun GalleryScreen(
     val context = LocalContext.current
     val uiState = viewModel.uiState
     var filterSelected by remember { mutableStateOf(false) }
+
+    // 목록 조회 실패는 토스트로만 안내
+    LaunchedEffect(uiState.isError) {
+        if (uiState.isError) {
+            Toast.makeText(context, "챌린지 목록을 불러오지 못했어요", Toast.LENGTH_SHORT).show()
+            viewModel.onErrorShown()
+        }
+    }
 
     // 카테고리 칩은 ChallengeCategory
     val categories = remember { ChallengeCategory.entries.map { it.displayName } }
@@ -123,7 +131,11 @@ fun GalleryScreen(
                 )
                 Spacer(Modifier.width(9.dp))
                 GalleryFilterButton(
-                    onClick = { filterSelected = !filterSelected },
+                    onClick = {
+                        filterSelected = !filterSelected
+                        // 칩을 닫으면 선택 카테고리도 해제 → 근거 없는 필터 유지 방지
+                        if (!filterSelected) viewModel.onCategorySelected(null)
+                    },
                     selected = filterSelected
                 )
             }
@@ -159,6 +171,7 @@ fun GalleryScreen(
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
+                // 실패/결과없음은 별도 문구 없이 빈 화면. 실패는 위 토스트로만 안내.
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize(),

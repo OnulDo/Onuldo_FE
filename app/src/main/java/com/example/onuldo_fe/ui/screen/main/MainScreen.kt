@@ -57,7 +57,7 @@ fun MainScreen(
             composable(BottomTab.Challenge.route) {
                 GalleryScreen(
                     onChallengeClick = { challenge ->
-                        onNavigate(Routes.challengeDetail(challenge.id.toLong()))
+                        onNavigate(Routes.challengeDetail(challenge.id))
                     },
                 )
             }

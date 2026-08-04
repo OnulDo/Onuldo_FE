@@ -39,17 +39,23 @@ class ParticipateViewModel(
 
     fun participate(durationWeeks: Int, depositAmount: Int) {
         if (uiState.isSubmitting) return
-        uiState = uiState.copy(isSubmitting = true, isError = false, isInsufficientPoint = false)
+        uiState = uiState.copy(
+            isSubmitting = true, isError = false,
+            isInsufficientPoint = false, isAlreadyParticipating = false
+        )
         viewModelScope.launch {
             runCatching { repository.participate(challengeId, depositAmount, durationWeeks) }
                 .onSuccess { uiState = uiState.copy(isSubmitting = false, result = it) }
                 .onFailure { e ->
                     val code = logChallengeError("ch_pd", e)
-                    // 포인트 부족은 충전 팝업, 그 외는 일반 실패(토스트)
-                    if (code == CODE_INSUFFICIENT_POINT) {
-                        uiState = uiState.copy(isSubmitting = false, isInsufficientPoint = true)
-                    } else {
-                        uiState = uiState.copy(isSubmitting = false, isError = true)
+                    // 이미 참여중은 오류가 아니라 안내(토스트+복귀), 포인트 부족은 충전 팝업, 그 외는 일반 실패(토스트)
+                    uiState = when (code) {
+                        CODE_ALREADY_PARTICIPATING ->
+                            uiState.copy(isSubmitting = false, isAlreadyParticipating = true)
+                        CODE_INSUFFICIENT_POINT ->
+                            uiState.copy(isSubmitting = false, isInsufficientPoint = true)
+                        else ->
+                            uiState.copy(isSubmitting = false, isError = true)
                     }
                 }
         }
@@ -58,9 +64,11 @@ class ParticipateViewModel(
     // 각 상태 1회 노출 후 소비
     fun onErrorShown() { uiState = uiState.copy(isError = false) }
     fun onInsufficientDismissed() { uiState = uiState.copy(isInsufficientPoint = false) }
+    fun onAlreadyParticipatingShown() { uiState = uiState.copy(isAlreadyParticipating = false) }
 
     companion object {
         private const val CODE_INSUFFICIENT_POINT = "INSUFFICIENT_POINT_FOR_CHALLENGE"
+        private const val CODE_ALREADY_PARTICIPATING = "ALREADY_PARTICIPATING_CHALLENGE"
         // 지갑 API 연동 전 임시 보유 포인트. 팀원 API 올라오면 loadWallet()에서 실제 balance로 교체
         private const val DUMMY_BALANCE = 20_000
 

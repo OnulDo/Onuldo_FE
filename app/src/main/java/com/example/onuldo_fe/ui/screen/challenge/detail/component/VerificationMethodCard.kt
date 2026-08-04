@@ -78,9 +78,12 @@ fun VerificationMethodCard(
         }
 
         // 인증 예시 사진 — 서버 URL 우선, 없으면 로컬 drawable 폴백 (Coil은 String/Int 둘 다 model로 받음)
+        // URL이 있어도 로딩 중/로드 실패 시 로컬 이미지로 폴백해 빈 영역이 남지 않게 한다.
         AsyncImage(
             model = imageUrl ?: R.drawable.challenge_detail_verification,
             contentDescription = "인증 예시 사진",
+            placeholder = painterResource(R.drawable.challenge_detail_verification),
+            error = painterResource(R.drawable.challenge_detail_verification),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 16.dp)

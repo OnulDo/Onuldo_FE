@@ -20,7 +20,7 @@ interface ChallengeApi {
     suspend fun getChallenges(
         @Query("size") size: Int,
         @Query("category") category: String?,  // ChallengeCategory API 값(FITNESS 등)
-        @Query("s") search: String?            // 검색어
+        @Query("keyword") search: String?      // 검색어 (서버 파라미터명: keyword)
     ): ChallengeListResultDto
 
     // 챌린지 상세 조회 //TODO: ID 필요

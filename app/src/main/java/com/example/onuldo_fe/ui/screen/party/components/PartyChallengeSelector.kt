@@ -143,7 +143,7 @@ private fun PartyChallengeSelectorSelectedPreview() {
     OnulDo_FETheme {
         Box(Modifier.background(SourCream).padding(20.dp)) {
             PartyChallengeSelector(
-                challenge = Challenge(id = 1, title = "30일 헬스 챌린지", participantCount = 0),
+                challenge = Challenge(id = 1L, title = "30일 헬스 챌린지", participantCount = 0),
                 categoryLabel = "생활루틴",
                 onClick = {}
             )

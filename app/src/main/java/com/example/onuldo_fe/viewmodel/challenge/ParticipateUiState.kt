@@ -8,5 +8,6 @@ data class ParticipateUiState(
     val result: ParticipationResult? = null,
     val isError: Boolean = false,            // 일반 실패 → 토스트
     val isInsufficientPoint: Boolean = false, // 포인트 부족 → 충전 팝업
+    val isAlreadyParticipating: Boolean = false, // 이미 참여중 → "이미 참여중입니다" 토스트 + 복귀
     val balance: Int = 0                      // 지갑 요약의 보유 포인트(balance)
 )

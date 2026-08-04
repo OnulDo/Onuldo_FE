@@ -59,7 +59,7 @@ object Routes {
         "&$CHALLENGE_PARTICIPATE_ARG_TIME_START=${Uri.encode(timeStart)}" +
         "&$CHALLENGE_PARTICIPATE_ARG_TIME_END=${Uri.encode(timeEnd)}"
 
-    const val CHALLENGE_START_DONE = "challenge_start_done"
+    // 참여 완료 화면(StartDone)은 별도 목적지가 아니라 ParticipateRoute 내부 상태로 렌더한다.
     // 추후: PASSWORD_RESET, 알림 설정, 약관 3종 등
 
     //카메라

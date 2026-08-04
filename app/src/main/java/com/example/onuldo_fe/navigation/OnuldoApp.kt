@@ -11,7 +11,6 @@ import com.example.onuldo_fe.camera.CameraScreen
 import com.example.onuldo_fe.camera.CameraViewModel
 import com.example.onuldo_fe.ui.screen.challenge.detail.DetailRoute
 import com.example.onuldo_fe.ui.screen.challenge.participate.ParticipateRoute
-import com.example.onuldo_fe.ui.screen.challenge.participate.StartDoneScreen
 import com.example.onuldo_fe.ui.screen.login.LandingScreen
 import com.example.onuldo_fe.ui.screen.login.LoginScreen
 import com.example.onuldo_fe.ui.screen.login.ProfileSetupScreen
@@ -236,19 +235,14 @@ fun OnuldoApp() {
                 timeStart = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_START).orEmpty(),
                 timeEnd = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_END).orEmpty(),
                 onBackClick = { navController.popBackStack() },
-                onSuccess = { navController.navigate(Routes.CHALLENGE_START_DONE) },
-                // 잔액 부족 팝업의 "충전하기" → 포인트 충전 화면
-                onChargePoint = { navController.navigate(Routes.MYPAGE_CHARGE) },
-            )
-        }
-        composable(Routes.CHALLENGE_START_DONE) {
-            StartDoneScreen(
-                // "홈으로 가기" → 상세 흐름 백스택 정리하고 메인(홈)으로
-                onHomeClick = {
+                // 참여 성공 완료 화면(StartDone)의 "홈으로 가기" → 상세 흐름 백스택 정리하고 메인(홈)으로
+                onHome = {
                     navController.navigate(Routes.MAIN) {
                         popUpTo(Routes.MAIN) { inclusive = true }
                     }
                 },
+                // 잔액 부족 팝업의 "충전하기" → 포인트 충전 화면
+                onChargePoint = { navController.navigate(Routes.MYPAGE_CHARGE) },
             )
         }
     }

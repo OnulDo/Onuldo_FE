@@ -21,7 +21,7 @@ private fun String.toChallengeCategory(): ChallengeCategory =
 
 // 목록 아이템 DTO → 화면 모델. 목록 카드에 필요한 필드만 추리기
 fun ChallengeItemDto.toModel(): Challenge = Challenge(
-    id = id.toInt(), //int형?
+    id = id,
     title = name,
     participantCount = participantCount,
     category = category.toChallengeCategory(),

@@ -52,7 +52,7 @@ private val pointOptions = listOf("10,000P", "20,000P", "30,000P", "50,000P")
 @Composable
 fun ParticipateScreen(
     // 아래 값들의 기본값은 @Preview 전용. 실제 값은 Route가 상세에서 넘겨받아 주입한다.
-    challenge: Challenge = Challenge(id = 0, title = "새벽 6시 기상", participantCount = 1234),
+    challenge: Challenge = Challenge(id = 0L, title = "새벽 6시 기상", participantCount = 1234),
     category: String = "생활루틴 챌린지",
     description: String = "매일 새벽 6시까지 기상하기",
     timeStart: String = "05:30:00",   // 인증 시작 "HH:mm:ss" (없으면 "")
@@ -73,6 +73,10 @@ fun ParticipateScreen(
     var selectedPeriod by remember { mutableStateOf<String?>(null) }
     var selectedPoint by remember { mutableStateOf<String?>(null) }
     val spacing = LocalSpacing.current
+
+    // 선택 칩의 API용 파싱을 한 곳에서만 수행 (요약/버튼/다이얼로그가 공유, 형식 변경 시 단일 지점) - 피드백
+    val selectedWeeks = selectedPeriod?.removeSuffix("주")?.toIntOrNull()
+    val selectedDeposit = selectedPoint?.filter { it.isDigit() }?.toIntOrNull()
 
     Column(
         modifier = modifier
@@ -171,7 +175,7 @@ fun ParticipateScreen(
 
         // 인증 시간대는 상세에서 받은 timeStart/timeEnd로 구성(초 단위 제거). 없으면 자율 인증 문구.
         val verifyTimeLine = if (timeStart.isNotBlank() && timeEnd.isNotBlank()) {
-            "위 챌린지는 ${timeStart.take(5)}~ ${timeEnd.take(5)}내에 인증을 진행해주세요"
+            "위 챌린지는 ${timeStart.take(5)} ~ ${timeEnd.take(5)}내에 인증을 진행해주세요"
         } else {
             "하루 한 번 자율 인증으로 진행해주세요"
         }
@@ -242,7 +246,6 @@ fun ParticipateScreen(
         Spacer(Modifier.height(spacing.spacing30))
 
         // 요약 박스 — 선택한 진행 기간/도전금이 그대로 반영된다(미선택 시 "-")
-        val selectedWeeks = selectedPeriod?.removeSuffix("주")?.toIntOrNull()
         val summaryItems = listOf(
             "진행 기간" to (selectedWeeks?.let { "${it}주 (${it * 7}일)" } ?: "-"),
             "인증 방식" to "하루 1회 자율 인증",
@@ -263,16 +266,15 @@ fun ParticipateScreen(
 
         Spacer(Modifier.height(46.dp))
 
-        // 진행 기간 + 도전금 둘 다 선택돼야 활성화
-        val canStart = selectedPeriod != null && selectedPoint != null
+        val canStart = selectedWeeks != null && selectedDeposit != null
 
         OnulDoButton(
             text = "도전 시작하기",
             onClick = {
-                // 칩 선택값("4주","10,000P")을 API용 int로 변환해 참여 요청 (포인트 검사는 서버가 수행)
-                val weeks = selectedPeriod?.removeSuffix("주")?.toIntOrNull()
-                val deposit = selectedPoint?.filter { it.isDigit() }?.toIntOrNull()
-                if (weeks != null && deposit != null) onStartClick(weeks, deposit)
+                // enabled=canStart로 이미 걸러지지만, 널 언팩은 방어적으로 처리 (포인트 검사는 서버가 수행)
+                val weeks = selectedWeeks ?: return@OnulDoButton
+                val deposit = selectedDeposit ?: return@OnulDoButton
+                onStartClick(weeks, deposit)
             },
             enabled = canStart && !isSubmitting
         )
@@ -282,12 +284,11 @@ fun ParticipateScreen(
 
     if (showInsufficientDialog) {
         // 필요 포인트 = 선택한 도전금, 보유 포인트 = 지갑 잔액(ownedPoint)
-        val requiredPoint = selectedPoint?.filter { it.isDigit() }?.toIntOrNull() ?: 0
         InsufficientPointDialog(
             onDismiss = onDismissInsufficient,
             onCharge = onChargePoint,
             ownedPoint = ownedPoint,
-            requiredPoint = requiredPoint
+            requiredPoint = selectedDeposit ?: 0
         )
     }
 }

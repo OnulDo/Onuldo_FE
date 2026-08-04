@@ -43,7 +43,7 @@ import com.example.onuldo_fe.ui.theme.SourCream
 //챌린지 상세 화면
 @Composable
 fun DetailScreen(
-    challenge: Challenge = Challenge(id = 0, title = "새벽 6시 기상", participantCount = 1234),
+    challenge: Challenge = Challenge(id = 0L, title = "새벽 6시 기상", participantCount = 1234),
     category: String = "생활루틴",
     // 상세 본문 블록. 실데이터는 DetailRoute에서 주입, 미전달 시(프리뷰/파티) 더미 사용.
     content: List<ContentBlock> = dummyContentBlocks,
@@ -160,20 +160,13 @@ fun DetailScreen(
     }
 
     if (showNoticeSheet) {
-        // 실데이터(성공/실패 조건)가 있으면 전달, 없으면 시트 기본 더미 사용 — 시트 디자인은 그대로.
-        if (successConditions.isNotEmpty() || failureConditions.isNotEmpty()) {
-            VerificationNoticeBottomSheet(
-                challengeTitle = challenge.title,
-                onDismiss = { showNoticeSheet = false },
-                successConditions = successConditions,
-                failureConditions = failureConditions
-            )
-        } else {
-            VerificationNoticeBottomSheet(
-                challengeTitle = challenge.title,
-                onDismiss = { showNoticeSheet = false }
-            )
-        }
+        // 성공/실패 조건을 그대로 전달 — 비어 있는 쪽은 시트가 리스트별로 기본 조건으로 폴백한다.
+        VerificationNoticeBottomSheet(
+            challengeTitle = challenge.title,
+            onDismiss = { showNoticeSheet = false },
+            successConditions = successConditions,
+            failureConditions = failureConditions
+        )
     }
 }
 
