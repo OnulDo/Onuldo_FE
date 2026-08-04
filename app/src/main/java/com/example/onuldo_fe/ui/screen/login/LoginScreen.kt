@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -37,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.data.auth.dto.SocialProvider
+import com.example.onuldo_fe.ui.component.AuthErrorBanner
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.component.OnuldoTextField
 import com.example.onuldo_fe.ui.component.SocialLoginButton
@@ -59,10 +62,14 @@ import com.example.onuldo_fe.viewmodel.LoginViewModel
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onSignupClick: () -> Unit,
+    // 소셜 로그인 결과 신규 회원이면 약관 동의 화면으로 보낸다.
+    onSocialSignupNeeded: () -> Unit = {},
     viewModel: LoginViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
     val isError = state.errorMessage != null
+    // 소셜 SDK는 로그인 창을 띄우기 위해 Activity 컨텍스트가 필요하다.
+    val context = LocalContext.current
 
     // 좌우 20dp 여백은 버튼/필드가 자체적으로 갖고, 텍스트만 아래 modifier로 맞춘다.
     val gutter = Modifier.padding(horizontal = 20.dp)
@@ -117,9 +124,10 @@ fun LoginScreen(
             imeAction = ImeAction.Done,
         )
 
-        if (isError) {
+        // 서버가 준 문구를 그대로 노출한다(5회 실패 잠금 안내 등도 여기로 들어온다).
+        state.errorMessage?.let { message ->
             Spacer(Modifier.height(10.dp))
-            LoginErrorBanner(text = "로그인 정보를 다시 확인해주세요.", modifier = gutter)
+            AuthErrorBanner(text = message, modifier = gutter)
         }
 
         Spacer(Modifier.height(24.dp))
@@ -147,21 +155,43 @@ fun LoginScreen(
         Spacer(Modifier.height(20.dp))
 
         SocialLoginButton(
-            text = "카카오 아이디로 로그인",
+            text = if (state.socialInProgress == SocialProvider.KAKAO) {
+                "카카오 로그인 중..."
+            } else {
+                "카카오 아이디로 로그인"
+            },
             containerColor = KakaoYellow,
             contentColor = KakaoLabel,
             leadingIcon = R.drawable.ic_kakao,
             iconSize = 28.dp,
-            onClick = { /* TODO: 카카오 OAuth */ },
+            onClick = {
+                viewModel.loginWithSocial(
+                    context = context,
+                    provider = SocialProvider.KAKAO,
+                    onLoggedIn = onLoginSuccess,
+                    onNeedSignup = onSocialSignupNeeded,
+                )
+            },
         )
         Spacer(Modifier.height(12.dp))
         SocialLoginButton(
-            text = "네이버 아이디로 로그인",
+            text = if (state.socialInProgress == SocialProvider.NAVER) {
+                "네이버 로그인 중..."
+            } else {
+                "네이버 아이디로 로그인"
+            },
             containerColor = NaverGreen,
             contentColor = Color.White,
             leadingIcon = R.drawable.ic_naver,
             iconSize = 38.dp,
-            onClick = { /* TODO: 네이버 OAuth */ },
+            onClick = {
+                viewModel.loginWithSocial(
+                    context = context,
+                    provider = SocialProvider.NAVER,
+                    onLoggedIn = onLoginSuccess,
+                    onNeedSignup = onSocialSignupNeeded,
+                )
+            },
         )
 
         Spacer(Modifier.weight(1f))
@@ -206,31 +236,3 @@ private fun OrDivider(modifier: Modifier = Modifier) {
     }
 }
 
-/** 로그인 실패 배너 (설계 에러 화면). */
-@Composable
-private fun LoginErrorBanner(text: String, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(Red3, RoundedCornerShape(12.dp))
-            .border(1.dp, Red, RoundedCornerShape(12.dp))
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(20.dp)
-                .background(Red, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text("!", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        }
-        Spacer(Modifier.width(10.dp))
-        Text(
-            text = text,
-            color = Red,
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-    }
-}
