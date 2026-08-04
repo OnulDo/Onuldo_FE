@@ -32,6 +32,7 @@ import kotlin.collections.emptyList
 @Composable
 fun MainScreen(
     onNavigate: (String) -> Unit = {},
+    onLoggedOut: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     var showBottomBar by remember { mutableStateOf(true) }
@@ -95,6 +96,8 @@ fun MainScreen(
                     onWithdrawClick = { onNavigate(Routes.MYPAGE_WITHDRAW) },
                     onAccountClick = { onNavigate(Routes.MYPAGE_ACCOUNT) },
                     onNotificationClick = { onNavigate(Routes.MYPAGE_NOTIFICATION) },
+                    onTermClick = { termType -> onNavigate(Routes.mypageTerm(termType.name)) },
+                    onLoggedOut = onLoggedOut,
                 )
             }
         }

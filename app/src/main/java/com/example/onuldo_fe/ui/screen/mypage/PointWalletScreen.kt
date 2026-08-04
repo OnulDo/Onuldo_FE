@@ -20,10 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,7 +31,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.data.user.dto.PointTransactionTypeDto
+import com.example.onuldo_fe.model.user.PointTransaction
+import com.example.onuldo_fe.model.user.WalletSummary
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
+import com.example.onuldo_fe.utils.formatAmount
+import com.example.onuldo_fe.utils.formatPoint
+import com.example.onuldo_fe.utils.formatSignedAmount
+import com.example.onuldo_fe.viewmodel.mypage.PointWalletViewModel
+import com.example.onuldo_fe.viewmodel.mypage.WalletFilter
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
@@ -65,32 +73,48 @@ private data class Tx(
     val balance: String,
 )
 
-// 더미 데이터 — TODO: API 연동 시 교체
-private val sampleTx = listOf(
-    Tx(TxCategory.환급, "독서 30분 챌린지 성공", "5/19", "+18,400P", "잔액 52,000P"),
-    Tx(TxCategory.충전, "포인트 충전 · 카카오페이", "5/18", "+30,000P", "잔액 33,600P"),
-    Tx(TxCategory.예치, "새벽 6시 기상 챌린지", "5/17", "−10,000P", "잔액 3,600P"),
-    Tx(TxCategory.차감, "30분 러닝 챌린지 실패", "5/15", "−5,000P", "잔액 13,600P"),
-    Tx(TxCategory.출금, "국민은행 1234-56-78901", "5/10", "−50,000P", "잔액 18,600P"),
-)
+/** 서버 거래 종류 → 화면 배지. 서버에는 "차감" 종류가 없어 [TxCategory.차감]은 매핑되지 않는다. */
+private fun PointTransaction.toTx(): Tx {
+    val category = when (type) {
+        PointTransactionTypeDto.CHARGE -> TxCategory.충전
+        PointTransactionTypeDto.WITHDRAW -> TxCategory.출금
+        PointTransactionTypeDto.DEPOSIT -> TxCategory.예치
+        PointTransactionTypeDto.REFUND -> TxCategory.환급
+        null -> TxCategory.예치
+    }
+    return Tx(
+        category = category,
+        title = title,
+        date = formatTransactionDate(date),
+        amount = "${formatSignedAmount(amount)}P",
+        balance = "잔액 ${formatPoint(balanceAfter)}",
+    )
+}
 
-private val filters = listOf("전체", "충전", "환급", "차감", "출금")
+/** `2026-05-19` → `5/19`. 형식이 다르면 원본을 그대로 쓴다. */
+private fun formatTransactionDate(raw: String): String {
+    val parts = raw.split("-")
+    if (parts.size != 3) return raw
+    val month = parts[1].toIntOrNull() ?: return raw
+    val day = parts[2].toIntOrNull() ?: return raw
+    return "$month/$day"
+}
 
 /**
  * 포인트 지갑 상세 — Figma node `4019:4132`.
  * 보유 포인트 · 충전/출금 · 누적 정산 · 거래 내역(필터).
  *
- * 값은 더미. TODO: ViewModel/API 연동.
+ * 요약은 `GET /wallet/summary`, 내역은 `GET /wallet/transactions`(커서 페이징)로 채운다.
  */
 @Composable
 fun PointWalletScreen(
     onBack: () -> Unit,
     onChargeClick: () -> Unit,
     onWithdrawClick: () -> Unit,
+    viewModel: PointWalletViewModel = viewModel(),
 ) {
-    var selectedFilter by remember { mutableStateOf("전체") }
-    val visibleTx = if (selectedFilter == "전체") sampleTx
-    else sampleTx.filter { it.category.label == selectedFilter }
+    val state by viewModel.uiState.collectAsState()
+    val visibleTx = state.transactions.map { it.toTx() }
 
     Column(
         modifier = Modifier
@@ -108,7 +132,7 @@ fun PointWalletScreen(
                 top = 24.dp, bottom = 24.dp,
             ),
         ) {
-            item { BalanceCard() }
+            item { BalanceCard(state.summary) }
             item { Spacer(Modifier.height(22.dp)) }
             item {
                 Row(
@@ -122,7 +146,7 @@ fun PointWalletScreen(
                 }
             }
             item { Spacer(Modifier.height(16.dp)) }
-            item { SettlementCard() }
+            item { SettlementCard(state.summary) }
             item { Spacer(Modifier.height(24.dp)) }
             item {
                 Text(
@@ -142,11 +166,11 @@ fun PointWalletScreen(
                         .padding(horizontal = 20.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    filters.forEach { f ->
+                    WalletFilter.entries.forEach { filter ->
                         FilterChip(
-                            text = f,
-                            selected = selectedFilter == f,
-                            onClick = { selectedFilter = f },
+                            text = filter.label,
+                            selected = state.selectedFilter == filter,
+                            onClick = { viewModel.selectFilter(filter) },
                             modifier = Modifier.weight(1f),
                         )
                     }
@@ -157,12 +181,19 @@ fun PointWalletScreen(
                 TxRow(tx)
                 Spacer(Modifier.height(8.dp))
             }
+            // 목록 끝에 닿으면 다음 페이지를 이어 받는다(커서 페이징).
+            if (state.hasNext) {
+                item {
+                    LaunchedEffect(state.transactions.size) { viewModel.loadMore() }
+                    Spacer(Modifier.height(8.dp))
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun BalanceCard() {
+private fun BalanceCard(summary: WalletSummary) {
     Column(
         modifier = Modifier
             .padding(horizontal = 20.dp)
@@ -182,7 +213,7 @@ private fun BalanceCard() {
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "52,000 P",
+            text = "${formatAmount(summary.balance)} P",
             fontFamily = Pretendard,
             fontWeight = FontWeight.Bold,
             fontSize = 30.sp,
@@ -191,7 +222,7 @@ private fun BalanceCard() {
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "진행 중 예치 7,000P",
+            text = "진행 중 예치 ${formatPoint(summary.pendingPoints)}",
             fontFamily = Pretendard,
             fontWeight = FontWeight.Normal,
             fontSize = 11.sp,
@@ -222,7 +253,7 @@ private fun ActionButton(text: String, filled: Boolean, onClick: () -> Unit, mod
 }
 
 @Composable
-private fun SettlementCard() {
+private fun SettlementCard(summary: WalletSummary) {
     Column(
         modifier = Modifier
             .padding(horizontal = 20.dp)
@@ -241,9 +272,19 @@ private fun SettlementCard() {
         )
         Spacer(Modifier.height(16.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
-            SettlementItem("총 예치", "350,000P", TxDark, Modifier.weight(1f))
-            SettlementItem("환급", "+298,000P", Color(0xFF18A77A), Modifier.weight(1f))
-            SettlementItem("차감", "−52,000P", Color(0xFFDC3F3F), Modifier.weight(1f))
+            SettlementItem("총 예치", formatPoint(summary.totalDeposit), TxDark, Modifier.weight(1f))
+            SettlementItem(
+                "환급",
+                "+${formatPoint(summary.totalRefund)}",
+                Color(0xFF18A77A),
+                Modifier.weight(1f),
+            )
+            SettlementItem(
+                "차감",
+                "−${formatPoint(summary.totalPenalty)}",
+                Color(0xFFDC3F3F),
+                Modifier.weight(1f),
+            )
         }
         Spacer(Modifier.height(18.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -256,7 +297,7 @@ private fun SettlementCard() {
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = "85%",
+                text = "${summary.averageReturnRate}%",
                 fontFamily = Pretendard,
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp,
