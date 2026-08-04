@@ -94,13 +94,6 @@ fun GalleryScreen(
     // 카테고리 칩은 ChallengeCategory
     val categories = remember { ChallengeCategory.entries.map { it.displayName } }
 
-    // 예외) 목록 로드 실패 시 토스트로 알림
-    LaunchedEffect(uiState.isError) {
-        if (uiState.isError) {
-            Toast.makeText(context, "챌린지를 불러오지 못했어요", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     Column(
         modifier = modifier
             .fillMaxSize()
