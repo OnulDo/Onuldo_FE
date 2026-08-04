@@ -1,5 +1,5 @@
 package com.example.onuldo_fe.ui.screen.challenge.participate
-import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
+import com.example.onuldo_fe.model.challenge.ParticipationResult
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -40,26 +40,33 @@ import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.Green3
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 
-// 더미 데이터 — API 연동 시 교체
-private val startDoneSummaryItems = listOf(
-    "진행 기간" to "5/20 ~ 6/16 (28일)",
-    "인증 시각" to "오전 6:00",
-    "예치 도전금" to "10,000P",
-    "예상 환급금" to "11,500P (성공 시)"
-)
-
 @Composable
 fun StartDoneScreen(
-    challenge: Challenge = Challenge(id = 0, title = "새벽 6시 기상", participantCount = 1234),
-    category: String = "시간 챌린지",                    // TODO: 실제 데이터
-    subtitle: String = "오늘부터 28일간 함께 갓생해요",   // TODO: 실제 데이터(기간에서 파생)
-    firstVerifyTime: String = "내일 오전 5:00 ~ 7:00",   // TODO: 실제 데이터
+    result: ParticipationResult,   // 참여 API 응답 — 기간/도전금/환급금
+    title: String,                 // 챌린지 제목(상세에서 전달)
+    category: String,              // 카테고리 라벨(상세에서 전달)
+    timeStart: String,             // 인증 시작 "HH:mm:ss"(상세에서 전달, 없으면 "")
+    timeEnd: String,               // 인증 마감 "HH:mm:ss"
     onHomeClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val spacing = LocalSpacing.current
+    val summaryItems = listOf(
+        "진행 기간" to "${formatMonthDay(result.startDate)} ~ ${formatMonthDay(result.endDate)} (${result.durationDays}일)",
+        "인증 시각" to if (timeStart.isNotBlank()) formatAmPm(timeStart) else "자율 인증",
+        "예치 도전금" to "%,dP".format(result.depositAmount),
+        "예상 환급금" to "%,dP (성공 시)".format(result.expectedRefundAmount)
+    )
+    val subtitle = "오늘부터 ${result.durationDays}일간 함께 갓생해요"
+    val firstVerifyTime = if (timeStart.isNotBlank() && timeEnd.isNotBlank()) {
+        "내일 ${formatAmPm(timeStart)} ~ ${formatAmPm(timeEnd)}"
+    } else {
+        "내일부터 인증할 수 있어요"
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -97,7 +104,7 @@ fun StartDoneScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(spacing.spacing8))
 
         Text(
             text = subtitle,
@@ -110,17 +117,17 @@ fun StartDoneScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(spacing.spacing48))
 
         ChallengeInfoBox(
             height = 184.dp,
             modifier = Modifier.padding(horizontal = 20.dp)
         ) {
             Column {
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(spacing.spacing16))
 
                 Text(
-                    text = challenge.title,
+                    text = title,
                     fontFamily = Pretendard,
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
@@ -154,8 +161,8 @@ fun StartDoneScreen(
                 Spacer(Modifier.height(11.dp))
 
                 Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    startDoneSummaryItems.forEachIndexed { index, (label, value) ->
-                        if (index > 0) Spacer(Modifier.height(8.dp))
+                    summaryItems.forEachIndexed { index, (label, value) ->
+                        if (index > 0) Spacer(Modifier.height(spacing.spacing8))
                         ChallengeSummaryRow(label = label, value = value)
                     }
                 }
@@ -215,10 +222,38 @@ fun StartDoneScreen(
     }
 }
 
+//(파싱 실패 시 원문 유지)
+private fun formatMonthDay(date: String): String = runCatching {
+    val parts = date.split("-")
+    "${parts[1].toInt()}/${parts[2].toInt()}"
+}.getOrDefault(date)
+
+private fun formatAmPm(time: String): String = runCatching {
+    val parts = time.split(":")
+    val h = parts[0].toInt()
+    val m = parts[1].toInt()
+    val ampm = if (h < 12) "오전" else "오후"
+    val h12 = if (h % 12 == 0) 12 else h % 12
+    "%s %d:%02d".format(ampm, h12, m)
+}.getOrDefault(time.take(5))
+
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 private fun StartDoneScreenPreview() {
     OnulDo_FETheme {
-        StartDoneScreen()
+        StartDoneScreen(
+            result = ParticipationResult(
+                startDate = "2026-05-20",
+                endDate = "2026-06-16",
+                durationWeeks = 4,
+                durationDays = 28,
+                depositAmount = 10_000,
+                expectedRefundAmount = 11_500
+            ),
+            title = "새벽 6시 기상",
+            category = "시간 챌린지",
+            timeStart = "06:00:00",
+            timeEnd = "07:00:00"
+        )
     }
 }

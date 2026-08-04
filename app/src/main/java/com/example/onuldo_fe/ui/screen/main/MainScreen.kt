@@ -3,14 +3,21 @@ package com.example.onuldo_fe.ui.screen.main
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.onuldo_fe.navigation.BottomTab
 import com.example.onuldo_fe.navigation.Routes
 import com.example.onuldo_fe.ui.component.OnuldoBottomBar
@@ -18,7 +25,8 @@ import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryScreen
 import com.example.onuldo_fe.ui.screen.home.HomeRoute
 import com.example.onuldo_fe.ui.screen.mypage.MyMainScreen
 import com.example.onuldo_fe.ui.screen.party.PartyRoute
-import com.example.onuldo_fe.ui.screen.record.RecordScreen
+import com.example.onuldo_fe.ui.screen.party.PartySettlementRoute
+import com.example.onuldo_fe.ui.screen.record.RecordRoute
 import com.example.onuldo_fe.ui.screen.record.data.CompleteRecord
 import kotlin.collections.emptyList
 
@@ -32,9 +40,11 @@ import kotlin.collections.emptyList
 @Composable
 fun MainScreen(
     onNavigate: (String) -> Unit = {},
+    onLoggedOut: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     var showBottomBar by remember { mutableStateOf(true) }
+    var homeRefreshKey by rememberSaveable { mutableIntStateOf(0) }
 
     Scaffold(
         bottomBar = {
@@ -50,41 +60,74 @@ fun MainScreen(
         ) {
             composable(BottomTab.Home.route) {
                 HomeRoute(
-                    onCameraPermissionRequired = { onNavigate(Routes.CAMERA_PERMISSION) },
-                    onCameraNavigate = { onNavigate(Routes.CAMERA) }
+                    onCameraNavigate = { onNavigate(Routes.CAMERA) },
+                    refreshKey = homeRefreshKey,
+                    onBrowseChallengesClick = {
+                        // 빈 홈 CTA에서 기존 챌린지 탭의 GalleryScreen으로 이동
+                        navController.navigate(BottomTab.Challenge.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onSettlementResultClick = { partyId ->
+                        navController.navigate(Routes.partySettlement(partyId))
+                    }
+                )
+            }
+            composable(
+                route = Routes.PARTY_SETTLEMENT,
+                arguments = listOf(navArgument("partyId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val partyId = backStackEntry.arguments?.getLong("partyId") ?: return@composable
+
+                LaunchedEffect(Unit) { showBottomBar = false }
+                DisposableEffect(Unit) {
+                    onDispose { showBottomBar = true }
+                }
+
+                PartySettlementRoute(
+                    partyId = partyId,
+                    onBack = { navController.popBackStack() }
                 )
             }
             composable(BottomTab.Challenge.route) {
                 GalleryScreen(
-                    onChallengeClick = { onNavigate(Routes.CHALLENGE_DETAIL) },
+                    onChallengeClick = { challenge ->
+                        onNavigate(Routes.challengeDetail(challenge.id))
+                    },
                 )
             }
             composable(BottomTab.Party.route) {
                 PartyRoute(
                     onBottomBarVisibilityChange = { showBottomBar = it },
-                    onCameraPermissionRequired = { onNavigate(Routes.CAMERA_PERMISSION) },
-                    onCameraNavigate = { onNavigate(Routes.CAMERA) }
+                    onCameraNavigate = { onNavigate(Routes.CAMERA) },
+                    onHomeNavigate = {
+                        // 새로 시작한 파티 재조회와 홈 상단 이동을 한 번에 요청
+                        homeRefreshKey++
+                        navController.navigate(BottomTab.Home.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
             }
             composable(BottomTab.Record.route) {
-                RecordScreen(
-                    progressList = emptyList(),
-                    completeList = listOf(
-                        CompleteRecord(
-                            isSuccess = true,
-                            title = "운동 30분 하기",
-                            progress = 100,
-                            completeDate = "2026.07.22",
-                            point = 5000
-                        ),
-                        CompleteRecord(
-                            isSuccess = false,
-                            title = "책 50페이지 읽기",
-                            progress = 70,
-                            completeDate = "2026.07.18",
-                            point = -1000
-                        )
-                    )
+                RecordRoute(
+                    onBrowseChallenges = {
+                        navController.navigate(BottomTab.Challenge.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
             }
             composable(BottomTab.My.route) {
@@ -95,6 +138,8 @@ fun MainScreen(
                     onWithdrawClick = { onNavigate(Routes.MYPAGE_WITHDRAW) },
                     onAccountClick = { onNavigate(Routes.MYPAGE_ACCOUNT) },
                     onNotificationClick = { onNavigate(Routes.MYPAGE_NOTIFICATION) },
+                    onTermClick = { termType -> onNavigate(Routes.mypageTerm(termType.name)) },
+                    onLoggedOut = onLoggedOut,
                 )
             }
         }

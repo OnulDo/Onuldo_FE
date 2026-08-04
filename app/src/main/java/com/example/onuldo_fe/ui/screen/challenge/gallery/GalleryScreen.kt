@@ -1,17 +1,17 @@
 package com.example.onuldo_fe.ui.screen.challenge.gallery
 
+import android.widget.Toast
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,14 +20,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,123 +36,149 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.onuldo_fe.R
-import com.example.onuldo_fe.repository.challenge.ChallengeRepositoryProvider
+import com.example.onuldo_fe.model.challenge.ChallengeCategory
 import com.example.onuldo_fe.ui.screen.challenge.gallery.component.GalleryFilterButton
 import com.example.onuldo_fe.ui.screen.challenge.gallery.component.GalleryFilterChips
 import com.example.onuldo_fe.ui.screen.challenge.gallery.component.GallerySearchBar
+import com.example.onuldo_fe.ui.theme.BlackBrown70
 import com.example.onuldo_fe.ui.theme.DarkBrown10
 import com.example.onuldo_fe.ui.theme.DarkBrown20
-import com.example.onuldo_fe.ui.theme.DarkBrown50
-import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.viewmodel.challenge.ChallengeListViewModel
 
 //챌린지 탐색 화면
 data class Challenge(
-    val id: Int,
+    val id: Long,
     val title: String,
     val participantCount: Int,
+    val category: ChallengeCategory = ChallengeCategory.LIFESTYLE_ROUTINE,
+    val imageUrl: String? = null,   // 서버 captionImgUrl (Coil 로딩) — null이면 imageRes 폴백
     @DrawableRes val imageRes: Int = R.drawable.challenge_sample_1
 )
 
-// 카테고리 더미 — API 연동 시 교체
-private val sampleCategories = listOf("피트니스", "취미", "자기계발", "생활루틴", "식습관")
-
 @Composable
 fun GalleryScreen(
-    // 챌린지 목록은 레포지토리에서 제공 (더미 → API 명세 확정 후 교체)
-    challenges: List<Challenge> = ChallengeRepositoryProvider.provide().getChallenges(),
+    viewModel: ChallengeListViewModel = viewModel(),
     onChallengeClick: (Challenge) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    var query by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+    val spacing = LocalSpacing.current
+    val context = LocalContext.current
+    val uiState = viewModel.uiState
     var filterSelected by remember { mutableStateOf(false) }
-    var selectedCategory by remember { mutableStateOf<String?>(null) }
 
-    // 검색어로 필터 (제목 매칭). 빈 검색어면 전체.
-    val visibleChallenges = challenges.filter {
-        it.title.contains(query.trim(), ignoreCase = true)
+    // 목록 조회 실패는 토스트로만 안내
+    LaunchedEffect(uiState.isError) {
+        if (uiState.isError) {
+            Toast.makeText(context, "챌린지 목록을 불러오지 못했어요", Toast.LENGTH_SHORT).show()
+            viewModel.onErrorShown()
+        }
     }
+
+    // 카테고리 칩은 ChallengeCategory
+    val categories = remember { ChallengeCategory.entries.map { it.displayName } }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(SourCream)
             .statusBarsPadding()
+            // 빈 곳 터치 시 검색창 포커스·키보드 해제
+            .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
     ) {
-        // 헤더(제목·검색창)와 필터칩을 그리드 안 전체폭 아이템으로 넣어
-        // 스크롤 시 카드와 함께 위로 올라가도록 함(고정 X).
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+        // 고정 헤더: 제목·서브카피·검색창·필터칩
+        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+            Text(
+                text = "챌린지",
+                style = MaterialTheme.typography.headlineLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = "나에게 맞는 챌린지를 찾아보세요",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+                color = BlackBrown70
+            )
+            Spacer(Modifier.height(spacing.spacing12))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                GallerySearchBar(
+                    value = uiState.query,
+                    onValueChange = viewModel::onQueryChange,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(Modifier.width(9.dp))
+                GalleryFilterButton(
+                    onClick = {
+                        filterSelected = !filterSelected
+                        // 칩을 닫으면 선택 카테고리도 해제 → 근거 없는 필터 유지 방지
+                        if (!filterSelected) viewModel.onCategorySelected(null)
+                    },
+                    selected = filterSelected
+                )
+            }
+            // 필터 카테고리 칩 (필터 버튼 눌렀을 때만 노출)
+            if (filterSelected) {
+                Spacer(Modifier.height(spacing.spacing12))
+                GalleryFilterChips(
+                    categories = categories,
+                    selectedCategory = uiState.selectedCategory?.displayName,
+                    onCategoryClick = { name ->
+                        //라벨 매칭 (enum필터 <-> 한글)
+                        val category = ChallengeCategory.entries.first { it.displayName == name }
+                        // 같은 칩 재선택이면 해제(null), 아니면 선택
+                        val next = if (uiState.selectedCategory == category) null else category
+                        viewModel.onCategorySelected(next)
+                    },
+                    contentPadding = PaddingValues(horizontal = 0.dp)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(spacing.spacing12))
+
+        // 카드 목록 — 로딩 중엔 기본 인디케이터만 표시(상세 로딩/빈 상태 UI는 추후)
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .weight(1f)
         ) {
-            // 제목 + 검색창 (스크롤됨)
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Column {
-                    Text(
-                        text = "챌린지",
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        text = "나에게 맞는 챌린지를 찾아보세요",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = DarkBrown50
-                    )
-                    Spacer(Modifier.height(17.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        GallerySearchBar(
-                            value = query,
-                            onValueChange = { query = it },
-                            modifier = Modifier.weight(1f)
-                        )
-                        Spacer(Modifier.width(9.dp))
-                        GalleryFilterButton(
-                            onClick = { filterSelected = !filterSelected }, // TODO: 필터 열기
-                            selected = filterSelected
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    color = Persimmon,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else {
+                // 실패/결과없음은 별도 문구 없이 빈 화면. 실패는 위 토스트로만 안내.
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
+                ) {
+                    items(uiState.challenges, key = { it.id }) { challenge ->
+                        ChallengeCard(
+                            challenge = challenge,
+                            onClick = { onChallengeClick(challenge) }
                         )
                     }
-                    // 필터가 닫혀 있으면 검색창과 카드 사이 여백만 보정(21 - 20(그리드 간격) = 1)
-                    if (!filterSelected) Spacer(Modifier.height(1.dp))
                 }
-            }
-
-            // 필터 카테고리 칩 (필터 버튼 눌렀을 때만 노출, 함께 스크롤)
-            if (filterSelected) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    // 그리드가 이미 좌우 20 inset을 주므로 칩 자체 패딩은 0
-                    GalleryFilterChips(
-                        categories = sampleCategories,
-                        selectedCategory = selectedCategory,
-                        onCategoryClick = { category ->
-                            // 같은 칩 다시 누르면 해제, 다른 칩 누르면 그 카테고리 선택
-                            selectedCategory = if (selectedCategory == category) null else category
-                            // TODO: 선택된 카테고리로 목록 필터링 (API 연동 시)
-                        },
-                        contentPadding = PaddingValues(horizontal = 0.dp)
-                    )
-                }
-            }
-
-            items(visibleChallenges, key = { it.id }) { challenge ->
-                ChallengeCard(
-                    challenge = challenge,
-                    onClick = { onChallengeClick(challenge) }
-                )
             }
         }
     }
@@ -163,6 +190,7 @@ private fun ChallengeCard(
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val spacing = LocalSpacing.current
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -171,42 +199,44 @@ private fun ChallengeCard(
             .border(1.dp, DarkBrown20, RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
     ) {
-        Image(
-            painter = painterResource(challenge.imageRes),
+        // 서버 이미지(URL) 우선, 없으면 로컬 drawable 폴백 (Coil은 String URL/Int res 둘 다 model로 받음)
+        AsyncImage(
+            model = challenge.imageUrl ?: challenge.imageRes,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(169f / 130f)
+                .height(130.dp)            // 디자인 스펙: 이미지 높이 130
                 .background(DarkBrown10)   // 로딩/여백 대비 회색 배경 유지
         )
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 10.dp)
+                .height(50.dp)
+                .padding(
+                    start = spacing.spacing12,
+                    end = spacing.spacing10,
+                    top = spacing.spacing12,
+                    bottom = spacing.spacing10
+                )
         ) {
             Text(
                 text = challenge.title,
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
-                    lineHeight = 13.sp
-                ),
+                style = MaterialTheme.typography.bodySmall,  // Body4 (12sp Bold)
                 color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 1
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-
-            Spacer(modifier = Modifier.height(6.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(R.drawable.challenge_person),
                     contentDescription = null,
                     tint = Persimmon,
-                    modifier = Modifier.size(12.dp)
+                    modifier = Modifier.size(10.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(5.dp))
                 Text(
                     text = "%,d명".format(challenge.participantCount),
                     style = MaterialTheme.typography.labelMedium.copy(
@@ -214,19 +244,10 @@ private fun ChallengeCard(
                         fontSize = 10.sp,
                         lineHeight = 10.sp
                     ),
-                    color = DarkBrown50,
+                    color = BlackBrown70,
                     maxLines = 1
                 )
             }
         }
-    }
-}
-
-
-@Preview(showBackground = true, widthDp = 360, heightDp = 720)
-@Composable
-private fun GalleryScreenPreview() {
-    OnulDo_FETheme {
-        GalleryScreen()
     }
 }

@@ -22,13 +22,13 @@ fun ProgressRecordScreen(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
     ) {
-        items(progressList) { record ->
+        items(progressList, key = { it.participationId }) { record ->
             ProgressRecordCard(
                 category = record.category,
                 title = record.title,
                 dDay = record.dDay,
                 progress = record.progress,
-                point = record.point,
+                depositAmount = record.depositAmount,
                 isTodayVerified = record.isTodayVerified
             )
         }
@@ -42,19 +42,23 @@ private fun ProgressRecordScreenPreview() {
         ProgressRecordScreen(
             progressList = listOf(
                 ProgressRecord(
+                    participationId = 1,
+                    challengeId = 101,
                     category = "운동",
                     title = "매일 만보 걷기",
                     dDay = 7,
                     progress = 65,
-                    point = 2000,
+                    depositAmount = 2000,
                     isTodayVerified = true
                 ),
                 ProgressRecord(
+                    participationId = 2,
+                    challengeId = 102,
                     category = "공부",
                     title = "영단어 외우기",
                     dDay = 3,
                     progress = 40,
-                    point = 1000,
+                    depositAmount = 1000,
                     isTodayVerified = false
                 )
             )

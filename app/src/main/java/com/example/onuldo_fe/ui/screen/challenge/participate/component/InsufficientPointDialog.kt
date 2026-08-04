@@ -34,6 +34,7 @@ import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -57,6 +58,7 @@ fun InsufficientPointDialog(
     requiredPoint: Int = DUMMY_REQUIRED_POINT
 ) {
     val shortage = (requiredPoint - ownedPoint).coerceAtLeast(0)
+    val spacing = LocalSpacing.current
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -101,7 +103,7 @@ fun InsufficientPointDialog(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(spacing.spacing8))
 
             Text(
                 text = "챌린지 시작을 위해 도전금이 필요해요",
@@ -114,7 +116,7 @@ fun InsufficientPointDialog(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(spacing.spacing20))
 
             ChallengeNoticeBox(
                 height = 78.dp,
@@ -178,6 +180,7 @@ private fun PointColumn(
     valueColor: Color,
     modifier: Modifier = Modifier
 ) {
+    val spacing = LocalSpacing.current
     Column(
         modifier = modifier.width(80.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -191,7 +194,7 @@ private fun PointColumn(
             color = DarkBrown70,
             textAlign = TextAlign.Center
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(spacing.spacing8))
         Text(
             text = value,
             fontFamily = Pretendard,
@@ -211,11 +214,12 @@ private fun OperatorColumn(
     width: Dp,
     modifier: Modifier = Modifier
 ) {
+    val spacing = LocalSpacing.current
     Column(
         modifier = modifier.width(width),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(spacing.spacing20))
         Text(
             text = symbol,
             fontFamily = Pretendard,

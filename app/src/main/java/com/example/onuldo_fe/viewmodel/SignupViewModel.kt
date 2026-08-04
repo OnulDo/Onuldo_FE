@@ -24,7 +24,8 @@ data class SignupUiState(
     private val confirmMatched get() = passwordConfirm.isNotEmpty() && passwordConfirm == password
 
     // 이메일: 형식이 맞으면 성공(초록), 입력이 있는데 형식이 틀리면 에러(빨강).
-    // TODO: "사용 가능한 이메일입니다"는 실제로는 서버 중복확인 결과. 지금은 형식 유효 = 사용 가능으로 임시 처리.
+    // 서버에 이메일 중복확인 API가 없어 여기서는 형식만 검사한다. 중복 여부는 회원가입 호출 시점에
+    // `DUPLICATE_EMAIL`로 판별된다(설계서의 실시간 중복 안내는 API 추가 전까지 구현 불가).
     val emailSuccess get() = email.isNotEmpty() && emailValid
     val emailError get() = email.isNotEmpty() && !emailValid
     val emailSupport: String?
@@ -59,10 +60,20 @@ class SignupViewModel : ViewModel() {
     fun toggleAgreeAll() = _uiState.update { it.copy(agreeAll = !it.agreeAll) }
 
     /**
-     * 다음 단계(프로필 설정)로 진행. 모든 필드 유효 + 약관 동의 시에만 [onNext] 호출.
-     * TODO: 서버 회원가입/중복확인 API 연동(입력한 이메일은 상태에 보관됨).
+     * 다음 단계(프로필 설정)로 진행.
+     *
+     * 서버 회원가입 API는 닉네임까지 한 번에 받으므로 **여기서는 호출하지 않고**
+     * 입력값을 [OnboardingDraft]에 넘겨 둔다. 실제 가입은 프로필 설정 완료 시점에 이뤄진다.
      */
     fun submit(onNext: () -> Unit) {
-        if (_uiState.value.isContinueEnabled) onNext()
+        val state = _uiState.value
+        if (!state.isContinueEnabled) return
+
+        OnboardingDraft.saveCredentials(
+            email = state.email,
+            password = state.password,
+            agreedRequiredTerms = state.agreeAll,
+        )
+        onNext()
     }
 }

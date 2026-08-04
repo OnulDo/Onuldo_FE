@@ -11,6 +11,7 @@ import com.example.onuldo_fe.model.party.PartyFeedItem
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.repository.party.PartyFeedRepository
 import com.example.onuldo_fe.repository.party.PartyFeedRepositoryProvider
+import kotlin.math.roundToInt
 
 // 오늘 인증 완료 인원과 전체 인원을 기준으로 계산한 진행 현황
 data class PartyProgressUiState(
@@ -61,11 +62,8 @@ class PartyFeedViewModel(
 
 // 명세에 따라 오늘 인증 완료 인원 비율을 정수 퍼센트로 계산
 private fun PartyProgress.toUiState() = PartyProgressUiState(
-    progressPercent = if (totalMemberCount == 0) {
-        0
-    } else {
-        completedMemberCount * 100 / totalMemberCount
-    },
+    // 인원수로 다시 계산하지 않고 서버가 내려준 진행률을 화면 퍼센트로 변환한다.
+    progressPercent = (progressRate * 100).roundToInt().coerceIn(0, 100),
     completedMemberCount = completedMemberCount,
     totalMemberCount = totalMemberCount
 )
@@ -74,7 +72,7 @@ private fun PartyProgress.toUiState() = PartyProgressUiState(
 private fun PartyFeedItem.toUiState() = PartyFeedItemUi(
     memberId = memberId,
     name = nickname,
-    time = verifiedElapsedMinutes?.toElapsedTimeText() ?: "미인증",
+    time = if (isVerifiedToday) verifiedElapsedMinutes?.toElapsedTimeText() ?: "인증 완료" else "미인증",
     profileImageUrl = profileImageUrl,
     verificationImageUrl = verificationImageUrl,
     // 실제 API 이미지가 존재하는 항목에 fake 로컬 이미지를 대응시켜 UI 테스트

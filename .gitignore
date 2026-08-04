@@ -14,3 +14,16 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# 자격증명·비밀값 (절대 커밋 금지)
+*.pem
+*.p12
+*.jks
+*.keystore
+.env
+.env.*
+secrets.properties
+keystore.properties
+aws-credentials*
+*credentials.json
+google-services.json

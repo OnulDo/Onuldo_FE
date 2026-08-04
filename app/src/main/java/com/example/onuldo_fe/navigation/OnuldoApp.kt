@@ -1,19 +1,23 @@
 package com.example.onuldo_fe.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.onuldo_fe.camera.CameraScreen
 import com.example.onuldo_fe.camera.CameraViewModel
-import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
-import com.example.onuldo_fe.ui.screen.challenge.participate.ParticipateScreen
-import com.example.onuldo_fe.ui.screen.challenge.participate.StartDoneScreen
+import com.example.onuldo_fe.ui.screen.challenge.detail.DetailRoute
+import com.example.onuldo_fe.ui.screen.challenge.participate.ParticipateRoute
 import com.example.onuldo_fe.ui.screen.login.LandingScreen
 import com.example.onuldo_fe.ui.screen.login.LoginScreen
 import com.example.onuldo_fe.ui.screen.login.ProfileSetupScreen
 import com.example.onuldo_fe.ui.screen.login.SignupScreen
+import com.example.onuldo_fe.ui.screen.login.SocialTermsScreen
 import com.example.onuldo_fe.ui.screen.login.WelcomeScreen
 import com.example.onuldo_fe.ui.screen.main.MainScreen
 import com.example.onuldo_fe.ui.screen.mypage.NicknameEditScreen
@@ -24,12 +28,23 @@ import com.example.onuldo_fe.ui.screen.mypage.PointWithdrawScreen
 import com.example.onuldo_fe.ui.screen.mypage.ProfileSettingsScreen
 import com.example.onuldo_fe.ui.screen.mypage.WithdrawAccountScreen
 import com.example.onuldo_fe.ui.screen.mypage.SettingScreen
+import com.example.onuldo_fe.ui.screen.mypage.TermScreen
+import com.example.onuldo_fe.data.auth.dto.TermType
+import com.example.onuldo_fe.data.network.SessionEvents
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.example.onuldo_fe.camera.CameraPermissionScreen
 import com.example.onuldo_fe.camera.PhotoPreviewScreen
 import com.example.onuldo_fe.ui.screen.verification.ChallengeVerificationScreen
 import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
+
+/** 마이 메뉴 이름. 서버가 약관 제목을 주기 전까지 상단바에 쓴다. */
+private fun termTitleOf(termType: TermType): String = when (termType) {
+    TermType.SERVICE -> "서비스 이용약관"
+    TermType.PRIVACY -> "개인정보 처리방침"
+    TermType.REFUND -> "환급 정책"
+    TermType.AGE_14 -> "만 14세 이상"
+    TermType.MARKETING -> "마케팅 수신 동의"
+}
 
 /** 앱 전체 내비게이션 그래프. 랜딩 → 로그인/회원가입 → 프로필 설정 → 환영 → 메인(탭).
  *  (스플래시는 별도 화면이 아니라 시스템 스플래시로 처리 — [MainActivity]) */
@@ -42,6 +57,16 @@ fun OnuldoApp() {
 
     //카메라 -> previewScreen
     val cameraViewModel: CameraViewModel = viewModel()
+
+    // 리프레시 토큰까지 만료돼 자동 재발급이 실패하면 랜딩으로 되돌린다.
+    LaunchedEffect(Unit) {
+        SessionEvents.sessionExpired.collect {
+            SessionEvents.consume()
+            navController.navigate(Routes.LANDING) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
 
     NavHost(navController = navController, startDestination = debugStartDestination) {
         composable(Routes.LANDING) {
@@ -59,6 +84,15 @@ fun OnuldoApp() {
                     }
                 },
                 onSignupClick = { navController.navigate(Routes.SIGNUP) },
+                // 소셜 로그인 결과 신규 회원 → 약관 동의 → 프로필 설정 → oauth/signup
+                onSocialSignupNeeded = { navController.navigate(Routes.SOCIAL_TERMS) },
+            )
+        }
+        composable(Routes.SOCIAL_TERMS) {
+            SocialTermsScreen(
+                onBack = { navController.popBackStack() },
+                onNext = { navController.navigate(Routes.PROFILE_SETUP) },
+                onTermClick = { termType -> navController.navigate(Routes.mypageTerm(termType.name)) },
             )
         }
         composable(Routes.SIGNUP) {
@@ -86,7 +120,15 @@ fun OnuldoApp() {
             )
         }
         composable(Routes.MAIN) {
-            MainScreen(onNavigate = { route -> navController.navigate(route) })
+            MainScreen(
+                onNavigate = { route -> navController.navigate(route) },
+                // 로그아웃 시 온보딩 백스택을 모두 비우고 랜딩으로 되돌린다.
+                onLoggedOut = {
+                    navController.navigate(Routes.LANDING) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+            )
         }
 
         // --- 마이페이지 하위 화면 (메인 탭 위 풀스크린) ---
@@ -123,15 +165,17 @@ fun OnuldoApp() {
         composable(Routes.MYPAGE_NOTIFICATION) {
             SettingScreen(onBackClick = { navController.popBackStack() })
         }
-
-        composable(Routes.CAMERA_PERMISSION) {
-            CameraPermissionScreen(
+        // 약관 상세. termType(SERVICE/PRIVACY/REFUND)에 따라 본문을 서버에서 받아 표시한다.
+        composable(
+            route = Routes.MYPAGE_TERM,
+            arguments = listOf(navArgument("termType") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val raw = backStackEntry.arguments?.getString("termType").orEmpty()
+            val termType = TermType.entries.firstOrNull { it.name == raw } ?: TermType.SERVICE
+            TermScreen(
+                termType = termType,
+                fallbackTitle = termTitleOf(termType),
                 onBack = { navController.popBackStack() },
-                onPermissionGranted = {
-                    navController.navigate(Routes.CAMERA) {
-                        popUpTo(Routes.CAMERA_PERMISSION) { inclusive = true }
-                    }
-                }
             )
         }
 
@@ -207,29 +251,53 @@ fun OnuldoApp() {
 
 
         // --- 챌린지 상세 흐름 (챌린지 탭 위 풀스크린): 상세 → 참여 → 시작 완료 ---
-        // 콜백만으로 화면끼리 연동. 각 화면은 자체 더미 데이터 표시(id 전달·조회 없음).
-        composable(Routes.CHALLENGE_DETAIL) {
-            DetailScreen(
+        // 상세는 challengeId를 받아 API로 조회(DetailRoute). 참여/완료는 콜백으로 연동.
+        composable(
+            route = Routes.CHALLENGE_DETAIL,
+            arguments = listOf(navArgument(Routes.CHALLENGE_DETAIL_ARG) { type = NavType.LongType })
+        ) { backStackEntry ->
+            val challengeId = backStackEntry.arguments?.getLong(Routes.CHALLENGE_DETAIL_ARG) ?: 0L
+            DetailRoute(
+                challengeId = challengeId,
                 onBackClick = { navController.popBackStack() },
-                onJoinClick = { navController.navigate(Routes.CHALLENGE_PARTICIPATE) },
+                onJoinClick = { title, description, category, timeStart, timeEnd ->
+                    navController.navigate(
+                        Routes.challengeParticipate(
+                            challengeId, title, description, category, timeStart, timeEnd
+                        )
+                    )
+                },
             )
         }
-        composable(Routes.CHALLENGE_PARTICIPATE) {
-            ParticipateScreen(
-                onBackClick = { navController.popBackStack() },
-                onStartClick = { navController.navigate(Routes.CHALLENGE_START_DONE) },
-                // 잔액 부족 팝업의 "충전하기" → 포인트 충전 화면
-                onChargePoint = { navController.navigate(Routes.MYPAGE_CHARGE) },
+        composable(
+            route = Routes.CHALLENGE_PARTICIPATE,
+            arguments = listOf(
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG) { type = NavType.LongType },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_TITLE) { type = NavType.StringType; defaultValue = "" },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_DESC) { type = NavType.StringType; defaultValue = "" },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_CATEGORY) { type = NavType.StringType; defaultValue = "" },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_START) { type = NavType.StringType; defaultValue = "" },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_END) { type = NavType.StringType; defaultValue = "" }
             )
-        }
-        composable(Routes.CHALLENGE_START_DONE) {
-            StartDoneScreen(
-                // "홈으로 가기" → 상세 흐름 백스택 정리하고 메인(홈)으로
-                onHomeClick = {
+        ) { backStackEntry ->
+            val challengeId = backStackEntry.arguments?.getLong(Routes.CHALLENGE_PARTICIPATE_ARG) ?: 0L
+            val args = backStackEntry.arguments
+            ParticipateRoute(
+                challengeId = challengeId,
+                title = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_TITLE).orEmpty(),
+                description = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_DESC).orEmpty(),
+                category = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_CATEGORY).orEmpty(),
+                timeStart = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_START).orEmpty(),
+                timeEnd = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_END).orEmpty(),
+                onBackClick = { navController.popBackStack() },
+                // 참여 성공 완료 화면(StartDone)의 "홈으로 가기" → 상세 흐름 백스택 정리하고 메인(홈)으로
+                onHome = {
                     navController.navigate(Routes.MAIN) {
                         popUpTo(Routes.MAIN) { inclusive = true }
                     }
                 },
+                // 잔액 부족 팝업의 "충전하기" → 포인트 충전 화면
+                onChargePoint = { navController.navigate(Routes.MYPAGE_CHARGE) },
             )
         }
     }

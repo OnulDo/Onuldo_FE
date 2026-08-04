@@ -30,6 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.component.OnulDoSwitch
 import com.example.onuldo_fe.ui.theme.BlackBrown
@@ -41,6 +43,7 @@ import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.viewmodel.mypage.NotificationSettingsViewModel
 
 // 마이페이지 - 알림 설정
 // 상태/유형 모델은 분리: [NotificationSettingsState], [NotificationType]
@@ -48,15 +51,14 @@ import com.example.onuldo_fe.ui.theme.White
 @Composable
 fun SettingScreen(
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: NotificationSettingsViewModel = viewModel()
 ) {
-    var state by remember { mutableStateOf(NotificationSettingsState()) }
+    // 서버 값(GET /api/users/me/notification-settings)으로 채우고, 변경 시 PATCH로 저장한다.
+    val state by viewModel.state.collectAsState()
 
     fun updateState(update: NotificationSettingsState.() -> NotificationSettingsState) {
-        state = state.update()
-
-        // TODO(API 연동 시)
-        // repository.saveNotificationSetting(state)
+        viewModel.apply(state.update())
     }
 
     // 전체 알림이 꺼지면 개별 알림은 값을 유지한 채 비활성 표시만 한다! (버튼 누르기 비활성)
@@ -77,9 +79,8 @@ fun SettingScreen(
             contentAlignment = Alignment.Center
         ) {
             OnulDoBackButton(
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = 8.dp),
+                // 패딩 없이 정렬만 — IconButton 중앙정렬로 화살표가 가로 20에 맞음(본문과 정렬)
+                modifier = Modifier.align(Alignment.CenterStart),
                 onClick = onBackClick
             )
             Text(

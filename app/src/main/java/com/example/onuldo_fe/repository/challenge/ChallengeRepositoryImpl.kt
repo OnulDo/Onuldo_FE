@@ -1,21 +1,46 @@
 package com.example.onuldo_fe.repository.challenge
 
-import com.example.onuldo_fe.R
-import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
+import com.example.onuldo_fe.data.challenge.api.ChallengeApi
+import com.example.onuldo_fe.data.challenge.dto.ParticipationRequestDto
+import com.example.onuldo_fe.data.challenge.mapper.toApiValue
+import com.example.onuldo_fe.data.challenge.mapper.toDetailModel
+import com.example.onuldo_fe.data.challenge.mapper.toModel
+import com.example.onuldo_fe.model.challenge.ChallengeCategory
+import com.example.onuldo_fe.model.challenge.ChallengeDetail
+import com.example.onuldo_fe.model.challenge.ChallengePage
+import com.example.onuldo_fe.model.challenge.ParticipationResult
 
-class ChallengeRepositoryImpl : ChallengeRepository {
-    // 더미 데이터 — API 명세 확정 후 실제 통신으로 교체
-    private val dummyChallenges = listOf(
-        Challenge(id = 0, title = "새벽 6시 기상", participantCount = 1234, imageRes = R.drawable.challenge_sample_1),
-        Challenge(id = 1, title = "30분 러닝", participantCount = 682, imageRes = R.drawable.challenge_sample_4),
-        Challenge(id = 2, title = "하루 독서 30분", participantCount = 920, imageRes = R.drawable.challenge_sample_6),
-        Challenge(id = 3, title = "영양제 챙기기", participantCount = 1532, imageRes = R.drawable.challenge_sample_2),
-        Challenge(id = 4, title = "영단어 30개", participantCount = 1149, imageRes = R.drawable.challenge_sample_3),
-        Challenge(id = 5, title = "명상 10분", participantCount = 425, imageRes = R.drawable.challenge_sample_5)
-    )
+// 챌린지 목록 API 요청과 DTO → 도메인 모델 변환 담당 (party RepositoryImpl과 동일 패턴)
+class ChallengeRepositoryImpl(private val api: ChallengeApi) : ChallengeRepository {
+    override suspend fun getChallenges(
+        page: Int,
+        size: Int,
+        category: ChallengeCategory?,
+        search: String?
+    ): ChallengePage {
+        // page는 커서 페이지네이션 전환으로 미사용(인터페이스 호환 위해 파라미터만 유지)
+        val response = api.getChallenges(
+            size = size,
+            category = category?.toApiValue(),          // 앱 enum → API category 문자열
+            search = search?.takeIf { it.isNotBlank() }  // 공백이면 s 미전송 (빈목록 처리는 ViewModel 담당)
+        )
+        return response.toModel()   // 목록 응답(content/hasNext) → 도메인 페이지
+    }
 
-    override fun getChallenges(): List<Challenge> = dummyChallenges
+    override suspend fun getChallengeDetail(challengeId: Long): ChallengeDetail {
+        val response = api.getChallengeDetail(challengeId)
+        return response.result.toDetailModel()
+    }
 
-    override fun getChallengeById(id: Int): Challenge =
-        dummyChallenges.firstOrNull { it.id == id } ?: dummyChallenges.first()
+    override suspend fun participate(
+        challengeId: Long,
+        depositAmount: Int,
+        durationWeeks: Int
+    ): ParticipationResult {
+        val response = api.participate(
+            challengeId = challengeId,
+            body = ParticipationRequestDto(depositAmount = depositAmount, durationWeeks = durationWeeks)
+        )
+        return response.result.toModel()
+    }
 }

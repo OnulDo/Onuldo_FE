@@ -1,0 +1,161 @@
+package com.example.onuldo_fe.ui.screen.mypage
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.data.auth.dto.TermType
+import com.example.onuldo_fe.model.term.TermContentBlock
+import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
+import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.Pretendard
+import com.example.onuldo_fe.viewmodel.mypage.TermViewModel
+
+/**
+ * 서버가 내려주는 본문 블록 종류(실측): `h2` 소제목 · `paragraph` 문단 · `linebreak` 빈 줄.
+ * 다른 제목 레벨이 추가될 수 있어 `h1`~`h3`를 모두 소제목으로 본다.
+ */
+private val HEADING_TYPES = setOf("h1", "h2", "h3")
+private const val TYPE_LINEBREAK = "linebreak"
+
+/**
+ * 약관 상세 (서비스 이용약관 · 개인정보 처리방침 · 환급 정책).
+ *
+ * 본문은 `GET /api/terms/{termType}`로 받아 `content` 블록 배열을 순서대로 렌더한다.
+ * 화면 제목은 진입한 메뉴 이름([fallbackTitle])을 쓰고, 서버가 제목을 주면 그것을 우선한다.
+ */
+@Composable
+fun TermScreen(
+    termType: TermType,
+    fallbackTitle: String,
+    onBack: () -> Unit,
+    viewModel: TermViewModel = viewModel(),
+) {
+    val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(termType) { viewModel.load(termType) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding(),
+    ) {
+        MyPageTopBar(title = state.term?.title?.takeIf { it.isNotBlank() } ?: fallbackTitle, onBack = onBack)
+
+        when {
+            state.isLoading -> LoadingBox()
+
+            state.errorMessage != null -> MessageBox(state.errorMessage.orEmpty())
+
+            state.term == null || state.term?.content.isNullOrEmpty() ->
+                MessageBox("약관 내용을 불러오지 못했어요.")
+
+            else -> {
+                val term = state.term ?: return@Column
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp, vertical = 24.dp),
+                ) {
+                    term.effectiveDate?.takeIf { it.isNotBlank() }?.let { date ->
+                        Text(
+                            text = "시행일 $date",
+                            fontFamily = Pretendard,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 12.sp,
+                            color = Persimmon,
+                        )
+                        Spacer(Modifier.height(16.dp))
+                    }
+
+                    term.content.forEach { block ->
+                        if (block.type == TYPE_LINEBREAK) {
+                            // 문단 사이 여백 전용 블록.
+                            Spacer(Modifier.height(10.dp))
+                        } else {
+                            TermBlock(block)
+                            Spacer(Modifier.height(8.dp))
+                        }
+                    }
+
+                    Spacer(Modifier.height(24.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TermBlock(block: TermContentBlock) {
+    if (block.content.isBlank()) return
+
+    if (block.type in HEADING_TYPES) {
+        Text(
+            text = block.content,
+            fontFamily = Pretendard,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp,
+            color = BlackBrown,
+        )
+    } else {
+        Text(
+            text = block.content,
+            fontFamily = Pretendard,
+            fontWeight = FontWeight.Normal,
+            fontSize = 13.sp,
+            lineHeight = 21.sp,
+            color = DarkBrown70,
+        )
+    }
+}
+
+@Composable
+private fun LoadingBox() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(color = Persimmon)
+    }
+}
+
+@Composable
+private fun MessageBox(message: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 32.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = message,
+            fontFamily = Pretendard,
+            fontSize = 13.sp,
+            color = DarkBrown70,
+        )
+    }
+}

@@ -88,9 +88,8 @@ fun NotificationScreen(
         ) {
             OnulDoBackButton(
                 onClick = onBackClick,
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = spacing.spacing8)
+                // 패딩 없이 정렬만 — IconButton 중앙정렬로 화살표가 가로 20에 맞음(본문과 정렬)
+                modifier = Modifier.align(Alignment.CenterStart)
             )
             Text(
                 text = "알림",
