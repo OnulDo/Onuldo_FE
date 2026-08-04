@@ -188,12 +188,11 @@ private fun ProfileCard(nickname: String, email: String, onClick: () -> Unit) {
                 color = DarkBrown70,
             )
         }
-        Text(
-            text = "›",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            color = DarkBrown50,
+        // 화살표는 Figma 에셋으로 통일한다(문자 '›'는 화면마다 크기가 달라짐).
+        Image(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,
+            modifier = Modifier.size(width = 5.dp, height = 8.dp),
         )
     }
 }

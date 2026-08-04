@@ -25,6 +25,7 @@ import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.component.OnuldoTextField
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.utils.Validators
@@ -68,7 +69,7 @@ fun NicknameEditScreen(
             fontFamily = Pretendard,
             fontWeight = FontWeight.Medium,
             fontSize = 14.sp,
-            color = MySubText,
+            color = DarkBrown70,
             modifier = Modifier.padding(horizontal = 20.dp),
         )
 
