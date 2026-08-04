@@ -30,6 +30,7 @@ enum class PartyAction {
 data class PartyUiState(
     val parties: List<PartyCardUi> = emptyList(),        // 파티 홈에 표시할 진행 중인 파티 목록
     val waitingRoom: PartyWaitingRoomUi? = null,         // 현재 입장한 파티의 최신 대기방 정보
+    val isReadySubmitted: Boolean = false,               // 로그인 파티원의 현재 준비 상태
     val isListLoading: Boolean = false,                  // 파티 목록을 불러오는 중인지 여부
     val action: PartyAction = PartyAction.Idle,          // 현재 진행 중인 파티 요청
     val errorMessage: String? = null                     // API 요청 실패 시 화면에 표시할 문구
@@ -37,9 +38,7 @@ data class PartyUiState(
 
 // 파티 생성부터 대기방 시작·이탈까지 파티의 핵심 상태 변경 관리
 class PartyViewModel(
-    private val repository: PartyRepository = PartyRepositoryProvider.provide(),
-    // TODO 로그인 연동 시 AuthRepository에서 현재 사용자 ID 전달
-    val currentUserId: String = "current-user"
+    private val repository: PartyRepository = PartyRepositoryProvider.provide()
 ) : ViewModel() {
     var uiState by mutableStateOf(PartyUiState())
         private set
@@ -75,32 +74,38 @@ class PartyViewModel(
     }
 
     fun createParty(command: CreatePartyCommand, onSuccess: (String) -> Unit) {
-        // 생성 요청 성공 시 발급된 partyId로 대기방 정보를 조회한 뒤 화면 상태에 반영
+        // 생성 성공과 대기방 조회를 분리해 조회 실패 시 파티를 다시 생성하지 않도록 처리
         // action이 Idle이 아니면 연속 클릭에 따른 동일 파티 중복 생성 방지
         if (uiState.action != PartyAction.Idle) return
         uiState = uiState.copy(action = PartyAction.Creating, errorMessage = null)
         viewModelScope.launch {
-            runCatching {
-                val created = repository.createParty(command)
-                repository.getWaitingRoom(created.partyId)
-            }.onSuccess { room ->
-                uiState = uiState.copy(
-                    waitingRoom = room.toUi(),
-                    action = PartyAction.Idle
-                )
-                onSuccess(room.partyId)
-            }.onFailure {
-                uiState = uiState.copy(
-                    action = PartyAction.Idle,
-                    errorMessage = "파티를 만들지 못했어요."
-                )
-            }
+            runCatching { repository.createParty(command) }
+                .onSuccess { created ->
+                    uiState = uiState.copy(
+                        waitingRoom = null,
+                        isReadySubmitted = false,
+                        action = PartyAction.Idle
+                    )
+                    onSuccess(created.partyId)
+                    loadWaitingRoom(created.partyId)
+                }
+                .onFailure {
+                    uiState = uiState.copy(
+                        action = PartyAction.Idle,
+                        errorMessage = "파티를 만들지 못했어요."
+                    )
+                }
         }
     }
 
     fun loadWaitingRoom(partyId: String, onSuccess: () -> Unit = {}) {
         // 방장과 파티원이 동일한 API 응답을 사용해 역할·준비 상태·정원 표시
-        uiState = uiState.copy(waitingRoom = null, action = PartyAction.LoadingRoom, errorMessage = null)
+        uiState = uiState.copy(
+            waitingRoom = null,
+            isReadySubmitted = false,
+            action = PartyAction.LoadingRoom,
+            errorMessage = null
+        )
         viewModelScope.launch {
             runCatching { repository.getWaitingRoom(partyId) }
                 .onSuccess { room ->
@@ -119,6 +124,16 @@ class PartyViewModel(
         }
     }
 
+    /** 초대코드 참여 응답의 최신 대기방을 추가 조회 없이 화면 상태에 적용한다. */
+    fun applyJoinedWaitingRoom(room: PartyWaitingRoom) {
+        uiState = uiState.copy(
+            waitingRoom = room.toUi(),
+            isReadySubmitted = false,
+            action = PartyAction.Idle,
+            errorMessage = null
+        )
+    }
+
     fun readyParty() {
         // 준비완료 요청 성공 응답에 포함된 최신 멤버 목록으로 대기방 갱신
         // 포인트 부족 여부는 화면에서 먼저 확인하고 실제 연동 후 서버에서도 최종 검증
@@ -128,7 +143,12 @@ class PartyViewModel(
         viewModelScope.launch {
             runCatching { repository.readyParty(partyId) }
                 .onSuccess { room ->
-                    uiState = uiState.copy(waitingRoom = room.toUi(), action = PartyAction.Idle)
+                    // 서버의 토글 결과에 맞춰 준비하기와 대기 상태를 전환한다.
+                    uiState = uiState.copy(
+                        waitingRoom = room.toUi(),
+                        isReadySubmitted = !uiState.isReadySubmitted,
+                        action = PartyAction.Idle
+                    )
                 }
                 .onFailure {
                     uiState = uiState.copy(
@@ -187,12 +207,14 @@ class PartyViewModel(
 private fun PartyWaitingRoom.toUi() = PartyWaitingRoomUi(
     partyId = partyId,
     partyName = partyName,
-    challengeName = challengeName,
     inviteCode = inviteCode,
     period = period,
     deposit = deposit,
     capacity = capacity,
-    members = members.map(PartyMember::toUi)
+    members = members.map(PartyMember::toUi),
+    // Repository가 Fake/Real 차이를 통일했으므로 ViewModel은 응답값만 전달한다.
+    isHost = isHost,
+    canStart = canStart
 )
 
 // 서버 문자열 상태가 변환된 도메인 enum을 화면에서 사용하는 enum으로 매핑
@@ -206,7 +228,8 @@ private fun PartyMember.toUi() = PartyMemberUi(
     },
     id = id,
     joinedOrder = joinedOrder,
-    profileImageUrl = profileImageUrl
+    profileImageUrl = profileImageUrl,
+    defaultCharacterId = defaultCharacterId
 )
 
 // 진행 중 파티 요약 정보를 파티 홈 카드에 표시할 UI 모델로 변환

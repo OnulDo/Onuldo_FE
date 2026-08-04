@@ -10,6 +10,7 @@ import com.example.onuldo_fe.model.home.HomeChallenge
 import com.example.onuldo_fe.model.home.HomeCompletedChallenge
 import com.example.onuldo_fe.model.home.HomeData
 import com.example.onuldo_fe.model.home.HomePartyChallenge
+import com.example.onuldo_fe.model.home.HomePartyMember
 import com.example.onuldo_fe.model.home.SettlementBanner
 import com.example.onuldo_fe.model.home.TodayChallenge
 import java.time.LocalTime
@@ -44,7 +45,7 @@ private fun HomeResponseDto.toModel(): HomeData {
         completedChallenges = completedModels,
         settlementBanner = settlementBanner
             ?.takeUnless { it.isChecked }
-            ?.let { SettlementBanner(it.partyName, it.resultId) }
+            ?.let { SettlementBanner(it.partyName, it.partyId) }
     )
 }
 
@@ -61,7 +62,7 @@ private fun HomeChallengeDto.toModel() = HomeChallenge(
     remainingDays = remainingDays,
     deadlineAt = LocalTime.parse(deadlineAt),
     status = status.toChallengeStatus(),
-    verifiedAt = verifiedAt?.let(LocalTime::parse),
+    verifiedAt = verifiedAt?.let { runCatching { LocalTime.parse(it) }.getOrNull() },
     remainingMinutes = remainingMinutes,
     canVerify = canVerify
 )
@@ -70,13 +71,21 @@ private fun HomePartyChallengeDto.toModel() = HomePartyChallenge(
     title = title,
     subtitle = subtitle,
     remainingDays = remainingDays,
-    deadlineAt = LocalTime.parse(deadlineAt),
+    deadlineAt = runCatching { LocalTime.parse(deadlineAt) }.getOrNull(),
     completedMemberCount = completedMemberCount,
     totalMemberCount = totalMemberCount,
     status = status.toChallengeStatus(),
-    verifiedAt = verifiedAt?.let(LocalTime::parse),
+    verifiedAt = verifiedAt?.let { runCatching { LocalTime.parse(it) }.getOrNull() },
     remainingMinutes = remainingMinutes,
-    canVerify = canVerify
+    canVerify = canVerify,
+    members = members.map {
+        HomePartyMember(
+            memberId = it.memberId,
+            profileImageUrl = it.profileImageUrl,
+            defaultCharacterId = it.defaultCharacterId,
+            isVerifiedToday = it.isVerifiedToday
+        )
+    }
 )
 
 private fun HomeCompletedChallengeDto.toModel(): HomeCompletedChallenge = when (type) {

@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 
 val Pretendard = FontFamily(
+    // TODO: Figma의 Medium·SemiBold를 정확히 표시할 수 있도록 해당 폰트 파일 추가
     Font(
         resId = R.font.pretendard_regular,
         weight = FontWeight.Normal

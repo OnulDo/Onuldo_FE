@@ -4,7 +4,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,182 +14,318 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
-import com.example.onuldo_fe.ui.component.OnulDoBackButton
+import com.example.onuldo_fe.ui.component.OnulDoButton
+import com.example.onuldo_fe.data.party.dummy.PartySettlementDummyData
+import com.example.onuldo_fe.model.party.PartySettlementMember
+import com.example.onuldo_fe.model.party.PartySettlementMemberStatus
+import com.example.onuldo_fe.model.party.PartySettlementResult
+import com.example.onuldo_fe.model.party.PartySettlementStatus
+import com.example.onuldo_fe.repository.party.toModel
+import com.example.onuldo_fe.ui.screen.party.components.PartyMemberCard
+import com.example.onuldo_fe.ui.screen.party.components.PartyTopBar
 import com.example.onuldo_fe.ui.theme.BlackBrown
-import com.example.onuldo_fe.ui.theme.DarkBrown40
+import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Green
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
-import com.example.onuldo_fe.ui.theme.White
+import java.text.NumberFormat
+import java.util.Locale
 
-data class PartySettlementMemberUi(val name: String, val bonus: String)
-
-private val sampleSettlementMembers = listOf(
-    PartySettlementMemberUi("민지", "+5,000P"),
-    PartySettlementMemberUi("서연", "+5,000P"),
-    PartySettlementMemberUi("준호", "+5,000P")
-)
+private val SettlementLossRed = Color(0xFFD9534F)
 
 @Composable
 fun PartySettlementScreen(
     onBack: () -> Unit,
+    result: PartySettlementResult,
     modifier: Modifier = Modifier,
-    onConfirm: () -> Unit = onBack,
-    members: List<PartySettlementMemberUi> = sampleSettlementMembers
+    onConfirm: () -> Unit = onBack
 ) {
+    val spacing = LocalSpacing.current
+    val content = result.status.content()
+
     Column(modifier.fillMaxSize().background(SourCream)) {
-        Box(Modifier.fillMaxWidth().height(56.dp)) {
-            OnulDoBackButton(
-                modifier = Modifier.align(Alignment.CenterStart).padding(start = 4.dp),
-                onClick = onBack
-            )
-            Text(
-                "파티 정산 결과",
-                modifier = Modifier.align(Alignment.CenterStart).padding(start = 44.dp),
-                color = BlackBrown,
-                fontFamily = Pretendard,
-                fontSize = 17.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        PartyTopBar(title = "파티 정산 결과", onBack = onBack)
 
         LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(bottom = 16.dp)
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            contentPadding = PaddingValues(bottom = spacing.spacing16)
         ) {
             item {
+                // TODO 디자인 시스템에 47dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(47.dp))
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Box(
-                        Modifier.size(135.dp).background(Persimmon.copy(alpha = 0.15f), CircleShape),
+                        modifier = Modifier
+                            .size(135.dp)
+                            .background(content.characterBackground, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        PartySettlementSuccessCharacter()
+                        PartySettlementCharacter()
                     }
                 }
-                Spacer(Modifier.height(7.dp))
+                Spacer(Modifier.height(spacing.spacing12))
                 Text(
-                    "전원 성공!",
+                    text = result.title,
                     modifier = Modifier.fillMaxWidth(),
                     color = BlackBrown,
                     fontFamily = Pretendard,
                     fontSize = 22.sp,
                     lineHeight = 40.sp,
                     fontWeight = FontWeight.Bold,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    textAlign = TextAlign.Center
                 )
                 Text(
-                    "파티 전원이 챌린지를 완주했어요",
+                    text = result.description,
                     modifier = Modifier.fillMaxWidth(),
-                    color = com.example.onuldo_fe.ui.theme.DarkBrown,
+                    color = DarkBrown,
                     fontFamily = Pretendard,
                     fontSize = 13.sp,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    lineHeight = 18.sp,
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Center
                 )
-                Spacer(Modifier.height(47.dp))
-                Text("내 정산 결과", modifier = Modifier.padding(start = 24.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(2.dp))
-                SettlementSummaryCard(Modifier.padding(horizontal = 20.dp))
-                Spacer(Modifier.height(12.dp))
-                Text("파티원 결과", modifier = Modifier.padding(start = 24.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(2.dp))
+                Spacer(Modifier.height(spacing.spacing50))
+                SettlementSectionTitle("내 정산 결과")
+                Spacer(Modifier.height(spacing.spacing8))
+                SettlementSummaryCard(
+                    refundAmount = result.refundAmount.toPointText(),
+                    adjustmentLabel = content.adjustmentLabel,
+                    adjustmentAmount = result.adjustmentAmount.toSignedPointText(),
+                    adjustmentColor = content.adjustmentColor,
+                    refundLabelColor = content.refundLabelColor,
+                    modifier = Modifier.padding(horizontal = spacing.spacing20)
+                )
+                Spacer(Modifier.height(spacing.spacing16))
+                SettlementSectionTitle("파티원 결과")
+                Spacer(Modifier.height(spacing.spacing8))
             }
 
-            items(members, key = { it.name }) { member ->
+            items(result.members, key = { it.userId }) { member ->
                 PartySettlementMemberCard(
                     member = member,
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                    showCompletionStatus = result.status == PartySettlementStatus.PartialSuccess,
+                    modifier = Modifier.padding(horizontal = spacing.spacing20)
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(spacing.spacing8))
             }
         }
 
-        Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
-            Button(
+        Box(
+            modifier = Modifier.fillMaxWidth().height(138.dp).background(SourCream),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            OnulDoButton(
+                text = "확인",
                 onClick = onConfirm,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 40.dp).height(52.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Persimmon, contentColor = SourCream)
-            ) {
-                Text("확인", fontFamily = Pretendard, fontSize = 17.sp, lineHeight = 20.sp, fontWeight = FontWeight.Bold)
-            }
+                modifier = Modifier
+                    // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
+                    .padding(top = 40.dp),
+                height = 52.dp,
+                fontSize = 17.sp,
+                lineHeight = 20.sp
+            )
         }
     }
 }
 
 @Composable
-private fun PartySettlementSuccessCharacter() {
+private fun SettlementSectionTitle(text: String) {
+    Text(
+        text = text,
+        modifier = Modifier.padding(start = LocalSpacing.current.spacing24),
+        color = BlackBrown,
+        fontFamily = Pretendard,
+        fontSize = 12.sp,
+        lineHeight = 22.sp,
+        fontWeight = FontWeight.Bold
+    )
+}
+
+@Composable
+private fun PartySettlementCharacter() {
     Image(
         painter = painterResource(R.drawable.party_settlement_success_icon),
-        contentDescription = "전원 성공",
+        contentDescription = null,
         modifier = Modifier.size(width = 73.dp, height = 104.dp),
         contentScale = ContentScale.Fit
     )
 }
 
 @Composable
-private fun SettlementSummaryCard(modifier: Modifier = Modifier) {
+private fun SettlementSummaryCard(
+    refundAmount: String,
+    adjustmentLabel: String,
+    adjustmentAmount: String,
+    adjustmentColor: Color,
+    refundLabelColor: Color,
+    modifier: Modifier = Modifier
+) {
     Row(
-        modifier.fillMaxWidth().height(76.dp).background(Persimmon10, RoundedCornerShape(14.dp)).border(BorderStroke(1.dp, Persimmon.copy(alpha = 0.2f)), RoundedCornerShape(14.dp)),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(76.dp)
+            .background(Persimmon10, RoundedCornerShape(14.dp))
+            .border(BorderStroke(1.dp, Persimmon.copy(alpha = 0.2f)), RoundedCornerShape(14.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        SettlementAmount("도전금 환급", "30,000P", DarkBrown50, BlackBrown, Modifier.weight(1f))
-        SettlementAmount("성과 보너스", "+5,000P", Green, Green, Modifier.weight(1f))
+        SettlementAmount("도전금 환급", refundAmount, refundLabelColor, BlackBrown, Modifier.weight(1f))
+        SettlementAmount(adjustmentLabel, adjustmentAmount, adjustmentColor, adjustmentColor, Modifier.weight(1f))
     }
 }
 
 @Composable
-private fun SettlementAmount(label: String, amount: String, labelColor: androidx.compose.ui.graphics.Color, amountColor: androidx.compose.ui.graphics.Color, modifier: Modifier = Modifier) {
+private fun SettlementAmount(
+    label: String,
+    amount: String,
+    labelColor: Color,
+    amountColor: Color,
+    modifier: Modifier = Modifier
+) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, color = labelColor, fontFamily = Pretendard, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-        Text(amount, modifier = Modifier.padding(top = 3.dp), color = amountColor, fontFamily = Pretendard, fontSize = 17.sp, lineHeight = 20.sp, fontWeight = FontWeight.Bold)
+        Text(
+            text = label,
+            color = labelColor,
+            fontFamily = Pretendard,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = amount,
+            // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
+            modifier = Modifier.padding(top = 3.dp),
+            color = amountColor,
+            fontFamily = Pretendard,
+            fontSize = 17.sp,
+            lineHeight = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
 @Composable
 private fun PartySettlementMemberCard(
-    member: PartySettlementMemberUi,
+    member: PartySettlementMember,
+    showCompletionStatus: Boolean,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier.fillMaxWidth().height(56.dp).background(White, RoundedCornerShape(12.dp)).border(BorderStroke(1.dp, DarkBrown40), RoundedCornerShape(12.dp)).padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(Modifier.size(40.dp).background(Persimmon10, CircleShape).border(1.dp, Persimmon, CircleShape), contentAlignment = Alignment.Center) {
-            Image(painterResource(R.drawable.party_member_avatar), null, Modifier.size(38.dp), contentScale = ContentScale.Fit)
+    val resultColor = if (member.adjustmentAmount < 0) SettlementLossRed else Green
+
+    PartyMemberCard(
+        name = member.name,
+        profileImageUrl = member.profileImageUrl,
+        defaultCharacterId = member.defaultCharacterId,
+        modifier = modifier,
+        startPadding = 16.dp,
+        endPadding = 20.dp,
+        nameWidth = 44.dp,
+        middleContent = {
+            if (showCompletionStatus) {
+                Text(
+                    text = if (member.status == PartySettlementMemberStatus.Completed) "완주" else "미완주",
+                    color = if (member.status == PartySettlementMemberStatus.Completed) Green else SettlementLossRed,
+                    fontFamily = Pretendard,
+                    fontSize = 11.sp,
+                    lineHeight = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
-        Text(member.name, modifier = Modifier.padding(start = 12.dp), color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.weight(1f))
-        Text(member.bonus, color = Green, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
+    ) {
+        Text(
+            text = member.adjustmentAmount.toSignedPointText(),
+            modifier = Modifier.width(130.dp),
+            color = resultColor,
+            fontFamily = Pretendard,
+            fontSize = 12.sp,
+            lineHeight = 22.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.End
+        )
     }
 }
 
-@Preview(name = "파티 정산 전원 성공", showBackground = true, widthDp = 390, heightDp = 844)
+private data class SettlementContent(
+    val characterBackground: Color,
+    val adjustmentLabel: String,
+    val adjustmentColor: Color,
+    val refundLabelColor: Color
+)
+
+private fun PartySettlementStatus.content() = when (this) {
+    PartySettlementStatus.AllSuccess -> SettlementContent(
+        characterBackground = Persimmon.copy(alpha = 0.15f),
+        adjustmentLabel = "성과 보너스",
+        adjustmentColor = Green,
+        refundLabelColor = DarkBrown50
+    )
+
+    PartySettlementStatus.PartialSuccess -> SettlementContent(
+        characterBackground = Persimmon.copy(alpha = 0.15f),
+        adjustmentLabel = "성과 보너스",
+        adjustmentColor = Green,
+        refundLabelColor = DarkBrown
+    )
+
+    PartySettlementStatus.AllFailed -> SettlementContent(
+        characterBackground = DarkBrown.copy(alpha = 0.08f),
+        adjustmentLabel = "차감",
+        adjustmentColor = SettlementLossRed,
+        refundLabelColor = DarkBrown
+    )
+}
+
+private val pointFormatter = NumberFormat.getNumberInstance(Locale.KOREA)
+
+private fun Int.toPointText(): String = "${pointFormatter.format(this)}P"
+
+private fun Int.toSignedPointText(): String = when {
+    this > 0 -> "+${pointFormatter.format(this)}P"
+    else -> "${pointFormatter.format(this)}P"
+}
+
+@Preview(name = "정산 - 전원 성공", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
-private fun PartySettlementScreenPreview() {
-    OnulDo_FETheme { PartySettlementScreen(onBack = {}) }
+private fun PartySettlementAllSuccessPreview() {
+    OnulDo_FETheme {
+        PartySettlementScreen(onBack = {}, result = PartySettlementDummyData.allSuccess.toModel())
+    }
+}
+
+@Preview(name = "정산 - 일부 성공", showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun PartySettlementPartialSuccessPreview() {
+    OnulDo_FETheme {
+        PartySettlementScreen(onBack = {}, result = PartySettlementDummyData.partialSuccess.toModel())
+    }
+}
+
+@Preview(name = "정산 - 전원 실패", showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun PartySettlementAllFailedPreview() {
+    OnulDo_FETheme {
+        PartySettlementScreen(onBack = {}, result = PartySettlementDummyData.allFailed.toModel())
+    }
 }

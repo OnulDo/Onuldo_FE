@@ -10,11 +10,12 @@ import com.example.onuldo_fe.model.party.PartyJoinError
 import com.example.onuldo_fe.model.party.PartyJoinResult
 import com.example.onuldo_fe.repository.party.PartyInviteRepository
 import com.example.onuldo_fe.repository.party.PartyInviteRepositoryProvider
+import com.example.onuldo_fe.model.party.PartyWaitingRoom
 
 // 초대코드 참여 요청의 입력 오류·성공 결과·네트워크 상태 관리
 data class PartyInviteUiState(
     val error: InviteCodeError? = null,         // 코드 정책 검증 실패 상태
-    val joinedPartyId: String? = null,          // 참여 성공 후 이동할 파티 ID
+    val joinedWaitingRoom: PartyWaitingRoom? = null, // 참여 성공 후 바로 표시할 대기방 정보
     val isJoining: Boolean = false,             // 참여 요청 중 중복 제출 방지 상태
     val networkErrorMessage: String? = null     // 통신 실패 시 표시할 오류 문구
 )
@@ -36,7 +37,7 @@ class PartyInviteViewModel(
                     onSuccess = { result ->
                         when (result) {
                             // 성공 결과는 Route의 LaunchedEffect가 감지해 대기방으로 이동
-                            is PartyJoinResult.Success -> PartyInviteUiState(joinedPartyId = result.partyId)
+                            is PartyJoinResult.Success -> PartyInviteUiState(joinedWaitingRoom = result.waitingRoom)
                             // 서버 정책 오류를 초대코드 다이얼로그의 강조 상태와 문구로 변환
                             is PartyJoinResult.Failure -> PartyInviteUiState(error = result.error.toUiError())
                         }

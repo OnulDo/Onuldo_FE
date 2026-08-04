@@ -28,10 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown20
 import com.example.onuldo_fe.ui.theme.DarkBrown40
@@ -49,13 +51,12 @@ fun GallerySearchBar(
     placeholder: String = "생활루틴"
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val borderColor = DarkBrown40
-    val iconColor = DarkBrown
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    // 포커스(입력 중)면 테두리 brand/brown/100(#5C2C03), 아니면 brown/40
+    val borderColor = if (isFocused) DarkBrown  else DarkBrown40
 
-    val textStyle = MaterialTheme.typography.labelLarge.copy(
-        fontSize = 13.sp,
-        lineHeight = 13.sp
-    )
+    // Caption1
+    val textStyle = MaterialTheme.typography.labelLarge
 
     Row(
         modifier = modifier
@@ -67,11 +68,10 @@ fun GallerySearchBar(
             .padding(top = 6.dp, bottom = 6.dp, start = 11.dp, end = 11.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 돋보기 아이콘 — tint로 색 제어
+        // tint 제거
         Icon(
             painter = painterResource(R.drawable.challenge_search),
             contentDescription = null,
-            tint = iconColor,
             modifier = Modifier.size(12.dp)
         )
         Spacer(Modifier.width(11.dp))
@@ -84,11 +84,12 @@ fun GallerySearchBar(
                     color = DarkBrown20
                 )
             }
+            //caption1
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
                 singleLine = true,
-                textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onBackground),
+                textStyle = textStyle.copy(color = BlackBrown),
                 cursorBrush = SolidColor(Persimmon),
                 interactionSource = interactionSource,
                 modifier = Modifier.fillMaxWidth()

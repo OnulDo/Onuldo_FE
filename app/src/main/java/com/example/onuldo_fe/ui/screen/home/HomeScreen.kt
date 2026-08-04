@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -29,16 +30,17 @@ import com.example.onuldo_fe.R
 import com.example.onuldo_fe.data.home.api.FakeHomeApi
 import com.example.onuldo_fe.data.home.dummy.FakeHomeScenario
 import com.example.onuldo_fe.repository.home.HomeRepositoryImpl
-import com.example.onuldo_fe.ui.component.home.EmptyChallengeContent
-import com.example.onuldo_fe.ui.component.home.HomeChallengeCard
-import com.example.onuldo_fe.ui.component.home.HomeCompletedChallengeCard
-import com.example.onuldo_fe.ui.component.home.HomeHeader
-import com.example.onuldo_fe.ui.component.home.HomePartyCard
-import com.example.onuldo_fe.ui.component.home.SettlementCompleteCard
-import com.example.onuldo_fe.ui.component.home.TodayChallengeCard
+import com.example.onuldo_fe.ui.screen.home.components.EmptyChallengeContent
+import com.example.onuldo_fe.ui.screen.home.components.HomeChallengeCard
+import com.example.onuldo_fe.ui.screen.home.components.HomeCompletedChallengeCard
+import com.example.onuldo_fe.ui.screen.home.components.HomeHeader
+import com.example.onuldo_fe.ui.screen.home.components.HomePartyCard
+import com.example.onuldo_fe.ui.screen.home.components.SettlementCompleteCard
+import com.example.onuldo_fe.ui.screen.home.components.TodayChallengeCard
 import com.example.onuldo_fe.viewmodel.home.HomeUiState
 import com.example.onuldo_fe.viewmodel.home.toUiState
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.SourCream
@@ -48,8 +50,9 @@ fun HomeScreen(
     uiState: HomeUiState,
     onNotificationClick: () -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
-    onSettlementResultClick: (String) -> Unit = {},
+    onSettlementResultClick: (Long) -> Unit = {},
     onVerifyClick: () -> Unit = {},
+    scrollToTopKey: Int = 0,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -57,7 +60,6 @@ fun HomeScreen(
             .fillMaxSize()
             .background(SourCream)
             .statusBarsPadding()
-        // .navigationBarsPadding()    ← 제거 (Scaffold가 이미 처리)
     ) {
         // 홈 API 상태에 따라 기본 홈과 빈 홈 분기
         if (uiState.hasHomeContent) {
@@ -65,7 +67,8 @@ fun HomeScreen(
                 uiState = uiState,
                 onNotificationClick = onNotificationClick,
                 onSettlementResultClick = onSettlementResultClick,
-                onVerifyClick = onVerifyClick
+                onVerifyClick = onVerifyClick,
+                scrollToTopKey = scrollToTopKey
             )
         } else {
             EmptyHomeContent(
@@ -85,6 +88,9 @@ private fun EmptyHomeContent(
     onBrowseChallengesClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val spacing = LocalSpacing.current
+    // TODO: 디자인 시스템에 없는 34·56dp 여백 토큰 추가 후 교체
+
     Box(modifier = modifier) {
         HomeHeader(
             userName = userName,
@@ -92,7 +98,7 @@ private fun EmptyHomeContent(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = 34.dp)
+                .padding(start = spacing.spacing20, end = spacing.spacing20, top = 34.dp)
         )
 
         EmptyChallengeContent(
@@ -100,7 +106,7 @@ private fun EmptyHomeContent(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
-                .padding(start = 56.dp, end = 56.dp, top = 216.dp)
+                .padding(start = spacing.spacing20, end = spacing.spacing20, top = 216.dp)
         )
     }
 }
@@ -109,16 +115,27 @@ private fun EmptyHomeContent(
 private fun HomeContent(
     uiState: HomeUiState,
     onNotificationClick: () -> Unit,
-    onSettlementResultClick: (String) -> Unit,
-    onVerifyClick: () -> Unit
+    onSettlementResultClick: (Long) -> Unit,
+    onVerifyClick: () -> Unit,
+    scrollToTopKey: Int
 ) {
+    val spacing = LocalSpacing.current
     val isAllCompleted = uiState.isAllCompleted
+    val scrollState = rememberScrollState()
+    // TODO: 디자인 시스템에 없는 17·34dp 여백 토큰 추가 후 교체
+
+    LaunchedEffect(scrollToTopKey) {
+        if (scrollToTopKey > 0) {
+            // 파티 시작 후 홈으로 돌아오면 이전 스크롤 위치 대신 상단 표시
+            scrollState.scrollTo(0)
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(bottom = 24.dp)
+            .verticalScroll(scrollState)
+            .padding(bottom = spacing.spacing24)
     ) {
         // 모든 홈 상태에서 공통 헤더 유지
         HomeHeader(
@@ -126,7 +143,7 @@ private fun HomeContent(
             onNotificationClick = onNotificationClick,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = 34.dp, bottom = 17.dp)
+                .padding(start = spacing.spacing20, end = spacing.spacing20, top = 34.dp, bottom = 17.dp)
         )
 
         // 오늘 집계 데이터가 있을 때 오늘의 챌린지 카드 노출
@@ -135,19 +152,19 @@ private fun HomeContent(
                 todayChallenge = todayChallenge,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = spacing.spacing20)
             )
         }
 
         // 확인하지 않은 파티 정산 결과가 있을 때 배너 노출
         uiState.settlementBanner?.let { banner ->
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(spacing.spacing18))
             SettlementCompleteCard(
                 partyName = banner.partyName,
-                onClick = { onSettlementResultClick(banner.resultId) },
+                onClick = { onSettlementResultClick(banner.partyId) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = spacing.spacing20)
             )
         }
 
@@ -155,7 +172,8 @@ private fun HomeContent(
         ChallengeSection(
             title = "함께하는 파티",
             visible = !isAllCompleted && uiState.partyChallenges.isNotEmpty(),
-            topSpacing = if (uiState.settlementBanner != null) 18.dp else 28.dp
+            topSpacing = if (uiState.settlementBanner != null) spacing.spacing18 else spacing.spacing28,
+            itemSpacing = spacing.spacing12
         ) {
             uiState.partyChallenges.forEach { partyChallenge ->
                 HomePartyCard(
@@ -170,7 +188,8 @@ private fun HomeContent(
         ChallengeSection(
             title = "나의 챌린지",
             visible = !isAllCompleted && uiState.challenges.isNotEmpty(),
-            topSpacing = if (uiState.partyChallenges.isNotEmpty()) 18.dp else 28.dp
+            topSpacing = if (uiState.partyChallenges.isNotEmpty()) spacing.spacing18 else spacing.spacing28,
+            itemSpacing = spacing.spacing12
         ) {
             uiState.challenges.forEach { challenge ->
                 HomeChallengeCard(
@@ -185,8 +204,8 @@ private fun HomeContent(
         ChallengeSection(
             title = stringResource(R.string.home_completed_challenge_title),
             visible = isAllCompleted,
-            topSpacing = 26.dp,
-            itemSpacing = 8.dp
+            topSpacing = spacing.spacing26,
+            itemSpacing = spacing.spacing8
         ) {
             uiState.completedChallenges.forEach { completedChallenge ->
                 HomeCompletedChallengeCard(completedChallenge, Modifier.fillMaxWidth())
@@ -199,17 +218,19 @@ private fun HomeContent(
 private fun ChallengeSection(
     title: String,
     visible: Boolean,
-    topSpacing: androidx.compose.ui.unit.Dp = 28.dp,
-    itemSpacing: androidx.compose.ui.unit.Dp = 12.dp,
+    topSpacing: androidx.compose.ui.unit.Dp,
+    itemSpacing: androidx.compose.ui.unit.Dp,
     content: @Composable ColumnScope.() -> Unit
 ) {
     if (!visible) return
+    val spacing = LocalSpacing.current
+    // TODO: 디자인 시스템에 없는 5·14dp 여백 토큰 추가 후 교체
 
     Spacer(modifier = Modifier.height(topSpacing))
-    SectionTitle(text = title, modifier = Modifier.padding(horizontal = 20.dp))
+    SectionTitle(text = title, modifier = Modifier.padding(horizontal = spacing.spacing20))
     Spacer(modifier = Modifier.height(14.dp))
     Column(
-        modifier = Modifier.padding(horizontal = 20.dp),
+        modifier = Modifier.padding(horizontal = spacing.spacing20),
         verticalArrangement = Arrangement.spacedBy(itemSpacing),
         content = content
     )
@@ -229,7 +250,6 @@ private fun SectionTitle(text: String, modifier: Modifier = Modifier) {
             text = text,
             color = BlackBrown,
             style = MaterialTheme.typography.bodyLarge,
-            fontSize = 17.sp,
             lineHeight = 20.sp
         )
     }
