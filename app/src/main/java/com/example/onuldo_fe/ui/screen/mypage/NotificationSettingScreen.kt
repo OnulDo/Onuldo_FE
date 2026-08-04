@@ -35,7 +35,6 @@ import com.example.onuldo_fe.ui.component.OnulDoSwitch
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
-import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Persimmon20
@@ -51,12 +50,13 @@ fun SettingScreen(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val spacing = LocalSpacing.current
     var state by remember { mutableStateOf(NotificationSettingsState()) }
 
     fun updateState(update: NotificationSettingsState.() -> NotificationSettingsState) {
-        // 알림 설정 조회/변경 API는 별도 구현되어 있어 여기선 로컬 상태만 관리
         state = state.update()
+
+        // TODO(API 연동 시)
+        // repository.saveNotificationSetting(state)
     }
 
     // 전체 알림이 꺼지면 개별 알림은 값을 유지한 채 비활성 표시만 한다! (버튼 누르기 비활성)
@@ -79,7 +79,7 @@ fun SettingScreen(
             OnulDoBackButton(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(start = spacing.spacing8),
+                    .padding(start = 8.dp),
                 onClick = onBackClick
             )
             Text(
@@ -118,7 +118,7 @@ fun SettingScreen(
             enabled = subEnabled
         )
 
-        Spacer(Modifier.height(spacing.spacing8))
+        Spacer(Modifier.height(8.dp))
 
         SettingToggleRow(
             title = "인증 마감 알림",
@@ -128,7 +128,7 @@ fun SettingScreen(
             enabled = subEnabled
         )
 
-        Spacer(Modifier.height(spacing.spacing8))
+        Spacer(Modifier.height(8.dp))
 
         SettingToggleRow(
             title = "인증 결과 알림",
@@ -152,7 +152,7 @@ fun SettingScreen(
             enabled = subEnabled
         )
 
-        Spacer(Modifier.height(spacing.spacing8))
+        Spacer(Modifier.height(8.dp))
 
         SettingToggleRow(
             title = "차감 알림",
@@ -171,7 +171,6 @@ private fun SettingSectionHeader(
     text: String,
     modifier: Modifier = Modifier
 ) {
-    val spacing = LocalSpacing.current
     Text(
         text = text,
         fontFamily = Pretendard,
@@ -181,7 +180,7 @@ private fun SettingSectionHeader(
         color = DarkBrown50,
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = spacing.spacing24)
+            .padding(start = 24.dp)
     )
 }
 
@@ -197,17 +196,16 @@ private fun SettingToggleRow(
     backgroundColor: Color = White,
     borderColor: Color = DarkBrown40
 ) {
-    val spacing = LocalSpacing.current
     Row(
         modifier = modifier
             //사이즈가 작게 나와서 가로 padding기준으로 바꿈
             .fillMaxWidth()
-            .padding(horizontal = spacing.spacing20)
+            .padding(horizontal = 20.dp)
             .height(height)
             .clip(RoundedCornerShape(14.dp))
             .background(backgroundColor)
             .border(1.dp, borderColor, RoundedCornerShape(14.dp))
-            .padding(horizontal = spacing.spacing16),
+            .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -232,7 +230,7 @@ private fun SettingToggleRow(
             )
         }
 
-        Spacer(Modifier.width(spacing.spacing12))
+        Spacer(Modifier.width(12.dp))
 
         //버튼 전환
         OnulDoSwitch(
