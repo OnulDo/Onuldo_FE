@@ -206,16 +206,35 @@ fun OnuldoApp() {
             DetailRoute(
                 challengeId = challengeId,
                 onBackClick = { navController.popBackStack() },
-                onJoinClick = { navController.navigate(Routes.challengeParticipate(challengeId)) },
+                onJoinClick = { title, description, category, timeStart, timeEnd ->
+                    navController.navigate(
+                        Routes.challengeParticipate(
+                            challengeId, title, description, category, timeStart, timeEnd
+                        )
+                    )
+                },
             )
         }
         composable(
             route = Routes.CHALLENGE_PARTICIPATE,
-            arguments = listOf(navArgument(Routes.CHALLENGE_PARTICIPATE_ARG) { type = NavType.LongType })
+            arguments = listOf(
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG) { type = NavType.LongType },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_TITLE) { type = NavType.StringType; defaultValue = "" },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_DESC) { type = NavType.StringType; defaultValue = "" },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_CATEGORY) { type = NavType.StringType; defaultValue = "" },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_START) { type = NavType.StringType; defaultValue = "" },
+                navArgument(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_END) { type = NavType.StringType; defaultValue = "" }
+            )
         ) { backStackEntry ->
             val challengeId = backStackEntry.arguments?.getLong(Routes.CHALLENGE_PARTICIPATE_ARG) ?: 0L
+            val args = backStackEntry.arguments
             ParticipateRoute(
                 challengeId = challengeId,
+                title = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_TITLE).orEmpty(),
+                description = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_DESC).orEmpty(),
+                category = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_CATEGORY).orEmpty(),
+                timeStart = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_START).orEmpty(),
+                timeEnd = args?.getString(Routes.CHALLENGE_PARTICIPATE_ARG_TIME_END).orEmpty(),
                 onBackClick = { navController.popBackStack() },
                 onSuccess = { navController.navigate(Routes.CHALLENGE_START_DONE) },
                 // 잔액 부족 팝업의 "충전하기" → 포인트 충전 화면

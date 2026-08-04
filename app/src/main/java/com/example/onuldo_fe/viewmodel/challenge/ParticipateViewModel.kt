@@ -17,8 +17,25 @@ class ParticipateViewModel(
     private val repository: ChallengeRepository = ChallengeRepositoryProvider.provide()
 ) : ViewModel() {
 
-    var uiState by mutableStateOf(ParticipateUiState())
+    // balance는 더미. 화면(포인트 부족 팝업의 "보유 포인트")까지 배선은 끝나 있음.
+    var uiState by mutableStateOf(ParticipateUiState(balance = DUMMY_BALANCE))
         private set
+
+    init {
+        loadWallet()
+    }
+
+    // 보유 포인트(지갑 잔액) 로드 — 포인트 부족 안내(보유/필요/부족분)에 사용.
+    // TODO(지갑 API 연동): 팀원의 GET /api/users/me/wallet/summary 가 올라오면
+    //   아래 더미 대입을 그 응답의 result.balance 로 교체하면 바로 연동된다.
+    //   예) viewModelScope.launch {
+    //         runCatching { walletRepository.getWalletSummary() }
+    //             .onSuccess { uiState = uiState.copy(balance = it.balance) }
+    //             .onFailure { logChallengeError("ch_wallet", it) }
+    //       }
+    private fun loadWallet() {
+        uiState = uiState.copy(balance = DUMMY_BALANCE)
+    }
 
     fun participate(durationWeeks: Int, depositAmount: Int) {
         if (uiState.isSubmitting) return
@@ -44,6 +61,8 @@ class ParticipateViewModel(
 
     companion object {
         private const val CODE_INSUFFICIENT_POINT = "INSUFFICIENT_POINT_FOR_CHALLENGE"
+        // 지갑 API 연동 전 임시 보유 포인트. 팀원 API 올라오면 loadWallet()에서 실제 balance로 교체
+        private const val DUMMY_BALANCE = 20_000
 
         fun factory(challengeId: Long) = viewModelFactory {
             initializer { ParticipateViewModel(challengeId) }

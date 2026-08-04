@@ -46,25 +46,24 @@ import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 
-// 더미 데이터 — API 연동 시 교체
 private val periodOptions = listOf("2주", "4주", "8주", "12주")
 private val pointOptions = listOf("10,000P", "20,000P", "30,000P", "50,000P")
-private val summaryItems = listOf(
-    "진행 기간" to "4주 (28일)",
-    "인증 방식" to "하루 1회 자율 인증",
-    "예치 도전금" to "10,000P"
-)
 
 @Composable
 fun ParticipateScreen(
+    // 아래 값들의 기본값은 @Preview 전용. 실제 값은 Route가 상세에서 넘겨받아 주입한다.
     challenge: Challenge = Challenge(id = 0, title = "새벽 6시 기상", participantCount = 1234),
-    category: String = "생활루틴 챌린지",               // TODO: 실제 데이터
-    description: String = "매일 새벽 6시까지 기상하기",   // TODO: 실제 데이터
+    category: String = "생활루틴 챌린지",
+    description: String = "매일 새벽 6시까지 기상하기",
+    timeStart: String = "05:30:00",   // 인증 시작 "HH:mm:ss" (없으면 "")
+    timeEnd: String = "06:30:00",     // 인증 마감 "HH:mm:ss" (없으면 "")
     // 참여 API 요청 중이면 버튼 비활성 (중복 제출 방지)
     isSubmitting: Boolean = false,
     // 포인트 부족 팝업 표시 여부(서버 INSUFFICIENT_POINT 응답 시) + 닫기 콜백
     showInsufficientDialog: Boolean = false,
     onDismissInsufficient: () -> Unit = {},
+    // 지갑 요약의 보유 포인트— 포인트 부족 팝업의 "보유 포인트"에 사용
+    ownedPoint: Int = 0,
     onBackClick: () -> Unit = {},
     // 선택한 기간(주)·도전금(P)을 상위(Route)로 전달 → 실제 참여 API 호출
     onStartClick: (durationWeeks: Int, depositAmount: Int) -> Unit = { _, _ -> },
@@ -170,10 +169,17 @@ fun ParticipateScreen(
 
         Spacer(Modifier.height(32.dp))
 
+        // 인증 시간대는 상세에서 받은 timeStart/timeEnd로 구성(초 단위 제거). 없으면 자율 인증 문구.
+        val verifyTimeLine = if (timeStart.isNotBlank() && timeEnd.isNotBlank()) {
+            "위 챌린지는 ${timeStart.take(5)}~ ${timeEnd.take(5)}내에 인증을 진행해주세요"
+        } else {
+            "하루 한 번 자율 인증으로 진행해주세요"
+        }
+
         NoticeBox(
             title = "성공 조건",
             lines = listOf(
-                "위 챌린지는 05:30~ 06:30내에 인증을 진행해주세요",
+                verifyTimeLine,
                 "일정 수준 이상 실패 시 도전금이 차감 됩니다."
             ),
             height = 100.dp,
@@ -230,10 +236,18 @@ fun ParticipateScreen(
             title = "성공 시 100% 환급 + 보상금",
             lines = listOf("주 1회 실패 인정, 그 외 비례 차감"),
             height = 60.dp,
-            topPadding = 12.dp // TODO: 내부 위 여백 미지정 — 60에 맞춘 추정값
+            topPadding = 12.dp
         )
 
         Spacer(Modifier.height(spacing.spacing30))
+
+        // 요약 박스 — 선택한 진행 기간/도전금이 그대로 반영된다(미선택 시 "-")
+        val selectedWeeks = selectedPeriod?.removeSuffix("주")?.toIntOrNull()
+        val summaryItems = listOf(
+            "진행 기간" to (selectedWeeks?.let { "${it}주 (${it * 7}일)" } ?: "-"),
+            "인증 방식" to "하루 1회 자율 인증",
+            "예치 도전금" to (selectedPoint ?: "-")
+        )
 
         ChallengeInfoBox(
             height = 90.dp,
@@ -267,9 +281,13 @@ fun ParticipateScreen(
     }
 
     if (showInsufficientDialog) {
+        // 필요 포인트 = 선택한 도전금, 보유 포인트 = 지갑 잔액(ownedPoint)
+        val requiredPoint = selectedPoint?.filter { it.isDigit() }?.toIntOrNull() ?: 0
         InsufficientPointDialog(
             onDismiss = onDismissInsufficient,
-            onCharge = onChargePoint
+            onCharge = onChargePoint,
+            ownedPoint = ownedPoint,
+            requiredPoint = requiredPoint
         )
     }
 }

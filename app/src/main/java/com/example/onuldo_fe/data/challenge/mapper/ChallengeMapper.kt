@@ -41,8 +41,11 @@ fun ChallengeListResultDto.toModel(): ChallengePage = ChallengePage(
 fun ChallengeItemDto.toDetailModel(): ChallengeDetail = ChallengeDetail(
     id = id,
     title = name,
+    summary = explainContent.orEmpty(),
     participantCount = participantCount,
     category = category.toChallengeCategory(),
+    timeStart = timeStart.orEmpty(),
+    timeEnd = timeEnd.orEmpty(),
     content = description.orEmpty().map {
         ContentBlock(type = BlockType.from(it.type), content = it.content.orEmpty())
     },

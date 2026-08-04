@@ -25,7 +25,14 @@ import com.example.onuldo_fe.viewmodel.challenge.ChallengeDetailViewModel
 fun DetailRoute(
     challengeId: Long,
     onBackClick: () -> Unit,
-    onJoinClick: () -> Unit,
+    // 참여 화면으로 이동. 이미 조회한 상세의 제목/한줄설명/카테고리/인증시간을 함께 넘김
+    onJoinClick: (
+        title: String,
+        description: String,
+        category: String,
+        timeStart: String,
+        timeEnd: String
+    ) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ChallengeDetailViewModel = viewModel(
         factory = ChallengeDetailViewModel.factory(challengeId)
@@ -62,7 +69,16 @@ fun DetailRoute(
             successConditions = detail.successConditions,
             failureConditions = detail.failureConditions,
             onBackClick = onBackClick,
-            onJoinClick = onJoinClick,
+            // 참여 화면 정보박스용: 제목(name), 한줄설명(explainContent), 카테고리 라벨, 인증 시간
+            onJoinClick = {
+                onJoinClick(
+                    detail.title,
+                    detail.summary,
+                    "${detail.category.displayName} 챌린지",
+                    detail.timeStart,
+                    detail.timeEnd
+                )
+            },
             modifier = modifier
         )
     } else {
