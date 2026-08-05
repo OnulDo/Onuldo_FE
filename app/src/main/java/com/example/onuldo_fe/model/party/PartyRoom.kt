@@ -41,7 +41,8 @@ data class PartyWaitingRoom(
     val capacity: Int,                         // 파티장을 포함한 모집 최대 인원
     val members: List<PartyMember>,            // 현재 대기방에 참여 중인 파티원 목록
     val isHost: Boolean,                       // 로그인 사용자가 파티장인지 여부
-    val canStart: Boolean                      // 서버가 판정한 파티 시작 가능 여부
+    val canStart: Boolean,                     // 서버가 판정한 파티 시작 가능 여부
+    val status: PartyLifecycleStatus = PartyLifecycleStatus.Recruiting // 현재 파티 진행 상태
 )
 
 // 파티 홈의 진행 중인 파티 카드에 표시할 요약 정보

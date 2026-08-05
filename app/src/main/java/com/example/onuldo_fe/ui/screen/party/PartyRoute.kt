@@ -140,6 +140,14 @@ fun PartyRoute(
         }
     }
 
+    LaunchedEffect(screen, waitingRoom?.status) {
+        if (screen == PartyScreen.WaitingRoom && waitingRoom?.status == PartyStatus.InProgress) {
+            // 다른 사용자가 파티를 시작하면 폴링을 멈추고 홈으로 이동한다.
+            partyViewModel.stopWaitingRoomPolling()
+            onHomeNavigate()
+        }
+    }
+
     LaunchedEffect(screen) {
         onBottomBarVisibilityChange(
             screen == PartyScreen.List || screen == PartyScreen.Feed

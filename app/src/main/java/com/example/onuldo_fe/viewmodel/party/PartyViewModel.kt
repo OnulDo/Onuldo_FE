@@ -260,7 +260,12 @@ private fun PartyWaitingRoom.toUi() = PartyWaitingRoomUi(
     members = members.map(PartyMember::toUi),
     // Repository가 Fake/Real 차이를 통일했으므로 ViewModel은 응답값만 전달한다.
     isHost = isHost,
-    canStart = canStart
+    canStart = canStart,
+    status = when (status) {
+        PartyLifecycleStatus.Recruiting -> PartyStatus.Recruiting
+        PartyLifecycleStatus.InProgress -> PartyStatus.InProgress
+        PartyLifecycleStatus.Disbanded -> PartyStatus.Disbanded
+    }
 )
 
 // 서버 문자열 상태가 변환된 도메인 enum을 화면에서 사용하는 enum으로 매핑
