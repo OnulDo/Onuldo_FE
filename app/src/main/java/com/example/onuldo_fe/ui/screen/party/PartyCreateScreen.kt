@@ -51,7 +51,8 @@ fun PartyCreateScreen(
     var selectedDeposit by remember(selectedChallenge?.id) { mutableIntStateOf(-1) }
     var showPointDialog by remember { mutableStateOf(false) }
     var isPartyNameError by remember { mutableStateOf(false) }
-    val partyNamePattern = remember { Regex("^[가-힣A-Za-z0-9]{2,20}$") }
+    // 단어 사이 공백은 허용하고, 앞뒤 공백은 아래 정규화 과정에서 제거한다.
+    val partyNamePattern = remember { Regex("^[가-힣A-Za-z0-9 ]{2,20}$") }
     val normalizedPartyName = remember(partyName) {
         // 한글 입력기에서 조합형 자모로 전달된 이름을 완성형 한글로 변환
         Normalizer.normalize(partyName.trim(), Normalizer.Form.NFC)
@@ -85,7 +86,7 @@ fun PartyCreateScreen(
             )
             if (isPartyNameError) {
                 Text(
-                    "한글, 영문, 숫자 2~20자로 입력해주세요.",
+                    "한글, 영문, 숫자, 공백을 포함해 2~20자로 입력해주세요.",
                     // TODO 디자인 시스템에 4dp·6dp 토큰이 추가되면 LocalSpacing으로 교체
                     modifier = Modifier.padding(start = 4.dp, top = 6.dp),
                     color = Persimmon,
