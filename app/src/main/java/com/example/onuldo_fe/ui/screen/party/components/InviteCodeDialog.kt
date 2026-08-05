@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -102,6 +103,8 @@ fun InviteCodeDialog(
                 },
                 singleLine = true,
                 textStyle = TextStyle(color = Color.Transparent),
+                // 입력은 유지하되 칸 위에 겹쳐 보이는 기본 텍스트 커서는 숨긴다.
+                cursorBrush = SolidColor(Color.Transparent),
                 decorationBox = { innerTextField ->
                     Box {
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
