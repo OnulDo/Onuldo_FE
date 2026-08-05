@@ -38,6 +38,7 @@ import com.example.onuldo_fe.model.home.notification.NotificationType
 import com.example.onuldo_fe.repository.notification.NotificationRepositoryImpl
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
@@ -196,7 +197,7 @@ private fun NotificationItemCard(item: NotificationItem) {
                 fontWeight = FontWeight.Normal,
                 fontSize = 10.sp,
                 lineHeight = 14.sp,
-                color = DarkBrown70
+                color = DarkBrown
             )
 
             Spacer(Modifier.height(6.dp))

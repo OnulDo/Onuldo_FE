@@ -6,6 +6,7 @@ data class NotificationSettingsState(
     val all: Boolean = true,
     val challengeStart: Boolean = true,
     val deadline: Boolean = true,
+    val endReminder: Boolean = true,
     val result: Boolean = true,
     val refund: Boolean = true,
     val deduction: Boolean = false

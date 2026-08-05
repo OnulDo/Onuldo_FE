@@ -125,16 +125,15 @@ fun SettingScreen(
             title = "전체 알림 수신",
             description = "모든 알림을 한 번에 끄거나 켤 수 있어요",
             checked = state.all,
-            // 전체 토글은 개별 5종을 모두 같은 값으로 전파한다(끄면 전부 off, 켜면 전부 on)
             onCheckedChange = { checked ->
                 updateState {
                     copy(
                         all = checked,
                         challengeStart = checked,
                         deadline = checked,
+                        endReminder = checked,
                         result = checked,
-                        refund = checked,
-                        deduction = checked
+                        refund = checked
                     )
                 }
             },
@@ -147,21 +146,11 @@ fun SettingScreen(
 
         SettingSectionHeader(text = "챌린지 알림")
 
-        Spacer(Modifier.height(9.dp))
+        Spacer(Modifier.height(2.dp))
 
         SettingToggleRow(
-            title = "챌린지 시작 알림",
-            description = "챌린지 시작 시각 알림",
-            checked = state.challengeStart,
-            onCheckedChange = { updateState { copy(challengeStart = it) } },
-            enabled = subEnabled
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        SettingToggleRow(
-            title = "인증 마감 알림",
-            description = "인증 마감 30분 전 알림",
+            title = "인증 마감 리마인더",
+            description = "당일 미인증 시 시간대별 리마인드 발송",
             checked = state.deadline,
             onCheckedChange = { updateState { copy(deadline = it) } },
             enabled = subEnabled
@@ -169,9 +158,51 @@ fun SettingScreen(
 
         Spacer(Modifier.height(8.dp))
 
+    //새 챌린지 시작
         SettingToggleRow(
-            title = "인증 결과 알림",
-            description = "인증 성공/실패 결과 알림",
+            title = "새 챌린지 시작",
+            description = "시작일 첫 인증 가능 시각에 알림",
+            checked = state.challengeStart,
+            onCheckedChange = { updateState { copy(challengeStart = it) } },
+            enabled = subEnabled
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+    // 종료일 리마인더 (신규)
+        SettingToggleRow(
+            title = "종료일 리마인더",
+            description = "종료 5·3·1일 전 20:00 알림",
+            checked = state.endReminder,
+            onCheckedChange = { updateState { copy(endReminder = it) } },
+            enabled = subEnabled
+        )
+
+        Spacer(Modifier.height(41.dp))
+
+        SettingSectionHeader(text = "인증 알림")
+
+        Spacer(Modifier.height(2.dp))
+
+    // 인증 결과
+        SettingToggleRow(
+            title = "인증 결과",
+            description = "직접검토 통과·기각 결과 알림",
+            checked = state.result,
+            onCheckedChange = { updateState { copy(result = it) } },
+            enabled = subEnabled
+        )
+
+        Spacer(Modifier.height(19.dp))
+
+        SettingSectionHeader(text = "파티 알림")
+
+        Spacer(Modifier.height(2.dp))
+
+        // 인증 결과
+        SettingToggleRow(
+            title = "파티원 인증 완료",
+            description = "파티 피드에 인증 사진이 올라오면 알림",
             checked = state.result,
             onCheckedChange = { updateState { copy(result = it) } },
             enabled = subEnabled
@@ -179,29 +210,19 @@ fun SettingScreen(
 
         Spacer(Modifier.height(41.dp))
 
-        SettingSectionHeader(text = "포인트 알림")
+        SettingSectionHeader(text = "항상 받는 알림")
 
-        Spacer(Modifier.height(9.dp))
+        Spacer(Modifier.height(2.dp))
 
+    // 정산 환급 완료
         SettingToggleRow(
-            title = "환급 완료 알림",
-            description = "챌린지 종료 후 환급 알림",
-            checked = state.refund,
-            onCheckedChange = { updateState { copy(refund = it) } },
-            enabled = subEnabled
+            title = "정산·환급 완료",
+            description = "포인트 지급 알림은 끌 수 없어요",
+            checked = true,
+            onCheckedChange = {},
+            enabled = false,
+            trailingText = "항상 발송"
         )
-
-        Spacer(Modifier.height(8.dp))
-
-        SettingToggleRow(
-            title = "차감 알림",
-            description = "인증 실패로 도전금 차감 시",
-            checked = state.deduction,
-            onCheckedChange = { updateState { copy(deduction = it) } },
-            enabled = subEnabled
-        )
-
-        Spacer(Modifier.height(40.dp))
     }
 
     // 알림 권한 안내 팝업(권한x) → "설정으로 이동"이면 시스템 알림설정으로
@@ -230,7 +251,7 @@ private fun SettingSectionHeader(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 12.sp,
-        lineHeight = 12.sp,
+        lineHeight = 22.sp,
         color = DarkBrown50,
         modifier = modifier
             .fillMaxWidth()
@@ -246,6 +267,9 @@ private fun SettingToggleRow(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    showSwitch: Boolean = true,
+    // 스위치 대신 오른쪽에 고정 문구를 띄울 때 사용 (예: "항상 발송")
+    trailingText: String? = null,
     height: Dp = 64.dp,
     backgroundColor: Color = White,
     borderColor: Color = DarkBrown40
@@ -286,12 +310,23 @@ private fun SettingToggleRow(
 
         Spacer(Modifier.width(12.dp))
 
-        //버튼 전환
-        OnulDoSwitch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            enabled = enabled
-        )
+        // 오른쪽: 고정 문구("항상 발송" 등)가 있으면 문구, 없으면 스위치
+        when {
+            trailingText != null -> Text(
+                text = trailingText,
+                fontFamily = Pretendard,
+                fontWeight = FontWeight.Bold,
+                fontSize = 11.sp,
+                lineHeight = 11.sp,
+                color = DarkBrown50
+            )
+
+            showSwitch -> OnulDoSwitch(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                enabled = enabled
+            )
+        }
     }
 }
 
