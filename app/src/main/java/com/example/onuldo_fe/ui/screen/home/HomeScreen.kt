@@ -86,6 +86,7 @@ fun HomeScreen(
         } else {
             EmptyHomeContent(
                 userName = uiState.userName,
+                profileImageUrl = uiState.userProfileImageUrl,
                 onNotificationClick = onNotificationClick,
                 onBrowseChallengesClick = onBrowseChallengesClick,
                 modifier = Modifier.fillMaxSize()
@@ -97,6 +98,7 @@ fun HomeScreen(
 @Composable
 private fun EmptyHomeContent(
     userName: String,
+    profileImageUrl: String?,
     onNotificationClick: () -> Unit,
     onBrowseChallengesClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -107,6 +109,7 @@ private fun EmptyHomeContent(
     Box(modifier = modifier) {
         HomeHeader(
             userName = userName,
+            profileImageUrl = profileImageUrl,
             onNotificationClick = onNotificationClick,
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -153,6 +156,7 @@ private fun HomeContent(
         // 모든 홈 상태에서 공통 헤더 유지
         HomeHeader(
             userName = uiState.userName,
+            profileImageUrl = uiState.userProfileImageUrl,
             onNotificationClick = onNotificationClick,
             modifier = Modifier
                 .fillMaxWidth()

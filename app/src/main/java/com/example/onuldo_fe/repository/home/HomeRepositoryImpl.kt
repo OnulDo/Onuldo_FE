@@ -7,6 +7,9 @@ import com.example.onuldo_fe.data.home.dto.HomeCompletedChallengeDto
 import com.example.onuldo_fe.data.home.dto.HomePartyChallengeDto
 import com.example.onuldo_fe.data.home.dto.HomeResponseDto
 import com.example.onuldo_fe.data.home.dto.RealHomeDailyChallengeDto
+import com.example.onuldo_fe.data.challenge.dto.DailyCompletedResultDto
+import com.example.onuldo_fe.data.party.api.RealPartyApi
+import com.example.onuldo_fe.data.party.dto.PartyFeedDto
 import com.example.onuldo_fe.data.user.api.UserApi
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomeChallenge
@@ -23,12 +26,14 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import retrofit2.HttpException
 
 class HomeRepositoryImpl(
     private val fakeApi: HomeApi,
     private val realApi: RealHomeApi? = null,
+    private val realPartyApi: RealPartyApi? = null,
     private val userApi: UserApi? = null,
     private val useRealDailyApi: Boolean = false,
     private val nowProvider: () -> LocalDateTime = LocalDateTime::now
@@ -43,40 +48,102 @@ class HomeRepositoryImpl(
                 requireNotNull(realApi) { "Real 홈 API가 설정되지 않았습니다." }
                     .getDailyChallenges()
             }
-            val nicknameDeferred = async { getNicknameOrEmpty() }
+            val profileDeferred = async { getProfileOrEmpty() }
+            val completedDeferred = async { getCompletedOrEmpty() }
 
             val response = dailyDeferred.await()
             if (!response.isSuccessful) throw HttpException(response)
             val body = response.body() ?: throw IOException("오늘 챌린지 응답 본문이 비어 있습니다.")
 
-            body.result.challenges
-                .toHomeData(nowProvider())
-                .copy(userName = nicknameDeferred.await())
+            val dailyItems = body.result.challenges
+            val partyFeeds = getPartyFeeds(dailyItems)
+            val profile = profileDeferred.await()
+
+            dailyItems.toHomeData(
+                now = nowProvider(),
+                partyFeeds = partyFeeds,
+                completed = completedDeferred.await()
+            ).copy(
+                userName = profile.nickname,
+                userProfileImageUrl = profile.profileImageUrl
+            )
         }
     }
 
-    /** 프로필 실패는 홈 전체 오류로 처리하지 않고 닉네임만 비운다. */
-    private suspend fun getNicknameOrEmpty(): String = try {
+    /** 프로필 실패는 홈 전체 오류로 처리하지 않는다. */
+    private suspend fun getProfileOrEmpty(): HomeProfile = try {
         val response = userApi?.getProfile()
         if (response?.isSuccessful == true) {
-            response.body()?.result?.nickname.orEmpty()
+            response.body()?.result?.let {
+                HomeProfile(it.nickname.orEmpty(), it.profileImageUrl)
+            } ?: HomeProfile()
         } else {
-            ""
+            HomeProfile()
         }
     } catch (error: CancellationException) {
         throw error
     } catch (error: Exception) {
-        ""
+        HomeProfile()
+    }
+
+    /** 완료 목록 실패 시 진행 중인 홈 카드는 그대로 표시한다. */
+    private suspend fun getCompletedOrEmpty(): DailyCompletedResultDto = try {
+        val response = realApi?.getDailyCompleted()
+        if (response?.isSuccessful == true) {
+            response.body()?.result ?: DailyCompletedResultDto()
+        } else {
+            DailyCompletedResultDto()
+        }
+    } catch (error: CancellationException) {
+        throw error
+    } catch (error: Exception) {
+        DailyCompletedResultDto()
+    }
+
+    /** /daily에 partyId가 있는 항목만 파티 피드와 연결한다. */
+    private suspend fun getPartyFeeds(
+        items: List<RealHomeDailyChallengeDto>
+    ): Map<Long, PartyFeedDto> = coroutineScope {
+        val api = realPartyApi ?: return@coroutineScope emptyMap()
+        items.asSequence()
+            .filter { it.participationType == "PARTY" }
+            .mapNotNull(RealHomeDailyChallengeDto::partyId)
+            .distinct()
+            .map { partyId ->
+                async {
+                    try {
+                        val response = api.getPartyFeed(partyId)
+                        if (response.isSuccessful) response.body()?.result else null
+                    } catch (error: CancellationException) {
+                        throw error
+                    } catch (error: Exception) {
+                        null
+                    }
+                }
+            }
+            .toList()
+            .awaitAll()
+            .filterNotNull()
+            .associateBy(PartyFeedDto::partyId)
     }
 }
 
+private data class HomeProfile(
+    val nickname: String = "",
+    val profileImageUrl: String? = null
+)
+
 /** 사진으로 전달받은 /daily 명세의 값만 홈 화면 모델로 변환한다. */
-internal fun List<RealHomeDailyChallengeDto>.toHomeData(now: LocalDateTime): HomeData {
+internal fun List<RealHomeDailyChallengeDto>.toHomeData(
+    now: LocalDateTime,
+    partyFeeds: Map<Long, PartyFeedDto> = emptyMap(),
+    completed: DailyCompletedResultDto = DailyCompletedResultDto()
+): HomeData {
     // 서버의 참여 유형으로 개인과 파티 카드를 나눈다.
     val personalChallenges = filter { it.participationType == "PERSONAL" }
         .map { it.toPersonalModel(now) }
     val partyChallenges = filter { it.participationType == "PARTY" }
-        .map { it.toPartyModel(now) }
+        .map { it.toPartyModel(now, it.partyId?.let(partyFeeds::get)) }
     val completedCount = count(RealHomeDailyChallengeDto::verifiedOnDate)
 
     return HomeData(
@@ -92,7 +159,7 @@ internal fun List<RealHomeDailyChallengeDto>.toHomeData(now: LocalDateTime): Hom
         },
         partyChallenges = partyChallenges,
         challenges = personalChallenges,
-        completedChallenges = emptyList(),
+        completedChallenges = completed.toHomeCompletedChallenges(),
         settlementBanner = null
     )
 }
@@ -101,35 +168,65 @@ private fun RealHomeDailyChallengeDto.toPersonalModel(now: LocalDateTime): HomeC
     val deadline = timeEnd.toLocalTimeOrNull() ?: LocalTime.MAX
     return HomeChallenge(
         title = challengeName,
-        // /daily 응답에는 연속 인증 일수가 없다.
-        streakDays = 0,
+        // 값이 없거나 음수이면 0일로 처리한다.
+        streakDays = streakDays?.coerceAtLeast(0) ?: 0,
         remainingDays = endDate.remainingDaysFrom(now.toLocalDate()),
         deadlineAt = deadline,
-        status = verifiedOnDate.toChallengeStatus(),
+        status = toChallengeStatus(now.toLocalTime()),
         verifiedAt = null,
         remainingMinutes = deadline.remainingMinutesFrom(now.toLocalTime(), verifiedOnDate),
         canVerify = canVerifyAt(now.toLocalTime())
     )
 }
 
-private fun RealHomeDailyChallengeDto.toPartyModel(now: LocalDateTime): HomePartyChallenge {
+private fun RealHomeDailyChallengeDto.toPartyModel(
+    now: LocalDateTime,
+    feed: PartyFeedDto?
+): HomePartyChallenge {
     val deadline = timeEnd.toLocalTimeOrNull()
     return HomePartyChallenge(
         // /daily 응답에는 파티명이 없으므로 챌린지명을 기본 제목으로 사용한다.
-        title = challengeName,
-        subtitle = "",
+        title = feed?.name ?: partyName?.takeIf(String::isNotBlank) ?: challengeName,
+        subtitle = if (feed != null || !partyName.isNullOrBlank()) challengeName else "",
         remainingDays = endDate.remainingDaysFrom(now.toLocalDate()),
         deadlineAt = deadline,
         // 파티별 인원 및 멤버 목록은 /daily 응답에 없으므로 임의 생성하지 않는다.
-        completedMemberCount = 0,
-        totalMemberCount = 0,
-        status = verifiedOnDate.toChallengeStatus(),
+        completedMemberCount = feed?.verifiedMemberCount ?: 0,
+        totalMemberCount = feed?.totalMemberCount ?: 0,
+        status = toChallengeStatus(now.toLocalTime()),
         verifiedAt = null,
         remainingMinutes = deadline?.remainingMinutesFrom(now.toLocalTime(), verifiedOnDate),
         canVerify = canVerifyAt(now.toLocalTime()),
-        members = emptyList()
+        members = feed?.members.orEmpty().map {
+            HomePartyMember(
+                memberId = it.userId.toString(),
+                profileImageUrl = it.profileImageUrl,
+                defaultCharacterId = null,
+                isVerifiedToday = it.isVerifiedToday
+            )
+        }
     )
 }
+
+private fun DailyCompletedResultDto.toHomeCompletedChallenges(): List<HomeCompletedChallenge> =
+    parties.map {
+        HomeCompletedChallenge.Party(
+            time = it.verifiedAt.toHomeTimeText(),
+            title = it.partyName,
+            completedMemberCount = it.verifiedMemberCount,
+            totalMemberCount = it.totalMemberCount
+        )
+    } + challenges.map {
+        HomeCompletedChallenge.Personal(
+            time = it.verifiedAt.toHomeTimeText(),
+            title = it.challengeName,
+            streakDays = it.streakDays
+        )
+    }
+
+private fun String.toHomeTimeText(): String =
+    runCatching { LocalDateTime.parse(this).toLocalTime().toString().take(5) }
+        .getOrElse { substringAfter('T', this).take(5) }
 
 private fun RealHomeDailyChallengeDto.canVerifyAt(now: LocalTime): Boolean {
     // 인증 완료 또는 인증 가능 시간 밖이면 버튼을 숨긴다.
@@ -139,8 +236,16 @@ private fun RealHomeDailyChallengeDto.canVerifyAt(now: LocalTime): Boolean {
     return (start == null || !now.isBefore(start)) && (end == null || !now.isAfter(end))
 }
 
-private fun Boolean.toChallengeStatus(): ChallengeStatus =
-    if (this) ChallengeStatus.Success else ChallengeStatus.NeedCertification
+/** 인증 완료 여부와 마감 시각으로 오늘 카드 상태를 정한다. */
+private fun RealHomeDailyChallengeDto.toChallengeStatus(now: LocalTime): ChallengeStatus {
+    if (verifiedOnDate) return ChallengeStatus.Success
+    val deadline = timeEnd.toLocalTimeOrNull()
+    return if (deadline != null && now.isAfter(deadline)) {
+        ChallengeStatus.Failed
+    } else {
+        ChallengeStatus.NeedCertification
+    }
+}
 
 private fun String?.toLocalTimeOrNull(): LocalTime? =
     this?.let { runCatching { LocalTime.parse(it) }.getOrNull() }
@@ -152,9 +257,9 @@ private fun String.remainingDaysFrom(today: LocalDate): Int =
     }.getOrDefault(0)
 
 private fun LocalTime.remainingMinutesFrom(now: LocalTime, verified: Boolean): Int? {
-    if (verified) return null
+    if (verified || now.isAfter(this)) return null
     // 인증 마감 시각과 현재 시각의 차이를 분으로 계산한다.
-    return ChronoUnit.MINUTES.between(now, this).coerceAtLeast(0).toInt()
+    return ChronoUnit.MINUTES.between(now, this).toInt()
 }
 
 internal fun HomeResponseDto.toModel(): HomeData {

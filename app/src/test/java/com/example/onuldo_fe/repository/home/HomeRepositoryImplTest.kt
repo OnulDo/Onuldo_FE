@@ -1,6 +1,11 @@
 package com.example.onuldo_fe.repository.home
 
 import com.example.onuldo_fe.data.home.dto.RealHomeDailyChallengeDto
+import com.example.onuldo_fe.data.challenge.dto.DailyCompletedChallengeDto
+import com.example.onuldo_fe.data.challenge.dto.DailyCompletedPartyDto
+import com.example.onuldo_fe.data.challenge.dto.DailyCompletedResultDto
+import com.example.onuldo_fe.data.party.dto.PartyFeedDto
+import com.example.onuldo_fe.data.party.dto.PartyFeedItemDto
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import java.time.LocalDateTime
 import org.junit.Assert.assertEquals
@@ -51,10 +56,75 @@ class HomeRepositoryImplTest {
         assertFalse(result.challenges.isNotEmpty())
     }
 
+    @Test
+    fun `미인증 상태로 마감 시각이 지나면 실패로 표시한다`() {
+        val result = listOf(dailyItem(type = "PERSONAL", name = "아침 운동", verified = false))
+            .toHomeData(LocalDateTime.of(2026, 8, 5, 23, 59, 1))
+            .challenges
+            .single()
+
+        assertEquals(ChallengeStatus.Failed, result.status)
+        assertEquals(false, result.canVerify)
+        assertNull(result.remainingMinutes)
+    }
+
+    @Test
+    fun `연속 성공 일수를 개인 챌린지 카드에 전달한다`() {
+        val result = listOf(
+            dailyItem(type = "PERSONAL", name = "매일 걷기", verified = false, streakDays = 12)
+        ).toHomeData(LocalDateTime.of(2026, 8, 5, 12, 0))
+
+        assertEquals(12, result.challenges.single().streakDays)
+    }
+
+    @Test
+    fun `partyId가 있으면 파티 피드의 인원과 프로필을 카드에 반영한다`() {
+        val item = dailyItem(type = "PARTY", name = "아침 운동", verified = false)
+            .copy(partyId = 10, partyName = "갓생팟")
+        val feed = PartyFeedDto(
+            partyId = 10,
+            name = "갓생팟",
+            challengeTitle = "아침 운동",
+            progressRate = 0.5,
+            verifiedMemberCount = 1,
+            totalMemberCount = 2,
+            members = listOf(
+                PartyFeedItemDto(1, "오늘두", "https://cdn/profile.png", true, null, null)
+            )
+        )
+
+        val result = listOf(item)
+            .toHomeData(LocalDateTime.of(2026, 8, 5, 12, 0), mapOf(10L to feed))
+            .partyChallenges
+            .single()
+
+        assertEquals("갓생팟", result.title)
+        assertEquals("아침 운동", result.subtitle)
+        assertEquals(1, result.completedMemberCount)
+        assertEquals(2, result.totalMemberCount)
+        assertEquals("https://cdn/profile.png", result.members.single().profileImageUrl)
+    }
+
+    @Test
+    fun `오늘 완료 목록을 개인과 파티 완료 카드로 변환한다`() {
+        val completed = DailyCompletedResultDto(
+            parties = listOf(DailyCompletedPartyDto(10, "갓생팟", 12, "2026-08-05T06:30:00", 3, 2)),
+            challenges = listOf(DailyCompletedChallengeDto(1, 12, "매일 걷기", "2026-08-05T07:10:00", 8))
+        )
+
+        val result = emptyList<RealHomeDailyChallengeDto>()
+            .toHomeData(LocalDateTime.of(2026, 8, 5, 12, 0), completed = completed)
+
+        assertEquals(2, result.completedChallenges.size)
+        assertEquals("06:30", result.completedChallenges.first().time)
+        assertEquals("07:10", result.completedChallenges.last().time)
+    }
+
     private fun dailyItem(
         type: String,
         name: String,
-        verified: Boolean
+        verified: Boolean,
+        streakDays: Int? = null
     ) = RealHomeDailyChallengeDto(
         participationId = 1,
         participationStatus = "ONGOING",
@@ -65,6 +135,7 @@ class HomeRepositoryImplTest {
         timeEnd = "23:59:00",
         startDate = "2026-08-01",
         endDate = "2026-08-20",
-        verifiedOnDate = verified
+        verifiedOnDate = verified,
+        streakDays = streakDays
     )
 }

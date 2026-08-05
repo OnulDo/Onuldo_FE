@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -44,12 +45,14 @@ import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.ui.screen.party.components.PartyNetworkImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeHeader(
     userName: String,
+    profileImageUrl: String? = null,
     modifier: Modifier = Modifier,
     onNotificationClick: () -> Unit = {}
 ) {
@@ -67,11 +70,14 @@ fun HomeHeader(
                 .background(Persimmon20, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.home_run_light_icon),
-                contentDescription = null,
-                modifier = Modifier.size(width = 28.dp, height = 33.dp),
-                contentScale = ContentScale.Fit
+            PartyNetworkImage(
+                imageUrl = profileImageUrl,
+                fallbackImageRes = R.drawable.home_run_light_icon,
+                contentDescription = "$userName 프로필",
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
             )
         }
 

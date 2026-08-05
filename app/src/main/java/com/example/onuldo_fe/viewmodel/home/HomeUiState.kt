@@ -11,6 +11,7 @@ enum class HomeContentMode { Empty, Default, AllCompleted }
 
 data class HomeUiState(
     val userName: String = "",
+    val userProfileImageUrl: String? = null,
     val todayChallenge: TodayChallenge? = null,
     val partyChallenges: List<HomePartyChallenge> = emptyList(),
     val challenges: List<HomeChallenge> = emptyList(),
@@ -40,6 +41,7 @@ data class HomeUiState(
 // Repository 모델을 화면용 UI 상태로 변환
 internal fun HomeData.toUiState() = HomeUiState(
     userName = userName,
+    userProfileImageUrl = userProfileImageUrl,
     todayChallenge = todayChallenge,
     partyChallenges = partyChallenges,
     challenges = challenges,
