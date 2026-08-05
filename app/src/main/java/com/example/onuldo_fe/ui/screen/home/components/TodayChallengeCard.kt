@@ -36,6 +36,9 @@ import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Persimmon50
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun TodayChallengeCard(
@@ -59,7 +62,8 @@ fun TodayChallengeCard(
             .padding(horizontal = spacing.spacing16, vertical = spacing.spacing16)
     ) {
         Text(
-            text = todayChallenge.date,
+            // 서버의 yyyy-MM-dd 날짜를 화면 표시 형식으로 바꾼다.
+            text = todayChallenge.date.toHomeDateText(),
             color = BlackBrown,
             style = MaterialTheme.typography.titleMedium,
             lineHeight = 20.sp,
@@ -116,6 +120,12 @@ fun TodayChallengeCard(
         }
     }
 }
+
+private val homeDateFormatter = DateTimeFormatter.ofPattern("M월 d일 (E)", Locale.KOREAN)
+
+private fun String.toHomeDateText(): String =
+    runCatching { LocalDate.parse(this).format(homeDateFormatter) }
+        .getOrDefault(this)
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFDF7, widthDp = 360)
 @Composable

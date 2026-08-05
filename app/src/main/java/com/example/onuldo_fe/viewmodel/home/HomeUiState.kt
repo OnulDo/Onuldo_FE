@@ -15,14 +15,16 @@ data class HomeUiState(
     val partyChallenges: List<HomePartyChallenge> = emptyList(),
     val challenges: List<HomeChallenge> = emptyList(),
     val completedChallenges: List<HomeCompletedChallenge> = emptyList(),
-    val settlementBanner: SettlementBanner? = null
+    val settlementBanner: SettlementBanner? = null,
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
 ) {
     // 홈 API 데이터 조합에 따른 화면 상태 결정
     val contentMode: HomeContentMode
         get() = when {
             todayChallenge?.let {
                 it.totalCount > 0 && it.completedCount >= it.totalCount
-            } == true -> HomeContentMode.AllCompleted
+            } == true && completedChallenges.isNotEmpty() -> HomeContentMode.AllCompleted
             todayChallenge == null &&
                 partyChallenges.isEmpty() &&
                 challenges.isEmpty() &&
