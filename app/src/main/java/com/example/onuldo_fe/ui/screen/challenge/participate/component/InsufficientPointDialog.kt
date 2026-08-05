@@ -54,10 +54,10 @@ fun InsufficientPointDialog(
     onDismiss: () -> Unit,
     onCharge: () -> Unit,
     modifier: Modifier = Modifier,
-    ownedPoint: Int = DUMMY_OWNED_POINT,
+    ownedPoint: Int? = DUMMY_OWNED_POINT,
     requiredPoint: Int = DUMMY_REQUIRED_POINT
 ) {
-    val shortage = (requiredPoint - ownedPoint).coerceAtLeast(0)
+    val shortage = ownedPoint?.let { (requiredPoint - it).coerceAtLeast(0) }
     val spacing = LocalSpacing.current
 
     Dialog(
@@ -129,7 +129,7 @@ fun InsufficientPointDialog(
                     ) {
                         PointColumn(
                             label = "보유 포인트",
-                            value = "%,dP".format(ownedPoint),
+                            value = ownedPoint?.let { "%,dP".format(it) } ?: "-",
                             valueColor = BlackBrown
                         )
                         OperatorColumn(symbol = "−", width = 28.dp)
@@ -141,7 +141,7 @@ fun InsufficientPointDialog(
                         OperatorColumn(symbol = "=", width = 35.dp)
                         PointColumn(
                             label = "부족분",
-                            value = "%,dP".format(shortage),
+                            value = shortage?.let { "%,dP".format(it) } ?: "-",
                             valueColor = Persimmon
                         )
                     }

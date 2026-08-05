@@ -104,6 +104,7 @@ fun MainScreen(
                 PartyRoute(
                     onBottomBarVisibilityChange = { showBottomBar = it },
                     onCameraNavigate = { onNavigate(Routes.camera(2L)) },
+                    onChargePoint = { onNavigate(Routes.MYPAGE_CHARGE) },
                     onHomeNavigate = {
                         // 새로 시작한 파티 재조회와 홈 상단 이동을 한 번에 요청
                         homeRefreshKey++

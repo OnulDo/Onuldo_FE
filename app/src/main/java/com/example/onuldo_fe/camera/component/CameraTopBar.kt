@@ -27,6 +27,7 @@ fun CameraTopBar(
     title: String,
     modifier: Modifier = Modifier,
     showFlashButton: Boolean = true,
+    isFlashOn: Boolean = false,
     onCloseClick: () -> Unit = {},
     onFlashClick: () -> Unit = {}
 ) {
@@ -74,7 +75,10 @@ fun CameraTopBar(
                 onClick = onFlashClick
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.camera_flash_btn),
+                    painter = painterResource(
+                        if (isFlashOn) R.drawable.camera_flash_on_btn
+                        else R.drawable.camera_flash_btn
+                    ),
                     contentDescription = "플래시",
                     tint = White
                 )

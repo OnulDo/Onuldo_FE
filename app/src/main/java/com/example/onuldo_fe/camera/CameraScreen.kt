@@ -92,12 +92,11 @@ fun CameraScreen(
                     .align(Alignment.Center)
             )
         }
-       /* Box(
+        /* Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black)
         )*/
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -111,6 +110,7 @@ fun CameraScreen(
                 title = title,
                 showFlashButton =
                     lensFacing == CameraSelector.LENS_FACING_BACK,
+                isFlashOn = flashMode == ImageCapture.FLASH_MODE_ON,
                 onCloseClick = onCloseClick,
                 onFlashClick = {
                     val newFlashMode =

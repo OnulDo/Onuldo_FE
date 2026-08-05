@@ -153,7 +153,8 @@ internal fun PartyWaitingRoomDto.toModel() = PartyWaitingRoom(
     capacity = maxMembers,
     members = members.mapIndexed { index, member -> member.toModel(index) },
     isHost = isHost,
-    canStart = canStart
+    canStart = canStart,
+    status = status.toLifecycleStatus()
 )
 
 /** 실제 대기방 응답을 화면과 분리된 도메인 모델로 변환한다. */
@@ -167,8 +168,16 @@ internal fun RealPartyWaitingRoomDto.toModel() = PartyWaitingRoom(
     members = members.mapIndexed { index, member -> member.toModel(index) },
     // 클라이언트 추측값 대신 서버가 로그인 사용자 기준으로 계산한 값을 전달한다.
     isHost = isHost,
-    canStart = canStart
+    canStart = canStart,
+    status = status.toLifecycleStatus()
 )
+
+/** 대기방 응답의 서버 상태를 앱 공통 파티 상태로 변환한다. */
+private fun String.toLifecycleStatus() = when (this) {
+    "ONGOING" -> PartyLifecycleStatus.InProgress
+    "FINISHED", "DISBANDED" -> PartyLifecycleStatus.Disbanded
+    else -> PartyLifecycleStatus.Recruiting
+}
 
 // 서버의 역할·준비 상태 문자열을 앱 내부 enum으로 변환
 private fun PartyMemberDto.toModel(index: Int) = PartyMember(
