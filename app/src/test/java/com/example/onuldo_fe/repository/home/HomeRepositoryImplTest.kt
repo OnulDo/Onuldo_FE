@@ -6,6 +6,7 @@ import com.example.onuldo_fe.data.challenge.dto.DailyCompletedPartyDto
 import com.example.onuldo_fe.data.challenge.dto.DailyCompletedResultDto
 import com.example.onuldo_fe.data.party.dto.PartyFeedDto
 import com.example.onuldo_fe.data.party.dto.PartyFeedItemDto
+import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomeCompletedChallenge
 import java.time.LocalDateTime
@@ -23,14 +24,17 @@ class HomeRepositoryImplTest {
             dailyItem(type = "PARTY", name = "아침 러닝", verified = true)
         )
 
-        val result = items.toHomeData(LocalDateTime.of(2026, 8, 5, 22, 59))
+        val result = items.toHomeData(
+            now = LocalDateTime.of(2026, 8, 5, 22, 59),
+            parties = listOf(partySummary())
+        )
 
         assertEquals(1, result.challenges.size)
         assertEquals("30일 걷기", result.challenges.single().title)
         assertEquals(ChallengeStatus.NeedCertification, result.challenges.single().status)
         assertEquals(60, result.challenges.single().remainingMinutes)
         assertEquals(1, result.partyChallenges.size)
-        assertEquals(ChallengeStatus.Success, result.partyChallenges.single().status)
+        assertEquals(ChallengeStatus.NeedCertification, result.partyChallenges.single().status)
         assertEquals(1, result.todayChallenge?.completedCount)
         assertEquals(2, result.todayChallenge?.totalCount)
     }
@@ -39,12 +43,8 @@ class HomeRepositoryImplTest {
     fun `서버에 없는 파티원 정보는 임의 생성하지 않는다`() {
         val result = listOf(dailyItem(type = "PARTY", name = "파티 챌린지", verified = false))
             .toHomeData(LocalDateTime.of(2026, 8, 5, 12, 0))
-            .partyChallenges
-            .single()
 
-        assertEquals(0, result.completedMemberCount)
-        assertEquals(0, result.totalMemberCount)
-        assertEquals(emptyList<Any>(), result.members)
+        assertEquals(emptyList<Any>(), result.partyChallenges)
     }
 
     @Test
@@ -81,7 +81,6 @@ class HomeRepositoryImplTest {
     @Test
     fun `partyId가 있으면 파티 피드의 인원과 프로필을 카드에 반영한다`() {
         val item = dailyItem(type = "PARTY", name = "아침 운동", verified = false)
-            .copy(partyId = 10, partyName = "갓생팟")
         val feed = PartyFeedDto(
             partyId = 10,
             name = "갓생팟",
@@ -102,7 +101,11 @@ class HomeRepositoryImplTest {
         )
 
         val result = listOf(item)
-            .toHomeData(LocalDateTime.of(2026, 8, 5, 12, 0), mapOf(10L to feed))
+            .toHomeData(
+                now = LocalDateTime.of(2026, 8, 5, 12, 0),
+                parties = listOf(partySummary()),
+                partyFeeds = mapOf(10L to feed)
+            )
             .partyChallenges
             .single()
 
@@ -148,5 +151,17 @@ class HomeRepositoryImplTest {
         endDate = "2026-08-20",
         verifiedOnDate = verified,
         streakDays = streakDays
+    )
+
+    private fun partySummary() = RealPartySummaryDto(
+        partyId = 10,
+        name = "갓생팟",
+        challengeTitle = "아침 운동",
+        status = "ONGOING",
+        endDate = "2026-08-20",
+        verificationDeadline = "23:59:00",
+        progressRate = 0.5,
+        verifiedMemberCount = 1,
+        totalMemberCount = 2
     )
 }
