@@ -26,11 +26,23 @@ class HomeViewModel(
     init { loadHome() }
 
     fun loadHome() {
+        requestHome(showFullScreenLoading = !uiState.hasHomeContent)
+    }
+
+    fun refreshHome() {
+        requestHome(showFullScreenLoading = false)
+    }
+
+    private fun requestHome(showFullScreenLoading: Boolean) {
         val generation = ++loadGeneration
         // 이전 조회를 취소해 최신 요청만 유지한다.
         loadJob?.cancel()
-        // API 호출 전 로딩 상태를 표시한다.
-        uiState = uiState.copy(isLoading = true, errorMessage = null)
+        // 새로고침은 기존 화면을 유지하고 상단 인디케이터만 표시한다.
+        uiState = uiState.copy(
+            isLoading = showFullScreenLoading,
+            isRefreshing = !showFullScreenLoading,
+            errorMessage = null
+        )
         loadJob = (coroutineScope ?: viewModelScope).launch {
             try {
                 // Repository가 Fake/Real 차이를 처리하므로 결과만 화면 상태로 변환한다.
@@ -39,9 +51,9 @@ class HomeViewModel(
                 if (generation != loadGeneration) return@launch
                 val settlementPartyId = loadedState.settlementBanner?.partyId
                 uiState = if (settlementPartyId in confirmedSettlementPartyIds) {
-                    loadedState.copy(settlementBanner = null)
+                    loadedState.copy(settlementBanner = null, isRefreshing = false)
                 } else {
-                    loadedState
+                    loadedState.copy(isRefreshing = false)
                 }
             } catch (error: CancellationException) {
                 // 코루틴 취소는 오류 화면으로 처리하지 않는다.
@@ -50,7 +62,9 @@ class HomeViewModel(
                 if (generation != loadGeneration) return@launch
                 uiState = uiState.copy(
                     isLoading = false,
-                    errorMessage = "홈 정보를 불러오지 못했어요."
+                    isRefreshing = false,
+                    // 기존 데이터가 있으면 새로고침 실패로 화면 전체를 가리지 않는다.
+                    errorMessage = "홈 정보를 불러오지 못했어요.".takeUnless { uiState.hasHomeContent }
                 )
             }
         }

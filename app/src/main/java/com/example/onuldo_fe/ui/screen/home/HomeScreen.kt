@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,16 +50,20 @@ import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.SourCream
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun HomeScreen(
     uiState: HomeUiState,
     onNotificationClick: () -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
     onSettlementResultClick: (Long) -> Unit = {},
     onVerifyClick: () -> Unit = {},
+    onRefresh: () -> Unit = {},
     scrollToTopKey: Int = 0,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    PullToRefreshBox(
+        isRefreshing = uiState.isRefreshing,
+        onRefresh = onRefresh,
         modifier = modifier
             .fillMaxSize()
             .background(SourCream)

@@ -18,6 +18,7 @@ data class HomeUiState(
     val completedChallenges: List<HomeCompletedChallenge> = emptyList(),
     val settlementBanner: SettlementBanner? = null,
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val errorMessage: String? = null
 ) {
     // 홈 API 데이터 조합에 따른 화면 상태 결정

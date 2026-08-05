@@ -7,6 +7,7 @@ data class RealHomeDailyResultDto(
 
 /** 오늘 수행할 챌린지 한 건의 서버 DTO. */
 data class RealHomeDailyChallengeDto(
+    val partyName: String? = null,                  // PARTY 항목의 파티 이름
     val participationId: Long = 0,                  // 챌린지 참여 기록 ID
     val participationStatus: String = "",          // ONGOING
     val participationType: String = "",            // PERSONAL 또는 PARTY
