@@ -1,5 +1,10 @@
 package com.example.onuldo_fe.ui.screen.mypage
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -17,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,15 +31,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.collectAsState
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.component.OnulDoSwitch
+import com.example.onuldo_fe.ui.component.PermissionDialogType
+import com.example.onuldo_fe.ui.component.PermissionSettingDialog
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
@@ -54,6 +64,8 @@ fun SettingScreen(
     modifier: Modifier = Modifier,
     viewModel: NotificationSettingsViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+
     // 서버 값(GET /api/users/me/notification-settings)으로 채우고, 변경 시 PATCH로 저장한다.
     val state by viewModel.state.collectAsState()
 
@@ -61,7 +73,23 @@ fun SettingScreen(
         viewModel.apply(state.update())
     }
 
-    // 전체 알림이 꺼지면 개별 알림은 값을 유지한 채 비활성 표시만 한다! (버튼 누르기 비활성)
+    // 진입 시 알림 권한이 없으면 안내 팝업을 띄운다(권한 없을 때 진입할 때마다).
+    //TODO: API 33 미만은 런타임 알림 권한이 없어 항상 허용된 것으로 봄( 예외를 어떻게 할것?)
+    var showNotificationPermissionDialog by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        val granted =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            } else {
+                true
+            }
+        showNotificationPermissionDialog = !granted
+    }
+
+    // 전체 알림이 꺼지면 개별 알림도 모두 꺼짐 + 비활성
     val subEnabled = state.all
 
     Column(
@@ -71,7 +99,6 @@ fun SettingScreen(
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
     ) {
-        // 헤더 — 다른 마이 화면과 같은 56dp 높이
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -79,7 +106,6 @@ fun SettingScreen(
             contentAlignment = Alignment.Center
         ) {
             OnulDoBackButton(
-                // 패딩 없이 정렬만 — IconButton 중앙정렬로 화살표가 가로 20에 맞음(본문과 정렬)
                 modifier = Modifier.align(Alignment.CenterStart),
                 onClick = onBackClick
             )
@@ -99,7 +125,19 @@ fun SettingScreen(
             title = "전체 알림 수신",
             description = "모든 알림을 한 번에 끄거나 켤 수 있어요",
             checked = state.all,
-            onCheckedChange = { updateState { copy(all = it) } },
+            onCheckedChange = { checked ->
+                updateState {
+                    copy(
+                        all = checked,
+                        challengeStart = checked,
+                        deadline = checked,
+                        endReminder = checked,
+                        result = checked,
+                        partyMemberVerified = checked,
+                        refund = checked
+                    )
+                }
+            },
             height = 80.dp,
             backgroundColor = Persimmon10,
             borderColor = Persimmon20
@@ -109,21 +147,11 @@ fun SettingScreen(
 
         SettingSectionHeader(text = "챌린지 알림")
 
-        Spacer(Modifier.height(9.dp))
+        Spacer(Modifier.height(2.dp))
 
         SettingToggleRow(
-            title = "챌린지 시작 알림",
-            description = "챌린지 시작 시각 알림",
-            checked = state.challengeStart,
-            onCheckedChange = { updateState { copy(challengeStart = it) } },
-            enabled = subEnabled
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        SettingToggleRow(
-            title = "인증 마감 알림",
-            description = "인증 마감 30분 전 알림",
+            title = "인증 마감 리마인더",
+            description = "당일 미인증 시 시간대별 리마인드 발송",
             checked = state.deadline,
             onCheckedChange = { updateState { copy(deadline = it) } },
             enabled = subEnabled
@@ -131,39 +159,86 @@ fun SettingScreen(
 
         Spacer(Modifier.height(8.dp))
 
+    //새 챌린지 시작
         SettingToggleRow(
-            title = "인증 결과 알림",
-            description = "인증 성공/실패 결과 알림",
-            checked = state.result,
-            onCheckedChange = { updateState { copy(result = it) } },
-            enabled = subEnabled
-        )
-
-        Spacer(Modifier.height(41.dp))
-
-        SettingSectionHeader(text = "포인트 알림")
-
-        Spacer(Modifier.height(9.dp))
-
-        SettingToggleRow(
-            title = "환급 완료 알림",
-            description = "챌린지 종료 후 환급 알림",
-            checked = state.refund,
-            onCheckedChange = { updateState { copy(refund = it) } },
+            title = "새 챌린지 시작",
+            description = "시작일 첫 인증 가능 시각에 알림",
+            checked = state.challengeStart,
+            onCheckedChange = { updateState { copy(challengeStart = it) } },
             enabled = subEnabled
         )
 
         Spacer(Modifier.height(8.dp))
 
+    // 종료일 리마인더 (신규)
         SettingToggleRow(
-            title = "차감 알림",
-            description = "인증 실패로 도전금 차감 시",
-            checked = state.deduction,
-            onCheckedChange = { updateState { copy(deduction = it) } },
+            title = "종료일 리마인더",
+            description = "종료 5·3·1일 전 20:00 알림",
+            checked = state.endReminder,
+            onCheckedChange = { updateState { copy(endReminder = it) } },
             enabled = subEnabled
         )
 
-        Spacer(Modifier.height(40.dp))
+        Spacer(Modifier.height(41.dp))
+
+        SettingSectionHeader(text = "인증 알림")
+
+        Spacer(Modifier.height(2.dp))
+
+    // 인증 결과
+        SettingToggleRow(
+            title = "인증 결과",
+            description = "직접검토 통과·기각 결과 알림",
+            checked = state.result,
+            onCheckedChange = { updateState { copy(result = it) } },
+            enabled = subEnabled
+        )
+
+        Spacer(Modifier.height(19.dp))
+
+        SettingSectionHeader(text = "파티 알림")
+
+        Spacer(Modifier.height(2.dp))
+
+        // 파티원 인증 완료 — 인증 결과와 별개 상태
+        SettingToggleRow(
+            title = "파티원 인증 완료",
+            description = "파티 피드에 인증 사진이 올라오면 알림",
+            checked = state.partyMemberVerified,
+            onCheckedChange = { updateState { copy(partyMemberVerified = it) } },
+            enabled = subEnabled
+        )
+
+        Spacer(Modifier.height(41.dp))
+
+        SettingSectionHeader(text = "항상 받는 알림")
+
+        Spacer(Modifier.height(2.dp))
+
+    // 정산 환급 완료
+        SettingToggleRow(
+            title = "정산·환급 완료",
+            description = "포인트 지급 알림은 끌 수 없어요",
+            checked = true,
+            onCheckedChange = {},
+            enabled = false,
+            trailingText = "항상 발송"
+        )
+    }
+
+    // 알림 권한 안내 팝업(권한x) → "설정으로 이동"이면 시스템 알림설정으로
+    if (showNotificationPermissionDialog) {
+        PermissionSettingDialog(
+            type = PermissionDialogType.NOTIFICATION,
+            onDismiss = { showNotificationPermissionDialog = false },
+            onMoveToSettings = {
+                showNotificationPermissionDialog = false
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+                context.startActivity(intent)
+            }
+        )
     }
 }
 
@@ -177,7 +252,7 @@ private fun SettingSectionHeader(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 12.sp,
-        lineHeight = 12.sp,
+        lineHeight = 22.sp,
         color = DarkBrown50,
         modifier = modifier
             .fillMaxWidth()
@@ -193,6 +268,9 @@ private fun SettingToggleRow(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    showSwitch: Boolean = true,
+    // 스위치 대신 오른쪽에 고정 문구를 띄울 때 사용 (예: "항상 발송")
+    trailingText: String? = null,
     height: Dp = 64.dp,
     backgroundColor: Color = White,
     borderColor: Color = DarkBrown40
@@ -233,12 +311,23 @@ private fun SettingToggleRow(
 
         Spacer(Modifier.width(12.dp))
 
-        //버튼 전환
-        OnulDoSwitch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            enabled = enabled
-        )
+        // 오른쪽: 고정 문구("항상 발송" 등)가 있으면 문구, 없으면 스위치
+        when {
+            trailingText != null -> Text(
+                text = trailingText,
+                fontFamily = Pretendard,
+                fontWeight = FontWeight.Bold,
+                fontSize = 11.sp,
+                lineHeight = 11.sp,
+                color = DarkBrown50
+            )
+
+            showSwitch -> OnulDoSwitch(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                enabled = enabled
+            )
+        }
     }
 }
 
