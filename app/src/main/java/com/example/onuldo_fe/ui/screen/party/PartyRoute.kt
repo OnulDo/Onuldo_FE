@@ -209,7 +209,7 @@ fun PartyRoute(
             // fake 포인트 부족 테스트 시 PartyTestConfig.AVAILABLE_POINT를 5_000으로 변경
             // Real 생성에서는 서버가 보유 포인트를 최종 검증하므로 Fake 포인트로 요청을 막지 않는다.
             availablePoint = if (PartyApiConfig.USE_REAL_CREATE) {
-                partyState.availablePoint ?: Int.MAX_VALUE
+                partyState.availablePoint
             } else {
                 PartyTestConfig.AVAILABLE_POINT
             },
@@ -283,7 +283,7 @@ fun PartyRoute(
                     ui = waitingRoom,
                     // Real 준비 완료에서는 서버가 포인트를 검증하므로 Fake 포인트로 요청을 막지 않는다.
                     availablePoint = if (PartyApiConfig.USE_REAL_READY) {
-                        partyState.availablePoint ?: Int.MAX_VALUE
+                        partyState.availablePoint
                     } else {
                         PartyTestConfig.AVAILABLE_POINT
                     },

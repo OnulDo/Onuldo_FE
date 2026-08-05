@@ -61,6 +61,7 @@ class PartyViewModel(
 
     private var waitingRoomPollingJob: Job? = null
     private var pollingPartyId: String? = null
+    private var waitingRoomMutationGeneration: Long = 0L
 
     init {
         // 파티 홈 진입 시 모집 중 파티를 제외한 진행 중 파티 목록 준비
@@ -206,10 +207,16 @@ class PartyViewModel(
     }
 
     private suspend fun refreshWaitingRoomSilently(partyId: String) {
+        // 요청 시작 시점의 세대를 저장해 이후 상태 변경보다 오래된 응답인지 판별한다.
+        val requestGeneration = waitingRoomMutationGeneration
         try {
             val room = repository.getWaitingRoom(partyId)
             // 버튼 요청 중 받은 오래된 응답이 준비·시작 결과를 덮지 않게 한다.
-            if (pollingPartyId == partyId && uiState.action == PartyAction.Idle) {
+            if (
+                pollingPartyId == partyId &&
+                uiState.action == PartyAction.Idle &&
+                requestGeneration == waitingRoomMutationGeneration
+            ) {
                 uiState = uiState.copy(waitingRoom = room.toUi())
             }
         } catch (error: CancellationException) {
@@ -221,6 +228,7 @@ class PartyViewModel(
 
     /** 초대코드 참여 응답의 최신 대기방을 추가 조회 없이 화면 상태에 적용한다. */
     fun applyJoinedWaitingRoom(room: PartyWaitingRoom) {
+        waitingRoomMutationGeneration++
         uiState = uiState.copy(
             waitingRoom = room.toUi(),
             isReadySubmitted = false,
@@ -234,6 +242,7 @@ class PartyViewModel(
         // 포인트 부족 여부는 화면에서 먼저 확인하고 실제 연동 후 서버에서도 최종 검증
         val partyId = uiState.waitingRoom?.partyId ?: return
         if (uiState.action != PartyAction.Idle) return
+        waitingRoomMutationGeneration++
         uiState = uiState.copy(
             action = PartyAction.ReadySubmitting,
             errorMessage = null,
@@ -281,6 +290,7 @@ class PartyViewModel(
         // 방장 승계와 마지막 인원 이탈에 따른 해체 처리는 서버 또는 fake store가 담당
         val partyId = uiState.waitingRoom?.partyId ?: return
         if (uiState.action != PartyAction.Idle) return
+        waitingRoomMutationGeneration++
         uiState = uiState.copy(action = PartyAction.LeaveSubmitting, errorMessage = null)
         viewModelScope.launch {
             runCatching { repository.leaveParty(partyId) }
@@ -302,6 +312,7 @@ class PartyViewModel(
         // 시작 가능 조건은 버튼 활성화에 사용하고 서버가 동일 조건을 다시 검증
         val partyId = uiState.waitingRoom?.partyId ?: return
         if (uiState.action != PartyAction.Idle) return
+        waitingRoomMutationGeneration++
         uiState = uiState.copy(action = PartyAction.StartSubmitting, errorMessage = null)
         viewModelScope.launch {
             runCatching { repository.startParty(partyId) }

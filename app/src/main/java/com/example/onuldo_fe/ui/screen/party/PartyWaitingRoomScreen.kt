@@ -35,7 +35,7 @@ import com.example.onuldo_fe.viewmodel.party.PartyWaitingRoomUi
 @Composable
 fun PartyWaitingRoomScreen(
     ui: PartyWaitingRoomUi,
-    availablePoint: Int = 5_000,
+    availablePoint: Int? = 5_000,
     isReadySubmitted: Boolean = false,
     onBack: () -> Unit,
     onStartClick: () -> Unit = {},
@@ -135,7 +135,7 @@ fun PartyWaitingRoomScreen(
                     when {
                         isLeader -> onStartClick()
                         // 대기 중에서 준비 상태로 바뀔 때만 보유 포인트를 검사한다.
-                        !isReadySubmitted && availablePoint < ui.deposit -> showPointDialog = true
+                        !isReadySubmitted && availablePoint != null && availablePoint < ui.deposit -> showPointDialog = true
                         else -> onReadyClick()
                     }
                 },

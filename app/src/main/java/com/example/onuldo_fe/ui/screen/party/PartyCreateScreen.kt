@@ -39,7 +39,7 @@ fun PartyCreateScreen(
     onChallengeClick: () -> Unit,
     onBack: () -> Unit,
     onCreate: (period: String, deposit: Int) -> Unit,
-    availablePoint: Int = 50_000,
+    availablePoint: Int? = 50_000,
     onChargePoint: () -> Unit = {},
     isSubmitting: Boolean = false,
     errorMessage: String? = null,
@@ -150,7 +150,7 @@ fun PartyCreateScreen(
                         onPartyNameChange(normalizedPartyName)
                         val requiredDeposit = deposits[selectedDeposit]
                         // TODO 파티 생성 API 연동 시 파티장 보유 포인트 검증 성공 후 파티 생성 요청
-                        if (availablePoint < requiredDeposit) {
+                        if (availablePoint != null && availablePoint < requiredDeposit) {
                             showPointDialog = true
                         } else {
                             onCreate(periods[selectedPeriod], requiredDeposit)
