@@ -8,6 +8,8 @@ data class NotificationSettingsState(
     val deadline: Boolean = true,
     val endReminder: Boolean = true,
     val result: Boolean = true,
+    // 파티원 인증 완료 — 서버 PATCH 타입이 없어 로컬 전용 (인증 결과와 상태 공유 금지)
+    val partyMemberVerified: Boolean = true,
     val refund: Boolean = true,
     val deduction: Boolean = false
 )

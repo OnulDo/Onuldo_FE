@@ -83,4 +83,4 @@ private val dummyNotifications = listOf(
         createdAt = now.minusDays(1),
         type = NotificationType.PartyDailySettlement
     )
-)
+).sortedByDescending { it.createdAt } // 최신순 보장 (화면은 받은 순서대로 표시)

@@ -133,6 +133,7 @@ fun SettingScreen(
                         deadline = checked,
                         endReminder = checked,
                         result = checked,
+                        partyMemberVerified = checked,
                         refund = checked
                     )
                 }
@@ -199,12 +200,12 @@ fun SettingScreen(
 
         Spacer(Modifier.height(2.dp))
 
-        // 인증 결과
+        // 파티원 인증 완료 — 인증 결과와 별개 상태
         SettingToggleRow(
             title = "파티원 인증 완료",
             description = "파티 피드에 인증 사진이 올라오면 알림",
-            checked = state.result,
-            onCheckedChange = { updateState { copy(result = it) } },
+            checked = state.partyMemberVerified,
+            onCheckedChange = { updateState { copy(partyMemberVerified = it) } },
             enabled = subEnabled
         )
 
