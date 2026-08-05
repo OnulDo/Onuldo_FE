@@ -116,6 +116,30 @@ fun PartyRoute(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    DisposableEffect(lifecycleOwner, screen, waitingPartyId, waitingRoom != null) {
+        val partyId = waitingPartyId
+        val shouldPoll = screen == PartyScreen.WaitingRoom && partyId != null && waitingRoom != null
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> if (shouldPoll) {
+                    partyId?.let(partyViewModel::startWaitingRoomPolling)
+                }
+                Lifecycle.Event.ON_STOP -> partyViewModel.stopWaitingRoomPolling()
+                else -> Unit
+            }
+        }
+
+        // 대기방 진입 시 바로 갱신하고, 백그라운드에서는 요청을 멈춘다.
+        if (shouldPoll && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            partyId?.let(partyViewModel::startWaitingRoomPolling)
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            partyViewModel.stopWaitingRoomPolling()
+        }
+    }
+
     LaunchedEffect(screen) {
         onBottomBarVisibilityChange(
             screen == PartyScreen.List || screen == PartyScreen.Feed

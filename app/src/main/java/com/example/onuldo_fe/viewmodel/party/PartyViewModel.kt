@@ -14,6 +14,10 @@ import com.example.onuldo_fe.model.party.PartySummary
 import com.example.onuldo_fe.model.party.PartyWaitingRoom
 import com.example.onuldo_fe.repository.party.PartyRepository
 import com.example.onuldo_fe.repository.party.PartyRepositoryProvider
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 // 생성·조회·준비·시작·이탈 중 진행 중인 요청을 표시해 중복 실행 방지
@@ -40,8 +44,15 @@ data class PartyUiState(
 class PartyViewModel(
     private val repository: PartyRepository = PartyRepositoryProvider.provide()
 ) : ViewModel() {
+    companion object {
+        private const val WAITING_ROOM_POLLING_INTERVAL_MS = 3_000L
+    }
+
     var uiState by mutableStateOf(PartyUiState())
         private set
+
+    private var waitingRoomPollingJob: Job? = null
+    private var pollingPartyId: String? = null
 
     init {
         // 파티 홈 진입 시 모집 중 파티를 제외한 진행 중 파티 목록 준비
@@ -121,6 +132,41 @@ class PartyViewModel(
                         errorMessage = "파티 대기방을 불러오지 못했어요."
                     )
                 }
+        }
+    }
+
+    /** 대기방에 머무는 동안 3초마다 최신 멤버와 준비 상태를 조회한다. */
+    fun startWaitingRoomPolling(partyId: String) {
+        if (waitingRoomPollingJob?.isActive == true && pollingPartyId == partyId) return
+
+        stopWaitingRoomPolling()
+        pollingPartyId = partyId
+        waitingRoomPollingJob = viewModelScope.launch {
+            while (isActive) {
+                refreshWaitingRoomSilently(partyId)
+                delay(WAITING_ROOM_POLLING_INTERVAL_MS)
+            }
+        }
+    }
+
+    /** 대기방을 벗어나거나 앱이 백그라운드로 가면 불필요한 요청을 중지한다. */
+    fun stopWaitingRoomPolling() {
+        waitingRoomPollingJob?.cancel()
+        waitingRoomPollingJob = null
+        pollingPartyId = null
+    }
+
+    private suspend fun refreshWaitingRoomSilently(partyId: String) {
+        try {
+            val room = repository.getWaitingRoom(partyId)
+            // 버튼 요청 중 받은 오래된 응답이 준비·시작 결과를 덮지 않게 한다.
+            if (pollingPartyId == partyId && uiState.action == PartyAction.Idle) {
+                uiState = uiState.copy(waitingRoom = room.toUi())
+            }
+        } catch (error: CancellationException) {
+            throw error
+        } catch (_: Exception) {
+            // 기존 화면을 유지하고 다음 주기에 다시 조회한다.
         }
     }
 
