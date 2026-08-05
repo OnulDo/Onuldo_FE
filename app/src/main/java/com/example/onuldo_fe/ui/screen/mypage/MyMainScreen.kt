@@ -18,6 +18,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.data.auth.dto.TermType
+import com.example.onuldo_fe.viewmodel.mypage.MyMainViewModel
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -44,11 +49,11 @@ import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
 
 /**
- * 마이 - 메인 (Figma node `4310:2206`). 하단 4탭 스캐폴드의 '마이' 탭 콘텐츠.
+ * 마이 - 메인 (Figma node `4310:2206`). 하단 5탭 스캐폴드의 '마이' 탭 콘텐츠.
  * 프로필 카드 · 포인트 지갑 요약 · 설정/약관/정보 메뉴 리스트.
  *
- * 값(닉네임·이메일·잔액 등)은 더미. TODO: ViewModel/API 연동.
- * 알림 설정·약관 3종 화면은 이번 범위 제외 → 해당 메뉴는 TODO 스텁.
+ * 닉네임·이메일·보유 포인트는 `GET /api/users/me`로 채운다.
+ * 서비스 탈퇴는 서버 API가 없어 아직 동작하지 않는다.
  */
 @Composable
 fun MyMainScreen(
@@ -58,10 +63,15 @@ fun MyMainScreen(
     onWithdrawClick: () -> Unit,
     onAccountClick: () -> Unit,
     onNotificationClick: () -> Unit,
-    nickname: String = "오늘두",
-    email: String = "user@example.com",
-    point: String = "52,000P",
+    onTermClick: (TermType) -> Unit = {},
+    onLoggedOut: () -> Unit = {},
+    viewModel: MyMainViewModel = viewModel(),
 ) {
+    val state by viewModel.uiState.collectAsState()
+    val nickname = state.nickname
+    val email = state.email
+    val point = state.pointText
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -95,11 +105,11 @@ fun MyMainScreen(
         Spacer(Modifier.height(20.dp))
 
         SectionLabel("약관 및 정책")
-        MenuCard(title = "서비스 이용약관", onClick = { /* TODO: 약관 화면(이번 범위 제외) */ })
+        MenuCard(title = "서비스 이용약관", onClick = { onTermClick(TermType.SERVICE) })
         Spacer(Modifier.height(10.dp))
-        MenuCard(title = "개인정보 처리방침", onClick = { /* TODO: 약관 화면(이번 범위 제외) */ })
+        MenuCard(title = "개인정보 처리방침", onClick = { onTermClick(TermType.PRIVACY) })
         Spacer(Modifier.height(10.dp))
-        MenuCard(title = "환급 정책", onClick = { /* TODO: 약관 화면(이번 범위 제외) */ })
+        MenuCard(title = "환급 정책", onClick = { onTermClick(TermType.REFUND) })
 
         Spacer(Modifier.height(20.dp))
 
@@ -117,7 +127,7 @@ fun MyMainScreen(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { /* TODO: 로그아웃 처리 */ },
+                .clickable { viewModel.logout(onLoggedOut) },
         )
         Spacer(Modifier.height(8.dp))
         Text(
@@ -130,7 +140,8 @@ fun MyMainScreen(
             textDecoration = TextDecoration.Underline,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { /* TODO: 회원 탈퇴 처리 */ },
+                // 서버에 회원 탈퇴 API가 없어 아직 연결하지 못했다. API 추가 시 확인 다이얼로그와 함께 연결한다.
+                .clickable { /* TODO: 회원 탈퇴 API 추가 후 연결 */ },
         )
     }
 }

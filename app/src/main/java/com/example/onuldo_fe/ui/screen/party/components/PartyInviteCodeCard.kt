@@ -23,7 +23,7 @@ fun PartyInviteCodeCard(inviteCode: String, onCopyClick: () -> Unit, modifier: M
             .height(88.dp)
             .background(White, RoundedCornerShape(16.dp))
             .border(1.dp, DarkBrown40, RoundedCornerShape(16.dp))
-            .padding(horizontal = 19.dp),
+            .padding(horizontal = LocalSpacing.current.spacing20),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(Modifier.weight(1f)) {
@@ -36,6 +36,7 @@ fun PartyInviteCodeCard(inviteCode: String, onCopyClick: () -> Unit, modifier: M
             )
             Text(
                 inviteCode,
+                // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
                 Modifier.padding(top = 3.dp),
                 color = BlackBrown,
                 fontFamily = Pretendard,

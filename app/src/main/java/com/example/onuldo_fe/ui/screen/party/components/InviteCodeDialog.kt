@@ -37,6 +37,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown10
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -69,6 +70,7 @@ fun InviteCodeDialog(
                 .background(SourCream, RoundedCornerShape(20.dp)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // TODO 디자인 시스템에 52dp 토큰이 추가되면 LocalSpacing으로 교체
             Spacer(Modifier.height(52.dp))
             Text(
                 text = "초대코드 입력",
@@ -78,7 +80,7 @@ fun InviteCodeDialog(
                 fontWeight = FontWeight.Bold,
                 letterSpacing = (-0.36).sp
             )
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(LocalSpacing.current.spacing10))
             Text(
                 text = error?.message ?: networkErrorMessage ?: "파티장에게 받은 6자리 코드를 입력하세요",
                 color = if (isError || networkErrorMessage != null) Red else DarkBrown,
@@ -87,7 +89,7 @@ fun InviteCodeDialog(
                 fontWeight = if (isError) FontWeight.Bold else FontWeight.Normal,
                 textAlign = TextAlign.Center
             )
-            Spacer(Modifier.height(31.dp))
+            Spacer(Modifier.height(LocalSpacing.current.spacing30))
             BasicTextField(
                 value = code,
                 onValueChange = { value ->
@@ -137,7 +139,7 @@ fun InviteCodeDialog(
                     }
                 }
             )
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(LocalSpacing.current.spacing28))
             Button(
                 onClick = {
                     if (isError) {

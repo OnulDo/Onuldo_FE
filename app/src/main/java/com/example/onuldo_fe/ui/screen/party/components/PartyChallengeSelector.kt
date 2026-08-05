@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
@@ -63,7 +64,7 @@ fun PartyChallengeSelector(
             .height(64.dp)
             .background(White, RoundedCornerShape(14.dp))
             .border(1.5.dp, Persimmon, RoundedCornerShape(14.dp))
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = LocalSpacing.current.spacing16),
         verticalAlignment = Alignment.CenterVertically
     ) {
         categoryLabel?.let { label ->
@@ -85,7 +86,7 @@ fun PartyChallengeSelector(
                     fontWeight = FontWeight.Bold
                 )
             }
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(LocalSpacing.current.spacing8))
         }
         Text(
             challenge.title,
@@ -109,7 +110,8 @@ fun PartyChallengeSelector(
                 painter = painterResource(R.drawable.party_create_arrow_right),
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(start = 7.dp)
+                    // TODO 디자인 시스템에 6dp 토큰이 추가되면 LocalSpacing으로 교체
+                    .padding(start = 6.dp)
                     .size(width = 5.dp, height = 10.dp)
             )
         }
@@ -143,7 +145,7 @@ private fun PartyChallengeSelectorSelectedPreview() {
     OnulDo_FETheme {
         Box(Modifier.background(SourCream).padding(20.dp)) {
             PartyChallengeSelector(
-                challenge = Challenge(id = 1, title = "30일 헬스 챌린지", participantCount = 0),
+                challenge = Challenge(id = 1L, title = "30일 헬스 챌린지", participantCount = 0),
                 categoryLabel = "생활루틴",
                 onClick = {}
             )

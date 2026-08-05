@@ -201,7 +201,8 @@ private fun termsLinkText() = buildAnnotatedString {
 
 /** 아이콘 의존성 없이 Canvas로 그린 체크박스. */
 @Composable
-private fun AgreeCheckbox(checked: Boolean) {
+// 소셜 가입 약관 화면([SocialTermsScreen])에서도 같은 체크박스를 쓴다.
+internal fun AgreeCheckbox(checked: Boolean) {
     val shape = RoundedCornerShape(7.dp)
     if (checked) {
         Canvas(

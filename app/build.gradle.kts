@@ -1,14 +1,20 @@
+﻿import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
 
-import java.util.Properties
-
+/**
+ * API 테스트 값과 소셜 로그인 키는 Git에서 제외되는 local.properties에서 읽는다.
+ * 값이 없으면 빈 문자열을 사용해 키가 없는 팀원도 프로젝트를 빌드할 수 있게 한다.
+ */
 val localProperties = Properties().apply {
     val file = rootProject.file("local.properties")
-    if (file.exists()) file.inputStream().use(::load)
+    if (file.exists()) file.inputStream().use { load(it) }
 }
+
+fun secret(key: String): String = localProperties.getProperty(key).orEmpty()
 
 fun quotedBuildConfig(value: String): String =
     "\"${value.replace("\\", "\\\\").replace("\"", "\\\"")}\""
@@ -29,12 +35,22 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // 카메라 이미지 업로드 API 설정. 개발용 토큰은 local.properties에서만 관리한다.
         buildConfigField("String", "API_BASE_URL", quotedBuildConfig("https://onuldo.site/"))
         buildConfigField(
             "String",
             "DEV_ACCESS_TOKEN",
-            quotedBuildConfig(localProperties.getProperty("ONULDO_ACCESS_TOKEN", ""))
+            quotedBuildConfig(secret("ONULDO_ACCESS_TOKEN"))
         )
+
+        val kakaoNativeAppKey = secret("KAKAO_NATIVE_APP_KEY")
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", quotedBuildConfig(kakaoNativeAppKey))
+        buildConfigField("String", "NAVER_CLIENT_ID", quotedBuildConfig(secret("NAVER_CLIENT_ID")))
+        buildConfigField("String", "NAVER_CLIENT_SECRET", quotedBuildConfig(secret("NAVER_CLIENT_SECRET")))
+
+        // 카카오톡 앱 로그인 결과를 돌려받는 커스텀 스킴(kakao{네이티브앱키}).
+        manifestPlaceholders["kakaoNativeAppKey"] = kakaoNativeAppKey
     }
 
     buildTypes {
@@ -73,11 +89,14 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
     implementation("androidx.exifinterface:exifinterface:1.4.1")
     implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation(libs.kakao.user)
+    implementation(libs.naver.oauth)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

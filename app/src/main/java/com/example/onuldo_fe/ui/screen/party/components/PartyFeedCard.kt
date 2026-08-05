@@ -23,9 +23,7 @@ import com.example.onuldo_fe.ui.theme.*
 @Composable
 fun PartyFeedCard(
     item: PartyFeedItemUi,
-    modifier: Modifier = Modifier,
-    isCurrentUser: Boolean = false,
-    onVerifyClick: () -> Unit = {}
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier
@@ -54,16 +52,23 @@ fun PartyFeedCard(
                 )
             }
         }
-        Row(Modifier.fillMaxWidth().height(50.dp).padding(start = 10.dp, end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth().height(50.dp).padding(
+                start = LocalSpacing.current.spacing10,
+                end = LocalSpacing.current.spacing10
+            ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             PartyMemberProfileImage(
                 profileImageUrl = item.profileImageUrl,
-                defaultCharacterId = item.defaultCharacterId,
+                // Swagger상 프로필 이미지는 항상 제공되므로 별도 캐릭터 ID를 만들지 않는다.
+                defaultCharacterId = null,
                 contentDescription = "${item.name} 프로필",
                 containerSize = 28.dp,
                 characterWidth = 22.dp,
                 characterHeight = 25.dp
             )
-            Column(Modifier.padding(start = 8.dp)) {
+            Column(Modifier.padding(start = LocalSpacing.current.spacing8)) {
                 Text(item.name, color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
                 Text(item.time, color = DarkBrown50, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Medium)
             }
@@ -86,7 +91,7 @@ private fun PartyFeedCardPreview() {
 private fun PartyFeedUnverifiedCardPreview() {
     OnulDo_FETheme {
         Box(Modifier.width(169.dp).background(SourCream)) {
-            PartyFeedCard(PartyFeedItemUi("하늘", "미인증", memberId = "current-user"), isCurrentUser = true)
+            PartyFeedCard(PartyFeedItemUi("하늘", "미인증", memberId = "current-user"))
         }
     }
 }

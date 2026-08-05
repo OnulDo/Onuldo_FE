@@ -25,6 +25,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
+import com.example.onuldo_fe.ui.theme.SourCream
 
 @Composable
 fun OnulDoButton(
@@ -34,7 +35,12 @@ fun OnulDoButton(
     enabled: Boolean = true,
     height: Dp = 56.dp,
     fontSize: TextUnit = 16.sp,
+    lineHeight: TextUnit = TextUnit.Unspecified,
     horizontalPadding: Dp = 20.dp,
+    containerColor: Color = Persimmon,
+    contentColor: Color = SourCream,
+    disabledContainerColor: Color = BlackBrown.copy(alpha = 0.1f),
+    disabledContentColor: Color = BlackBrown.copy(alpha = 0.2f),
     pressedContainerColor: Color = DarkBrown
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -49,16 +55,18 @@ fun OnulDoButton(
         enabled = enabled,
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isPressed) pressedContainerColor else Persimmon,
+            containerColor = if (isPressed) pressedContainerColor else containerColor,
+            contentColor = contentColor,
             // Figma(RFD) btn/disabled = 배경 BlackBrown 10% · 글자 BlackBrown 20%.
-            disabledContainerColor = BlackBrown.copy(alpha = 0.1f),
-            disabledContentColor = BlackBrown.copy(alpha = 0.2f),
+            disabledContainerColor = disabledContainerColor,
+            disabledContentColor = disabledContentColor,
         ),
         interactionSource = interactionSource
     ) {
         Text(
             text = text,
             fontSize = fontSize,
+            lineHeight = lineHeight,
             fontFamily = Pretendard,
             fontWeight = FontWeight.Bold
         )
