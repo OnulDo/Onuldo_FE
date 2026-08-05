@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.onuldo_fe.camera.component.CameraTopBar
 import com.example.onuldo_fe.camera.component.PreviewBottomBar
+import com.example.onuldo_fe.ui.component.OnulDoErrorDialog
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 
 @Composable
@@ -35,7 +34,7 @@ fun PhotoPreviewScreen(
     onRetakeClick: () -> Unit = {},
     onSubmitClick: () -> Unit = {},
     submitState: VerificationSubmitState = VerificationSubmitState.Idle,
-    onRetry: () -> Unit = {}
+    onErrorConfirm: () -> Unit = {}
 ) {
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize().background(Color.Black)
@@ -83,16 +82,14 @@ fun PhotoPreviewScreen(
         }
     }
 
-    when (submitState) {
-        is VerificationSubmitState.Error -> AlertDialog(
-            onDismissRequest = {},
-            title = { Text("업로드 실패") },
-            text = { Text(submitState.message) },
-            confirmButton = { Button(onClick = onRetry) { Text("재시도") } },
-            dismissButton = { Button(onClick = onRetakeClick) { Text("다시 촬영") } }
+    if (submitState is VerificationSubmitState.Error) {
+        OnulDoErrorDialog(
+            title = "업로드에 실패했어요",
+            description = submitState.message,
+            buttonText = "확인",
+            onButtonClick = onErrorConfirm,
+            onDismiss = {}
         )
-
-        else -> Unit
     }
 }
 

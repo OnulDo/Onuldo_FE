@@ -231,7 +231,7 @@ fun OnuldoApp() {
                 },
                 onSubmitClick = { cameraViewModel.submitVerification(challengeId) },
                 submitState = submitState,
-                onRetry = { cameraViewModel.submitVerification(challengeId) }
+                onErrorConfirm = cameraViewModel::clearSubmitState
             )
         }
 
