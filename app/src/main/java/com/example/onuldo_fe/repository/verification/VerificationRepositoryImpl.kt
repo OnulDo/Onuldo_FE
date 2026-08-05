@@ -4,8 +4,12 @@ import android.content.Context
 import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
 import com.example.onuldo_fe.data.verification.api.VerificationApi
+import com.example.onuldo_fe.data.verification.dto.ChallengeVerificationRequestDto
+import com.example.onuldo_fe.data.verification.dto.ChallengeVerificationResultDto
 import com.example.onuldo_fe.data.verification.dto.ImageUploadResultDto
+import com.example.onuldo_fe.model.verification.ChallengeVerificationResult
 import com.example.onuldo_fe.model.verification.ImageUploadResult
+import com.example.onuldo_fe.model.verification.VerificationReview
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -37,6 +41,17 @@ class VerificationRepositoryImpl(
         }
     }
 
+    override suspend fun verifyChallenge(
+        challengeId: Long,
+        fileId: String
+    ): ChallengeVerificationResult = withContext(Dispatchers.IO) {
+        require(challengeId > 0L) { "챌린지 정보가 올바르지 않습니다." }
+        require(fileId.isNotBlank()) { "업로드된 사진 정보가 없습니다." }
+        api.verifyChallenge(
+            challengeId = challengeId,
+            request = ChallengeVerificationRequestDto(fileId)
+        ).result.toModel()
+    }
     private fun validateImage(file: File) {
         val exif = ExifInterface(file)
         val width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
@@ -68,6 +83,16 @@ class VerificationRepositoryImpl(
         }
     }
 
+    private fun ChallengeVerificationResultDto.toModel() = ChallengeVerificationResult(
+        verificationId = verificationId,
+        challengeId = challengeId,
+        participationId = participationId,
+        fileId = fileId,
+        verificationDate = verificationDate,
+        verifiedAt = verifiedAt,
+        review = runCatching { VerificationReview.valueOf(review.uppercase()) }
+            .getOrDefault(VerificationReview.MANUAL_REVIEW)
+    )
     private fun ImageUploadResultDto.toModel() = ImageUploadResult(
         bucket = bucket,
         fileId = fileId,

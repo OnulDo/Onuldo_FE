@@ -35,8 +35,7 @@ fun PhotoPreviewScreen(
     onRetakeClick: () -> Unit = {},
     onSubmitClick: () -> Unit = {},
     submitState: VerificationSubmitState = VerificationSubmitState.Idle,
-    onRetry: () -> Unit = {},
-    onUploadComplete: () -> Unit = {}
+    onRetry: () -> Unit = {}
 ) {
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize().background(Color.Black)
@@ -74,11 +73,12 @@ fun PhotoPreviewScreen(
             PreviewBottomBar(
                 onRetakeClick = onRetakeClick,
                 onSubmitClick = onSubmitClick,
-                enabled = submitState != VerificationSubmitState.Loading
+                enabled = submitState != VerificationSubmitState.Uploading &&
+                    submitState != VerificationSubmitState.Reviewing
             )
         }
 
-        if (submitState == VerificationSubmitState.Loading) {
+        if (submitState == VerificationSubmitState.Uploading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
     }
@@ -91,12 +91,7 @@ fun PhotoPreviewScreen(
             confirmButton = { Button(onClick = onRetry) { Text("재시도") } },
             dismissButton = { Button(onClick = onRetakeClick) { Text("다시 촬영") } }
         )
-        is VerificationSubmitState.Success -> AlertDialog(
-            onDismissRequest = {},
-            title = { Text("업로드 완료") },
-            text = { Text("사진이 안전하게 업로드되었습니다.") },
-            confirmButton = { Button(onClick = onUploadComplete) { Text("확인") } }
-        )
+
         else -> Unit
     }
 }

@@ -37,7 +37,10 @@ import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
 
 @Composable
-fun VerificationFailureScreen() {
+fun VerificationFailureScreen(
+    failureReason: String = "사진이 챌린지 인증 조건을 충족하지 못했어요.",
+    onRetryClick: () -> Unit = {}
+) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -112,7 +115,7 @@ fun VerificationFailureScreen() {
                     Spacer(modifier = Modifier.height(11.dp))
                     //실패사유 목데이터 연결하기.
                     Text(
-                        text = "사진에서 사람을 감지할 수 없어요",
+                        text = failureReason.ifBlank { "사진이 챌린지 인증 조건을 충족하지 못했어요." },
                         color = BlackBrown,
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -172,7 +175,7 @@ fun VerificationFailureScreen() {
 
         OnulDoButton(
             text = "다시 인증하기",
-            onClick = {},
+            onClick = onRetryClick,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 42.dp)

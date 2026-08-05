@@ -26,6 +26,7 @@ import com.example.onuldo_fe.ui.theme.White
 fun VerificationStepCard(
     icon: Int,
     title: String,
+    completed: Boolean = true,
 ) {
     Surface(
         modifier = Modifier
@@ -46,11 +47,15 @@ fun VerificationStepCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Image(
-                painter = painterResource(icon),
-                contentDescription = null,
-                modifier = Modifier.size(22.dp)
-            )
+            if (completed) {
+                Image(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp)
+                )
+            } else {
+                Spacer(modifier = Modifier.size(22.dp))
+            }
 
             Spacer(modifier = Modifier.width(9.dp))
 

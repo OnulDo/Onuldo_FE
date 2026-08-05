@@ -26,7 +26,7 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 
 
 @Composable
-fun VerificationSuccessScreen() {
+fun VerificationSuccessScreen(onConfirmClick: () -> Unit = {}) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -83,7 +83,7 @@ fun VerificationSuccessScreen() {
 
         OnulDoButton(
             text = "확인",
-            onClick = {},
+            onClick = onConfirmClick,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 42.dp)

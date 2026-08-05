@@ -178,14 +178,20 @@ fun OnuldoApp() {
             )
         }
 
-        // 카메라 화면
-        composable(Routes.CAMERA) {
+        // 카메라 촬영
+        composable(
+            route = Routes.CAMERA,
+            arguments = listOf(navArgument(Routes.CAMERA_CHALLENGE_ID_ARG) { type = NavType.LongType })
+        ) { backStackEntry ->
+            val challengeId = backStackEntry.arguments
+                ?.getLong(Routes.CAMERA_CHALLENGE_ID_ARG)
+                ?: return@composable
             CameraScreen(
                 category = "시간 챌린지",
-                title = "30분 러닝",
+                title = "오늘의 챌린지 인증",
                 onPhotoCaptured = { uri ->
                     cameraViewModel.setImageUri(uri)
-                    navController.navigate(Routes.PHOTO_PREVIEW)
+                    navController.navigate(Routes.photoPreview(challengeId))
                 },
                 onCloseClick = {
                     cameraViewModel.discardPhoto()
@@ -194,61 +200,72 @@ fun OnuldoApp() {
             )
         }
 
-        //프리뷰
-        composable(Routes.PHOTO_PREVIEW) {
-
+        // 촬영 사진 확인 및 제출
+        composable(
+            route = Routes.PHOTO_PREVIEW,
+            arguments = listOf(navArgument(Routes.CAMERA_CHALLENGE_ID_ARG) { type = NavType.LongType })
+        ) { backStackEntry ->
+            val challengeId = backStackEntry.arguments
+                ?.getLong(Routes.CAMERA_CHALLENGE_ID_ARG)
+                ?: return@composable
             val imageUri by cameraViewModel.imageUri.collectAsState()
             val submitState by cameraViewModel.submitState.collectAsState()
+
+            LaunchedEffect(submitState) {
+                if (submitState == com.example.onuldo_fe.camera.VerificationSubmitState.Reviewing) {
+                    navController.navigate(Routes.VERIFICATION_REVIEWING)
+                }
+            }
+
             PhotoPreviewScreen(
                 category = "시간 챌린지",
-                title = "30분 러닝",
+                title = "오늘의 챌린지 인증",
                 imageUri = imageUri,
-
                 onCloseClick = {
                     cameraViewModel.discardPhoto()
                     navController.popBackStack()
                 },
-
                 onRetakeClick = {
                     cameraViewModel.discardPhoto()
                     navController.popBackStack()
                 },
-
-                onSubmitClick = {
-                    cameraViewModel.uploadImage()
-                },
+                onSubmitClick = { cameraViewModel.submitVerification(challengeId) },
                 submitState = submitState,
-                onRetry = cameraViewModel::uploadImage,
-                onUploadComplete = {
-                    cameraViewModel.clearSubmitState()
-                    navController.popBackStack()
-                }
+                onRetry = { cameraViewModel.submitVerification(challengeId) }
             )
         }
 
-        //검증 심사중
         composable(Routes.VERIFICATION_REVIEWING) {
-            ChallengeVerificationScreen(
-                status = VerificationStatus.REVIEWING
-            )
+            val submitState by cameraViewModel.submitState.collectAsState()
+
+            LaunchedEffect(submitState) {
+                when (submitState) {
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Success ->
+                        navController.navigate(Routes.VERIFICATION_SUCCESS) {
+                            popUpTo(Routes.VERIFICATION_REVIEWING) { inclusive = true }
+                        }
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Failure ->
+                        navController.navigate(Routes.VERIFICATION_FAIL) {
+                            popUpTo(Routes.VERIFICATION_REVIEWING) { inclusive = true }
+                        }
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Waiting ->
+                        navController.navigate(Routes.VERIFICATION_WAITING) {
+                            popUpTo(Routes.VERIFICATION_REVIEWING) { inclusive = true }
+                        }
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Error ->
+                        navController.popBackStack()
+                    else -> Unit
+                }
+            }
+
+            ChallengeVerificationScreen(status = VerificationStatus.REVIEWING)
         }
 
         composable(Routes.VERIFICATION_SUCCESS) {
             ChallengeVerificationScreen(
-                status = VerificationStatus.SUCCESS
-            )
-        }
-
-        composable(Routes.VERIFICATION_FAIL) {
-            ChallengeVerificationScreen(
-                status = VerificationStatus.FAILURE
-            )
-        }
-
-        composable(Routes.VERIFICATION_WAITING) {
-            ChallengeVerificationScreen(
-                status = VerificationStatus.WAITING,
+                status = VerificationStatus.SUCCESS,
                 onConfirmClick = {
+                    cameraViewModel.clearSubmitState()
                     navController.navigate(Routes.MAIN) {
                         popUpTo(Routes.MAIN) { inclusive = true }
                     }
@@ -256,7 +273,33 @@ fun OnuldoApp() {
             )
         }
 
+        composable(Routes.VERIFICATION_FAIL) {
+            val state by cameraViewModel.submitState.collectAsState()
+            ChallengeVerificationScreen(
+                status = VerificationStatus.FAILURE,
+                failureReason = (state as? com.example.onuldo_fe.camera.VerificationSubmitState.Failure)?.message.orEmpty(),
+                onRetryClick = {
+                    cameraViewModel.activeChallengeId?.let { challengeId ->
+                        cameraViewModel.clearSubmitState()
+                        navController.navigate(Routes.camera(challengeId)) {
+                            popUpTo(Routes.VERIFICATION_FAIL) { inclusive = true }
+                        }
+                    }
+                }
+            )
+        }
 
+        composable(Routes.VERIFICATION_WAITING) {
+            ChallengeVerificationScreen(
+                status = VerificationStatus.WAITING,
+                onConfirmClick = {
+                    cameraViewModel.clearSubmitState()
+                    navController.navigate(Routes.MAIN) {
+                        popUpTo(Routes.MAIN) { inclusive = true }
+                    }
+                }
+            )
+        }
 
         // --- 챌린지 상세 흐름 (챌린지 탭 위 풀스크린): 상세 → 참여 → 시작 완료 ---
         // 상세는 challengeId를 받아 API로 조회(DetailRoute). 참여/완료는 콜백으로 연동.

@@ -73,8 +73,12 @@ object Routes {
     // 추후: PASSWORD_RESET, 알림 설정, 약관 3종 등
 
     //카메라
-    const val CAMERA = "camera"
-    const val PHOTO_PREVIEW = "photo_preview"
+    const val CAMERA_CHALLENGE_ID_ARG = "challengeId"
+    const val CAMERA = "camera/{$CAMERA_CHALLENGE_ID_ARG}"
+    fun camera(challengeId: Long) = "camera/$challengeId"
+
+    const val PHOTO_PREVIEW = "photo_preview/{$CAMERA_CHALLENGE_ID_ARG}"
+    fun photoPreview(challengeId: Long) = "photo_preview/$challengeId"
 
     //검증
     const val VERIFICATION_REVIEWING = "verification_reviewing"
