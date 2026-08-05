@@ -74,16 +74,10 @@ fun HomeRoute(
     }
 
     DisposableEffect(lifecycleOwner) {
-        // 최초 데이터는 HomeViewModel.init에서 조회하므로 첫 RESUME은 중복 호출하지 않는다.
-        var isFirstResume = true
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                if (isFirstResume) {
-                    isFirstResume = false
-                } else {
-                    // 다른 화면이나 백그라운드에서 홈으로 돌아오면 최신 데이터를 조회한다.
-                    viewModel.refreshHome()
-                }
+            // 최초 로드가 끝난 뒤 홈으로 돌아오는 경우에만 최신 데이터를 조회한다.
+            if (event == Lifecycle.Event.ON_RESUME && viewModel.uiState.hasLoadedHome) {
+                viewModel.refreshHome()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
