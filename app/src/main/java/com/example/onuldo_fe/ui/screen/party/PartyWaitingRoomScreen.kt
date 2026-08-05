@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,19 +35,25 @@ import com.example.onuldo_fe.viewmodel.party.PartyWaitingRoomUi
 @Composable
 fun PartyWaitingRoomScreen(
     ui: PartyWaitingRoomUi,
-    availablePoint: Int = 5_000,
+    availablePoint: Int? = 5_000,
     isReadySubmitted: Boolean = false,
     onBack: () -> Unit,
     onStartClick: () -> Unit = {},
     onReadyClick: () -> Unit = {},
     onChargePoint: () -> Unit = {},
     isActionInProgress: Boolean = false,
-    errorMessage: String? = null
+    errorMessage: String? = null,
+    showPointShortageFromServer: Boolean = false,
+    onPointShortageDismiss: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
     val clipboard = LocalClipboardManager.current
     var showPointDialog by remember { mutableStateOf(false) }
     var showLeaveConfirmDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(showPointShortageFromServer) {
+        if (showPointShortageFromServer) showPointDialog = true
+    }
     // 로그인 사용자 기준 서버 판정값으로 파티장/파티원 버튼을 구분한다.
     val isLeader = ui.isHost
 
@@ -128,7 +135,7 @@ fun PartyWaitingRoomScreen(
                     when {
                         isLeader -> onStartClick()
                         // 대기 중에서 준비 상태로 바뀔 때만 보유 포인트를 검사한다.
-                        !isReadySubmitted && availablePoint < ui.deposit -> showPointDialog = true
+                        !isReadySubmitted && availablePoint != null && availablePoint < ui.deposit -> showPointDialog = true
                         else -> onReadyClick()
                     }
                 },
@@ -152,9 +159,13 @@ fun PartyWaitingRoomScreen(
         InsufficientPointDialog(
             ownedPoint = availablePoint,
             requiredPoint = ui.deposit,
-            onDismiss = { showPointDialog = false },
+            onDismiss = {
+                showPointDialog = false
+                onPointShortageDismiss()
+            },
             onCharge = {
                 showPointDialog = false
+                onPointShortageDismiss()
                 onChargePoint()
             }
         )
