@@ -26,11 +26,13 @@ object NetworkModule {
     /** 화면·Repository가 로그인 결과를 반영할 때 쓰는 토큰 저장소. */
     val tokenStore: TokenStore = InMemoryTokenStore
 
-    /** 디버그 빌드에서만 본문까지 로깅한다. 릴리스에서는 토큰이 로그에 남지 않도록 끈다. */
+    /** 디버그에서는 요청 정보만 기록하고 인증 헤더는 마스킹한다. 릴리스에서는 로깅하지 않는다. */
     private val loggingInterceptor: HttpLoggingInterceptor by lazy {
         HttpLoggingInterceptor().apply {
+            redactHeader("Authorization")
             level = if (BuildConfig.DEBUG) {
-                HttpLoggingInterceptor.Level.BODY
+                // 로그인 응답 및 토큰 재발급 요청 본문에도 토큰이 있으므로 BODY는 기록하지 않는다.
+                HttpLoggingInterceptor.Level.BASIC
             } else {
                 HttpLoggingInterceptor.Level.NONE
             }
