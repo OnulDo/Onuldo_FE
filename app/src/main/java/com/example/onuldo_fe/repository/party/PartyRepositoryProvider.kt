@@ -4,13 +4,13 @@ import com.example.onuldo_fe.data.party.api.FakePartyApi
 import com.example.onuldo_fe.data.party.api.PartyApi
 import com.example.onuldo_fe.data.party.api.RealPartyApi
 import com.example.onuldo_fe.data.party.config.PartyApiConfig
-import com.example.onuldo_fe.data.party.network.PartyNetworkClient
+import com.example.onuldo_fe.data.network.NetworkModule
 
 // 파티 Repository 구현체와 사용할 API 제공
 object PartyRepositoryProvider {
     fun provide(
         fakeApi: PartyApi = FakePartyApi(),
-        realApi: RealPartyApi = PartyNetworkClient.create(RealPartyApi::class.java),
+        realApi: RealPartyApi = NetworkModule.create(RealPartyApi::class.java),
         useRealPartyListApi: Boolean = PartyApiConfig.USE_REAL_LIST,
         useRealPartyWaitingRoomApi: Boolean = PartyApiConfig.USE_REAL_WAITING_ROOM,
         useRealPartyCreateApi: Boolean = PartyApiConfig.USE_REAL_CREATE,
