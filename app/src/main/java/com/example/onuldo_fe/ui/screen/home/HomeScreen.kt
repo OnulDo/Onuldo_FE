@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.runBlocking
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.data.home.api.FakeHomeApi
 import com.example.onuldo_fe.data.home.dummy.FakeHomeScenario
@@ -62,7 +64,18 @@ fun HomeScreen(
             .statusBarsPadding()
     ) {
         // 홈 API 상태에 따라 기본 홈과 빈 홈 분기
-        if (uiState.hasHomeContent) {
+        if (uiState.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = Persimmon
+            )
+        } else if (uiState.errorMessage != null) {
+            Text(
+                text = uiState.errorMessage,
+                modifier = Modifier.align(Alignment.Center),
+                color = BlackBrown
+            )
+        } else if (uiState.hasHomeContent) {
             HomeContent(
                 uiState = uiState,
                 onNotificationClick = onNotificationClick,
@@ -289,5 +302,6 @@ private fun HomeScreenAllCompletedPreview() {
 @Composable
 private fun HomeScenarioPreview(scenario: FakeHomeScenario) {
     val repository = HomeRepositoryImpl(FakeHomeApi(scenario))
-    OnulDo_FETheme { HomeScreen(uiState = repository.getHome().toUiState()) }
+    val uiState = runBlocking { repository.getHome().toUiState() }
+    OnulDo_FETheme { HomeScreen(uiState = uiState) }
 }
