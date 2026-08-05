@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +70,10 @@ fun CameraScreen(
 
     var flashMode by rememberSaveable {
         mutableStateOf(ImageCapture.FLASH_MODE_OFF)
+    }
+
+    LaunchedEffect(imageCapture, flashMode) {
+        imageCapture.flashMode = flashMode
     }
 
     BoxWithConstraints(

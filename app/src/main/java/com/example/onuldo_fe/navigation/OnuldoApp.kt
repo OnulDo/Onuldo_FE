@@ -223,7 +223,10 @@ fun OnuldoApp() {
                 imageUri = imageUri,
                 onCloseClick = {
                     cameraViewModel.discardPhoto()
-                    navController.popBackStack()
+                    navController.popBackStack(
+                        route = Routes.CAMERA,
+                        inclusive = true
+                    )
                 },
                 onRetakeClick = {
                     cameraViewModel.discardPhoto()
