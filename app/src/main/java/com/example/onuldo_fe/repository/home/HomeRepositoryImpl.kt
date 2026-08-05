@@ -185,9 +185,9 @@ private fun RealHomeDailyChallengeDto.toPartyModel(
 ): HomePartyChallenge {
     val deadline = timeEnd.toLocalTimeOrNull()
     return HomePartyChallenge(
-        // /daily 응답에는 파티명이 없으므로 챌린지명을 기본 제목으로 사용한다.
-        title = feed?.name ?: partyName?.takeIf(String::isNotBlank) ?: challengeName,
-        subtitle = if (feed != null || !partyName.isNullOrBlank()) challengeName else "",
+        // /daily의 파티명이 없으면 빈 값으로 보임
+        title = partyName.orEmpty(),
+        subtitle = challengeName,
         remainingDays = endDate.remainingDaysFrom(now.toLocalDate()),
         deadlineAt = deadline,
         // 파티별 인원 및 멤버 목록은 /daily 응답에 없으므로 임의 생성하지 않는다.
