@@ -5,7 +5,8 @@ enum class PartyJoinError {
     Invalid,                                   // 존재하지 않거나 형식이 잘못된 코드
     AlreadyStarted,                            // 이미 시작되어 참여할 수 없는 파티
     Full,                                      // 모집 최대 인원에 도달한 파티
-    Expired                                    // 해체 등으로 초대코드가 만료된 파티
+    Expired,                                   // 해체 등으로 초대코드가 만료된 파티
+    Unknown                                    // 아직 분류되지 않은 서버 정책 오류
 }
 
 // 초대코드 파티 참여 요청의 성공 또는 정책 오류 결과
