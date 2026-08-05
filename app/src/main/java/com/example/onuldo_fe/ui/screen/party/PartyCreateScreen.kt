@@ -6,6 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +43,8 @@ fun PartyCreateScreen(
     onChargePoint: () -> Unit = {},
     isSubmitting: Boolean = false,
     errorMessage: String? = null,
+    showPointShortageFromServer: Boolean = false,
+    onPointShortageDismiss: () -> Unit = {},
     selectedChallengeCategoryLabel: String? = null
 ) {
     val spacing = LocalSpacing.current
@@ -51,6 +54,10 @@ fun PartyCreateScreen(
     var selectedDeposit by remember(selectedChallenge?.id) { mutableIntStateOf(-1) }
     var showPointDialog by remember { mutableStateOf(false) }
     var isPartyNameError by remember { mutableStateOf(false) }
+
+    LaunchedEffect(showPointShortageFromServer) {
+        if (showPointShortageFromServer) showPointDialog = true
+    }
     // 단어 사이 공백은 허용하고, 앞뒤 공백은 아래 정규화 과정에서 제거한다.
     val partyNamePattern = remember { Regex("^[가-힣A-Za-z0-9 ]{2,20}$") }
     val normalizedPartyName = remember(partyName) {
@@ -164,9 +171,13 @@ fun PartyCreateScreen(
         InsufficientPointDialog(
             ownedPoint = availablePoint,
             requiredPoint = deposits[selectedDeposit],
-            onDismiss = { showPointDialog = false },
+            onDismiss = {
+                showPointDialog = false
+                onPointShortageDismiss()
+            },
             onCharge = {
                 showPointDialog = false
+                onPointShortageDismiss()
                 onChargePoint()
             }
         )

@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,12 +42,18 @@ fun PartyWaitingRoomScreen(
     onReadyClick: () -> Unit = {},
     onChargePoint: () -> Unit = {},
     isActionInProgress: Boolean = false,
-    errorMessage: String? = null
+    errorMessage: String? = null,
+    showPointShortageFromServer: Boolean = false,
+    onPointShortageDismiss: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
     val clipboard = LocalClipboardManager.current
     var showPointDialog by remember { mutableStateOf(false) }
     var showLeaveConfirmDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(showPointShortageFromServer) {
+        if (showPointShortageFromServer) showPointDialog = true
+    }
     // 로그인 사용자 기준 서버 판정값으로 파티장/파티원 버튼을 구분한다.
     val isLeader = ui.isHost
 
@@ -152,9 +159,13 @@ fun PartyWaitingRoomScreen(
         InsufficientPointDialog(
             ownedPoint = availablePoint,
             requiredPoint = ui.deposit,
-            onDismiss = { showPointDialog = false },
+            onDismiss = {
+                showPointDialog = false
+                onPointShortageDismiss()
+            },
             onCharge = {
                 showPointDialog = false
+                onPointShortageDismiss()
                 onChargePoint()
             }
         )

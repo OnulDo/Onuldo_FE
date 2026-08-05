@@ -14,11 +14,15 @@ import com.example.onuldo_fe.model.party.PartySummary
 import com.example.onuldo_fe.model.party.PartyWaitingRoom
 import com.example.onuldo_fe.repository.party.PartyRepository
 import com.example.onuldo_fe.repository.party.PartyRepositoryProvider
+import com.example.onuldo_fe.repository.user.UserRepository
+import com.example.onuldo_fe.repository.user.UserRepositoryProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.json.JSONObject
+import retrofit2.HttpException
 
 // 생성·조회·준비·시작·이탈 중 진행 중인 요청을 표시해 중복 실행 방지
 enum class PartyAction {
@@ -37,12 +41,16 @@ data class PartyUiState(
     val isReadySubmitted: Boolean = false,               // 로그인 파티원의 현재 준비 상태
     val isListLoading: Boolean = false,                  // 파티 목록을 불러오는 중인지 여부
     val action: PartyAction = PartyAction.Idle,          // 현재 진행 중인 파티 요청
-    val errorMessage: String? = null                     // API 요청 실패 시 화면에 표시할 문구
+    val errorMessage: String? = null,                    // API 요청 실패 시 화면에 표시할 문구
+    val availablePoint: Int? = null,                     // 실제 지갑 API에서 조회한 보유 포인트
+    val isCreatePointInsufficient: Boolean = false,      // 생성 요청에서 서버가 판정한 포인트 부족 여부
+    val isReadyPointInsufficient: Boolean = false        // 준비 요청에서 서버가 판정한 포인트 부족 여부
 )
 
 // 파티 생성부터 대기방 시작·이탈까지 파티의 핵심 상태 변경 관리
 class PartyViewModel(
-    private val repository: PartyRepository = PartyRepositoryProvider.provide()
+    private val repository: PartyRepository = PartyRepositoryProvider.provide(),
+    private val userRepository: UserRepository = UserRepositoryProvider.provide()
 ) : ViewModel() {
     companion object {
         private const val WAITING_ROOM_POLLING_INTERVAL_MS = 3_000L
@@ -57,12 +65,34 @@ class PartyViewModel(
     init {
         // 파티 홈 진입 시 모집 중 파티를 제외한 진행 중 파티 목록 준비
         loadParties()
+        loadAvailablePoint()
     }
 
     // 이전 요청의 오류가 다음 화면에 남지 않도록 화면 이동 전 초기화
     fun clearError() {
         uiState = uiState.copy(errorMessage = null)
     }
+
+    fun dismissCreatePointDialog() {
+        uiState = uiState.copy(isCreatePointInsufficient = false)
+    }
+
+    fun dismissReadyPointDialog() {
+        uiState = uiState.copy(isReadyPointInsufficient = false)
+    }
+
+    private fun loadAvailablePoint() {
+        viewModelScope.launch {
+            fetchAvailablePoint()?.let { point ->
+                uiState = uiState.copy(availablePoint = point.coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
+            }
+        }
+    }
+
+    /** 지갑 요약을 우선 사용하고, 조회 실패 시 마이페이지의 현재 포인트로 보완한다. */
+    private suspend fun fetchAvailablePoint(): Long? =
+        userRepository.getWalletSummary().getOrNull()?.balance
+            ?: userRepository.getMyPage().getOrNull()?.currentPoint
 
     fun loadParties() {
         // Repository의 도메인 모델을 화면 전용 카드 모델로 변환해 저장
@@ -88,8 +118,25 @@ class PartyViewModel(
         // 생성 성공과 대기방 조회를 분리해 조회 실패 시 파티를 다시 생성하지 않도록 처리
         // action이 Idle이 아니면 연속 클릭에 따른 동일 파티 중복 생성 방지
         if (uiState.action != PartyAction.Idle) return
-        uiState = uiState.copy(action = PartyAction.Creating, errorMessage = null)
+        uiState = uiState.copy(
+            action = PartyAction.Creating,
+            errorMessage = null,
+            isCreatePointInsufficient = false
+        )
         viewModelScope.launch {
+            // 생성 직전에 최신 잔액을 다시 확인해 API 오류 코드와 무관하게 부족 모달을 표시한다.
+            fetchAvailablePoint()?.let { point ->
+                val availablePoint = point.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+                uiState = uiState.copy(availablePoint = availablePoint)
+                if (availablePoint < command.deposit) {
+                    uiState = uiState.copy(
+                        action = PartyAction.Idle,
+                        isCreatePointInsufficient = true
+                    )
+                    return@launch
+                }
+            }
+
             runCatching { repository.createParty(command) }
                 .onSuccess { created ->
                     uiState = uiState.copy(
@@ -100,10 +147,12 @@ class PartyViewModel(
                     onSuccess(created.partyId)
                     loadWaitingRoom(created.partyId)
                 }
-                .onFailure {
+                .onFailure { error ->
+                    val isPointInsufficient = error.isInsufficientPartyPoint()
                     uiState = uiState.copy(
                         action = PartyAction.Idle,
-                        errorMessage = "파티를 만들지 못했어요."
+                        isCreatePointInsufficient = isPointInsufficient,
+                        errorMessage = if (isPointInsufficient) null else "파티를 만들지 못했어요."
                     )
                 }
         }
@@ -185,8 +234,28 @@ class PartyViewModel(
         // 포인트 부족 여부는 화면에서 먼저 확인하고 실제 연동 후 서버에서도 최종 검증
         val partyId = uiState.waitingRoom?.partyId ?: return
         if (uiState.action != PartyAction.Idle) return
-        uiState = uiState.copy(action = PartyAction.ReadySubmitting, errorMessage = null)
+        uiState = uiState.copy(
+            action = PartyAction.ReadySubmitting,
+            errorMessage = null,
+            isReadyPointInsufficient = false
+        )
         viewModelScope.launch {
+            // READY로 바꿀 때만 최신 잔액을 확인하고, WAITING 복귀는 포인트 검사 없이 요청한다.
+            if (!uiState.isReadySubmitted) {
+                fetchAvailablePoint()?.let { point ->
+                    val availablePoint = point.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+                    uiState = uiState.copy(availablePoint = availablePoint)
+                    val requiredPoint = uiState.waitingRoom?.deposit ?: return@launch
+                    if (availablePoint < requiredPoint) {
+                        uiState = uiState.copy(
+                            action = PartyAction.Idle,
+                            isReadyPointInsufficient = true
+                        )
+                        return@launch
+                    }
+                }
+            }
+
             runCatching { repository.readyParty(partyId) }
                 .onSuccess { room ->
                     // 서버의 토글 결과에 맞춰 준비하기와 대기 상태를 전환한다.
@@ -196,10 +265,12 @@ class PartyViewModel(
                         action = PartyAction.Idle
                     )
                 }
-                .onFailure {
+                .onFailure { error ->
+                    val isPointInsufficient = error.isInsufficientPartyPoint()
                     uiState = uiState.copy(
                         action = PartyAction.Idle,
-                        errorMessage = "준비완료 처리에 실패했어요."
+                        isReadyPointInsufficient = isPointInsufficient,
+                        errorMessage = if (isPointInsufficient) null else "준비완료 처리에 실패했어요."
                     )
                 }
         }
@@ -247,6 +318,18 @@ class PartyViewModel(
                 }
         }
     }
+}
+
+/** 파티 생성 실패 응답에서 서버의 포인트 부족 코드를 확인한다. */
+private fun Throwable.isInsufficientPartyPoint(): Boolean {
+    if (this !is HttpException) return false
+    val body = runCatching { response()?.errorBody()?.string() }.getOrNull().orEmpty()
+    val errorBody = runCatching { JSONObject(body) }.getOrNull()
+    val code = errorBody?.optString("code").orEmpty()
+    val message = errorBody?.optString("message").orEmpty()
+    return code.contains("INSUFFICIENT_POINT") ||
+        code == "PAR-ERR-03" ||
+        message.contains("포인트") && message.contains("부족")
 }
 
 // Repository가 전달한 도메인 대기방 모델을 Compose 화면 전용 모델로 변환

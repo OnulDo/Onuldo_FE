@@ -58,6 +58,7 @@ fun PartyRoute(
     partySettlementViewModel: PartySettlementViewModel = viewModel(),
     onBottomBarVisibilityChange: (Boolean) -> Unit = {},
     onCameraNavigate: () -> Unit = {},
+    onChargePoint: () -> Unit = {},
     onHomeNavigate: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -207,7 +208,14 @@ fun PartyRoute(
             errorMessage = partyState.errorMessage,
             // fake 포인트 부족 테스트 시 PartyTestConfig.AVAILABLE_POINT를 5_000으로 변경
             // Real 생성에서는 서버가 보유 포인트를 최종 검증하므로 Fake 포인트로 요청을 막지 않는다.
-            availablePoint = if (PartyApiConfig.USE_REAL_CREATE) Int.MAX_VALUE else PartyTestConfig.AVAILABLE_POINT,
+            availablePoint = if (PartyApiConfig.USE_REAL_CREATE) {
+                partyState.availablePoint ?: Int.MAX_VALUE
+            } else {
+                PartyTestConfig.AVAILABLE_POINT
+            },
+            showPointShortageFromServer = partyState.isCreatePointInsufficient,
+            onPointShortageDismiss = partyViewModel::dismissCreatePointDialog,
+            onChargePoint = onChargePoint,
             onCreate = { period, deposit ->
                 // 필수 선택값이 모두 준비된 경우에만 ViewModel에 생성 명령 전달
                 val challenge = selectedChallenge ?: return@PartyCreateScreen
@@ -274,10 +282,17 @@ fun PartyRoute(
                 PartyWaitingRoomScreen(
                     ui = waitingRoom,
                     // Real 준비 완료에서는 서버가 포인트를 검증하므로 Fake 포인트로 요청을 막지 않는다.
-                    availablePoint = if (PartyApiConfig.USE_REAL_READY) Int.MAX_VALUE else PartyTestConfig.AVAILABLE_POINT,
+                    availablePoint = if (PartyApiConfig.USE_REAL_READY) {
+                        partyState.availablePoint ?: Int.MAX_VALUE
+                    } else {
+                        PartyTestConfig.AVAILABLE_POINT
+                    },
                     isReadySubmitted = partyState.isReadySubmitted,
                     isActionInProgress = partyState.action != PartyAction.Idle,
                     errorMessage = partyState.errorMessage,
+                    showPointShortageFromServer = partyState.isReadyPointInsufficient,
+                    onPointShortageDismiss = partyViewModel::dismissReadyPointDialog,
+                    onChargePoint = onChargePoint,
                     onBack = {
                         // 뒤로가기도 파티 탈퇴 요청으로 처리하고 성공 시에만 목록으로 이동
                         partyViewModel.leaveParty { screen = PartyScreen.List }
