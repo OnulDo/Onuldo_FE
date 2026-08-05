@@ -7,6 +7,7 @@ import com.example.onuldo_fe.data.challenge.dto.DailyCompletedResultDto
 import com.example.onuldo_fe.data.party.dto.PartyFeedDto
 import com.example.onuldo_fe.data.party.dto.PartyFeedItemDto
 import com.example.onuldo_fe.model.home.ChallengeStatus
+import com.example.onuldo_fe.model.home.HomeCompletedChallenge
 import java.time.LocalDateTime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -89,7 +90,14 @@ class HomeRepositoryImplTest {
             verifiedMemberCount = 1,
             totalMemberCount = 2,
             members = listOf(
-                PartyFeedItemDto(1, "오늘두", "https://cdn/profile.png", true, null, null)
+                PartyFeedItemDto(
+                    userId = 1,
+                    nickname = "오늘두",
+                    profileImageUrl = "https://cdn/profile.png",
+                    isVerifiedToday = true,
+                    verificationPhotoUrl = null,
+                    verifiedAt = null
+                )
             )
         )
 
@@ -108,8 +116,8 @@ class HomeRepositoryImplTest {
     @Test
     fun `오늘 완료 목록을 개인과 파티 완료 카드로 변환한다`() {
         val completed = DailyCompletedResultDto(
-            parties = listOf(DailyCompletedPartyDto(10, "갓생팟", 12, "2026-08-05T06:30:00", 3, 2)),
-            challenges = listOf(DailyCompletedChallengeDto(1, 12, "매일 걷기", "2026-08-05T07:10:00", 8))
+            parties = listOf(DailyCompletedPartyDto(10, "갓생팟", 12, "2026-08-05T07:10:00", 3, 2)),
+            challenges = listOf(DailyCompletedChallengeDto(1, 12, "매일 걷기", "2026-08-05T06:30:00", 8))
         )
 
         val result = emptyList<RealHomeDailyChallengeDto>()
@@ -118,6 +126,9 @@ class HomeRepositoryImplTest {
         assertEquals(2, result.completedChallenges.size)
         assertEquals("06:30", result.completedChallenges.first().time)
         assertEquals("07:10", result.completedChallenges.last().time)
+        val completedParty = result.completedChallenges.filterIsInstance<HomeCompletedChallenge.Party>().single()
+        assertEquals(2, completedParty.completedMemberCount)
+        assertEquals(3, completedParty.totalMemberCount)
     }
 
     private fun dailyItem(

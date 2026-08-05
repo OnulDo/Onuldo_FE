@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.repository.home
 
+import android.util.Log
 import com.example.onuldo_fe.data.home.api.HomeApi
 import com.example.onuldo_fe.data.home.api.RealHomeApi
 import com.example.onuldo_fe.data.home.dto.HomeChallengeDto
@@ -83,6 +84,7 @@ class HomeRepositoryImpl(
     } catch (error: CancellationException) {
         throw error
     } catch (error: Exception) {
+        Log.w(TAG, "홈 프로필 조회 실패", error)
         HomeProfile()
     }
 
@@ -97,6 +99,7 @@ class HomeRepositoryImpl(
     } catch (error: CancellationException) {
         throw error
     } catch (error: Exception) {
+        Log.w(TAG, "오늘 완료 챌린지 조회 실패", error)
         DailyCompletedResultDto()
     }
 
@@ -117,6 +120,7 @@ class HomeRepositoryImpl(
                     } catch (error: CancellationException) {
                         throw error
                     } catch (error: Exception) {
+                        Log.w(TAG, "파티 피드 조회 실패: partyId=$partyId", error)
                         null
                     }
                 }
@@ -125,6 +129,10 @@ class HomeRepositoryImpl(
             .awaitAll()
             .filterNotNull()
             .associateBy(PartyFeedDto::partyId)
+    }
+
+    private companion object {
+        const val TAG = "HomeRepository"
     }
 }
 
@@ -185,12 +193,12 @@ private fun RealHomeDailyChallengeDto.toPartyModel(
 ): HomePartyChallenge {
     val deadline = timeEnd.toLocalTimeOrNull()
     return HomePartyChallenge(
-        // /daily의 파티명이 없으면 빈 값으로 보임
+        // /daily의 partyName만 사용해 서버 응답 누락을 화면에서 확인할 수 있게 한다.
         title = partyName.orEmpty(),
         subtitle = challengeName,
         remainingDays = endDate.remainingDaysFrom(now.toLocalDate()),
         deadlineAt = deadline,
-        // 파티별 인원 및 멤버 목록은 /daily 응답에 없으므로 임의 생성하지 않는다.
+        // 파티별 인증 인원과 멤버 목록은 partyId로 조회한 파티 피드 응답을 사용한다.
         completedMemberCount = feed?.verifiedMemberCount ?: 0,
         totalMemberCount = feed?.totalMemberCount ?: 0,
         status = toChallengeStatus(now.toLocalTime()),
@@ -209,20 +217,21 @@ private fun RealHomeDailyChallengeDto.toPartyModel(
 }
 
 private fun DailyCompletedResultDto.toHomeCompletedChallenges(): List<HomeCompletedChallenge> =
-    parties.map {
-        HomeCompletedChallenge.Party(
+    (parties.map {
+        it.verifiedAt to HomeCompletedChallenge.Party(
             time = it.verifiedAt.toHomeTimeText(),
             title = it.partyName,
             completedMemberCount = it.verifiedMemberCount,
             totalMemberCount = it.totalMemberCount
         )
     } + challenges.map {
-        HomeCompletedChallenge.Personal(
+        it.verifiedAt to HomeCompletedChallenge.Personal(
             time = it.verifiedAt.toHomeTimeText(),
             title = it.challengeName,
             streakDays = it.streakDays
         )
-    }
+    }).sortedBy { (verifiedAt, _) -> verifiedAt }
+        .map { (_, challenge) -> challenge }
 
 private fun String.toHomeTimeText(): String =
     runCatching { LocalDateTime.parse(this).toLocalTime().toString().take(5) }
