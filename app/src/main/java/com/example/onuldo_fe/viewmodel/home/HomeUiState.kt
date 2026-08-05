@@ -17,6 +17,7 @@ data class HomeUiState(
     val challenges: List<HomeChallenge> = emptyList(),
     val completedChallenges: List<HomeCompletedChallenge> = emptyList(),
     val settlementBanner: SettlementBanner? = null,
+    val hasLoadedHome: Boolean = false,
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val errorMessage: String? = null

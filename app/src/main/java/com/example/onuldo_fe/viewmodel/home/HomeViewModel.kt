@@ -26,7 +26,7 @@ class HomeViewModel(
     init { loadHome() }
 
     fun loadHome() {
-        requestHome(showFullScreenLoading = !uiState.hasHomeContent)
+        requestHome(showFullScreenLoading = !uiState.hasLoadedHome)
     }
 
     fun refreshHome() {
@@ -35,12 +35,14 @@ class HomeViewModel(
 
     private fun requestHome(showFullScreenLoading: Boolean) {
         val generation = ++loadGeneration
+        // 최초 성공 전에는 refresh 요청도 빈 화면을 노출하지 않고 전체 로딩으로 처리한다.
+        val shouldShowFullScreenLoading = showFullScreenLoading || !uiState.hasLoadedHome
         // 이전 조회를 취소해 최신 요청만 유지한다.
         loadJob?.cancel()
         // 새로고침은 기존 화면을 유지하고 상단 인디케이터만 표시한다.
         uiState = uiState.copy(
-            isLoading = showFullScreenLoading,
-            isRefreshing = !showFullScreenLoading,
+            isLoading = shouldShowFullScreenLoading,
+            isRefreshing = !shouldShowFullScreenLoading,
             errorMessage = null
         )
         loadJob = (coroutineScope ?: viewModelScope).launch {
@@ -51,9 +53,13 @@ class HomeViewModel(
                 if (generation != loadGeneration) return@launch
                 val settlementPartyId = loadedState.settlementBanner?.partyId
                 uiState = if (settlementPartyId in confirmedSettlementPartyIds) {
-                    loadedState.copy(settlementBanner = null, isRefreshing = false)
+                    loadedState.copy(
+                        settlementBanner = null,
+                        hasLoadedHome = true,
+                        isRefreshing = false
+                    )
                 } else {
-                    loadedState.copy(isRefreshing = false)
+                    loadedState.copy(hasLoadedHome = true, isRefreshing = false)
                 }
             } catch (error: CancellationException) {
                 // 코루틴 취소는 오류 화면으로 처리하지 않는다.
@@ -64,7 +70,7 @@ class HomeViewModel(
                     isLoading = false,
                     isRefreshing = false,
                     // 기존 데이터가 있으면 새로고침 실패로 화면 전체를 가리지 않는다.
-                    errorMessage = "홈 정보를 불러오지 못했어요.".takeUnless { uiState.hasHomeContent }
+                    errorMessage = "홈 정보를 불러오지 못했어요.".takeUnless { uiState.hasLoadedHome }
                 )
             }
         }
