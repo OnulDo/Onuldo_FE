@@ -8,13 +8,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,9 +38,11 @@ import com.example.onuldo_fe.model.home.notification.NotificationType
 import com.example.onuldo_fe.repository.notification.NotificationRepositoryImpl
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -49,11 +53,16 @@ import com.example.onuldo_fe.viewmodel.notification.toUiState
 
 // 알림 종류별 아이콘 매핑 — API 연동 후에도 UI에서만 관리
 private fun NotificationType.iconRes(): Int = when (this) {
-    NotificationType.Deadline -> R.drawable.notification_deadline_icon
-    NotificationType.VerificationSuccess -> R.drawable.verification_check_icon
-    NotificationType.ChallengeStart -> R.drawable.notification_challenge_icon
-    NotificationType.Refund -> R.drawable.verification_check_icon
-    NotificationType.VerificationFail -> R.drawable.notification_fail_icon
+    NotificationType.DeadlineReminder -> R.drawable.notification_deadline_icon
+    NotificationType.DeadlineWarning -> R.drawable.notification_alert_icon
+    NotificationType.ReviewPassed -> R.drawable.verification_check_icon
+    NotificationType.ReviewRejected -> R.drawable.notification_fail_icon
+    NotificationType.PartyMemberVerified -> R.drawable.notification_party_icon
+    NotificationType.ChallengeStart -> R.drawable.notification_start_icon
+    NotificationType.ChallengeEndReminder -> R.drawable.notification_deadline_icon
+    NotificationType.SoloRefund -> R.drawable.verification_check_icon
+    NotificationType.PartySettlement -> R.drawable.verification_check_icon
+    NotificationType.PartyDailySettlement -> R.drawable.ic_email_badge
 }
 
 // 알림 화면 — 알림 목록
@@ -63,6 +72,7 @@ fun NotificationScreen(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit = {}
 ) {
+    val spacing = LocalSpacing.current
     val notifications = uiState.notifications
     Column(
         modifier = modifier
@@ -100,8 +110,13 @@ fun NotificationScreen(
             // 알림 리스트
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                contentPadding = PaddingValues(
+                    start = spacing.spacing20,
+                    end = spacing.spacing20,
+                    top = spacing.spacing8,
+                    bottom = spacing.spacing20
+                ),
+                verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
             ) {
                 items(notifications) { item ->
                     NotificationItemCard(item)
@@ -137,67 +152,70 @@ private fun ColumnScope.NotificationEmpty() {
     }
 }
 
-// 알림 카드
+// 알림 카드 — 내용(사유 등)에 따라 높이가 늘어남 (기본 76dp, 2줄이면 커짐)
 @Composable
 private fun NotificationItemCard(item: NotificationItem) {
-    Box(
+    val spacing = LocalSpacing.current
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(76.dp)
+            .heightIn(min = 76.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(White)
             .border(1.dp, DarkBrown40, RoundedCornerShape(14.dp))
+            .padding(horizontal = spacing.spacing16, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        //아이콘
+        // 아이콘
         Image(
             painter = painterResource(item.type.iconRes()),
             contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 16.dp)
-                .size(30.dp)
+            modifier = Modifier.size(30.dp)
         )
 
-        // 제목
-        Text(
-            text = item.title,
-            modifier = Modifier.padding(start = 58.dp, end = 16.dp, top = 14.dp),
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp,
-            lineHeight = 13.sp,
-            color = BlackBrown,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        Spacer(Modifier.width(spacing.spacing12))
 
-        // 내용
-        Text(
-            text = item.content,
-            modifier = Modifier.padding(start = 58.dp, end = 16.dp, top = 34.dp),
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Normal,
-            fontSize = 11.sp,
-            lineHeight = 11.sp,
-            color = DarkBrown70,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            // 제목
+            Text(
+                text = item.title,
+                fontFamily = Pretendard,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                lineHeight = 12.sp,
+                color = BlackBrown,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
 
-        // 시간
-        Text(
-            text = item.time,
-            modifier = Modifier.padding(start = 58.dp, top = 54.dp),
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Normal,
-            fontSize = 10.sp,
-            lineHeight = 10.sp,
-            color = DarkBrown50
-        )
+            Spacer(Modifier.height(8.dp))
+
+            // 내용 — 받은 내용 그대로 출력 (\n 포함, 줄 수 제한 없음)
+            Text(
+                text = item.content,
+                fontFamily = Pretendard,
+                fontWeight = FontWeight.Normal,
+                fontSize = 10.sp,
+                lineHeight = 14.sp,
+                color = DarkBrown
+            )
+
+            Spacer(Modifier.height(6.dp))
+
+            // 시간 (상대 시각 — createdAt을 RelativeTime이 변환)
+            Text(
+                text = item.timeLabel,
+                fontFamily = Pretendard,
+                fontWeight = FontWeight.Normal,
+                fontSize = 10.sp,
+                lineHeight = 10.sp,
+                color = DarkBrown50
+            )
+        }
     }
 }
 
-@Preview(name = "Notification With Content", showBackground = true, widthDp = 390, heightDp = 844)
+@Preview(name = "Notification With Content", showBackground = true, widthDp = 390, heightDp = 1150)
 @Composable
 private fun NotificationScreenPreview() {
     OnulDo_FETheme {
