@@ -7,6 +7,7 @@ import com.example.onuldo_fe.data.home.dto.HomeCompletedChallengeDto
 import com.example.onuldo_fe.data.home.dto.HomePartyChallengeDto
 import com.example.onuldo_fe.data.home.dto.HomeResponseDto
 import com.example.onuldo_fe.data.home.dto.RealHomeDailyChallengeDto
+import com.example.onuldo_fe.data.user.api.UserApi
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomeChallenge
 import com.example.onuldo_fe.model.home.HomeCompletedChallenge
@@ -20,11 +21,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import retrofit2.HttpException
 
 class HomeRepositoryImpl(
     private val fakeApi: HomeApi,
     private val realApi: RealHomeApi? = null,
+    private val userApi: UserApi? = null,
     private val useRealDailyApi: Boolean = false,
     private val nowProvider: () -> LocalDateTime = LocalDateTime::now
 ) : HomeRepository {
@@ -32,13 +37,36 @@ class HomeRepositoryImpl(
         // 설정값이 false면 기존 Fake 홈을 사용한다.
         if (!useRealDailyApi) return fakeApi.getHome().toModel()
 
-        // 설정값이 true면 오늘 챌린지 API를 호출한다.
-        val response = requireNotNull(realApi) { "Real 홈 API가 설정되지 않았습니다." }
-            .getDailyChallenges()
-        if (!response.isSuccessful) throw HttpException(response)
-        val body = response.body() ?: throw IOException("오늘 챌린지 응답 본문이 비어 있습니다.")
+        return coroutineScope {
+            // 서로 독립적인 오늘 챌린지와 프로필을 동시에 조회한다.
+            val dailyDeferred = async {
+                requireNotNull(realApi) { "Real 홈 API가 설정되지 않았습니다." }
+                    .getDailyChallenges()
+            }
+            val nicknameDeferred = async { getNicknameOrEmpty() }
 
-        return body.result.challenges.toHomeData(nowProvider())
+            val response = dailyDeferred.await()
+            if (!response.isSuccessful) throw HttpException(response)
+            val body = response.body() ?: throw IOException("오늘 챌린지 응답 본문이 비어 있습니다.")
+
+            body.result.challenges
+                .toHomeData(nowProvider())
+                .copy(userName = nicknameDeferred.await())
+        }
+    }
+
+    /** 프로필 실패는 홈 전체 오류로 처리하지 않고 닉네임만 비운다. */
+    private suspend fun getNicknameOrEmpty(): String = try {
+        val response = userApi?.getProfile()
+        if (response?.isSuccessful == true) {
+            response.body()?.result?.nickname.orEmpty()
+        } else {
+            ""
+        }
+    } catch (error: CancellationException) {
+        throw error
+    } catch (error: Exception) {
+        ""
     }
 }
 
