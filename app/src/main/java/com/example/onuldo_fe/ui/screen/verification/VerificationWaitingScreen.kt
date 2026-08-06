@@ -31,6 +31,8 @@ import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.ui.theme.Persimmon10
+import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.White
 
@@ -82,9 +84,9 @@ fun VerificationWaitingScreen(
             )
 
             Text(
-                text = "AI가 1차로 사진을 살펴본 뒤\n운영팀에서 직접 확인하고 있어요.",
+                text = "AI가 판단하기 어려운 사진이라\n운영팀에서 직접 확인하고 있어요.",
                 color = DarkBrown70,
-                fontSize = 13.sp,
+                style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.padding(top = 8.dp),
                 textAlign = TextAlign.Center
             )
@@ -94,7 +96,11 @@ fun VerificationWaitingScreen(
                     .fillMaxWidth()
                     .padding(top = 61.dp),
                 shape = RoundedCornerShape(size = 14.dp),
-                color = Red2
+                color = Persimmon10,
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = Persimmon20
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(15.dp)
@@ -113,29 +119,28 @@ fun VerificationWaitingScreen(
                     Text(
                         text = "검토는 최대 24시간 이내 완료됩니다.",
                         color = DarkBrown,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(bottom = 9.dp)
                     )
 
                     Text(
                         text = "검토 중에도 챌린지는 계속 진행됩니다.",
                         color = DarkBrown,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(bottom = 9.dp)
                     )
 
                     Text(
                         text = "결과는 알림으로 즉시 안내드려요.",
                         color = DarkBrown,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(bottom = 9.dp)
                     )
 
                     Text(
                         text = "검토 통과 시 인증 완료 처리됩니다.",
                         color = DarkBrown,
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(bottom = 14.dp)
+                        style = MaterialTheme.typography.labelSmall,
                     )
                 }
             }
@@ -159,9 +164,9 @@ fun VerificationWaitingScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "제출 시간",
+                            text = "제출 시각",
                             color = DarkBrown,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.titleSmall
                         )
 
                         Spacer(modifier = Modifier.weight(1f))
@@ -169,7 +174,7 @@ fun VerificationWaitingScreen(
                         Text(
                             text = "2026년 5월 20일 07:32",
                             color = BlackBrown,
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.bodySmall,
                         )
                     }
                 }
