@@ -97,6 +97,17 @@ fun HomeRoute(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            // 최초 로드가 끝난 뒤 홈으로 돌아오는 경우에만 최신 데이터를 조회한다.
+            if (event == Lifecycle.Event.ON_RESUME && viewModel.uiState.hasLoadedHome) {
+                viewModel.refreshHome()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     if (showNotification) {
         BackHandler { showNotification = false }
         NotificationRoute(onBackClick = { showNotification = false })
@@ -111,6 +122,7 @@ fun HomeRoute(
             },
             onBrowseChallengesClick = onBrowseChallengesClick,
             onVerifyClick = ::handleVerifyClick,
+            onRefresh = viewModel::refreshHome,
             scrollToTopKey = refreshKey
         )
     }
