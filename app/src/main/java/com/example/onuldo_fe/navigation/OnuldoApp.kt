@@ -306,7 +306,9 @@ fun OnuldoApp() {
                     cameraViewModel.discardPhoto()
                     navController.popBackStack()
                 },
-                onSubmitClick = { cameraViewModel.submitVerification(challengeId) },
+                onSubmitClick = {
+                    cameraViewModel.submitVerification(challengeId, category, title)
+                },
                 submitState = submitState,
                 onErrorConfirm = cameraViewModel::clearSubmitState
             )
@@ -370,9 +372,13 @@ fun OnuldoApp() {
                 },
                 onRetryClick = {
                     cameraViewModel.activeChallengeId?.let { challengeId ->
+                        val category = cameraViewModel.activeCategory
+                            .ifBlank { "시간 챌린지" }
+                        val title = cameraViewModel.activeTitle
+                            .ifBlank { "오늘의 챌린지 인증" }
                         cameraViewModel.clearSubmitState()
-                        navController.navigate(Routes.camera(challengeId)) {
-                            popUpTo(Routes.VERIFICATION_FAIL) { inclusive = true }
+                        navController.navigate(Routes.camera(challengeId, category, title)) {
+                            popUpTo(Routes.CAMERA) { inclusive = true }
                         }
                     }
                 }

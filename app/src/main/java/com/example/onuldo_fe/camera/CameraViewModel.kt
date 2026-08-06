@@ -34,6 +34,10 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     private var uploadedFileId: String? = null
     var activeChallengeId: Long? = null
         private set
+    var activeCategory: String = ""
+        private set
+    var activeTitle: String = ""
+        private set
 
     fun setImageUri(uri: Uri?) {
         if (_imageUri.value != uri) deleteLocalPhoto()
@@ -42,7 +46,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         _submitState.value = VerificationSubmitState.Idle
     }
 
-    fun submitVerification(challengeId: Long) {
+    fun submitVerification(challengeId: Long, category: String, title: String) {
         if (challengeId <= 0L) {
             _submitState.value = VerificationSubmitState.Error("챌린지 정보를 확인할 수 없습니다.")
             return
@@ -52,6 +56,8 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         ) return
 
         activeChallengeId = challengeId
+        activeCategory = category
+        activeTitle = title
         val uri = _imageUri.value ?: run {
             _submitState.value = VerificationSubmitState.Error(
                 "제출할 사진이 없습니다. 다시 촬영해 주세요."
