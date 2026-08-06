@@ -27,8 +27,8 @@ fun GalleryRoute(
     val lifecycleOwner = LocalLifecycleOwner.current
     val uiState = viewModel.uiState
 
-    // 최초 로드가 끝난 뒤 이 화면으로 되돌아오면, 표시 없이 조용히 최신 목록으로 갱신한다.
-    // (당겨서 새로고침만 인디케이터를 보여주고, 복귀 자동 재조회는 사용자에게 티나지 않게 한다.)
+    // 최초 로드가 끝난 뒤 이 화면으로 되돌아오면, 로딩/새로고침 표시 없이 조용히 최신 목록으로 갱신한다.
+    // (당겨서 새로고침만 상단 인디케이터를 보여주고, 복귀 자동 재조회는 사용자에게 티나지 않게 한다.)
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME && viewModel.uiState.hasLoaded) {

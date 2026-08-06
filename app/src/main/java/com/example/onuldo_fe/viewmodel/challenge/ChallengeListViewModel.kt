@@ -52,7 +52,7 @@ class ChallengeListViewModel(
         uiState = uiState.copy(isError = false)
     }
 
-    // 조회 표시 방식 — FULL: 전체 화면 로딩, REFRESH: 당겨서 새로고침(상단 인디케이터), SILENT: 표시 없이 데이터만 갱신
+    // 조회 표시 방식 — FULL: 전체 화면 로딩, REFRESH: 상단 인디케이터, SILENT: 표시 없이 데이터만 갱신
     private enum class LoadMode { FULL, REFRESH, SILENT }
 
     // 당겨서 새로고침(pull-to-refresh) — 상단 인디케이터를 표시하며 재조회
@@ -62,7 +62,7 @@ class ChallengeListViewModel(
         scheduleLoad(debounceMs = 0, mode = LoadMode.REFRESH)
     }
 
-    // 화면 복귀(ON_RESUME)용 조용한 재조회 — 로딩/새로고침 표시 없이 기존 목록을 최신으로 교체만
+    // 화면 복귀(ON_RESUME)용 조용한 재조회 — 로딩/새로고침 표시 없이 기존 목록을 최신으로 교체만 한다.
     // 예외) 이미 조회 중이면 무시한다.
     fun silentRefresh() {
         if (uiState.isLoading || uiState.isRefreshing) return
@@ -87,7 +87,7 @@ class ChallengeListViewModel(
         // 당겨서 새로고침 인디케이터 최소 표시 시간 측정용
         val refreshStartTime = if (mode == LoadMode.REFRESH) System.currentTimeMillis() else 0L
 
-        // 표시 상태 설정: FULL=전체 로딩, REFRESH=상단 인디케이터, SILENT=아무 표시 없음
+        // 표시 상태 설정: FULL=전체 로딩, REFRESH=상단 인디케이터, SILENT=아무 표시 없음(기존 목록 유지)
         uiState = when (mode) {
             LoadMode.FULL -> uiState.copy(isLoading = true, isError = false)
             LoadMode.REFRESH -> uiState.copy(isRefreshing = true, isError = false)
