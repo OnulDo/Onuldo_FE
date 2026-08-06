@@ -72,12 +72,14 @@ fun OnuldoTextField(
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             // Figma input 텍스트/placeholder = 14px Regular.
-            textStyle = MaterialTheme.typography.bodyMedium,
+            // typography.bodyMedium은 Bold라 여기서 굵기만 내린다
+            // (공용 스타일을 바꾸면 다른 화면까지 영향을 준다).
+            textStyle = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
             placeholder = {
                 Text(
                     placeholder,
                     color = DarkBrown40,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
                 )
             },
             singleLine = true,

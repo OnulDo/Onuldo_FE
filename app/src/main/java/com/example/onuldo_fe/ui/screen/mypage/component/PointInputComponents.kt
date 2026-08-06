@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,9 +20,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.onuldo_fe.ui.screen.mypage.MyLine
+import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.screen.mypage.MySubText
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
@@ -69,20 +69,28 @@ fun AmountInputBox(
     }
 }
 
-/** 금액 프리셋 칩 — 선택 시 Persimmon 채움, 아니면 흰 배경 + 연한 테두리. */
+/**
+ * 금액 프리셋 칩.
+ *
+ * 충전은 누를 때마다 금액을 더하는 방식이라 선택 상태가 없다(Figma `5154:3439`).
+ * 출금은 금액을 지정하는 방식이라 선택 상태를 표시한다(Figma `5154:3517`).
+ */
 @Composable
 fun AmountChip(
     text: String,
-    selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    selected: Boolean = false,
 ) {
     Box(
         modifier = modifier
             .height(44.dp)
-            .clip(RoundedCornerShape(22.dp))
+            .clip(RoundedCornerShape(14.dp))
             .background(if (selected) Persimmon else White)
-            .then(if (selected) Modifier else Modifier.border(1.dp, MyLine, RoundedCornerShape(22.dp)))
+            .then(
+                if (selected) Modifier
+                else Modifier.border(1.dp, DarkBrown40, RoundedCornerShape(14.dp))
+            )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -96,7 +104,7 @@ fun AmountChip(
     }
 }
 
-/** 하단 고정 CTA — 상단 구분선 + Persimmon 알약 버튼. */
+/** 하단 고정 CTA. 최신 디자인에서 상단 구분선이 빠졌다. */
 @Composable
 fun PointCtaButton(
     text: String,
@@ -104,25 +112,11 @@ fun PointCtaButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        HorizontalDivider(thickness = 1.dp, color = MyLine)
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 20.dp, vertical = 12.dp)
-                .fillMaxWidth()
-                .height(56.dp)
-                .clip(RoundedCornerShape(28.dp))
-                .background(if (enabled) Persimmon else Persimmon.copy(alpha = 0.4f))
-                .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = text,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = White,
-            )
-        }
-    }
+    OnulDoButton(
+        text = text,
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier.padding(vertical = 12.dp),
+        fontSize = 17.sp,
+    )
 }

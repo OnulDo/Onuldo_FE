@@ -137,7 +137,6 @@ fun MainScreen(
                     onWalletClick = { onNavigate(Routes.MYPAGE_WALLET) },
                     onChargeClick = { onNavigate(Routes.MYPAGE_CHARGE) },
                     onWithdrawClick = { onNavigate(Routes.MYPAGE_WITHDRAW) },
-                    onAccountClick = { onNavigate(Routes.MYPAGE_ACCOUNT) },
                     onNotificationClick = { onNavigate(Routes.MYPAGE_NOTIFICATION) },
                     onTermClick = { termType -> onNavigate(Routes.mypageTerm(termType.name)) },
                     onLoggedOut = onLoggedOut,
