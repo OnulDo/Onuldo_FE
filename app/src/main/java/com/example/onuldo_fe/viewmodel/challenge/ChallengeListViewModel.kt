@@ -29,7 +29,9 @@ class ChallengeListViewModel(
     // 요청 세대 — 취소를 못 받고 지연 도착한 이전 응답이 최신을 덮어쓰는 것 방지(백스톱)
     private var requestGeneration = 0
 
-    init { scheduleLoad(debounceMs = 0) }
+    init {
+        scheduleLoad(debounceMs = 0)
+    }
 
     // 카테고리 선택/해제 → 즉시 재조회 (검색어와 AND 조합)
     fun onCategorySelected(category: ChallengeCategory?) {
@@ -46,23 +48,53 @@ class ChallengeListViewModel(
     }
 
     // 에러 토스트 1회 노출 후 소비 (화면은 빈 상태로 유지)
-    fun onErrorShown() { uiState = uiState.copy(isError = false) }
+    fun onErrorShown() {
+        uiState = uiState.copy(isError = false)
+    }
+
+    // 조회 표시 방식 — FULL: 전체 화면 로딩, REFRESH: 상단 인디케이터, SILENT: 표시 없이 데이터만 갱신
+    private enum class LoadMode { FULL, REFRESH, SILENT }
+
+    // 당겨서 새로고침(pull-to-refresh) — 상단 인디케이터를 표시하며 재조회
+    // 예외) 이미 조회 중이면 무시해 중복 호출을 막는다.
+    fun refresh() {
+        if (uiState.isLoading || uiState.isRefreshing) return
+        scheduleLoad(debounceMs = 0, mode = LoadMode.REFRESH)
+    }
+
+    // 화면 복귀(ON_RESUME)용 조용한 재조회 — 로딩/새로고침 표시 없이 기존 목록을 최신으로 교체만 한다.
+    // 예외) 이미 조회 중이면 무시한다.
+    fun silentRefresh() {
+        if (uiState.isLoading || uiState.isRefreshing) return
+        scheduleLoad(debounceMs = 0, mode = LoadMode.SILENT)
+    }
 
     // 이전 조회를 취소하고 (필요 시 디바운스 후) 새 조회 시작
-    private fun scheduleLoad(debounceMs: Long) {
+    private fun scheduleLoad(debounceMs: Long, mode: LoadMode = LoadMode.FULL) {
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
             if (debounceMs > 0) delay(debounceMs)
-            load()
+            load(mode)
         }
     }
 
-    private suspend fun load() {
+    private suspend fun load(mode: LoadMode = LoadMode.FULL) {
         // 이번 요청의 세대와 조회 조건(카테고리/검색어)을 시작 시점에 고정(capture)
         val generation = ++requestGeneration
         val category = uiState.selectedCategory
-        val query = uiState.query   // 공백/빈 문자열이면 Repository에서 keyword 미전송 → 전체 조회
-        uiState = uiState.copy(isLoading = true, isError = false)
+        val query = uiState.query
+
+        // 당겨서 새로고침 인디케이터 최소 표시 시간 측정용
+        val refreshStartTime = if (mode == LoadMode.REFRESH) System.currentTimeMillis() else 0L
+
+        // 표시 상태 설정: FULL=전체 로딩, REFRESH=상단 인디케이터, SILENT=아무 표시 없음(기존 목록 유지)
+        // FULL은 진행 중이던 새로고침 인디케이터를 함께 해제해 두 인디케이터가 겹쳐 보이지 않게 한다.
+        uiState = when (mode) {
+            LoadMode.FULL -> uiState.copy(isLoading = true, isRefreshing = false, isError = false)
+            LoadMode.REFRESH -> uiState.copy(isRefreshing = true, isError = false)
+            LoadMode.SILENT -> uiState.copy(isError = false)
+        }
+
         runCatching {
             repository.getChallenges(
                 page = 0,
@@ -71,17 +103,42 @@ class ChallengeListViewModel(
                 search = query
             )
         }.onSuccess { page ->
+
             if (generation != requestGeneration) return@onSuccess
-            uiState = uiState.copy(challenges = page.challenges, isLoading = false)
+
+            // 당겨서 새로고침일 때만, 응답이 너무 빨라 인디케이터가 안 보이지 않도록 최소 300ms 유지
+            if (mode == LoadMode.REFRESH) {
+                val elapsed = System.currentTimeMillis() - refreshStartTime
+                if (elapsed < REFRESH_INDICATOR_MIN_MS) {
+                    delay(REFRESH_INDICATOR_MIN_MS - elapsed)
+                }
+            }
+
+            uiState = uiState.copy(
+                challenges = page.challenges,
+                isLoading = false,
+                isRefreshing = false,
+                hasLoaded = true
+            )
+
         }.onFailure { e ->
-            if (e is CancellationException) throw e   // 취소는 실패로 처리하지 않음
+
+            if (e is CancellationException) throw e
             if (generation != requestGeneration) return@onFailure
+
             logChallengeError("ch_ls", e)
-            uiState = uiState.copy(isLoading = false, isError = true)
+
+            // 실패 시 기존 목록 유지. 최초(FULL) 조회 실패만 에러 토스트, 새로고침/조용한 재조회 실패는 조용히 무시
+            uiState = uiState.copy(
+                isLoading = false,
+                isRefreshing = false,
+                isError = mode == LoadMode.FULL
+            )
         }
     }
 
     companion object {
-        private const val SEARCH_DEBOUNCE_MS = 300L
+        private const val SEARCH_DEBOUNCE_MS = 300L             //검색 API 호출 지연(입력없을 때)
+        private const val REFRESH_INDICATOR_MIN_MS = 300L        // 새로고침 인디케이터 최소 노출 시간
     }
 }

@@ -27,7 +27,7 @@ import com.example.onuldo_fe.ui.component.PermissionDialogType
 import com.example.onuldo_fe.ui.component.PermissionSettingDialog
 import com.example.onuldo_fe.ui.screen.party.components.InviteCodeDialog
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
-import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryScreen
+import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryRoute
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.util.moveToAppSettings
 import com.example.onuldo_fe.viewmodel.party.PartyAction
@@ -237,7 +237,7 @@ fun PartyRoute(
             }
         )
 
-        PartyScreen.ChallengeSelect -> GalleryScreen(
+        PartyScreen.ChallengeSelect -> GalleryRoute(
             onChallengeClick = { challenge ->
                 pendingChallenge = challenge
                 screen = PartyScreen.ChallengeDetail

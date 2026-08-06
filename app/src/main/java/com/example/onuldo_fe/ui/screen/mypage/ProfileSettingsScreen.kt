@@ -2,6 +2,7 @@ package com.example.onuldo_fe.ui.screen.mypage
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -37,24 +38,27 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
+import com.example.onuldo_fe.ui.theme.DarkBrown40
+import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.viewmodel.mypage.ProfileSettingsViewModel
 
-/** 프로필 아바타 원형 배경 (#FFEBDE). */
-private val AvatarBackground = Color(0xFFFFEBDE)
+/** 아바타 원형 배경. Figma: Persimmon 15%. */
+private val AvatarBackground = Persimmon.copy(alpha = 0.15f)
 
 /**
- * 프로필 설정 (마이 진입) — Figma node `4019:4672`.
- * 아바타 + 닉네임/이메일 + 기본 정보(닉네임 변경·이메일·비밀번호 변경) 행.
+ * 프로필 설정 (마이 진입) — Figma node `4837:2412`.
+ * 아바타 + 닉네임/이메일 + 기본 정보(닉네임·이메일) 행.
  *
  * 표시값은 `GET /api/users/me/profile`로 채운다.
- * 아바타 편집(📷)은 서버에 프로필 수정 API가 없어 아직 동작하지 않는다.
+ * 아바타 편집 배지는 서버에 프로필 수정 API가 없어 아직 동작하지 않는다.
  */
 @Composable
 fun ProfileSettingsScreen(
     onBack: () -> Unit,
-    onNicknameClick: () -> Unit,
-    onPasswordClick: () -> Unit,
+    /** 현재 닉네임을 함께 넘겨, 변경 화면이 재조회 없이 초기값을 채울 수 있게 한다. */
+    onNicknameClick: (String) -> Unit,
     viewModel: ProfileSettingsViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -96,15 +100,14 @@ fun ProfileSettingsScreen(
                         modifier = Modifier.size(84.dp),
                     )
                 }
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(Persimmon),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(text = "📷", fontSize = 14.sp)
-                }
+                // 편집 배지는 Figma 에셋(연필). 이모지를 쓰면 기기마다 모양이 달라진다.
+                // 아직 클릭 동작이 없어 장식으로만 두고 스크린리더에서 감춘다.
+                // (프로필 수정 API 연동 시 클릭과 함께 contentDescription을 되살릴 것.)
+                Image(
+                    painter = painterResource(R.drawable.ic_profile_edit_badge),
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                )
             }
         }
 
@@ -123,7 +126,7 @@ fun ProfileSettingsScreen(
             fontFamily = Pretendard,
             fontWeight = FontWeight.Medium,
             fontSize = 14.sp,
-            color = MySubText,
+            color = DarkBrown70,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -135,15 +138,25 @@ fun ProfileSettingsScreen(
             fontFamily = Pretendard,
             fontWeight = FontWeight.Medium,
             fontSize = 12.sp,
-            color = MySubText,
+            color = DarkBrown50,
             modifier = Modifier.padding(start = 24.dp, bottom = 8.dp),
         )
 
-        RowCard { MyPageMenuRow(title = "닉네임", value = nickname, onClick = onNicknameClick) }
+        RowCard {
+            // 조회 전에는 nickname이 비어 있다. 그대로 넘기면 변경 화면이 초기값 없이 열려
+            // 기존과 같은 닉네임을 입력해도 '변경하기'가 활성화되므로, 값이 올 때까지 막는다.
+            MyPageMenuRow(
+                title = "닉네임",
+                value = nickname,
+                onClick = if (nickname.isNotBlank()) {
+                    { onNicknameClick(nickname) }
+                } else {
+                    null
+                },
+            )
+        }
         Spacer(Modifier.height(10.dp))
         RowCard { MyPageMenuRow(title = "이메일", value = email, showChevron = false) }
-        Spacer(Modifier.height(10.dp))
-        RowCard { MyPageMenuRow(title = "비밀번호 변경", onClick = onPasswordClick) }
     }
 }
 
@@ -154,7 +167,9 @@ private fun RowCard(content: @Composable () -> Unit) {
             .padding(horizontal = 20.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(White),
+            .background(White)
+            // Figma: 카드에 1dp 테두리(brand/dark-brown/40)가 들어간다.
+            .border(1.dp, DarkBrown40, RoundedCornerShape(14.dp)),
     ) {
         content()
     }
@@ -164,6 +179,6 @@ private fun RowCard(content: @Composable () -> Unit) {
 @Composable
 private fun ProfileSettingsScreenPreview() {
     OnulDo_FETheme {
-        ProfileSettingsScreen(onBack = {}, onNicknameClick = {}, onPasswordClick = {})
+        ProfileSettingsScreen(onBack = {}, onNicknameClick = {})
     }
 }

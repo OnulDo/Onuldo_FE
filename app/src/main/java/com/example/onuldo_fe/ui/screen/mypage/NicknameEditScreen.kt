@@ -25,20 +25,28 @@ import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.component.OnuldoTextField
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.utils.Validators
+
+/** 프로필 수정 API 연동 여부. 서버에 엔드포인트가 생기면 true로 바꾼다. */
+private const val PROFILE_UPDATE_API_READY = false
 
 /**
  * 닉네임 변경 — Figma node `4019:4540`.
  * 설계서 규칙(2~8자 한글/영문/숫자, 특수문자 불가). 유효하고 기존과 다르면 '변경하기' 활성.
  *
- * TODO: 서버 닉네임 중복확인("이미 사용 중인 닉네임이에요") 연동.
+ * [currentNickname]은 프로필 설정 화면이 이미 조회한 값을 라우트 인자로 넘겨받는다.
+ *
+ * TODO: 서버에 프로필 수정 API(`PATCH /api/users/me/profile`)가 없어 **입력값을 저장할 수 없다.**
+ *       API가 생기면 [PROFILE_UPDATE_API_READY]를 true로 바꾸고 '변경하기'에 연동한 뒤,
+ *       성공 응답에서만 [onBack]을 호출한다. 닉네임 중복확인("이미 사용 중인 닉네임이에요")도 함께 붙인다.
  */
 @Composable
 fun NicknameEditScreen(
     onBack: () -> Unit,
-    currentNickname: String = "오늘두",
+    currentNickname: String = "",
 ) {
     var nickname by remember { mutableStateOf(currentNickname) }
     val isValid = Validators.isValidNickname(nickname)
@@ -68,7 +76,7 @@ fun NicknameEditScreen(
             fontFamily = Pretendard,
             fontWeight = FontWeight.Medium,
             fontSize = 14.sp,
-            color = MySubText,
+            color = DarkBrown70,
             modifier = Modifier.padding(horizontal = 20.dp),
         )
 
@@ -84,10 +92,23 @@ fun NicknameEditScreen(
 
         Spacer(Modifier.weight(1f))
 
+        // 저장할 수단이 없는데 화면만 닫으면 사용자는 변경이 끝난 줄 안다.
+        // API가 붙기 전까지는 눌리지 않게 두고 이유를 밝힌다.
+        if (!PROFILE_UPDATE_API_READY) {
+            Text(
+                text = "서버 연동 준비 중이라 아직 저장할 수 없어요",
+                fontFamily = Pretendard,
+                fontWeight = FontWeight.Medium,
+                fontSize = 13.sp,
+                color = DarkBrown70,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+            )
+        }
+
         OnulDoButton(
             text = "변경하기",
-            onClick = { /* TODO: 닉네임 변경 API 연동 후 popBack */ onBack() },
-            enabled = isValid && nickname != currentNickname,
+            onClick = { /* TODO: 닉네임 변경 API 연동 시 성공 응답에서만 onBack() */ },
+            enabled = PROFILE_UPDATE_API_READY && isValid && nickname != currentNickname,
         )
         Spacer(Modifier.height(18.dp))
     }

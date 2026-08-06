@@ -11,7 +11,13 @@ import com.example.onuldo_fe.model.user.PointTransaction
 import com.example.onuldo_fe.model.user.UserProfile
 import com.example.onuldo_fe.model.user.WalletSummary
 
-/** 사용자·포인트 지갑 저장소. */
+/**
+ * 사용자·포인트 지갑 저장소.
+ *
+ * 보유 포인트는 이 저장소(충전·가입보너스) 밖에서도 바뀐다 — 챌린지 참여 예치금 차감,
+ * 정산 환급 등이 다른 저장소를 거친다. 그래서 잔액 변동을 여기서 신호로 알리지 않고,
+ * 잔액을 보여주는 화면이 다시 보일 때 새로 읽는다. (`ui.component.RefreshOnResume`)
+ */
 interface UserRepository {
 
     suspend fun getMyPage(): ApiResult<MyPageSummary>

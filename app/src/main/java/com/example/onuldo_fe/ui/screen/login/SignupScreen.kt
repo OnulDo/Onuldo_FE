@@ -133,13 +133,7 @@ fun SignupScreen(
             modifier = gutter,
         )
 
-        Spacer(Modifier.height(8.dp))
-
-        AgreeAllCard(
-            checked = state.agreeAll,
-            onToggle = viewModel::toggleAgreeAll,
-            modifier = gutter,
-        )
+        // 약관 동의는 다음 단계인 [TermsAgreementScreen]에서 받는다(2026-08-04 디자인 확정).
 
         Spacer(Modifier.weight(1f))
 
@@ -150,53 +144,6 @@ fun SignupScreen(
         )
         Spacer(Modifier.height(24.dp))
     }
-}
-
-/** 전체 약관 동의 카드 (체크박스 + 약관 링크). 하위 약관 상세는 추후 TODO. */
-@Composable
-private fun AgreeAllCard(
-    checked: Boolean,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(Persimmon10, RoundedCornerShape(14.dp))
-            .clickable(onClick = onToggle)
-            .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AgreeCheckbox(checked = checked)
-        Spacer(Modifier.width(14.dp))
-        Column {
-            Text(
-                text = "전체 약관에 동의합니다",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = termsLinkText(),
-                fontFamily = Pretendard,
-                fontSize = 11.sp,
-                color = DarkBrown70,
-            )
-        }
-    }
-}
-
-private fun termsLinkText() = buildAnnotatedString {
-    withStyle(SpanStyle(color = Persimmon, textDecoration = TextDecoration.Underline)) {
-        append("서비스 이용약관 ›")
-    }
-    append("   ")
-    withStyle(SpanStyle(color = Persimmon, textDecoration = TextDecoration.Underline)) {
-        append("개인정보 처리방침 ›")
-    }
-    append("   만 14세 이상")
 }
 
 /** 아이콘 의존성 없이 Canvas로 그린 체크박스. */

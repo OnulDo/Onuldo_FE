@@ -1,31 +1,33 @@
 package com.example.onuldo_fe.ui.screen.mypage.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.onuldo_fe.ui.screen.mypage.MyLine
-import com.example.onuldo_fe.ui.screen.mypage.MySubText
-import com.example.onuldo_fe.ui.screen.mypage.MyValueText
+import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Pretendard
 
 /**
- * 마이페이지 하위 화면 공통 상단바 — 뒤로가기(‹) + 중앙 타이틀 + 하단 구분선.
- * (온보딩의 진행 헤더와 달리 마이페이지는 이 형태를 쓴다.)
+ * 마이페이지 하위 화면 공통 상단바 — 뒤로가기 + 중앙 타이틀 (Figma node `4837:2418`).
+ *
+ * 뒤로가기는 다른 화면과 동일한 [OnulDoBackButton]을 쓴다(직접 그린 '‹' 문자를 쓰면
+ * 화면마다 크기·정렬이 어긋난다). 헤더 아래 구분선은 최신 디자인에서 빠졌다.
  */
 @Composable
 fun MyPageTopBar(
@@ -33,34 +35,25 @@ fun MyPageTopBar(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = title,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = BlackBrown,
-            )
-            Text(
-                text = "‹",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 26.sp,
-                color = BlackBrown,
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = 20.dp)
-                    .size(width = 24.dp, height = 40.dp)
-                    .clickable(onClick = onBack),
-            )
-        }
-        HorizontalDivider(thickness = 1.dp, color = MyLine)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = title,
+            fontFamily = Pretendard,
+            fontWeight = FontWeight.Bold,
+            fontSize = 17.sp,
+            lineHeight = 20.sp,
+            color = BlackBrown,
+        )
+        OnulDoBackButton(
+            // IconButton이 자체 여백을 가져 별도 padding 없이 가로 20dp에 맞는다.
+            modifier = Modifier.align(Alignment.CenterStart),
+            onClick = onBack,
+        )
     }
 }
 
@@ -88,7 +81,8 @@ fun MyPageMenuRow(
             text = title,
             fontFamily = Pretendard,
             fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
+            fontSize = 14.sp,
+            lineHeight = 22.sp,
             color = BlackBrown,
         )
         Text(
@@ -96,19 +90,18 @@ fun MyPageMenuRow(
             fontFamily = Pretendard,
             fontWeight = FontWeight.Medium,
             fontSize = 14.sp,
-            color = MyValueText,
+            color = DarkBrown50,
             textAlign = TextAlign.End,
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 12.dp, end = if (showChevron) 8.dp else 0.dp),
         )
         if (showChevron) {
-            Text(
-                text = "›",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = MySubText,
+            // Figma에서 추출한 셰브론(5×8). 문자 '›'를 쓰면 화면마다 크기가 달라진다.
+            Image(
+                painter = painterResource(R.drawable.ic_chevron_right),
+                contentDescription = null,
+                modifier = Modifier.size(width = 5.dp, height = 8.dp),
             )
         }
     }

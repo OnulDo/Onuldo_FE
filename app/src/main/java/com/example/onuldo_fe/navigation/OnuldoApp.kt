@@ -16,20 +16,19 @@ import com.example.onuldo_fe.ui.screen.login.LandingScreen
 import com.example.onuldo_fe.ui.screen.login.LoginScreen
 import com.example.onuldo_fe.ui.screen.login.ProfileSetupScreen
 import com.example.onuldo_fe.ui.screen.login.SignupScreen
-import com.example.onuldo_fe.ui.screen.login.SocialTermsScreen
+import com.example.onuldo_fe.ui.screen.login.TermsAgreementScreen
 import com.example.onuldo_fe.ui.screen.login.WelcomeScreen
 import com.example.onuldo_fe.ui.screen.main.MainScreen
 import com.example.onuldo_fe.ui.screen.mypage.NicknameEditScreen
-import com.example.onuldo_fe.ui.screen.mypage.PasswordChangeScreen
 import com.example.onuldo_fe.ui.screen.mypage.PointChargeScreen
 import com.example.onuldo_fe.ui.screen.mypage.PointWalletScreen
 import com.example.onuldo_fe.ui.screen.mypage.PointWithdrawScreen
 import com.example.onuldo_fe.ui.screen.mypage.ProfileSettingsScreen
-import com.example.onuldo_fe.ui.screen.mypage.WithdrawAccountScreen
 import com.example.onuldo_fe.ui.screen.mypage.SettingScreen
 import com.example.onuldo_fe.ui.screen.mypage.TermScreen
 import com.example.onuldo_fe.data.auth.dto.TermType
 import com.example.onuldo_fe.data.network.SessionEvents
+import com.example.onuldo_fe.viewmodel.OnboardingDraft
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.onuldo_fe.camera.PhotoPreviewScreen
@@ -69,6 +68,11 @@ fun OnuldoApp() {
 
     NavHost(navController = navController, startDestination = debugStartDestination) {
         composable(Routes.LANDING) {
+            // 랜딩 도착 = 온보딩을 시작 전이거나 중도 이탈했다는 뜻.
+            // 뒤로가기 이탈·로그아웃·세션 만료가 모두 이곳으로 모이므로, 메모리에 남은
+            // 이메일·비밀번호를 여기서 지운다. (OnboardingDraft는 프로세스 전역 object다.)
+            LaunchedEffect(Unit) { OnboardingDraft.clear() }
+
             LandingScreen(
                 onLoginClick = { navController.navigate(Routes.LOGIN) },
                 onSignupClick = { navController.navigate(Routes.SIGNUP) },
@@ -84,11 +88,12 @@ fun OnuldoApp() {
                 },
                 onSignupClick = { navController.navigate(Routes.SIGNUP) },
                 // 소셜 로그인 결과 신규 회원 → 약관 동의 → 프로필 설정 → oauth/signup
-                onSocialSignupNeeded = { navController.navigate(Routes.SOCIAL_TERMS) },
+                onSocialSignupNeeded = { navController.navigate(Routes.TERMS_AGREEMENT) },
             )
         }
-        composable(Routes.SOCIAL_TERMS) {
-            SocialTermsScreen(
+        // 약관 동의. 이메일 가입과 소셜 신규 가입이 공통으로 거친다.
+        composable(Routes.TERMS_AGREEMENT) {
+            TermsAgreementScreen(
                 onBack = { navController.popBackStack() },
                 onNext = { navController.navigate(Routes.PROFILE_SETUP) },
                 onTermClick = { termType -> navController.navigate(Routes.mypageTerm(termType.name)) },
@@ -97,8 +102,8 @@ fun OnuldoApp() {
         composable(Routes.SIGNUP) {
             SignupScreen(
                 onBack = { navController.popBackStack() },
-                // 회원가입 완료 → 프로필 설정으로 바로 진행(이메일 인증·권한 화면 제거됨).
-                onNext = { navController.navigate(Routes.PROFILE_SETUP) },
+                // 회원가입 입력 → 약관 동의 → 프로필 설정 순으로 진행한다.
+                onNext = { navController.navigate(Routes.TERMS_AGREEMENT) },
             )
         }
         composable(Routes.PROFILE_SETUP) {
@@ -119,6 +124,10 @@ fun OnuldoApp() {
             )
         }
         composable(Routes.MAIN) {
+            // 메인 도착 = 온보딩 종료. 가입 경로는 ProfileSetupViewModel이 이미 비웠지만,
+            // 회원가입을 입력하다 로그인으로 되돌아가 로그인한 경우가 남는다.
+            LaunchedEffect(Unit) { OnboardingDraft.clear() }
+
             MainScreen(
                 onNavigate = { route -> navController.navigate(route) },
                 // 로그아웃 시 온보딩 백스택을 모두 비우고 랜딩으로 되돌린다.
@@ -134,15 +143,26 @@ fun OnuldoApp() {
         composable(Routes.MYPAGE_PROFILE) {
             ProfileSettingsScreen(
                 onBack = { navController.popBackStack() },
-                onNicknameClick = { navController.navigate(Routes.MYPAGE_NICKNAME) },
-                onPasswordClick = { navController.navigate(Routes.MYPAGE_PASSWORD) },
+                onNicknameClick = { nickname ->
+                    navController.navigate(Routes.mypageNickname(nickname))
+                },
             )
         }
-        composable(Routes.MYPAGE_NICKNAME) {
-            NicknameEditScreen(onBack = { navController.popBackStack() })
-        }
-        composable(Routes.MYPAGE_PASSWORD) {
-            PasswordChangeScreen(onBack = { navController.popBackStack() })
+        composable(
+            route = Routes.MYPAGE_NICKNAME,
+            arguments = listOf(
+                navArgument(Routes.MYPAGE_NICKNAME_ARG) {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+            ),
+        ) { backStackEntry ->
+            NicknameEditScreen(
+                currentNickname = backStackEntry.arguments
+                    ?.getString(Routes.MYPAGE_NICKNAME_ARG)
+                    .orEmpty(),
+                onBack = { navController.popBackStack() },
+            )
         }
         composable(Routes.MYPAGE_WALLET) {
             PointWalletScreen(
@@ -156,9 +176,6 @@ fun OnuldoApp() {
         }
         composable(Routes.MYPAGE_WITHDRAW) {
             PointWithdrawScreen(onBack = { navController.popBackStack() })
-        }
-        composable(Routes.MYPAGE_ACCOUNT) {
-            WithdrawAccountScreen(onBack = { navController.popBackStack() })
         }
         // 알림 설정(시온)  //화면이 상태 자체 보유 → 등록만. 뒤로가기 → 마이로 복귀
         composable(Routes.MYPAGE_NOTIFICATION) {

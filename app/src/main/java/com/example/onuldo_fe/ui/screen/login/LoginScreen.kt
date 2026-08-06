@@ -55,7 +55,7 @@ import com.example.onuldo_fe.viewmodel.LoginViewModel
 
 /**
  * 이메일 로그인 화면 — WF ver.2.2 (Figma node 4353:3162).
- * 헤더(봉투 아이콘 + 타이틀) → 이메일/비밀번호 입력 → 로그인 → 비밀번호 찾기
+ * 헤더(봉투 아이콘 + 타이틀) → 이메일/비밀번호 입력 → 로그인
  *  → "또는" 구분선 → 카카오/네이버 소셜 로그인 → 하단 회원가입 링크.
  */
 @Composable
@@ -138,17 +138,8 @@ fun LoginScreen(
             enabled = state.isLoginEnabled,
         )
 
-        Spacer(Modifier.height(14.dp))
-
-        Text(
-            text = "비밀번호 찾기",
-            style = MaterialTheme.typography.labelLarge,
-            color = DarkBrown70,
-            textDecoration = TextDecoration.Underline,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .clickable { /* TODO: 비밀번호 재설정 화면 */ },
-        )
+        // '비밀번호 찾기'는 제거됨(2026-08-04 팀 확정).
+        // 온보딩에서 이메일 인증 단계를 없앴기 때문에 본인 확인 수단이 없어 재설정을 구현할 수 없다.
 
         Spacer(Modifier.height(28.dp))
         OrDivider(modifier = gutter)
