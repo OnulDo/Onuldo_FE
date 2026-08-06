@@ -1,9 +1,6 @@
 package com.example.onuldo_fe.camera.component
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +24,7 @@ import com.example.onuldo_fe.ui.theme.White
 
 @Composable
 fun CameraBottomBar(
+    modifier: Modifier = Modifier,
     onNoteClick: () -> Unit = {},
     onCaptureClick: () -> Unit = {},
     onSwitchClick: () -> Unit = {}
@@ -34,12 +32,9 @@ fun CameraBottomBar(
     val spacing = LocalSpacing.current
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(
-                horizontal = spacing.spacing24,
-                vertical = spacing.spacing30
-            ),
+            .padding(horizontal = spacing.spacing24),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -66,7 +61,7 @@ fun CameraBottomBar(
 
         IconButton(
             onClick = onCaptureClick,
-            modifier = Modifier.size(80.dp)
+            modifier = Modifier.size(56.dp)
         ) {
             Icon(
                 painter = painterResource(R.drawable.camera_shot_btn),
