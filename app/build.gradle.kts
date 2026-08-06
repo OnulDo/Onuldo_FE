@@ -37,13 +37,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // 카메라 이미지 업로드 API 설정. 개발용 토큰은 local.properties에서만 관리한다.
+        // 서버 API 주소는 민감정보가 아니므로 모든 빌드 타입에서 공통으로 사용한다.
         buildConfigField("String", "API_BASE_URL", quotedBuildConfig("https://onuldo.site/"))
-        buildConfigField(
-            "String",
-            "DEV_ACCESS_TOKEN",
-            quotedBuildConfig(secret("ONULDO_ACCESS_TOKEN"))
-        )
 
         val kakaoNativeAppKey = secret("KAKAO_NATIVE_APP_KEY")
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", quotedBuildConfig(kakaoNativeAppKey))
