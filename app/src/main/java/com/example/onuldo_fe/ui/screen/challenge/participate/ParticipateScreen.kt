@@ -248,7 +248,11 @@ fun ParticipateScreen(
         // 요약 박스 — 선택한 진행 기간/도전금이 그대로 반영된다(미선택 시 "-")
         val summaryItems = listOf(
             "진행 기간" to (selectedWeeks?.let { "${it}주 (${it * 7}일)" } ?: "-"),
-            "인증 방식" to "하루 1회 자율 인증",
+            "인증 방식" to  if (timeStart.isNotBlank() && timeEnd.isNotBlank()) {
+                "${timeStart.take(5)} ~ ${timeEnd.take(5)}내에 인증"
+            } else {
+                "00:00 ~ 23:00내에 인증" //시간 반영(QA 피드백)
+            },
             "예치 도전금" to (selectedPoint ?: "-")
         )
 

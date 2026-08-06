@@ -57,13 +57,13 @@ fun StartDoneScreen(
     val spacing = LocalSpacing.current
     val summaryItems = listOf(
         "진행 기간" to "${formatMonthDay(result.startDate)} ~ ${formatMonthDay(result.endDate)} (${result.durationDays}일)",
-        "인증 시각" to if (timeStart.isNotBlank()) formatAmPm(timeStart) else "자율 인증",
+        "인증 시각" to if (timeStart.isNotBlank()) formatTimeRange(timeStart, timeEnd) else "오전 00:00 ~ 23:00",
         "예치 도전금" to "%,dP".format(result.depositAmount),
         "예상 환급금" to "%,dP (성공 시)".format(result.expectedRefundAmount)
     )
     val subtitle = "오늘부터 ${result.durationDays}일간 함께 갓생해요"
     val firstVerifyTime = if (timeStart.isNotBlank() && timeEnd.isNotBlank()) {
-        "내일 ${formatAmPm(timeStart)} ~ ${formatAmPm(timeEnd)}"
+        "내일 ${formatTimeRange(timeStart, timeEnd)}"
     } else {
         "내일부터 인증할 수 있어요"
     }
@@ -228,14 +228,25 @@ private fun formatMonthDay(date: String): String = runCatching {
     "${parts[1].toInt()}/${parts[2].toInt()}"
 }.getOrDefault(date)
 
-private fun formatAmPm(time: String): String = runCatching {
-    val parts = time.split(":")
-    val h = parts[0].toInt()
-    val m = parts[1].toInt()
-    val ampm = if (h < 12) "오전" else "오후"
-    val h12 = if (h % 12 == 0) 12 else h % 12
-    "%s %d:%02d".format(ampm, h12, m)
-}.getOrDefault(time.take(5))
+// 범위 표기: 시작엔 항상 오전/오후, 끝엔 시간만 표시 (24시간제)
+fun formatTimeRange(start: String, end: String): String = runCatching {
+    val startText = format24h(start, withAmPm = true)
+    val endText = format24h(end, withAmPm = false)
+
+    "$startText ~ $endText"
+}.getOrDefault("${start.take(5)} ~ ${end.take(5)}")
+
+// "HH:mm" withAmPm이면 앞에 오전/오후 표시
+private fun format24h(time: String, withAmPm: Boolean): String {
+    val (h, m) = time.split(":").map { it.toInt() }
+    val hhmm = "%02d:%02d".format(h, m)
+
+    return if (withAmPm) {
+        "${if (h < 12) "오전" else "오후"} $hhmm"
+    } else {
+        hhmm
+    }
+}
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
