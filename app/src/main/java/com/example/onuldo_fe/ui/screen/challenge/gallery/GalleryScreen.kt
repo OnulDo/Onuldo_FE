@@ -85,7 +85,10 @@ fun GalleryScreen(
     val focusManager = LocalFocusManager.current
     val spacing = LocalSpacing.current
     val pullToRefreshState = rememberPullToRefreshState()
-    var filterSelected by remember { mutableStateOf(false) }
+    // 화면 재생성 후에도 선택된 카테고리가 있으면 필터 칩을 펼쳐 활성 필터가 보이게(코드 래빗)
+    var filterSelected by remember(uiState.selectedCategory) {
+        mutableStateOf(uiState.selectedCategory != null)
+    }
 
     // 카테고리 칩은 ChallengeCategory
     val categories = remember { ChallengeCategory.entries.map { it.displayName } }

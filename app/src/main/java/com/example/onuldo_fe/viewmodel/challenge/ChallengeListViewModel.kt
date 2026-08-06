@@ -88,8 +88,9 @@ class ChallengeListViewModel(
         val refreshStartTime = if (mode == LoadMode.REFRESH) System.currentTimeMillis() else 0L
 
         // 표시 상태 설정: FULL=전체 로딩, REFRESH=상단 인디케이터, SILENT=아무 표시 없음(기존 목록 유지)
+        // FULL은 진행 중이던 새로고침 인디케이터를 함께 해제해 두 인디케이터가 겹쳐 보이지 않게 한다.
         uiState = when (mode) {
-            LoadMode.FULL -> uiState.copy(isLoading = true, isError = false)
+            LoadMode.FULL -> uiState.copy(isLoading = true, isRefreshing = false, isError = false)
             LoadMode.REFRESH -> uiState.copy(isRefreshing = true, isError = false)
             LoadMode.SILENT -> uiState.copy(isError = false)
         }

@@ -57,7 +57,7 @@ fun StartDoneScreen(
     val spacing = LocalSpacing.current
     val summaryItems = listOf(
         "진행 기간" to "${formatMonthDay(result.startDate)} ~ ${formatMonthDay(result.endDate)} (${result.durationDays}일)",
-        "인증 시각" to if (timeStart.isNotBlank()) formatTimeRange(timeStart, timeEnd) else "오전 00:00 ~ 23:00",
+        "인증 시각" to formatTimeRange(timeStart, timeEnd),
         "예치 도전금" to "%,dP".format(result.depositAmount),
         "예상 환급금" to "%,dP (성공 시)".format(result.expectedRefundAmount)
     )
@@ -228,13 +228,17 @@ private fun formatMonthDay(date: String): String = runCatching {
     "${parts[1].toInt()}/${parts[2].toInt()}"
 }.getOrDefault(date)
 
-// 범위 표기: 시작엔 항상 오전/오후, 끝엔 시간만 표시 (24시간제)
-fun formatTimeRange(start: String, end: String): String = runCatching {
-    val startText = format24h(start, withAmPm = true)
-    val endText = format24h(end, withAmPm = false)
+// 범위 표기: 24시간제. withAmPm=true면 시작에만 오전/오후를 붙인다(끝은 항상 시간만).
+// 시각 미설정(둘 중 하나라도 빈 값)이면 종일 표기로 폴백해, 호출부에서 별도 null/빈값 처리를 하지 않아도 된다.
+fun formatTimeRange(start: String, end: String, withAmPm: Boolean = true): String {
+    if (start.isBlank() || end.isBlank()) return if (withAmPm) "오전 00:00 ~ 23:00" else "00:00 ~ 23:00"
+    return runCatching {
+        val startText = format24h(start, withAmPm = withAmPm)
+        val endText = format24h(end, withAmPm = false)
 
-    "$startText ~ $endText"
-}.getOrDefault("${start.take(5)} ~ ${end.take(5)}")
+        "$startText ~ $endText"
+    }.getOrDefault("${start.take(5)} ~ ${end.take(5)}")
+}
 
 // "HH:mm" withAmPm이면 앞에 오전/오후 표시
 private fun format24h(time: String, withAmPm: Boolean): String {
