@@ -9,7 +9,8 @@ fun ChallengeVerificationScreen(
     onConfirmClick: () -> Unit = {},
     onRetryClick: () -> Unit = {},
     onManualReviewClick: () -> Unit = {},
-    isReviewResultReady: Boolean = false
+    isReviewResultReady: Boolean = false,
+    submittedAt: String? = null
 ) {
     when (status) {
         VerificationStatus.REVIEWING -> VerificationReviewingScreen(
@@ -21,6 +22,9 @@ fun ChallengeVerificationScreen(
             onRetryClick = onRetryClick,
             onManualReviewClick = onManualReviewClick
         )
-        VerificationStatus.WAITING -> VerificationWaitingScreen(onConfirmClick = onConfirmClick)
+        VerificationStatus.WAITING -> VerificationWaitingScreen(
+            submittedAt = submittedAt,
+            onConfirmClick = onConfirmClick
+        )
     }
 }

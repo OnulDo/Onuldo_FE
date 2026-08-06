@@ -38,6 +38,8 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         private set
     var activeTitle: String = ""
         private set
+    var activeVerifiedAt: String? = null
+        private set
 
     fun setImageUri(uri: Uri?) {
         if (_imageUri.value != uri) deleteLocalPhoto()
@@ -58,6 +60,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         activeChallengeId = challengeId
         activeCategory = category
         activeTitle = title
+        activeVerifiedAt = null
         val uri = _imageUri.value ?: run {
             _submitState.value = VerificationSubmitState.Error(
                 "제출할 사진이 없습니다. 다시 촬영해 주세요."
@@ -74,6 +77,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
 
                 _submitState.value = VerificationSubmitState.Reviewing
                 val result = repository.verifyChallenge(challengeId, fileId)
+                activeVerifiedAt = result.verifiedAt
                 when (result.review) {
                     VerificationReview.PASS ->
                         _submitState.value = VerificationSubmitState.Success(result)

@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -36,12 +37,17 @@ import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.White
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun VerificationWaitingScreen(
+    submittedAt: String? = null,
     onConfirmClick: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
+    val submittedAtText = remember(submittedAt) { submittedAt.toDisplayDateTime() }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -176,7 +182,7 @@ fun VerificationWaitingScreen(
                         Spacer(modifier = Modifier.weight(1f))
 
                         Text(
-                            text = "2026년 5월 20일 07:32",
+                            text = submittedAtText,
                             color = BlackBrown,
                             style = MaterialTheme.typography.bodySmall,
                         )
@@ -193,6 +199,16 @@ fun VerificationWaitingScreen(
                 .padding(bottom = 42.dp)
         )
     }
+}
+
+private val submittedAtFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 HH:mm")
+
+private fun String?.toDisplayDateTime(): String {
+    if (this.isNullOrBlank()) return "제출 시각을 확인할 수 없어요"
+    val dateTime = runCatching { LocalDateTime.parse(this) }.getOrNull()
+        ?: runCatching { OffsetDateTime.parse(this).toLocalDateTime() }.getOrNull()
+        ?: return "제출 시각을 확인할 수 없어요"
+    return dateTime.format(submittedAtFormatter)
 }
 
 @Preview(showBackground = true)

@@ -392,8 +392,15 @@ fun OnuldoApp() {
         }
 
         composable(Routes.VERIFICATION_WAITING) {
+            val state by cameraViewModel.submitState.collectAsState()
+            val submittedAt =
+                (state as? com.example.onuldo_fe.camera.VerificationSubmitState.Waiting)
+                    ?.result
+                    ?.verifiedAt
+                    ?: cameraViewModel.activeVerifiedAt
             ChallengeVerificationScreen(
                 status = VerificationStatus.WAITING,
+                submittedAt = submittedAt,
                 onConfirmClick = {
                     cameraViewModel.clearSubmitState()
                     navController.navigate(Routes.MAIN) {
