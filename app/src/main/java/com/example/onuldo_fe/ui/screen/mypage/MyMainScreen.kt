@@ -36,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.component.RefreshOnResume
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageMenuRow
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
@@ -70,6 +71,10 @@ fun MyMainScreen(
     val nickname = state.nickname
     val email = state.email
     val point = state.pointText
+
+    // 충전·챌린지 참여 등으로 보유 포인트가 바뀐 뒤 이 탭으로 돌아올 수 있다. ViewModel은
+    // 백스택에 살아 있어 한 번 조회한 값이 그대로 남으므로, 화면이 보일 때마다 새로 읽는다.
+    RefreshOnResume { viewModel.load() }
 
     Column(
         modifier = Modifier

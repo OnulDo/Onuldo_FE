@@ -51,10 +51,13 @@ class PointWalletViewModel(
 
     private var nextCursor: String? = null
 
-    init {
-        load()
-    }
-
+    /**
+     * 요약과 거래내역을 함께 조회.
+     *
+     * 화면이 보일 때마다 호출된다(최초 진입 포함 — `PointWalletScreen`의 `RefreshOnResume`).
+     * 그래서 `init`에서 따로 조회하지 않는다. 충전 화면을 다녀오면 잔액뿐 아니라 새 거래도
+     * 목록에 들어와야 하므로 둘 다 새로 읽는다.
+     */
     fun load() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }

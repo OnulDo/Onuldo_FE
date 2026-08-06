@@ -21,14 +21,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -40,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.user.dto.PointTransactionTypeDto
 import com.example.onuldo_fe.model.user.PointTransaction
 import com.example.onuldo_fe.model.user.WalletSummary
+import com.example.onuldo_fe.ui.component.RefreshOnResume
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.utils.formatAmount
 import com.example.onuldo_fe.utils.formatPoint
@@ -128,15 +125,8 @@ fun PointWalletScreen(
     val visibleTx = state.transactions.map { it.toTx() }
 
     // 충전 화면에서 돌아오면 잔액·내역이 바뀌어 있다. ViewModel은 백스택에 살아 있어
-    // init의 load()가 다시 불리지 않으므로, 화면이 다시 보일 때마다 새로 읽는다.
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) viewModel.load()
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
+    // 한 번 조회한 값이 그대로 남으므로, 화면이 보일 때마다 새로 읽는다(최초 진입 포함).
+    RefreshOnResume { viewModel.load() }
 
     Column(
         modifier = Modifier

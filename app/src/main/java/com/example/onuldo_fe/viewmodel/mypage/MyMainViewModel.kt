@@ -35,11 +35,13 @@ class MyMainViewModel(
     private val _uiState = MutableStateFlow(MyMainUiState())
     val uiState: StateFlow<MyMainUiState> = _uiState.asStateFlow()
 
-    init {
-        load()
-    }
-
-    /** 화면 재진입·포인트 변동 후 갱신용. */
+    /**
+     * 프로필·보유 포인트 조회.
+     *
+     * 화면이 보일 때마다 호출된다(최초 진입 포함 — `MyMainScreen`의 `RefreshOnResume`).
+     * 그래서 `init`에서 따로 조회하지 않는다. 충전은 물론 챌린지 참여 예치금 차감처럼
+     * 다른 화면에서 일어난 변동도 이 시점에 반영된다.
+     */
     fun load() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }

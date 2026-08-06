@@ -8,7 +8,6 @@ import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.onuldo_fe.camera.CameraScreen
 import com.example.onuldo_fe.camera.CameraViewModel
 import com.example.onuldo_fe.ui.screen.challenge.detail.DetailRoute
@@ -29,6 +28,7 @@ import com.example.onuldo_fe.ui.screen.mypage.SettingScreen
 import com.example.onuldo_fe.ui.screen.mypage.TermScreen
 import com.example.onuldo_fe.data.auth.dto.TermType
 import com.example.onuldo_fe.data.network.SessionEvents
+import com.example.onuldo_fe.viewmodel.OnboardingDraft
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.onuldo_fe.camera.PhotoPreviewScreen
@@ -68,6 +68,11 @@ fun OnuldoApp() {
 
     NavHost(navController = navController, startDestination = debugStartDestination) {
         composable(Routes.LANDING) {
+            // 랜딩 도착 = 온보딩을 시작 전이거나 중도 이탈했다는 뜻.
+            // 뒤로가기 이탈·로그아웃·세션 만료가 모두 이곳으로 모이므로, 메모리에 남은
+            // 이메일·비밀번호를 여기서 지운다. (OnboardingDraft는 프로세스 전역 object다.)
+            LaunchedEffect(Unit) { OnboardingDraft.clear() }
+
             LandingScreen(
                 onLoginClick = { navController.navigate(Routes.LOGIN) },
                 onSignupClick = { navController.navigate(Routes.SIGNUP) },
@@ -119,6 +124,10 @@ fun OnuldoApp() {
             )
         }
         composable(Routes.MAIN) {
+            // 메인 도착 = 온보딩 종료. 가입 경로는 ProfileSetupViewModel이 이미 비웠지만,
+            // 회원가입을 입력하다 로그인으로 되돌아가 로그인한 경우가 남는다.
+            LaunchedEffect(Unit) { OnboardingDraft.clear() }
+
             MainScreen(
                 onNavigate = { route -> navController.navigate(route) },
                 // 로그아웃 시 온보딩 백스택을 모두 비우고 랜딩으로 되돌린다.
@@ -134,11 +143,26 @@ fun OnuldoApp() {
         composable(Routes.MYPAGE_PROFILE) {
             ProfileSettingsScreen(
                 onBack = { navController.popBackStack() },
-                onNicknameClick = { navController.navigate(Routes.MYPAGE_NICKNAME) },
+                onNicknameClick = { nickname ->
+                    navController.navigate(Routes.mypageNickname(nickname))
+                },
             )
         }
-        composable(Routes.MYPAGE_NICKNAME) {
-            NicknameEditScreen(onBack = { navController.popBackStack() })
+        composable(
+            route = Routes.MYPAGE_NICKNAME,
+            arguments = listOf(
+                navArgument(Routes.MYPAGE_NICKNAME_ARG) {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+            ),
+        ) { backStackEntry ->
+            NicknameEditScreen(
+                currentNickname = backStackEntry.arguments
+                    ?.getString(Routes.MYPAGE_NICKNAME_ARG)
+                    .orEmpty(),
+                onBack = { navController.popBackStack() },
+            )
         }
         composable(Routes.MYPAGE_WALLET) {
             PointWalletScreen(

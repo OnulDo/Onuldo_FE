@@ -34,12 +34,15 @@ import com.example.onuldo_fe.utils.Validators
  * 닉네임 변경 — Figma node `4019:4540`.
  * 설계서 규칙(2~8자 한글/영문/숫자, 특수문자 불가). 유효하고 기존과 다르면 '변경하기' 활성.
  *
- * TODO: 서버 닉네임 중복확인("이미 사용 중인 닉네임이에요") 연동.
+ * [currentNickname]은 프로필 설정 화면이 이미 조회한 값을 라우트 인자로 넘겨받는다.
+ *
+ * TODO: 서버에 프로필 수정 API(`PATCH /api/users/me/profile`)가 없어 **입력값이 저장되지 않는다.**
+ *       API가 생기면 '변경하기'에 연동하고, 닉네임 중복확인("이미 사용 중인 닉네임이에요")도 함께 붙인다.
  */
 @Composable
 fun NicknameEditScreen(
     onBack: () -> Unit,
-    currentNickname: String = "오늘두",
+    currentNickname: String = "",
 ) {
     var nickname by remember { mutableStateOf(currentNickname) }
     val isValid = Validators.isValidNickname(nickname)
