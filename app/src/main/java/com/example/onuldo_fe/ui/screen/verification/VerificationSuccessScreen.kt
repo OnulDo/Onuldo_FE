@@ -40,9 +40,6 @@ fun VerificationSuccessScreen(onConfirmClick: () -> Unit = {}) {
                     .padding(top = 27.dp)
                     .height(48.dp)
             ) {
-                OnulDoBackButton(
-                    modifier = Modifier.align(Alignment.CenterStart)
-                )
                 Text(
                     text = "인증 결과",
                     color = BlackBrown,
