@@ -82,7 +82,6 @@ fun DetailRoute(
             modifier = modifier
         )
     } else {
-        // 로딩 중이거나, 에러 직후(곧 위 LaunchedEffect가 목록으로 되돌림)
         DetailLoading(modifier)
     }
 }

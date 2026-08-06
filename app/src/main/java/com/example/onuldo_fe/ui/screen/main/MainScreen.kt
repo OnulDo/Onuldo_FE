@@ -21,7 +21,7 @@ import androidx.navigation.navArgument
 import com.example.onuldo_fe.navigation.BottomTab
 import com.example.onuldo_fe.navigation.Routes
 import com.example.onuldo_fe.ui.component.OnuldoBottomBar
-import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryScreen
+import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryRoute
 import com.example.onuldo_fe.ui.screen.home.HomeRoute
 import com.example.onuldo_fe.ui.screen.mypage.MyMainScreen
 import com.example.onuldo_fe.ui.screen.party.PartyRoute
@@ -94,7 +94,7 @@ fun MainScreen(
                 )
             }
             composable(BottomTab.Challenge.route) {
-                GalleryScreen(
+                GalleryRoute(
                     onChallengeClick = { challenge ->
                         onNavigate(Routes.challengeDetail(challenge.id))
                     },
