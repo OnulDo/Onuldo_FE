@@ -11,3 +11,4 @@ object ChallengeRepositoryProvider {
 
     fun provide(): ChallengeRepository = ChallengeRepositoryImpl(api)
 }
+

@@ -11,18 +11,23 @@ enum class HomeContentMode { Empty, Default, AllCompleted }
 
 data class HomeUiState(
     val userName: String = "",
+    val userProfileImageUrl: String? = null,
     val todayChallenge: TodayChallenge? = null,
     val partyChallenges: List<HomePartyChallenge> = emptyList(),
     val challenges: List<HomeChallenge> = emptyList(),
     val completedChallenges: List<HomeCompletedChallenge> = emptyList(),
-    val settlementBanner: SettlementBanner? = null
+    val settlementBanner: SettlementBanner? = null,
+    val hasLoadedHome: Boolean = false,
+    val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
+    val errorMessage: String? = null
 ) {
     // 홈 API 데이터 조합에 따른 화면 상태 결정
     val contentMode: HomeContentMode
         get() = when {
             todayChallenge?.let {
                 it.totalCount > 0 && it.completedCount >= it.totalCount
-            } == true -> HomeContentMode.AllCompleted
+            } == true && completedChallenges.isNotEmpty() -> HomeContentMode.AllCompleted
             todayChallenge == null &&
                 partyChallenges.isEmpty() &&
                 challenges.isEmpty() &&
@@ -38,6 +43,7 @@ data class HomeUiState(
 // Repository 모델을 화면용 UI 상태로 변환
 internal fun HomeData.toUiState() = HomeUiState(
     userName = userName,
+    userProfileImageUrl = userProfileImageUrl,
     todayChallenge = todayChallenge,
     partyChallenges = partyChallenges,
     challenges = challenges,

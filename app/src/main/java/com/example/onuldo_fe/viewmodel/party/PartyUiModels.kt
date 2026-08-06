@@ -27,7 +27,8 @@ enum class InviteCodeError(val message: String) {
     Invalid("잘못된 초대코드예요. 코드를 다시 확인해주세요."), // 존재하지 않거나 형식이 잘못된 코드
     AlreadyStarted("이미 시작된 파티예요."),                    // 이미 챌린지를 시작하여 사용할 수 없는 코드
     Full("파티 인원이 가득 찼어요."),                          // 설정된 모집 최대 인원에 도달한 파티
-    Expired("만료된 초대코드예요.")                            // 파티 해체 등으로 만료된 코드
+    Expired("만료된 초대코드예요."),                           // 파티 해체 등으로 만료된 코드
+    Unknown("파티 참여 요청을 처리하지 못했어요.")             // 아직 분류되지 않은 서버 오류
 }
 
 // 파티 대기방의 파티원 카드에 표시할 정보
@@ -80,7 +81,8 @@ data class PartyWaitingRoomUi(
     // 서버 응답값을 그대로 사용해 로그인 사용자의 파티장 UI를 결정한다.
     val isHost: Boolean = true,
     // 서버가 인원과 준비 상태를 검증해 내려준 시작 가능 여부다.
-    val canStart: Boolean = true
+    val canStart: Boolean = true,
+    val status: PartyStatus = PartyStatus.Recruiting // 폴링으로 갱신되는 현재 파티 상태
 )
 
 // 파티 목록 화면과 Preview에서 사용하는 fake 파티 카드 데이터

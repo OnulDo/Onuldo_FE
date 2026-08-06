@@ -86,16 +86,18 @@ fun HomeChallengeCard(
                     lineHeight = 21.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    // 서버의 상태와 연속 성공 일수로 카드 보조 문구 구성
-                    text = challenge.subtitleText(),
-                    color = DarkBrown50,
-                    fontFamily = Pretendard,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
-                )
+                challenge.subtitleTextOrNull()?.let { subtitle ->
+                    // 0일 연속 성공이면 문구와 간격을 모두 숨긴다.
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = subtitle,
+                        color = DarkBrown50,
+                        fontFamily = Pretendard,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1
+                    )
+                }
             }
 
             Text(
@@ -235,9 +237,10 @@ private fun ChallengeStatus.actionTextRes(): Int = when (this) {
 }
 
 @Composable
-private fun HomeChallenge.subtitleText(): String = when (status) {
+private fun HomeChallenge.subtitleTextOrNull(): String? = when (status) {
     ChallengeStatus.NeedCertification,
-    ChallengeStatus.Success -> stringResource(R.string.home_challenge_streak, streakDays)
+    ChallengeStatus.Success -> streakDays.takeIf { it > 0 }
+        ?.let { stringResource(R.string.home_challenge_streak, it) }
     ChallengeStatus.WaitingReview -> stringResource(R.string.home_challenge_waiting)
     ChallengeStatus.Failed -> stringResource(R.string.home_challenge_streak_broken)
 }

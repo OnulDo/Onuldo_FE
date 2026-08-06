@@ -61,4 +61,5 @@ private fun PartyJoinError.toUiError() = when (this) {
     PartyJoinError.AlreadyStarted -> InviteCodeError.AlreadyStarted
     PartyJoinError.Full -> InviteCodeError.Full
     PartyJoinError.Expired -> InviteCodeError.Expired
+    PartyJoinError.Unknown -> InviteCodeError.Unknown
 }
