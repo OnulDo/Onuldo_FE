@@ -9,6 +9,7 @@ import com.example.onuldo_fe.model.user.PointTransaction
 import com.example.onuldo_fe.model.user.WalletSummary
 import com.example.onuldo_fe.repository.user.UserRepository
 import com.example.onuldo_fe.repository.user.UserRepositoryProvider
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -52,6 +53,16 @@ class PointWalletViewModel(
     private var nextCursor: String? = null
 
     /**
+     * 진행 중인 조회. 새 조회를 시작하기 전에 취소해, 늦게 도착한 옛 응답이
+     * 최신 목록과 [nextCursor]를 덮어쓰지 못하게 한다.
+     *
+     * [load]는 화면이 보일 때마다 불리므로 필터 변경·다음 페이지 요청과 쉽게 겹친다.
+     * (예: 필터를 바꾼 직후 화면이 다시 RESUME되면 두 조회가 동시에 돈다.)
+     */
+    private var loadJob: Job? = null
+    private var loadMoreJob: Job? = null
+
+    /**
      * 요약과 거래내역을 함께 조회.
      *
      * 화면이 보일 때마다 호출된다(최초 진입 포함 — `PointWalletScreen`의 `RefreshOnResume`).
@@ -59,7 +70,7 @@ class PointWalletViewModel(
      * 목록에 들어와야 하므로 둘 다 새로 읽는다.
      */
     fun load() {
-        viewModelScope.launch {
+        loadJob = restartLoad {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             userRepository.getWalletSummary()
@@ -73,7 +84,18 @@ class PointWalletViewModel(
     fun selectFilter(filter: WalletFilter) {
         if (_uiState.value.selectedFilter == filter) return
         _uiState.update { it.copy(selectedFilter = filter, transactions = emptyList()) }
-        viewModelScope.launch { loadFirstPage() }
+        loadJob = restartLoad { loadFirstPage() }
+    }
+
+    /**
+     * 이전 조회(추가 로드 포함)를 모두 끊고 [block]을 새로 시작한다.
+     * 취소된 추가 로드는 `isLoadingMore`를 되돌리지 못하므로 여기서 함께 내린다.
+     */
+    private fun restartLoad(block: suspend () -> Unit): Job {
+        loadJob?.cancel()
+        loadMoreJob?.cancel()
+        _uiState.update { it.copy(isLoadingMore = false) }
+        return viewModelScope.launch { block() }
     }
 
     /** 목록 끝에 도달했을 때 다음 페이지를 이어 받는다. */
@@ -82,7 +104,7 @@ class PointWalletViewModel(
         val cursor = nextCursor
         if (state.isLoading || state.isLoadingMore || !state.hasNext || cursor == null) return
 
-        viewModelScope.launch {
+        loadMoreJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoadingMore = true) }
 
             userRepository.getWalletTransactions(

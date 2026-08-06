@@ -101,9 +101,11 @@ fun ProfileSettingsScreen(
                     )
                 }
                 // 편집 배지는 Figma 에셋(연필). 이모지를 쓰면 기기마다 모양이 달라진다.
+                // 아직 클릭 동작이 없어 장식으로만 두고 스크린리더에서 감춘다.
+                // (프로필 수정 API 연동 시 클릭과 함께 contentDescription을 되살릴 것.)
                 Image(
                     painter = painterResource(R.drawable.ic_profile_edit_badge),
-                    contentDescription = "프로필 사진 변경",
+                    contentDescription = null,
                     modifier = Modifier.size(32.dp),
                 )
             }

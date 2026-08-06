@@ -10,6 +10,7 @@ import com.example.onuldo_fe.repository.auth.AuthRepositoryProvider
 import com.example.onuldo_fe.repository.user.UserRepository
 import com.example.onuldo_fe.repository.user.UserRepositoryProvider
 import com.example.onuldo_fe.utils.formatPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,6 +36,8 @@ class MyMainViewModel(
     private val _uiState = MutableStateFlow(MyMainUiState())
     val uiState: StateFlow<MyMainUiState> = _uiState.asStateFlow()
 
+    private var loadJob: Job? = null
+
     /**
      * 프로필·보유 포인트 조회.
      *
@@ -43,7 +46,10 @@ class MyMainViewModel(
      * 다른 화면에서 일어난 변동도 이 시점에 반영된다.
      */
     fun load() {
-        viewModelScope.launch {
+        // 화면이 보일 때마다 불리므로 이전 조회가 아직 돌고 있을 수 있다.
+        // 끊지 않으면 늦게 온 옛 응답이 최신 잔액을 덮는다.
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             userRepository.getMyPage()

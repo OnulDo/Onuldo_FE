@@ -38,10 +38,14 @@ import com.example.onuldo_fe.ui.screen.mypage.component.AmountInputBox
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.ui.screen.mypage.component.PointCtaButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
+
+/** 출금 API 연동 여부. 서버에 엔드포인트가 생기면 true로 바꾼다. */
+private const val WITHDRAW_API_READY = false
 
 private data class WithdrawPreset(val label: String, val value: Int)
 
@@ -133,10 +137,23 @@ fun PointWithdrawScreen(
             Spacer(Modifier.height(24.dp))
         }
 
+        // 이체할 수단이 없는데 화면만 닫으면 사용자는 출금이 접수된 줄 안다.
+        // API가 붙기 전까지는 눌리지 않게 두고 이유를 밝힌다.
+        if (!WITHDRAW_API_READY) {
+            Text(
+                text = "서버 연동 준비 중이라 아직 출금할 수 없어요",
+                fontFamily = Pretendard,
+                fontWeight = FontWeight.Medium,
+                fontSize = 13.sp,
+                color = DarkBrown70,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+            )
+        }
+
         PointCtaButton(
             text = "출금하기",
-            enabled = amount > 0,
-            onClick = { /* TODO: 서버 출금 API 추가 후 연결 */ onBack() },
+            enabled = WITHDRAW_API_READY && amount > 0,
+            onClick = { /* TODO: 서버 출금 API 연동 시 성공 응답에서만 onBack() */ },
         )
     }
 }
