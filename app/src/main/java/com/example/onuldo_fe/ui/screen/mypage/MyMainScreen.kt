@@ -36,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.component.RefreshOnResume
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageMenuRow
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
@@ -61,7 +62,6 @@ fun MyMainScreen(
     onWalletClick: () -> Unit,
     onChargeClick: () -> Unit,
     onWithdrawClick: () -> Unit,
-    onAccountClick: () -> Unit,
     onNotificationClick: () -> Unit,
     onTermClick: (TermType) -> Unit = {},
     onLoggedOut: () -> Unit = {},
@@ -71,6 +71,10 @@ fun MyMainScreen(
     val nickname = state.nickname
     val email = state.email
     val point = state.pointText
+
+    // 충전·챌린지 참여 등으로 보유 포인트가 바뀐 뒤 이 탭으로 돌아올 수 있다. ViewModel은
+    // 백스택에 살아 있어 한 번 조회한 값이 그대로 남으므로, 화면이 보일 때마다 새로 읽는다.
+    RefreshOnResume { viewModel.load() }
 
     Column(
         modifier = Modifier
@@ -99,8 +103,6 @@ fun MyMainScreen(
         SectionLabel("설정")
         //알림 이동 추가 (시온)
         MenuCard(title = "알림 설정", onClick = onNotificationClick)
-        Spacer(Modifier.height(10.dp))
-        MenuCard(title = "출금 계좌 관리", onClick = onAccountClick)
 
         Spacer(Modifier.height(20.dp))
 
@@ -191,12 +193,11 @@ private fun ProfileCard(nickname: String, email: String, onClick: () -> Unit) {
                 color = DarkBrown70,
             )
         }
-        Text(
-            text = "›",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            color = DarkBrown50,
+        // 화살표는 Figma 에셋으로 통일한다(문자 '›'는 화면마다 크기가 달라짐).
+        Image(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,
+            modifier = Modifier.size(width = 5.dp, height = 8.dp),
         )
     }
 }
@@ -322,7 +323,7 @@ private fun MyMainScreenPreview() {
     OnulDo_FETheme {
         MyMainScreen(
             onProfileClick = {}, onWalletClick = {}, onChargeClick = {},
-            onWithdrawClick = {}, onAccountClick = {}, onNotificationClick = {},
+            onWithdrawClick = {}, onNotificationClick = {},
         )
     }
 }

@@ -15,7 +15,6 @@ data class SignupUiState(
     val email: String = "",
     val password: String = "",
     val passwordConfirm: String = "",
-    val agreeAll: Boolean = false,
 ) {
     private val emailValid get() = Validators.isValidEmail(email)
     // 비밀번호는 이메일 포함 여부까지 검사(설계서 규칙). 닉네임은 회원가입 폼에 없어 미전달.
@@ -43,7 +42,8 @@ data class SignupUiState(
         get() = if (confirmError) "비밀번호가 일치하지 않습니다" else null
 
     val isContinueEnabled: Boolean
-        get() = emailValid && passwordValid && confirmMatched && agreeAll
+        // 약관 동의는 다음 단계(TermsAgreementScreen)에서 받으므로 여기서는 입력값만 본다.
+        get() = emailValid && passwordValid && confirmMatched
 }
 
 class SignupViewModel : ViewModel() {
@@ -57,12 +57,11 @@ class SignupViewModel : ViewModel() {
 
     fun onPasswordConfirmChange(value: String) = _uiState.update { it.copy(passwordConfirm = value) }
 
-    fun toggleAgreeAll() = _uiState.update { it.copy(agreeAll = !it.agreeAll) }
 
     /**
-     * 다음 단계(프로필 설정)로 진행.
+     * 다음 단계(약관 동의)로 진행.
      *
-     * 서버 회원가입 API는 닉네임까지 한 번에 받으므로 **여기서는 호출하지 않고**
+     * 서버 회원가입 API는 닉네임·약관까지 한 번에 받으므로 **여기서는 호출하지 않고**
      * 입력값을 [OnboardingDraft]에 넘겨 둔다. 실제 가입은 프로필 설정 완료 시점에 이뤄진다.
      */
     fun submit(onNext: () -> Unit) {
@@ -72,7 +71,8 @@ class SignupViewModel : ViewModel() {
         OnboardingDraft.saveCredentials(
             email = state.email,
             password = state.password,
-            agreedRequiredTerms = state.agreeAll,
+            // 동의 여부는 다음 화면에서 받아 OnboardingDraft에 다시 기록한다.
+            agreedRequiredTerms = false,
         )
         onNext()
     }

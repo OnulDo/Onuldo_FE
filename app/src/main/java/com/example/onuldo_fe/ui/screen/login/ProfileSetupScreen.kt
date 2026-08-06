@@ -28,12 +28,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.AuthErrorBanner
 import com.example.onuldo_fe.ui.component.OnboardingBackHeader
 import com.example.onuldo_fe.ui.component.OnulDoButton
@@ -122,12 +124,12 @@ fun ProfileSetupScreen(
                         },
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = "+",
-                        color = Persimmon,
-                        fontFamily = Pretendard,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 44.sp,
+                    // 텍스트 '+'는 baseline 때문에 원 중앙에서 위로 치우친다. 도형 아이콘으로 정렬을 맞춘다.
+                    Image(
+                        painter = painterResource(R.drawable.ic_plus),
+                        contentDescription = "프로필 사진 선택",
+                        colorFilter = ColorFilter.tint(Persimmon),
+                        modifier = Modifier.size(40.dp),
                     )
                 }
             } else {
@@ -156,12 +158,11 @@ fun ProfileSetupScreen(
                         .border(2.dp, MaterialTheme.colorScheme.background, CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = "+",
-                        color = White,
-                        fontFamily = Pretendard,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
+                    Image(
+                        painter = painterResource(R.drawable.ic_plus),
+                        contentDescription = "프로필 사진 변경",
+                        colorFilter = ColorFilter.tint(White),
+                        modifier = Modifier.size(14.dp),
                     )
                 }
             }

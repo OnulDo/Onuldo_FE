@@ -7,22 +7,26 @@ object Routes {
     const val LANDING = "landing"
     const val LOGIN = "login"
     const val SIGNUP = "signup"
-    /** 소셜 신규 회원 약관 동의 (소셜 로그인에서 isNewUser=true일 때만 진입) */
-    const val SOCIAL_TERMS = "social_terms"
+    /** 약관 동의. 이메일 회원가입과 소셜 신규 가입이 공통으로 거친다. */
+    const val TERMS_AGREEMENT = "terms_agreement"
     const val PROFILE_SETUP = "profile_setup"
     const val WELCOME = "welcome"
     const val MAIN = "main"
 
     // 마이페이지 하위 화면 (메인 탭 위에 풀스크린으로 올라감)
     const val MYPAGE_PROFILE = "mypage_profile"
-    const val MYPAGE_NICKNAME = "mypage_nickname"
-    const val MYPAGE_PASSWORD = "mypage_password"
     const val MYPAGE_WALLET = "mypage_wallet"
     const val MYPAGE_CHARGE = "mypage_charge"
     const val MYPAGE_WITHDRAW = "mypage_withdraw"
-    const val MYPAGE_ACCOUNT = "mypage_account"
     //알림 설정 -> 알림 설정페이지 추가 (시온)
     const val MYPAGE_NOTIFICATION = "mypage_notification"
+
+    // 닉네임 변경 — 프로필 설정이 이미 조회해 둔 현재 닉네임을 넘겨 입력칸의 초기값으로 쓴다.
+    // (재조회하면 화면이 빈 칸으로 잠깐 떴다가 채워진다.) 한글이 들어가므로 Uri.encode 필요.
+    const val MYPAGE_NICKNAME_ARG = "nickname"
+    const val MYPAGE_NICKNAME = "mypage_nickname?$MYPAGE_NICKNAME_ARG={$MYPAGE_NICKNAME_ARG}"
+    fun mypageNickname(nickname: String) =
+        "mypage_nickname?$MYPAGE_NICKNAME_ARG=${Uri.encode(nickname)}"
 
     // 약관 상세 (서비스 이용약관·개인정보 처리방침·환급 정책) — termType을 인자로 받는다.
     const val MYPAGE_TERM = "mypage_term/{termType}"

@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,33 +38,40 @@ import com.example.onuldo_fe.ui.screen.mypage.component.AmountInputBox
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.ui.screen.mypage.component.PointCtaButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
 
+/** 출금 API 연동 여부. 서버에 엔드포인트가 생기면 true로 바꾼다. */
+private const val WITHDRAW_API_READY = false
+
 private data class WithdrawPreset(val label: String, val value: Int)
 
 private val withdrawPresets = listOf(
     WithdrawPreset("전액", 45_000),
-    WithdrawPreset("1만", 10_000),
-    WithdrawPreset("3만", 30_000),
-    WithdrawPreset("4.5만", 45_000),
+    WithdrawPreset("10,000P", 10_000),
+    WithdrawPreset("30,000P", 30_000),
+    WithdrawPreset("45,000P", 45_000),
 )
 
 /**
- * 포인트 출금 (v2) — Figma node `4019:4313`.
- * 출금 가능 금액 + 금액 입력/칩 + 보낼 계좌 + 도착 예정 안내.
+ * 포인트 출금 — Figma node `5154:3517`.
+ * 출금 가능 금액 + 금액 입력/칩 + 보낼 곳.
  *
- * 값은 더미. TODO: 실제 출금(이체) 연동.
+ * 출금은 충전과 달리 칩이 **금액을 지정**한다(가산이 아님).
+ * 값은 더미. TODO: 서버에 출금 API가 없어 실제 이체는 미연동.
  */
 @Composable
 fun PointWithdrawScreen(
     onBack: () -> Unit,
 ) {
-    var selectedPreset by remember { mutableIntStateOf(2) } // 기본 3만 = 30,000
+    // 0에서 시작해 칩으로 금액을 지정한다(Figma 기본 상태가 0P).
+    var selectedPreset by remember { mutableStateOf<Int?>(null) }
 
-    val amountText = "%,d".format(withdrawPresets[selectedPreset].value)
+    val amount = selectedPreset?.let { withdrawPresets[it].value } ?: 0
+    val amountText = "%,d".format(amount)
 
     Column(
         modifier = Modifier
@@ -129,10 +137,23 @@ fun PointWithdrawScreen(
             Spacer(Modifier.height(24.dp))
         }
 
+        // 이체할 수단이 없는데 화면만 닫으면 사용자는 출금이 접수된 줄 안다.
+        // API가 붙기 전까지는 눌리지 않게 두고 이유를 밝힌다.
+        if (!WITHDRAW_API_READY) {
+            Text(
+                text = "서버 연동 준비 중이라 아직 출금할 수 없어요",
+                fontFamily = Pretendard,
+                fontWeight = FontWeight.Medium,
+                fontSize = 13.sp,
+                color = DarkBrown70,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+            )
+        }
+
         PointCtaButton(
-            text = "${amountText}원 출금",
-            enabled = true,
-            onClick = { /* TODO: 출금 신청 처리 후 지갑으로 복귀 */ onBack() },
+            text = "출금하기",
+            enabled = WITHDRAW_API_READY && amount > 0,
+            onClick = { /* TODO: 서버 출금 API 연동 시 성공 응답에서만 onBack() */ },
         )
     }
 }

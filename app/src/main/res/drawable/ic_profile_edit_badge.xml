@@ -1,0 +1,26 @@
+<!--
+  프로필 아바타 편집 배지. Figma node 4837:2423(원형 배지) + 4837:2424(연필) 합성.
+  배지 32×32: Persimmon 원 + HeaderCream 3px 테두리, 안쪽에 11×11 연필.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+    <!-- 배지 원 (r=14.5, stroke 3) -->
+    <path
+        android:pathData="M16,1.5 A14.5,14.5 0 1,1 15.99,1.5 Z"
+        android:fillColor="#FC6B2B"
+        android:strokeColor="#FFFCF6"
+        android:strokeWidth="3" />
+
+    <!-- 연필 (원본 11×11을 배지 중앙에 배치) -->
+    <group
+        android:translateX="10.5"
+        android:translateY="10.5">
+        <path
+            android:pathData="M8.9238 0C8.77566 0 8.62736 0.0564292 8.51447 0.169613L7.5262 1.15789L9.84196 3.47368L10.8302 2.4854C11.0566 2.25903 11.0566 1.89252 10.8302 1.66674L9.33313 0.169613C9.21994 0.0564292 9.07194 0 8.9238 0ZM6.6578 2.02632L0 8.68421V11H2.31576L8.97355 4.34211L6.6578 2.02632Z"
+            android:fillColor="#FFFCFA" />
+    </group>
+</vector>

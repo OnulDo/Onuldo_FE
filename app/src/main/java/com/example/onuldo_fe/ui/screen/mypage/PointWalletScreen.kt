@@ -14,20 +14,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -39,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.user.dto.PointTransactionTypeDto
 import com.example.onuldo_fe.model.user.PointTransaction
 import com.example.onuldo_fe.model.user.WalletSummary
+import com.example.onuldo_fe.ui.component.RefreshOnResume
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.utils.formatAmount
 import com.example.onuldo_fe.utils.formatPoint
@@ -46,6 +44,8 @@ import com.example.onuldo_fe.utils.formatSignedAmount
 import com.example.onuldo_fe.viewmodel.mypage.PointWalletViewModel
 import com.example.onuldo_fe.viewmodel.mypage.WalletFilter
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.DarkBrown40
+import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -125,15 +125,8 @@ fun PointWalletScreen(
     val visibleTx = state.transactions.map { it.toTx() }
 
     // 충전 화면에서 돌아오면 잔액·내역이 바뀌어 있다. ViewModel은 백스택에 살아 있어
-    // init의 load()가 다시 불리지 않으므로, 화면이 다시 보일 때마다 새로 읽는다.
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) viewModel.load()
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
+    // 한 번 조회한 값이 그대로 남으므로, 화면이 보일 때마다 새로 읽는다(최초 진입 포함).
+    RefreshOnResume { viewModel.load() }
 
     Column(
         modifier = Modifier
@@ -282,13 +275,32 @@ private fun SettlementCard(summary: WalletSummary) {
             .border(1.dp, Color(0xFFF2EADF), RoundedCornerShape(14.dp))
             .padding(vertical = 14.dp, horizontal = 20.dp),
     ) {
-        Text(
-            text = "누적 정산 내역",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp,
-            color = BlackBrown,
-        )
+        // Figma(5652:2948): 평균 환급률은 카드 하단이 아니라 제목 오른쪽에 붙는다.
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "누적 정산 내역",
+                fontFamily = Pretendard,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                color = BlackBrown,
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(
+                text = "평균 환급률",
+                fontFamily = Pretendard,
+                fontWeight = FontWeight.Medium,
+                fontSize = 11.sp,
+                color = DarkBrown50,
+            )
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = "${summary.averageReturnRate}%",
+                fontFamily = Pretendard,
+                fontWeight = FontWeight.Bold,
+                fontSize = 11.sp,
+                color = Persimmon,
+            )
+        }
         Spacer(Modifier.height(16.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
             SettlementItem("총 예치", formatPoint(summary.totalDeposit), TxDark, Modifier.weight(1f))
@@ -303,24 +315,6 @@ private fun SettlementCard(summary: WalletSummary) {
                 "−${formatPoint(summary.totalPenalty)}",
                 Color(0xFFDC3F3F),
                 Modifier.weight(1f),
-            )
-        }
-        Spacer(Modifier.height(18.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "평균 환급률",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Medium,
-                fontSize = 11.sp,
-                color = Color(0xFF6E5B49),
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = "${summary.averageReturnRate}%",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                color = Persimmon,
             )
         }
     }
@@ -356,8 +350,9 @@ private fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit, mod
         modifier = modifier
             .height(32.dp)
             .clip(RoundedCornerShape(999.dp))
-            .background(if (selected) BlackBrown else White)
-            .then(if (selected) Modifier else Modifier.border(1.dp, Color(0xFFE5DDD0), RoundedCornerShape(999.dp)))
+            // Figma(5652:2948): 선택 칩은 검정이 아니라 Persimmon 채움.
+            .background(if (selected) Persimmon else White)
+            .then(if (selected) Modifier else Modifier.border(1.dp, DarkBrown40, RoundedCornerShape(999.dp)))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -366,7 +361,7 @@ private fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit, mod
             fontFamily = Pretendard,
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
-            color = if (selected) White else Color(0xFF3B2D22),
+            color = if (selected) White else BlackBrown,
         )
     }
 }
