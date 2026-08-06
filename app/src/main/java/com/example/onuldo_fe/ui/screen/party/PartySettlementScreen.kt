@@ -191,7 +191,7 @@ private fun SettlementSummaryCard(
             .border(BorderStroke(1.dp, Persimmon.copy(alpha = 0.2f)), RoundedCornerShape(14.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        SettlementAmount("도전금 환급", refundAmount, refundLabelColor, BlackBrown, Modifier.weight(1f))
+        SettlementAmount("도전금", refundAmount, refundLabelColor, BlackBrown, Modifier.weight(1f))
         SettlementAmount(adjustmentLabel, adjustmentAmount, adjustmentColor, adjustmentColor, Modifier.weight(1f))
     }
 }
