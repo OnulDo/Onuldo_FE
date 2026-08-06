@@ -39,7 +39,8 @@ import com.example.onuldo_fe.ui.theme.Red2
 @Composable
 fun VerificationFailureScreen(
     failureReason: String = "사진이 챌린지 인증 조건을 충족하지 못했어요.",
-    onRetryClick: () -> Unit = {}
+    onRetryClick: () -> Unit = {},
+    onManualReviewClick: () -> Unit = {}
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -166,7 +167,7 @@ fun VerificationFailureScreen(
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier
                     .padding(top = 7.dp)
-                    .clickable{ }
+                    .clickable(onClick = onManualReviewClick)
             )
         }
 
