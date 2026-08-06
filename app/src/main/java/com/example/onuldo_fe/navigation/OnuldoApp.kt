@@ -333,10 +333,7 @@ fun OnuldoApp() {
                 status = VerificationStatus.FAILURE,
                 failureReason = (state as? com.example.onuldo_fe.camera.VerificationSubmitState.Failure)?.message.orEmpty(),
                 onManualReviewClick = {
-                    cameraViewModel.clearSubmitState()
-                    navController.navigate(Routes.VERIFICATION_WAITING) {
-                        popUpTo(Routes.VERIFICATION_FAIL) { inclusive = true }
-                    }
+                    navController.navigate(Routes.VERIFICATION_WAITING)
                 },
                 onRetryClick = {
                     cameraViewModel.activeChallengeId?.let { challengeId ->
