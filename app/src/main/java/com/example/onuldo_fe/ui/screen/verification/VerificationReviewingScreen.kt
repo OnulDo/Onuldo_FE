@@ -33,7 +33,9 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun VerificationReviewingScreen() {
+fun VerificationReviewingScreen(
+    isResultReady: Boolean = false
+) {
     val steps = listOf(
         "사진 메타데이터 검증",
         "AI 이미지 전송",
@@ -42,13 +44,20 @@ fun VerificationReviewingScreen() {
         "챌린지 조건 분석",
         "최종 결과 판정"
     )
-    var completedStepCount by remember { mutableIntStateOf(0) }
+    var animatedStepCount by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
-        steps.indices.forEach { index ->
-            delay(700L)
-            completedStepCount = index + 1
+        // 서버가 단계별 진행률을 제공하지 않으므로 앞의 5단계만 안내용으로 순차 표시한다.
+        repeat(steps.lastIndex) { index ->
+            delay(300L)
+            animatedStepCount = index + 1
         }
+    }
+
+    val completedStepCount = when {
+        animatedStepCount < steps.lastIndex -> animatedStepCount
+        isResultReady -> steps.size
+        else -> steps.lastIndex
     }
 
     Box(modifier = Modifier.fillMaxSize()) {

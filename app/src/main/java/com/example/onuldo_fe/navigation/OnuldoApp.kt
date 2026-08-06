@@ -41,6 +41,7 @@ import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
 import kotlinx.coroutines.delay
 
 private const val MINIMUM_REVIEWING_DURATION_MILLIS = 2_000L
+private const val FINAL_REVIEW_STEP_DISPLAY_MILLIS = 300L
 
 /** 마이 메뉴 이름. 서버가 약관 제목을 주기 전까지 상단바에 쓴다. */
 private fun termTitleOf(termType: TermType): String = when (termType) {
@@ -317,15 +318,17 @@ fun OnuldoApp() {
         composable(Routes.VERIFICATION_REVIEWING) {
             val submitState by cameraViewModel.submitState.collectAsState()
             val reviewingStartedAt = remember { SystemClock.elapsedRealtime() }
-
-            LaunchedEffect(submitState) {
-                val isFinalResult = submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Success ||
+            val isReviewResultReady =
+                submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Success ||
                     submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Failure ||
                     submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Waiting
 
-                if (isFinalResult) {
+            LaunchedEffect(submitState) {
+                if (isReviewResultReady) {
                     val elapsedTime = SystemClock.elapsedRealtime() - reviewingStartedAt
-                    delay((MINIMUM_REVIEWING_DURATION_MILLIS - elapsedTime).coerceAtLeast(0L))
+                    val remainingMinimumDuration =
+                        (MINIMUM_REVIEWING_DURATION_MILLIS - elapsedTime).coerceAtLeast(0L)
+                    delay(maxOf(remainingMinimumDuration, FINAL_REVIEW_STEP_DISPLAY_MILLIS))
                 }
 
                 when (submitState) {
@@ -347,7 +350,10 @@ fun OnuldoApp() {
                 }
             }
 
-            ChallengeVerificationScreen(status = VerificationStatus.REVIEWING)
+            ChallengeVerificationScreen(
+                status = VerificationStatus.REVIEWING,
+                isReviewResultReady = isReviewResultReady
+            )
         }
 
         composable(Routes.VERIFICATION_SUCCESS) {

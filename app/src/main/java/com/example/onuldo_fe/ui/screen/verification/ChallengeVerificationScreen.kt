@@ -8,10 +8,13 @@ fun ChallengeVerificationScreen(
     failureReason: String = "",
     onConfirmClick: () -> Unit = {},
     onRetryClick: () -> Unit = {},
-    onManualReviewClick: () -> Unit = {}
+    onManualReviewClick: () -> Unit = {},
+    isReviewResultReady: Boolean = false
 ) {
     when (status) {
-        VerificationStatus.REVIEWING -> VerificationReviewingScreen()
+        VerificationStatus.REVIEWING -> VerificationReviewingScreen(
+            isResultReady = isReviewResultReady
+        )
         VerificationStatus.SUCCESS -> VerificationSuccessScreen(onConfirmClick = onConfirmClick)
         VerificationStatus.FAILURE -> VerificationFailureScreen(
             failureReason = failureReason,
