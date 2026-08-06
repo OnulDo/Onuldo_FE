@@ -30,6 +30,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Persimmon20
@@ -40,6 +41,8 @@ import com.example.onuldo_fe.ui.theme.White
 fun VerificationWaitingScreen(
     onConfirmClick: () -> Unit = {}
 ) {
+    val spacing = LocalSpacing.current
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -64,37 +67,37 @@ fun VerificationWaitingScreen(
                     textAlign = TextAlign.Center
                 )
             }
+            Spacer(modifier = Modifier.height(spacing.spacing48))
 
             Image(
                 painter = painterResource(id = R.drawable.verification_waiting_icon),
                 contentDescription = "인증 대기 아이콘",
                 modifier = Modifier
-                    .padding(top = 57.dp)
                     .size(120.dp)
             )
+            Spacer(modifier = Modifier.height(spacing.spacing8))
 
             Text(
                 text = "인증 검토 중이에요",
                 color = BlackBrown,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 24.dp),
+                    .fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
+            Spacer(modifier = Modifier.height(spacing.spacing10))
 
             Text(
                 text = "AI가 판단하기 어려운 사진이라\n운영팀에서 직접 확인하고 있어요.",
                 color = DarkBrown70,
                 style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(top = 8.dp),
                 textAlign = TextAlign.Center
             )
 
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 61.dp),
+                    .padding(top = 59.dp), // 디자인시스템 미적용 (추후 다시 적용)
                 shape = RoundedCornerShape(size = 14.dp),
                 color = Persimmon10,
                 border = BorderStroke(
@@ -145,10 +148,11 @@ fun VerificationWaitingScreen(
                 }
             }
 
+            Spacer(modifier = Modifier.height(spacing.spacing16))
+
             Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
+                    .fillMaxWidth(),
                 shape = RoundedCornerShape(size = 14.dp),
                 color = White,
                 border = BorderStroke(
