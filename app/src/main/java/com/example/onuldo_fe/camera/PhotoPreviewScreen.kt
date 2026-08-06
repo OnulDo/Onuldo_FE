@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.onuldo_fe.camera.component.CameraTopBar
 import com.example.onuldo_fe.camera.component.PreviewBottomBar
@@ -39,20 +38,20 @@ fun PhotoPreviewScreen(
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize().background(Color.Black)
     ) {
-        val cameraHeight = maxWidth * 4f / 3f
-        val cameraTop = (maxHeight - cameraHeight) / 2f
-        val cameraBottom = cameraTop + cameraHeight
-        val bottomAreaHeight = (maxHeight - cameraBottom).coerceAtLeast(0.dp)
+        val layoutDimensions = calculateCameraLayoutDimensions(maxWidth, maxHeight)
 
         AsyncImage(
             model = imageUri,
             contentDescription = "촬영한 사진",
-            modifier = Modifier.fillMaxWidth().aspectRatio(3f / 4f).align(Alignment.Center),
+            modifier = Modifier
+                .height(layoutDimensions.previewHeight)
+                .aspectRatio(3f / 4f)
+                .align(Alignment.Center),
             contentScale = ContentScale.Fit
         )
 
         Box(
-            modifier = Modifier.fillMaxWidth().height(cameraTop.coerceAtLeast(0.dp))
+            modifier = Modifier.fillMaxWidth().height(layoutDimensions.topAreaHeight)
                 .align(Alignment.TopCenter).statusBarsPadding(),
             contentAlignment = Alignment.Center
         ) {
@@ -65,7 +64,7 @@ fun PhotoPreviewScreen(
         }
 
         Box(
-            modifier = Modifier.fillMaxWidth().height(bottomAreaHeight)
+            modifier = Modifier.fillMaxWidth().height(layoutDimensions.bottomAreaHeight)
                 .align(Alignment.BottomCenter).navigationBarsPadding(),
             contentAlignment = Alignment.Center
         ) {

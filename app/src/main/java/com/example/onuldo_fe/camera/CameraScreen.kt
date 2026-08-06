@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.onuldo_fe.camera.component.CameraBottomBar
 import com.example.onuldo_fe.camera.component.CameraPreview
@@ -81,10 +80,7 @@ fun CameraScreen(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        val cameraHeight = maxWidth * 4f / 3f
-        val cameraTop = (maxHeight - cameraHeight) / 2f
-        val cameraBottom = cameraTop + cameraHeight
-        val bottomAreaHeight = (maxHeight - cameraBottom).coerceAtLeast(0.dp)
+        val layoutDimensions = calculateCameraLayoutDimensions(maxWidth, maxHeight)
 
         // 카메라 프리뷰
         key(lensFacing) {
@@ -92,7 +88,7 @@ fun CameraScreen(
                 imageCapture = imageCapture,
                 lensFacing = lensFacing,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .height(layoutDimensions.previewHeight)
                     .aspectRatio(3f / 4f)
                     .align(Alignment.Center)
             )
@@ -105,7 +101,7 @@ fun CameraScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(cameraTop.coerceAtLeast(0.dp))
+                .height(layoutDimensions.topAreaHeight)
                 .align(Alignment.TopCenter)
                 .statusBarsPadding(),
             contentAlignment = Alignment.Center
@@ -133,7 +129,7 @@ fun CameraScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(bottomAreaHeight)
+                .height(layoutDimensions.bottomAreaHeight)
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding(),
             contentAlignment = Alignment.Center
