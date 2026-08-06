@@ -14,7 +14,9 @@ data class HomePartyChallenge(
     val verifiedAt: LocalTime? = null,        // 인증 완료 시간
     val remainingMinutes: Int? = null,        // 인증 마감까지 남은 시간(분)
     val canVerify: Boolean = true,            // 현재 인증 버튼 활성화 여부
-    val members: List<HomePartyMember> = emptyList() // 파티원별 프로필과 오늘 인증 상태
+    val members: List<HomePartyMember> = emptyList(), // 파티원별 프로필과 오늘 인증 상태
+    val challengeId: Long? = null,             // 인증 API에 전달할 챌린지 ID
+    val category: String = ""                  // 카메라 TopBar에 표시할 카테고리
 )
 
 // 홈 파티 카드에 표시할 파티원 프로필 정보

@@ -56,7 +56,7 @@ fun HomeScreen(
     onNotificationClick: () -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
     onSettlementResultClick: (Long) -> Unit = {},
-    onVerifyClick: () -> Unit = {},
+    onVerifyClick: (Long, String, String) -> Unit = { _, _, _ -> },
     onRefresh: () -> Unit = {},
     scrollToTopKey: Int = 0,
     modifier: Modifier = Modifier
@@ -138,7 +138,7 @@ private fun HomeContent(
     uiState: HomeUiState,
     onNotificationClick: () -> Unit,
     onSettlementResultClick: (Long) -> Unit,
-    onVerifyClick: () -> Unit,
+    onVerifyClick: (Long, String, String) -> Unit,
     scrollToTopKey: Int
 ) {
     val spacing = LocalSpacing.current
@@ -202,7 +202,17 @@ private fun HomeContent(
                 HomePartyCard(
                     partyChallenge = partyChallenge,
                     modifier = Modifier.fillMaxWidth(),
-                    onVerifyClick = onVerifyClick
+                    onVerifyClick = {
+                        partyChallenge.challengeId
+                            ?.takeIf { it > 0L }
+                            ?.let { challengeId ->
+                                onVerifyClick(
+                                    challengeId,
+                                    partyChallenge.category,
+                                    partyChallenge.subtitle
+                                )
+                            }
+                    }
                 )
             }
         }
@@ -218,7 +228,13 @@ private fun HomeContent(
                 HomeChallengeCard(
                     challenge = challenge,
                     modifier = Modifier.fillMaxWidth(),
-                    onVerifyClick = onVerifyClick
+                    onVerifyClick = {
+                        challenge.challengeId
+                            ?.takeIf { it > 0L }
+                            ?.let { challengeId ->
+                                onVerifyClick(challengeId, challenge.category, challenge.title)
+                            }
+                    }
                 )
             }
         }

@@ -30,7 +30,7 @@ fun HomeRoute(
     viewModel: HomeViewModel = viewModel(),
     onSettlementResultClick: (Long) -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
-    onCameraNavigate: () -> Unit = {},
+    onCameraNavigate: (Long, String, String) -> Unit = { _, _, _ -> },
     refreshKey: Int = 0
 ) {
     val context = LocalContext.current
@@ -38,6 +38,9 @@ fun HomeRoute(
     var showNotification by rememberSaveable { mutableStateOf(false) }
     var showNotificationPermissionDialog by remember { mutableStateOf(false) }
     var showCameraPermissionDialog by rememberSaveable { mutableStateOf(false) }
+    var pendingChallengeId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var pendingCategory by rememberSaveable { mutableStateOf("") }
+    var pendingTitle by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(refreshKey) {
         if (refreshKey > 0) {
@@ -65,14 +68,19 @@ fun HomeRoute(
         }
     }
 
-    fun handleVerifyClick() {
+    fun handleVerifyClick(challengeId: Long, category: String, title: String) {
+        if (challengeId <= 0L) return
+        pendingChallengeId = challengeId
+        pendingCategory = category
+        pendingTitle = title
         val isCameraPermissionGranted = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.CAMERA
         ) == PackageManager.PERMISSION_GRANTED
 
         if (isCameraPermissionGranted) {
-            onCameraNavigate()
+            onCameraNavigate(challengeId, category, title)
+            pendingChallengeId = null
         } else {
             showCameraPermissionDialog = true
         }
@@ -88,7 +96,10 @@ fun HomeRoute(
 
                 if (isCameraPermissionGranted) {
                     showCameraPermissionDialog = false
-                    onCameraNavigate()
+                    pendingChallengeId?.let { challengeId ->
+                        onCameraNavigate(challengeId, pendingCategory, pendingTitle)
+                    }
+                    pendingChallengeId = null
                 }
             }
         }
@@ -131,7 +142,12 @@ fun HomeRoute(
     if (showCameraPermissionDialog) {
         PermissionSettingDialog(
             type = PermissionDialogType.CAMERA,
-            onDismiss = { showCameraPermissionDialog = false },
+            onDismiss = {
+                showCameraPermissionDialog = false
+                pendingChallengeId = null
+                pendingCategory = ""
+                pendingTitle = ""
+            },
             onMoveToSettings = { moveToAppSettings(context) }
         )
     }

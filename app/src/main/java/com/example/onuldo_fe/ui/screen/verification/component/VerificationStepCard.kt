@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
@@ -26,6 +28,7 @@ import com.example.onuldo_fe.ui.theme.White
 fun VerificationStepCard(
     icon: Int,
     title: String,
+    completed: Boolean = true,
 ) {
     Surface(
         modifier = Modifier
@@ -42,15 +45,22 @@ fun VerificationStepCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
+                .padding(horizontal = 14.dp, vertical = 10.dp)
+                .semantics(mergeDescendants = true) {
+                    stateDescription = if (completed) "완료" else "미완료"
+                },
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Image(
-                painter = painterResource(icon),
-                contentDescription = null,
-                modifier = Modifier.size(22.dp)
-            )
+            if (completed) {
+                Image(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp)
+                )
+            } else {
+                Spacer(modifier = Modifier.size(22.dp))
+            }
 
             Spacer(modifier = Modifier.width(9.dp))
 

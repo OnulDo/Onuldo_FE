@@ -164,7 +164,18 @@ internal fun List<RealHomeDailyChallengeDto>.toHomeData(
     // 서버의 참여 유형으로 개인과 파티 카드를 나눈다.
     val personalChallenges = filter { it.participationType == "PERSONAL" }
         .map { it.toPersonalModel(now) }
-    val partyChallenges = parties.map { it.toHomeModel(now, partyFeeds[it.partyId]) }
+    val partyDailyChallenges = filter { it.participationType == "PARTY" }
+        .mapNotNull { daily ->
+            daily.partyId?.let { partyId -> partyId to daily }
+        }
+        .toMap()
+    val partyChallenges = parties.map {
+        it.toHomeModel(
+            now = now,
+            feed = partyFeeds[it.partyId],
+            dailyChallenge = partyDailyChallenges[it.partyId]
+        )
+    }
     val completedCount = count(RealHomeDailyChallengeDto::verifiedOnDate)
 
     return HomeData(
@@ -196,13 +207,16 @@ private fun RealHomeDailyChallengeDto.toPersonalModel(now: LocalDateTime): HomeC
         status = toChallengeStatus(now.toLocalTime()),
         verifiedAt = null,
         remainingMinutes = deadline.remainingMinutesFrom(now.toLocalTime(), verifiedOnDate),
-        canVerify = canVerifyAt(now.toLocalTime())
+        canVerify = canVerifyAt(now.toLocalTime()),
+        challengeId = challengeId.takeIf { it > 0L },
+        category = category
     )
 }
 
 private fun RealPartySummaryDto.toHomeModel(
     now: LocalDateTime,
-    feed: PartyFeedDto?
+    feed: PartyFeedDto?,
+    dailyChallenge: RealHomeDailyChallengeDto?
 ): HomePartyChallenge {
     val deadline = verificationDeadline.toLocalTimeOrNull()
     val isDeadlinePassed = deadline?.let(now.toLocalTime()::isAfter) == true
@@ -225,7 +239,9 @@ private fun RealPartySummaryDto.toHomeModel(
                 defaultCharacterId = null,
                 isVerifiedToday = it.isVerifiedToday
             )
-        }
+        },
+        challengeId = dailyChallenge?.challengeId?.takeIf { it > 0L },
+        category = dailyChallenge?.category.orEmpty()
     )
 }
 
