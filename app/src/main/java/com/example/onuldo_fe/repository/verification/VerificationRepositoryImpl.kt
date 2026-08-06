@@ -74,7 +74,21 @@ class VerificationRepositoryImpl(
         val target = File.createTempFile("verification_upload_", ".jpg", context.cacheDir)
         try {
             context.contentResolver.openInputStream(this)?.use { input ->
-                target.outputStream().use(input::copyTo)
+                target.outputStream().use { output ->
+                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                    var copiedBytes = 0L
+
+                    while (true) {
+                        val readBytes = input.read(buffer)
+                        if (readBytes < 0) break
+
+                        copiedBytes += readBytes
+                        require(copiedBytes <= MAX_IMAGE_BYTES) {
+                            "사진은 비어 있지 않고 5MB 이하여야 합니다."
+                        }
+                        output.write(buffer, 0, readBytes)
+                    }
+                }
             } ?: error("사진 파일을 열 수 없습니다.")
             return target to true
         } catch (error: Throwable) {
