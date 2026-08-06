@@ -1,7 +1,11 @@
 package com.example.onuldo_fe.navigation
 
+import android.os.SystemClock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -34,6 +38,9 @@ import androidx.compose.runtime.getValue
 import com.example.onuldo_fe.camera.PhotoPreviewScreen
 import com.example.onuldo_fe.ui.screen.verification.ChallengeVerificationScreen
 import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
+import kotlinx.coroutines.delay
+
+private const val MINIMUM_REVIEWING_DURATION_MILLIS = 2_000L
 
 /** 마이 메뉴 이름. 서버가 약관 제목을 주기 전까지 상단바에 쓴다. */
 private fun termTitleOf(termType: TermType): String = when (termType) {
@@ -261,10 +268,26 @@ fun OnuldoApp() {
                 .orEmpty()
             val imageUri by cameraViewModel.imageUri.collectAsState()
             val submitState by cameraViewModel.submitState.collectAsState()
+            var hasStartedReviewNavigation by remember { mutableStateOf(false) }
 
             LaunchedEffect(submitState) {
-                if (submitState == com.example.onuldo_fe.camera.VerificationSubmitState.Reviewing) {
-                    navController.navigate(Routes.VERIFICATION_REVIEWING)
+                val shouldShowReviewing = when (submitState) {
+                    com.example.onuldo_fe.camera.VerificationSubmitState.Reviewing,
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Success,
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Failure,
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Waiting -> true
+                    else -> false
+                }
+
+                if (shouldShowReviewing && !hasStartedReviewNavigation) {
+                    hasStartedReviewNavigation = true
+                    navController.navigate(Routes.VERIFICATION_REVIEWING) {
+                        launchSingleTop = true
+                    }
+                } else if (submitState == com.example.onuldo_fe.camera.VerificationSubmitState.Idle ||
+                    submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Error
+                ) {
+                    hasStartedReviewNavigation = false
                 }
             }
 
@@ -291,8 +314,18 @@ fun OnuldoApp() {
 
         composable(Routes.VERIFICATION_REVIEWING) {
             val submitState by cameraViewModel.submitState.collectAsState()
+            val reviewingStartedAt = remember { SystemClock.elapsedRealtime() }
 
             LaunchedEffect(submitState) {
+                val isFinalResult = submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Success ||
+                    submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Failure ||
+                    submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Waiting
+
+                if (isFinalResult) {
+                    val elapsedTime = SystemClock.elapsedRealtime() - reviewingStartedAt
+                    delay((MINIMUM_REVIEWING_DURATION_MILLIS - elapsedTime).coerceAtLeast(0L))
+                }
+
                 when (submitState) {
                     is com.example.onuldo_fe.camera.VerificationSubmitState.Success ->
                         navController.navigate(Routes.VERIFICATION_SUCCESS) {
