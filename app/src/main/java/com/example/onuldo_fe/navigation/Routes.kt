@@ -74,11 +74,26 @@ object Routes {
 
     //카메라
     const val CAMERA_CHALLENGE_ID_ARG = "challengeId"
-    const val CAMERA = "camera/{$CAMERA_CHALLENGE_ID_ARG}"
-    fun camera(challengeId: Long) = "camera/$challengeId"
+    const val CAMERA_CATEGORY_ARG = "cameraCategory"
+    const val CAMERA_TITLE_ARG = "cameraTitle"
+    const val CAMERA = "camera/{$CAMERA_CHALLENGE_ID_ARG}" +
+        "?$CAMERA_CATEGORY_ARG={$CAMERA_CATEGORY_ARG}" +
+        "&$CAMERA_TITLE_ARG={$CAMERA_TITLE_ARG}"
+    fun camera(
+        challengeId: Long,
+        category: String = "시간 챌린지",
+        title: String = "오늘의 챌린지 인증"
+    ) = "camera/$challengeId" +
+        "?$CAMERA_CATEGORY_ARG=${Uri.encode(category)}" +
+        "&$CAMERA_TITLE_ARG=${Uri.encode(title)}"
 
-    const val PHOTO_PREVIEW = "photo_preview/{$CAMERA_CHALLENGE_ID_ARG}"
-    fun photoPreview(challengeId: Long) = "photo_preview/$challengeId"
+    const val PHOTO_PREVIEW = "photo_preview/{$CAMERA_CHALLENGE_ID_ARG}" +
+        "?$CAMERA_CATEGORY_ARG={$CAMERA_CATEGORY_ARG}" +
+        "&$CAMERA_TITLE_ARG={$CAMERA_TITLE_ARG}"
+    fun photoPreview(challengeId: Long, category: String, title: String) =
+        "photo_preview/$challengeId" +
+            "?$CAMERA_CATEGORY_ARG=${Uri.encode(category)}" +
+            "&$CAMERA_TITLE_ARG=${Uri.encode(title)}"
 
     //검증
     const val VERIFICATION_REVIEWING = "verification_reviewing"

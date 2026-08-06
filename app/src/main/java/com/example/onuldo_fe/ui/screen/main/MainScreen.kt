@@ -60,7 +60,9 @@ fun MainScreen(
         ) {
             composable(BottomTab.Home.route) {
                 HomeRoute(
-                    onCameraNavigate = { onNavigate(Routes.camera(2L)) },
+                    onCameraNavigate = { challengeId, category, title ->
+                        onNavigate(Routes.camera(challengeId, category, title))
+                    },
                     refreshKey = homeRefreshKey,
                     onBrowseChallengesClick = {
                         // 빈 홈 CTA에서 기존 챌린지 탭의 GalleryScreen으로 이동

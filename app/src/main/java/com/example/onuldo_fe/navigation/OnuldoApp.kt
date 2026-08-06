@@ -181,17 +181,35 @@ fun OnuldoApp() {
         // 카메라 촬영
         composable(
             route = Routes.CAMERA,
-            arguments = listOf(navArgument(Routes.CAMERA_CHALLENGE_ID_ARG) { type = NavType.LongType })
+            arguments = listOf(
+                navArgument(Routes.CAMERA_CHALLENGE_ID_ARG) { type = NavType.LongType },
+                navArgument(Routes.CAMERA_CATEGORY_ARG) {
+                    type = NavType.StringType
+                    defaultValue = "시간 챌린지"
+                },
+                navArgument(Routes.CAMERA_TITLE_ARG) {
+                    type = NavType.StringType
+                    defaultValue = "오늘의 챌린지 인증"
+                }
+            )
         ) { backStackEntry ->
             val challengeId = backStackEntry.arguments
                 ?.getLong(Routes.CAMERA_CHALLENGE_ID_ARG)
                 ?: return@composable
+            val category = backStackEntry.arguments
+                ?.getString(Routes.CAMERA_CATEGORY_ARG)
+                .orEmpty()
+            val title = backStackEntry.arguments
+                ?.getString(Routes.CAMERA_TITLE_ARG)
+                .orEmpty()
             CameraScreen(
-                category = "시간 챌린지",
-                title = "오늘의 챌린지 인증",
+                category = category,
+                title = title,
                 onPhotoCaptured = { uri ->
                     cameraViewModel.setImageUri(uri)
-                    navController.navigate(Routes.photoPreview(challengeId))
+                    navController.navigate(
+                        Routes.photoPreview(challengeId, category, title)
+                    )
                 },
                 onCloseClick = {
                     cameraViewModel.discardPhoto()
@@ -203,11 +221,27 @@ fun OnuldoApp() {
         // 촬영 사진 확인 및 제출
         composable(
             route = Routes.PHOTO_PREVIEW,
-            arguments = listOf(navArgument(Routes.CAMERA_CHALLENGE_ID_ARG) { type = NavType.LongType })
+            arguments = listOf(
+                navArgument(Routes.CAMERA_CHALLENGE_ID_ARG) { type = NavType.LongType },
+                navArgument(Routes.CAMERA_CATEGORY_ARG) {
+                    type = NavType.StringType
+                    defaultValue = "시간 챌린지"
+                },
+                navArgument(Routes.CAMERA_TITLE_ARG) {
+                    type = NavType.StringType
+                    defaultValue = "오늘의 챌린지 인증"
+                }
+            )
         ) { backStackEntry ->
             val challengeId = backStackEntry.arguments
                 ?.getLong(Routes.CAMERA_CHALLENGE_ID_ARG)
                 ?: return@composable
+            val category = backStackEntry.arguments
+                ?.getString(Routes.CAMERA_CATEGORY_ARG)
+                .orEmpty()
+            val title = backStackEntry.arguments
+                ?.getString(Routes.CAMERA_TITLE_ARG)
+                .orEmpty()
             val imageUri by cameraViewModel.imageUri.collectAsState()
             val submitState by cameraViewModel.submitState.collectAsState()
 
@@ -218,8 +252,8 @@ fun OnuldoApp() {
             }
 
             PhotoPreviewScreen(
-                category = "시간 챌린지",
-                title = "오늘의 챌린지 인증",
+                category = category,
+                title = title,
                 imageUri = imageUri,
                 onCloseClick = {
                     cameraViewModel.discardPhoto()
