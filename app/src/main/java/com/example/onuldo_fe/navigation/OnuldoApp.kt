@@ -410,8 +410,9 @@ fun OnuldoApp() {
             )
         }
 
-        // --- 챌린지 상세 흐름 (챌린지 탭 위 풀스크린): 상세 → 참여 → 시작 완료 ---
-        // 상세는 challengeId를 받아 API로 조회(DetailRoute). 참여/완료는 콜백으로 연동.
+        // --- 챌린지 상세 흐름: 상세 → 참여 ---
+        // challengeId 기반으로 상세 API를 조회한 뒤, CTA 동작은 호출부에서 처리한다.
+        // 챌린지 탭(참여 화면 이동)/파티 생성 흐름(선택 확정)에서 공통 재사용한다.
         composable(
             route = Routes.CHALLENGE_DETAIL,
             arguments = listOf(navArgument(Routes.CHALLENGE_DETAIL_ARG) { type = NavType.LongType })
@@ -420,10 +421,15 @@ fun OnuldoApp() {
             DetailRoute(
                 challengeId = challengeId,
                 onBackClick = { navController.popBackStack() },
-                onJoinClick = { title, description, category, timeStart, timeEnd ->
+                onActionClick = { data ->
                     navController.navigate(
                         Routes.challengeParticipate(
-                            challengeId, title, description, category, timeStart, timeEnd
+                            data.challengeId,
+                            data.title,
+                            data.description,
+                            data.category,
+                            data.timeStart,
+                            data.timeEnd
                         )
                     )
                 },

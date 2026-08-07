@@ -168,14 +168,13 @@ private fun ConditionBox(
     isSuccess: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // 고정 높이 대신 내용에 맞게 감싸도록 함 — 조건 개수/길이가 달라져도(실제 API 데이터)
-    // 잘리거나 간격이 깨지지 않고, 항목 간 간격은 항상 10dp로 일정하게 유지된다.
+    // 고정 높이 대신 내용에 맞게 감싸도록 함(조건 BOX) — 조건 개수/길이가 달라져도 ok(실제 API 데이터)
     Column(
         modifier = modifier
             .fillMaxWidth()       // 시트 폭에 맞춤 (부모 padding 20 기준 = 390 프레임에서 350)
             .clip(RoundedCornerShape(14.dp))
             .background(background)
-            .padding(start = 16.dp, end = 16.dp, top = 17.dp, bottom = 16.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
@@ -197,10 +196,10 @@ private fun ConditionBox(
 
         Spacer(Modifier.height(12.dp))   // 헤더 ↔ 목록
 
-        // 항목은 일정 간격(10dp)으로 배분 — 개수·줄바꿈에 따라 박스가 자연스럽게 늘어남
+        // 항목은 일정 간격(8dp)으로 배분 — 박스가 사이즈 자동 유지(항목 개수에 따라)
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items.forEach { item ->
                 Text(

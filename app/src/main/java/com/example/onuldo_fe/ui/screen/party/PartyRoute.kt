@@ -22,7 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.party.dummy.PartyTestConfig
 import com.example.onuldo_fe.data.party.config.PartyApiConfig
 import com.example.onuldo_fe.model.party.CreatePartyCommand
-import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
+import com.example.onuldo_fe.ui.screen.challenge.detail.DetailRoute
 import com.example.onuldo_fe.ui.component.PermissionDialogType
 import com.example.onuldo_fe.ui.component.PermissionSettingDialog
 import com.example.onuldo_fe.ui.screen.party.components.InviteCodeDialog
@@ -250,14 +250,15 @@ fun PartyRoute(
             if (challenge == null) {
                 LaunchedEffect(Unit) { screen = PartyScreen.ChallengeSelect }
             } else {
-                DetailScreen(
-                    challenge = challenge,
+                // 챌린지 탭과 동일하게 상세 API로 실제 데이터를 조회해 표시
+                DetailRoute(
+                    challengeId = challenge.id,
                     onBackClick = { screen = PartyScreen.ChallengeSelect },
                     // 파티 생성 경로에서는 즉시 참여하지 않고 선택 결과를 생성 화면으로 전달
-                    ctaText = "파티 만들기",
-                    onJoinClick = {
-                        // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정
-                        selectedChallenge = pendingChallenge
+                    actionText = "파티 만들기",
+                    onActionClick = { data ->
+                        // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정(제목은 API 값으로 갱신)
+                        selectedChallenge = challenge.copy(title = data.title)
                         pendingChallenge = null
                         screen = PartyScreen.Create
                     }
