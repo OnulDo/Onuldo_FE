@@ -33,6 +33,9 @@ class ParticipateViewModel(
         loadWallet()
     }
 
+    // 화면 복귀(예: 포인트 충전 후) 시 최신 잔액을 반영하기 위해 외부에서 지갑을 재조회한다.
+    fun refreshWallet() = loadWallet()
+
     // 보유 포인트(지갑 잔액) 로드 — 포인트 부족 안내(보유/필요/부족분)에 사용.
     // 실패 시 balance는 null로 남겨(=미확인) 화면이 0이 아니라 "-"로 표기하게 한다
     private fun loadWallet() {
