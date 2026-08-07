@@ -7,34 +7,40 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.onuldo_fe.data.network.onSuccess
 import com.example.onuldo_fe.repository.challenge.ChallengeRepository
 import com.example.onuldo_fe.repository.challenge.ChallengeRepositoryProvider
+import com.example.onuldo_fe.repository.user.UserRepository
+import com.example.onuldo_fe.repository.user.UserRepositoryProvider
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 // 챌린지 참여(POST participations) ViewModel. challengeId는 진입 시 확정되므로 생성 시 주입.
 class ParticipateViewModel(
     private val challengeId: Long,
-    private val repository: ChallengeRepository = ChallengeRepositoryProvider.provide()
+    private val repository: ChallengeRepository = ChallengeRepositoryProvider.provide(),
+    private val userRepository: UserRepository = UserRepositoryProvider.provide()
 ) : ViewModel() {
 
-    // balance는 더미. 화면(포인트 부족 팝업의 "보유 포인트")까지 배선은 끝나 있음.
-    var uiState by mutableStateOf(ParticipateUiState(balance = DUMMY_BALANCE))
+    // 보유 포인트(balance)는 지갑 요약 API로 채운다. 화면(포인트 부족 팝업의 "보유 포인트")까지 배선 완료.
+    var uiState by mutableStateOf(ParticipateUiState())
         private set
+
+    // 진행 중인 지갑 조회. 새 조회가 시작되면 이전 것을 취소해 최신 응답만 반영한다(동시 요청 race 방지).
+    private var walletJob: Job? = null
 
     init {
         loadWallet()
     }
 
     // 보유 포인트(지갑 잔액) 로드 — 포인트 부족 안내(보유/필요/부족분)에 사용.
-    // TODO(지갑 API 연동): 팀원의 GET /api/users/me/wallet/summary 가 올라오면
-    //   아래 더미 대입을 그 응답의 result.balance 로 교체하면 바로 연동된다.
-    //   예) viewModelScope.launch {
-    //         runCatching { walletRepository.getWalletSummary() }
-    //             .onSuccess { uiState = uiState.copy(balance = it.balance) }
-    //             .onFailure { logChallengeError("ch_wallet", it) }
-    //       }
+    // 실패 시 balance는 null로 남겨(=미확인) 화면이 0이 아니라 "-"로 표기하게 한다
     private fun loadWallet() {
-        uiState = uiState.copy(balance = DUMMY_BALANCE)
+        walletJob?.cancel()
+        walletJob = viewModelScope.launch {
+            userRepository.getWalletSummary()
+                .onSuccess { summary -> uiState = uiState.copy(balance = summary.balance) }
+        }
     }
 
     fun participate(durationWeeks: Int, depositAmount: Int) {
@@ -52,8 +58,11 @@ class ParticipateViewModel(
                     uiState = when (code) {
                         CODE_ALREADY_PARTICIPATING ->
                             uiState.copy(isSubmitting = false, isAlreadyParticipating = true)
-                        CODE_INSUFFICIENT_POINT ->
+                        CODE_INSUFFICIENT_POINT -> {
+                            // 부족 팝업의 보유/부족분이 정확하도록 최신 지갑 잔액을 다시 조회한다.
+                            loadWallet()
                             uiState.copy(isSubmitting = false, isInsufficientPoint = true)
+                        }
                         else ->
                             uiState.copy(isSubmitting = false, isError = true)
                     }
@@ -69,8 +78,6 @@ class ParticipateViewModel(
     companion object {
         private const val CODE_INSUFFICIENT_POINT = "INSUFFICIENT_POINT_FOR_CHALLENGE"
         private const val CODE_ALREADY_PARTICIPATING = "ALREADY_PARTICIPATING_CHALLENGE"
-        // 지갑 API 연동 전 임시 보유 포인트. 팀원 API 올라오면 loadWallet()에서 실제 balance로 교체
-        private const val DUMMY_BALANCE = 20_000
 
         fun factory(challengeId: Long) = viewModelFactory {
             initializer { ParticipateViewModel(challengeId) }

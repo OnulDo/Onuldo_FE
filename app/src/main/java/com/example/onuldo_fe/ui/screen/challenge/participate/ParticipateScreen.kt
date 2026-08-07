@@ -62,8 +62,8 @@ fun ParticipateScreen(
     // 포인트 부족 팝업 표시 여부(서버 INSUFFICIENT_POINT 응답 시) + 닫기 콜백
     showInsufficientDialog: Boolean = false,
     onDismissInsufficient: () -> Unit = {},
-    // 지갑 요약의 보유 포인트— 포인트 부족 팝업의 "보유 포인트"에 사용
-    ownedPoint: Int = 0,
+    // 지갑 요약의 보유 포인트(Long)— 포인트 부족 팝업의 "보유 포인트"에 사용. null이면 미확인("-")
+    ownedPoint: Long? = null,
     onBackClick: () -> Unit = {},
     // 선택한 기간(주)·도전금(P)을 상위(Route)로 전달 → 실제 참여 API 호출
     onStartClick: (durationWeeks: Int, depositAmount: Int) -> Unit = { _, _ -> },
