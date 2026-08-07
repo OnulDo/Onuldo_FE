@@ -180,7 +180,9 @@ private fun RealHomeDailyChallengeDto.toPersonalModel(now: LocalDateTime): HomeC
         status = toChallengeStatus(now.toLocalTime()),
         verifiedAt = null,
         remainingMinutes = deadline.remainingMinutesFrom(now.toLocalTime(), verifiedOnDate),
-        canVerify = canVerifyAt(now.toLocalTime())
+        canVerify = canVerifyAt(now.toLocalTime()),
+        challengeId = challengeId.takeIf { it > 0L },
+        category = category
     )
 }
 
@@ -215,7 +217,9 @@ private fun PartyHomeItemDto.toHomeModel(
                 defaultCharacterId = null,
                 isVerifiedToday = it.isVerifiedToday
             )
-        }
+        },
+        challengeId = dailyChallenge?.challengeId?.takeIf { it > 0L },
+        category = dailyChallenge?.category.orEmpty()
     )
 }
 

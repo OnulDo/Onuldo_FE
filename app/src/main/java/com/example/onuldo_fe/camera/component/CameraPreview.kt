@@ -1,6 +1,7 @@
 package com.example.onuldo_fe.camera.component
 
 import android.annotation.SuppressLint
+import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -18,6 +19,7 @@ import androidx.compose.runtime.remember
 @Composable
 fun CameraPreview(
     imageCapture: ImageCapture,
+    lensFacing: Int,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -29,6 +31,7 @@ fun CameraPreview(
 
             val previewView = PreviewView(ctx).apply {
                 implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                scaleType = PreviewView.ScaleType.FILL_CENTER
             }
 
             val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
@@ -37,11 +40,16 @@ fun CameraPreview(
 
                 val cameraProvider = cameraProviderFuture.get()
 
-                val preview = Preview.Builder().build().also {
+                val preview = Preview.Builder()
+                    .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                    .build()
+                    .also {
                     it.surfaceProvider = previewView.surfaceProvider
                 }
 
-                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                val cameraSelector = CameraSelector.Builder()
+                    .requireLensFacing(lensFacing)
+                    .build()
 
                 try {
                     cameraProvider.unbindAll()

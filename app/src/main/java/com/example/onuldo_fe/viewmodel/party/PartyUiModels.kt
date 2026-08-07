@@ -81,7 +81,8 @@ data class PartyWaitingRoomUi(
     // 서버 응답값을 그대로 사용해 로그인 사용자의 파티장 UI를 결정한다.
     val isHost: Boolean = true,
     // 서버가 인원과 준비 상태를 검증해 내려준 시작 가능 여부다.
-    val canStart: Boolean = true
+    val canStart: Boolean = true,
+    val status: PartyStatus = PartyStatus.Recruiting // 폴링으로 갱신되는 현재 파티 상태
 )
 
 // 파티 목록 화면과 Preview에서 사용하는 fake 파티 카드 데이터

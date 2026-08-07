@@ -3,12 +3,12 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.services)
 }
 
 /**
- * 소셜 로그인 키는 `local.properties`에서 읽는다(이 파일은 커밋되지 않는다).
- * 값이 없으면 빈 문자열로 두어 빌드는 통과시키고, 소셜 로그인만 비활성화된다.
- * 팀원이 키 없이 클론해도 앱이 빌드되도록 하기 위함이다.
+ * API 테스트 값과 소셜 로그인 키는 Git에서 제외되는 local.properties에서 읽는다.
+ * 값이 없으면 빈 문자열을 사용해 키가 없는 팀원도 프로젝트를 빌드할 수 있게 한다.
  */
 val localProperties = Properties().apply {
     val file = rootProject.file("local.properties")
@@ -16,6 +16,9 @@ val localProperties = Properties().apply {
 }
 
 fun secret(key: String): String = localProperties.getProperty(key).orEmpty()
+
+fun quotedBuildConfig(value: String): String =
+    "\"${value.replace("\\", "\\\\").replace("\"", "\\\"")}\""
 
 android {
     namespace = "com.example.onuldo_fe"
@@ -34,12 +37,15 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val kakaoNativeAppKey = secret("KAKAO_NATIVE_APP_KEY")
-        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", "\"$kakaoNativeAppKey\"")
-        buildConfigField("String", "NAVER_CLIENT_ID", "\"${secret("NAVER_CLIENT_ID")}\"")
-        buildConfigField("String", "NAVER_CLIENT_SECRET", "\"${secret("NAVER_CLIENT_SECRET")}\"")
+        // 서버 API 주소는 민감정보가 아니므로 모든 빌드 타입에서 공통으로 사용한다.
+        buildConfigField("String", "API_BASE_URL", quotedBuildConfig("https://onuldo.site/"))
 
-        // 카카오톡 앱으로 로그인할 때 결과를 돌려받는 커스텀 스킴 (kakao{네이티브앱키})
+        val kakaoNativeAppKey = secret("KAKAO_NATIVE_APP_KEY")
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", quotedBuildConfig(kakaoNativeAppKey))
+        buildConfigField("String", "NAVER_CLIENT_ID", quotedBuildConfig(secret("NAVER_CLIENT_ID")))
+        buildConfigField("String", "NAVER_CLIENT_SECRET", quotedBuildConfig(secret("NAVER_CLIENT_SECRET")))
+
+        // 카카오톡 앱 로그인 결과를 돌려받는 커스텀 스킴(kakao{네이티브앱키}).
         manifestPlaceholders["kakaoNativeAppKey"] = kakaoNativeAppKey
     }
 
@@ -58,7 +64,6 @@ android {
     }
     buildFeatures {
         compose = true
-        // 네트워크 로깅을 디버그 빌드에서만 켜기 위해 BuildConfig.DEBUG 사용
         buildConfig = true
     }
 }
@@ -68,6 +73,7 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -83,11 +89,12 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp)
-    implementation("io.coil-kt:coil-compose:2.7.0")
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.gson)
-    implementation(libs.okhttp)
+    // Firebase Cloud Messaging (FCM) — BoM으로 버전 통일
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
     implementation(libs.okhttp.logging.interceptor)
+    implementation("androidx.exifinterface:exifinterface:1.4.1")
+    implementation("io.coil-kt:coil-compose:2.7.0")
     implementation(libs.kakao.user)
     implementation(libs.naver.oauth)
     testImplementation(libs.junit)

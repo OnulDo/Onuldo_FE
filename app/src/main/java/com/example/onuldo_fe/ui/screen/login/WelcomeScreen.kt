@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -119,7 +120,8 @@ private fun HeroCard(
             .padding(horizontal = 20.dp)
             .fillMaxWidth()
             .height(320.dp)
-            .clip(RoundedCornerShape(24.dp))
+            // 히어로 배경은 둥근 사각형이 아니라 원형이다(2026-08-04 디자인 확정).
+            .clip(CircleShape)
             .background(HeroBackground),
     ) {
         // 색종이 조각 (6dp 사각형, -30도 회전)

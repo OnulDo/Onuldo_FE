@@ -1,6 +1,5 @@
 package com.example.onuldo_fe.ui.screen.challenge.gallery
 
-import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,11 +23,14 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,17 +40,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.model.challenge.ChallengeCategory
+import com.example.onuldo_fe.viewmodel.challenge.ChallengeListUiState
 import com.example.onuldo_fe.ui.screen.challenge.gallery.component.GalleryFilterButton
 import com.example.onuldo_fe.ui.screen.challenge.gallery.component.GalleryFilterChips
 import com.example.onuldo_fe.ui.screen.challenge.gallery.component.GallerySearchBar
@@ -59,7 +60,6 @@ import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
-import com.example.onuldo_fe.viewmodel.challenge.ChallengeListViewModel
 
 //챌린지 탐색 화면
 data class Challenge(
@@ -71,34 +71,50 @@ data class Challenge(
     @DrawableRes val imageRes: Int = R.drawable.challenge_sample_1
 )
 
+// 상태 없는 순수 UI — 데이터/이벤트는 GalleryRoute에서 주입한다. (파티 생성 흐름에서도 재사용)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GalleryScreen(
-    viewModel: ChallengeListViewModel = viewModel(),
+    uiState: ChallengeListUiState,
+    onQueryChange: (String) -> Unit,
+    onCategorySelected: (ChallengeCategory?) -> Unit,
     onChallengeClick: (Challenge) -> Unit = {},
+    onRefresh: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val focusManager = LocalFocusManager.current
     val spacing = LocalSpacing.current
-    val context = LocalContext.current
-    val uiState = viewModel.uiState
-    var filterSelected by remember { mutableStateOf(false) }
-
-    // 목록 조회 실패는 토스트로만 안내
-    LaunchedEffect(uiState.isError) {
-        if (uiState.isError) {
-            Toast.makeText(context, "챌린지 목록을 불러오지 못했어요", Toast.LENGTH_SHORT).show()
-            viewModel.onErrorShown()
-        }
+    val pullToRefreshState = rememberPullToRefreshState()
+    // 화면 재생성 후에도 선택된 카테고리가 있으면 필터 칩을 펼쳐 활성 필터가 보이게(코드 래빗)
+    var filterSelected by remember(uiState.selectedCategory) {
+        mutableStateOf(uiState.selectedCategory != null)
     }
 
     // 카테고리 칩은 ChallengeCategory
     val categories = remember { ChallengeCategory.entries.map { it.displayName } }
 
-    Column(
+    // 화면 전체를 감싸 당김 인디케이터가 헤더 위(화면 맨 위)에 뜨게 한다.
+    // 위에서 당길 때만 노출(pull-to-refresh)되고, 화면 복귀 자동 갱신(silentRefresh)은 표시되지 않는다.
+    PullToRefreshBox(
+        isRefreshing = uiState.isRefreshing,
+        onRefresh = onRefresh,
+        state = pullToRefreshState,
         modifier = modifier
             .fillMaxSize()
             .background(SourCream)
-            .statusBarsPadding()
+            .statusBarsPadding(),
+        indicator = {
+            PullToRefreshDefaults.Indicator(
+                state = pullToRefreshState,
+                isRefreshing = uiState.isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+                color = Persimmon
+            )
+        }
+    ) {
+      Column(
+        modifier = Modifier
+            .fillMaxSize()
             // 빈 곳 터치 시 검색창 포커스·키보드 해제
             .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
     ) {
@@ -119,7 +135,7 @@ fun GalleryScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 GallerySearchBar(
                     value = uiState.query,
-                    onValueChange = viewModel::onQueryChange,
+                    onValueChange = onQueryChange,
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(Modifier.width(9.dp))
@@ -127,7 +143,7 @@ fun GalleryScreen(
                     onClick = {
                         filterSelected = !filterSelected
                         // 칩을 닫으면 선택 카테고리도 해제 → 근거 없는 필터 유지 방지
-                        if (!filterSelected) viewModel.onCategorySelected(null)
+                        if (!filterSelected) onCategorySelected(null)
                     },
                     selected = filterSelected
                 )
@@ -143,7 +159,7 @@ fun GalleryScreen(
                         val category = ChallengeCategory.entries.first { it.displayName == name }
                         // 같은 칩 재선택이면 해제(null), 아니면 선택
                         val next = if (uiState.selectedCategory == category) null else category
-                        viewModel.onCategorySelected(next)
+                        onCategorySelected(next)
                     },
                     contentPadding = PaddingValues(horizontal = 0.dp)
                 )
@@ -181,6 +197,7 @@ fun GalleryScreen(
                 }
             }
         }
+      }
     }
 }
 

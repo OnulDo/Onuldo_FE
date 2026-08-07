@@ -25,16 +25,16 @@ import com.example.onuldo_fe.viewmodel.challenge.ChallengeDetailViewModel
 fun DetailRoute(
     challengeId: Long,
     onBackClick: () -> Unit,
-    // 참여 화면으로 이동. 이미 조회한 상세의 제목/한줄설명/카테고리/인증시간을 함께 넘김
-    onJoinClick: (
-        title: String,
-        description: String,
-        category: String,
-        timeStart: String,
-        timeEnd: String
-    ) -> Unit,
+    // CTA 클릭 시 동작. 조회한 상세 값을 [ChallengeActionData]로 묶어 넘긴다.
+    // (챌린지 탭=참여 화면 이동, 파티 생성 흐름=선택 확정 등 호출부마다 다르게 사용)
+    onActionClick: (ChallengeActionData) -> Unit,
     modifier: Modifier = Modifier,
+    // CTA 라벨 — 챌린지 탭은 "참여하기", 파티 생성 흐름은 "파티 만들기"로 재사용
+    actionText: String = "참여하기",
+    // challengeId를 key로 줘, 같은 ViewModelStoreOwner에서 챌린지가 바뀌면 새 상세를 조회
+    // (파티 생성 흐름은 nav 목적지가 아니라 화면 상태 전환이라 key가 없으면 이전 챌린지 VM이 재사용된다.) - 클로드 설명
     viewModel: ChallengeDetailViewModel = viewModel(
+        key = challengeId.toString(),
         factory = ChallengeDetailViewModel.factory(challengeId)
     )
 ) {
@@ -69,20 +69,24 @@ fun DetailRoute(
             successConditions = detail.successConditions,
             failureConditions = detail.failureConditions,
             onBackClick = onBackClick,
-            // 참여 화면 정보박스용: 제목(name), 한줄설명(explainContent), 카테고리 라벨, 인증 시간
-            onJoinClick = {
-                onJoinClick(
-                    detail.title,
-                    detail.summary,
-                    "${detail.category.displayName} 챌린지",
-                    detail.timeStart,
-                    detail.timeEnd
+            // 참여 화면 정보박스용: id, 제목(name), 한줄설명(explainContent), 카테고리 라벨, 인증 시간
+            //현재는 title만 사용하나, 화면 재사용을 위해 전체로 작성
+            onActionClick = {
+                onActionClick(
+                    ChallengeActionData(
+                        challengeId = detail.id,
+                        title = detail.title,
+                        description = detail.summary,
+                        category = "${detail.category.displayName} 챌린지",
+                        timeStart = detail.timeStart,
+                        timeEnd = detail.timeEnd
+                    )
                 )
             },
+            ctaText = actionText,
             modifier = modifier
         )
     } else {
-        // 로딩 중이거나, 에러 직후(곧 위 LaunchedEffect가 목록으로 되돌림)
         DetailLoading(modifier)
     }
 }

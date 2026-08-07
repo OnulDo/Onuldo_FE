@@ -34,7 +34,7 @@ fun ParticipateRoute(
     val uiState = viewModel.uiState
     val context = LocalContext.current
 
-    // 참여 실패 시 토스트 안내
+    // 참여 실패 시 토스트 안내 // TODO:  챌린지 토스트 추가예정
     LaunchedEffect(uiState.isError) {
         if (uiState.isError) {
             Toast.makeText(context, "참여에 실패했어요. 다시 시도해주세요", Toast.LENGTH_SHORT).show()
@@ -42,7 +42,7 @@ fun ParticipateRoute(
         }
     }
 
-    // 이미 참여중이면 오류가 아니라 안내 후 상세로 복귀 (참여 화면에 머물지 않음)
+    // 이미 참여중이면 오류가 아니라 안내 후 상세로 복귀 (참여 화면에 머물지 않음) // TODO:  챌린지 토스트 추가예정
     LaunchedEffect(uiState.isAlreadyParticipating) {
         if (uiState.isAlreadyParticipating) {
             Toast.makeText(context, "이미 참여중인 챌린지입니다", Toast.LENGTH_SHORT).show()

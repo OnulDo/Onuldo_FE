@@ -1,13 +1,17 @@
 package com.example.onuldo_fe.ui.screen.home
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
@@ -26,13 +30,17 @@ fun HomeRoute(
     viewModel: HomeViewModel = viewModel(),
     onSettlementResultClick: (Long) -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
-    onCameraNavigate: () -> Unit = {},
+    onCameraNavigate: (Long, String, String) -> Unit = { _, _, _ -> },
     refreshKey: Int = 0
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showNotification by rememberSaveable { mutableStateOf(false) }
+    var showNotificationPermissionDialog by remember { mutableStateOf(false) }
     var showCameraPermissionDialog by rememberSaveable { mutableStateOf(false) }
+    var pendingChallengeId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var pendingCategory by rememberSaveable { mutableStateOf("") }
+    var pendingTitle by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(refreshKey) {
         if (refreshKey > 0) {
@@ -41,14 +49,38 @@ fun HomeRoute(
         }
     }
 
-    fun handleVerifyClick() {
+    fun handleNotificationClick() {
+        // 알림 권한 있으면 알림 화면, 없으면 권한 안내 팝업 (API 33 미만은 런타임 권한 없음 → 바로 진입)
+        val isNotificationPermissionGranted =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            } else {
+                true
+            }
+
+        if (isNotificationPermissionGranted) {
+            showNotification = true
+        } else {
+            showNotificationPermissionDialog = true
+        }
+    }
+
+    fun handleVerifyClick(challengeId: Long, category: String, title: String) {
+        if (challengeId <= 0L) return
+        pendingChallengeId = challengeId
+        pendingCategory = category
+        pendingTitle = title
         val isCameraPermissionGranted = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.CAMERA
         ) == PackageManager.PERMISSION_GRANTED
 
         if (isCameraPermissionGranted) {
-            onCameraNavigate()
+            onCameraNavigate(challengeId, category, title)
+            pendingChallengeId = null
         } else {
             showCameraPermissionDialog = true
         }
@@ -64,7 +96,10 @@ fun HomeRoute(
 
                 if (isCameraPermissionGranted) {
                     showCameraPermissionDialog = false
-                    onCameraNavigate()
+                    pendingChallengeId?.let { challengeId ->
+                        onCameraNavigate(challengeId, pendingCategory, pendingTitle)
+                    }
+                    pendingChallengeId = null
                 }
             }
         }
@@ -90,7 +125,7 @@ fun HomeRoute(
     } else {
         HomeScreen(
             uiState = viewModel.uiState,
-            onNotificationClick = { showNotification = true },
+            onNotificationClick = ::handleNotificationClick,
             onSettlementResultClick = { partyId ->
                 // 결과 화면 이동을 요청한 뒤 현재 홈 세션에서 확인한 배너 제거
                 onSettlementResultClick(partyId)
@@ -103,11 +138,32 @@ fun HomeRoute(
         )
     }
 
+    // 카메라 권한 안내 팝업 → "설정으로 이동"이면 앱 설정으로
     if (showCameraPermissionDialog) {
         PermissionSettingDialog(
             type = PermissionDialogType.CAMERA,
-            onDismiss = { showCameraPermissionDialog = false },
+            onDismiss = {
+                showCameraPermissionDialog = false
+                pendingChallengeId = null
+                pendingCategory = ""
+                pendingTitle = ""
+            },
             onMoveToSettings = { moveToAppSettings(context) }
+        )
+    }
+
+    // 알림 권한 없을 때(최초) 안내 팝업 → "설정으로 이동"이면 시스템(폰) 알림설정으로
+    if (showNotificationPermissionDialog) {
+        PermissionSettingDialog(
+            type = PermissionDialogType.NOTIFICATION,
+            onDismiss = { showNotificationPermissionDialog = false },
+            onMoveToSettings = {
+                showNotificationPermissionDialog = false
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+                context.startActivity(intent)
+            }
         )
     }
 }

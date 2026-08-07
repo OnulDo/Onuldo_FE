@@ -22,12 +22,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.party.dummy.PartyTestConfig
 import com.example.onuldo_fe.data.party.config.PartyApiConfig
 import com.example.onuldo_fe.model.party.CreatePartyCommand
-import com.example.onuldo_fe.ui.screen.challenge.detail.DetailScreen
+import com.example.onuldo_fe.ui.screen.challenge.detail.DetailRoute
 import com.example.onuldo_fe.ui.component.PermissionDialogType
 import com.example.onuldo_fe.ui.component.PermissionSettingDialog
 import com.example.onuldo_fe.ui.screen.party.components.InviteCodeDialog
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
-import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryScreen
+import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryRoute
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.util.moveToAppSettings
 import com.example.onuldo_fe.viewmodel.party.PartyAction
@@ -58,6 +58,7 @@ fun PartyRoute(
     partySettlementViewModel: PartySettlementViewModel = viewModel(),
     onBottomBarVisibilityChange: (Boolean) -> Unit = {},
     onCameraNavigate: () -> Unit = {},
+    onChargePoint: () -> Unit = {},
     onHomeNavigate: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -114,6 +115,54 @@ fun PartyRoute(
 
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    DisposableEffect(lifecycleOwner, screen) {
+        val shouldRefreshPoint = screen == PartyScreen.Create || screen == PartyScreen.WaitingRoom
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && shouldRefreshPoint) {
+                partyViewModel.refreshAvailablePoint()
+            }
+        }
+
+        // 생성·대기방 진입 시와 포인트 충전 화면에서 돌아온 시점에 표시 잔액을 갱신한다.
+        if (shouldRefreshPoint && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            partyViewModel.refreshAvailablePoint()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    DisposableEffect(lifecycleOwner, screen, waitingPartyId, waitingRoom != null) {
+        val partyId = waitingPartyId
+        val shouldPoll = screen == PartyScreen.WaitingRoom && partyId != null && waitingRoom != null
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> if (shouldPoll) {
+                    partyId?.let(partyViewModel::startWaitingRoomPolling)
+                }
+                Lifecycle.Event.ON_STOP -> partyViewModel.stopWaitingRoomPolling()
+                else -> Unit
+            }
+        }
+
+        // 대기방 진입 시 바로 갱신하고, 백그라운드에서는 요청을 멈춘다.
+        if (shouldPoll && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            partyId?.let(partyViewModel::startWaitingRoomPolling)
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            partyViewModel.stopWaitingRoomPolling()
+        }
+    }
+
+    LaunchedEffect(screen, waitingRoom?.status) {
+        if (screen == PartyScreen.WaitingRoom && waitingRoom?.status == PartyStatus.InProgress) {
+            // 다른 사용자가 파티를 시작하면 폴링을 멈추고 홈으로 이동한다.
+            partyViewModel.stopWaitingRoomPolling()
+            onHomeNavigate()
+        }
     }
 
     LaunchedEffect(screen) {
@@ -175,7 +224,15 @@ fun PartyRoute(
             errorMessage = partyState.errorMessage,
             // fake 포인트 부족 테스트 시 PartyTestConfig.AVAILABLE_POINT를 5_000으로 변경
             // Real 생성에서는 서버가 보유 포인트를 최종 검증하므로 Fake 포인트로 요청을 막지 않는다.
-            availablePoint = if (PartyApiConfig.USE_REAL_CREATE) Int.MAX_VALUE else PartyTestConfig.AVAILABLE_POINT,
+            availablePoint = if (PartyApiConfig.USE_REAL_CREATE) {
+                partyState.availablePoint
+            } else {
+                PartyTestConfig.AVAILABLE_POINT
+            },
+            showPointShortageFromServer = partyState.isCreatePointInsufficient,
+            onPointShortageDismiss = partyViewModel::dismissCreatePointDialog,
+            onChargePoint = onChargePoint,
+            checkPointBeforeRequest = !PartyApiConfig.USE_REAL_CREATE,
             onCreate = { period, deposit ->
                 // 필수 선택값이 모두 준비된 경우에만 ViewModel에 생성 명령 전달
                 val challenge = selectedChallenge ?: return@PartyCreateScreen
@@ -197,7 +254,7 @@ fun PartyRoute(
             }
         )
 
-        PartyScreen.ChallengeSelect -> GalleryScreen(
+        PartyScreen.ChallengeSelect -> GalleryRoute(
             onChallengeClick = { challenge ->
                 pendingChallenge = challenge
                 screen = PartyScreen.ChallengeDetail
@@ -210,14 +267,18 @@ fun PartyRoute(
             if (challenge == null) {
                 LaunchedEffect(Unit) { screen = PartyScreen.ChallengeSelect }
             } else {
-                DetailScreen(
-                    challenge = challenge,
+                // 챌린지 탭과 동일하게 상세 API로 실제 데이터를 조회해 표시
+                DetailRoute(
+                    challengeId = challenge.id,
                     onBackClick = { screen = PartyScreen.ChallengeSelect },
                     // 파티 생성 경로에서는 즉시 참여하지 않고 선택 결과를 생성 화면으로 전달
-                    ctaText = "파티 만들기",
-                    onJoinClick = {
-                        // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정
-                        selectedChallenge = pendingChallenge
+                    actionText = "파티 만들기",
+                    onActionClick = { data ->
+                        // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정하고, 생성 요청에는 상세 API의 id/title을 사용한다.
+                        selectedChallenge = challenge.copy(
+                            id = data.challengeId,
+                            title = data.title
+                        )
                         pendingChallenge = null
                         screen = PartyScreen.Create
                     }
@@ -242,10 +303,18 @@ fun PartyRoute(
                 PartyWaitingRoomScreen(
                     ui = waitingRoom,
                     // Real 준비 완료에서는 서버가 포인트를 검증하므로 Fake 포인트로 요청을 막지 않는다.
-                    availablePoint = if (PartyApiConfig.USE_REAL_READY) Int.MAX_VALUE else PartyTestConfig.AVAILABLE_POINT,
+                    availablePoint = if (PartyApiConfig.USE_REAL_READY) {
+                        partyState.availablePoint
+                    } else {
+                        PartyTestConfig.AVAILABLE_POINT
+                    },
                     isReadySubmitted = partyState.isReadySubmitted,
                     isActionInProgress = partyState.action != PartyAction.Idle,
                     errorMessage = partyState.errorMessage,
+                    showPointShortageFromServer = partyState.isReadyPointInsufficient,
+                    onPointShortageDismiss = partyViewModel::dismissReadyPointDialog,
+                    onChargePoint = onChargePoint,
+                    checkPointBeforeRequest = !PartyApiConfig.USE_REAL_READY,
                     onBack = {
                         // 뒤로가기도 파티 탈퇴 요청으로 처리하고 성공 시에만 목록으로 이동
                         partyViewModel.leaveParty { screen = PartyScreen.List }

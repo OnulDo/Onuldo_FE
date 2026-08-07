@@ -8,6 +8,11 @@ data class ChallengeListUiState(
     val challenges: List<Challenge> = emptyList(),
     val selectedCategory: ChallengeCategory? = null,  // null이면 전체
     val query: String = "",
+    // 최초/필터 변경 시 빈 목록 위에 표시하는 전체 화면 로딩
     val isLoading: Boolean = false,
-    val isError: Boolean = false
+    // 기존 목록을 유지한 채 재조회할 때 표시하는 상단 새로고침 인디케이터
+    val isRefreshing: Boolean = false,
+    val isError: Boolean = false,
+    // 최초 조회가 한 번이라도 성공했는지 — 화면 복귀 시 새로고침 트리거 조건
+    val hasLoaded: Boolean = false
 )
