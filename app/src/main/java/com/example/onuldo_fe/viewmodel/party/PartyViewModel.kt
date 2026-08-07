@@ -64,10 +64,11 @@ class PartyViewModel(
     private var waitingRoomPollingJob: Job? = null
     private var pollingPartyId: String? = null
     private var waitingRoomMutationGeneration: Long = 0L
+    private var partyListJob: Job? = null
+    private var partyListGeneration: Long = 0L
+    private var hasLoadedPartyList: Boolean = false
 
     init {
-        // 파티 홈 진입 시 모집 중 파티를 제외한 진행 중 파티 목록 준비
-        loadParties()
         loadAvailablePoint()
     }
 
@@ -98,22 +99,44 @@ class PartyViewModel(
             ?: userRepository.getMyPage().getOrNull()?.currentPoint
 
     fun loadParties() {
-        // Repository의 도메인 모델을 화면 전용 카드 모델로 변환해 저장
-        uiState = uiState.copy(isListLoading = true, errorMessage = null)
-        viewModelScope.launch {
-            runCatching { repository.getParties() }
-                .onSuccess { parties ->
-                    uiState = uiState.copy(
-                        parties = parties.map(PartySummary::toUi),
-                        isListLoading = false
-                    )
-                }
-                .onFailure {
-                    uiState = uiState.copy(
-                        isListLoading = false,
-                        errorMessage = "파티 목록을 불러오지 못했어요."
-                    )
-                }
+        requestPartyList(showFullScreenLoading = true)
+    }
+
+    /** 파티 목록이 보이는 시점에 최초 조회 또는 조용한 재조회를 시작한다. */
+    fun onPartyListVisible() {
+        // 이미 시작한 조회가 있으면 초기 진입·ON_START 이벤트의 중복 요청을 막는다.
+        if (partyListJob?.isActive == true) return
+        requestPartyList(showFullScreenLoading = !hasLoadedPartyList)
+    }
+
+    private fun requestPartyList(showFullScreenLoading: Boolean) {
+        val generation = ++partyListGeneration
+        partyListJob?.cancel()
+        // 재진입 시에는 기존 카드를 유지하고, 최초 조회·오류 재시도만 전체 로딩을 보여준다.
+        uiState = uiState.copy(
+            isListLoading = showFullScreenLoading,
+            errorMessage = null
+        )
+        partyListJob = viewModelScope.launch {
+            try {
+                val parties = repository.getParties()
+                if (generation != partyListGeneration) return@launch
+                hasLoadedPartyList = true
+                uiState = uiState.copy(
+                    parties = parties.map(PartySummary::toUi),
+                    isListLoading = false
+                )
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                if (generation != partyListGeneration) return@launch
+                uiState = uiState.copy(
+                    isListLoading = false,
+                    // 재진입 갱신 실패는 기존 목록을 유지하고 최초 조회 실패만 오류로 표시한다.
+                    errorMessage = "파티 목록을 불러오지 못했어요."
+                        .takeUnless { hasLoadedPartyList }
+                )
+            }
         }
     }
 

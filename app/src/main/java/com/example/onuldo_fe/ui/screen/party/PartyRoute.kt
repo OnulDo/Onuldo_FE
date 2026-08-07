@@ -117,6 +117,22 @@ fun PartyRoute(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    DisposableEffect(lifecycleOwner, screen) {
+        val isPartyListVisible = screen == PartyScreen.List
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START && isPartyListVisible) {
+                partyViewModel.onPartyListVisible()
+            }
+        }
+
+        // 탭 재진입·파티 내부 화면에서 목록으로 복귀하면 즉시 최신 목록을 조회한다.
+        if (isPartyListVisible && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            partyViewModel.onPartyListVisible()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     DisposableEffect(lifecycleOwner, screen, waitingPartyId, waitingRoom != null) {
         val partyId = waitingPartyId
         val shouldPoll = screen == PartyScreen.WaitingRoom && partyId != null && waitingRoom != null

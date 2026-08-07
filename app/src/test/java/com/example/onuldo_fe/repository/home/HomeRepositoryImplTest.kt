@@ -157,11 +157,15 @@ class HomeRepositoryImplTest {
         partyId = 10,
         name = "갓생팟",
         challengeTitle = "아침 운동",
+        goal = "매일 아침 운동",
         status = "ONGOING",
+        myStatus = "NOT_VERIFIED",
         endDate = "2026-08-20",
+        dDay = 12,
         verificationDeadline = "23:59:00",
         progressRate = 0.5,
         verifiedMemberCount = 1,
-        totalMemberCount = 2
+        totalMemberCount = 2,
+        members = emptyList()
     )
 }
