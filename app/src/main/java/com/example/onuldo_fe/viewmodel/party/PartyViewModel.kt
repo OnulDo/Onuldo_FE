@@ -5,12 +5,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.party.CreatePartyCommand
 import com.example.onuldo_fe.model.party.PartyLifecycleStatus
 import com.example.onuldo_fe.model.party.PartyMember
 import com.example.onuldo_fe.model.party.PartyMemberReadyStatus
 import com.example.onuldo_fe.model.party.PartyRole
 import com.example.onuldo_fe.model.party.PartySummary
+import com.example.onuldo_fe.model.party.PartyVerificationStatus
 import com.example.onuldo_fe.model.party.PartyWaitingRoom
 import com.example.onuldo_fe.repository.party.PartyRepository
 import com.example.onuldo_fe.repository.party.PartyRepositoryProvider
@@ -387,6 +389,21 @@ private fun PartySummary.toUi() = PartyCardUi(
     remainingText = remainingText,
     completedMemberCount = completedMemberCount,
     totalMemberCount = totalMemberCount,
+    goal = goal,
+    verificationStatus = when (verificationStatus) {
+        PartyVerificationStatus.NotVerified -> ChallengeStatus.NeedCertification
+        PartyVerificationStatus.Pending -> ChallengeStatus.WaitingReview
+        PartyVerificationStatus.Success -> ChallengeStatus.Success
+        PartyVerificationStatus.Fail -> ChallengeStatus.Failed
+    },
+    members = members.map { member ->
+        PartyCardMemberUi(
+            userId = member.userId,
+            nickname = member.nickname,
+            profileImageUrl = member.profileImageUrl,
+            isVerifiedToday = member.isVerifiedToday
+        )
+    },
     status = when (status) {
         PartyLifecycleStatus.Recruiting -> PartyStatus.Recruiting
         PartyLifecycleStatus.InProgress -> PartyStatus.InProgress

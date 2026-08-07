@@ -1,6 +1,7 @@
 package com.example.onuldo_fe.viewmodel.party
 
 import androidx.annotation.DrawableRes
+import com.example.onuldo_fe.model.home.ChallengeStatus
 
 // 파티 대기방에서 사용하는 파티원 권한
 enum class PartyMemberRole {
@@ -52,7 +53,18 @@ data class PartyCardUi(
     val remainingText: String? = null,         // 오늘 인증 마감까지 남은 시간 문구
     val completedMemberCount: Int,             // 오늘 인증을 완료한 파티원 수
     val totalMemberCount: Int,                 // 현재 파티에 참여 중인 전체 인원 수
-    val status: PartyStatus = PartyStatus.InProgress // 파티 모집·진행·해체 상태
+    val status: PartyStatus = PartyStatus.InProgress, // 파티 모집·진행·해체 상태
+    val goal: String = challengeName,              // 카드에 노출할 파티 목표
+    val verificationStatus: ChallengeStatus = ChallengeStatus.NeedCertification,
+    val members: List<PartyCardMemberUi> = emptyList()
+)
+
+// 파티 목록 카드의 프로필·오늘 인증 표시에 사용할 파티원
+data class PartyCardMemberUi(
+    val userId: Long,
+    val nickname: String,
+    val profileImageUrl: String,
+    val isVerifiedToday: Boolean
 )
 
 // 파티 피드의 파티원 인증 카드에 표시할 정보

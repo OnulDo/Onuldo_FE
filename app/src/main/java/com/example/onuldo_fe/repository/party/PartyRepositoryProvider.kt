@@ -16,7 +16,8 @@ object PartyRepositoryProvider {
         useRealPartyCreateApi: Boolean = PartyApiConfig.USE_REAL_CREATE,
         useRealPartyReadyApi: Boolean = PartyApiConfig.USE_REAL_READY,
         useRealPartyStartApi: Boolean = PartyApiConfig.USE_REAL_START,
-        useRealPartySettlementApi: Boolean = PartyApiConfig.USE_REAL_SETTLEMENT
+        useRealPartySettlementApi: Boolean = PartyApiConfig.USE_REAL_SETTLEMENT,
+        useRealPartyLeaveApi: Boolean = PartyApiConfig.USE_REAL_LEAVE
     ): PartyRepository = PartyRepositoryImpl(
         fakeApi = fakeApi,
         realApi = realApi,
@@ -25,6 +26,7 @@ object PartyRepositoryProvider {
         useRealPartyCreateApi = useRealPartyCreateApi,
         useRealPartyReadyApi = useRealPartyReadyApi,
         useRealPartyStartApi = useRealPartyStartApi,
-        useRealPartySettlementApi = useRealPartySettlementApi
+        useRealPartySettlementApi = useRealPartySettlementApi,
+        useRealPartyLeaveApi = useRealPartyLeaveApi
     )
 }

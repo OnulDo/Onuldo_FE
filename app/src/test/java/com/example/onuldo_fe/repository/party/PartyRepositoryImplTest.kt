@@ -12,11 +12,15 @@ import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
+import com.example.onuldo_fe.data.party.dto.PartyListMemberDto
+import com.example.onuldo_fe.data.party.dto.PartyLeaveResponseDto
 import com.example.onuldo_fe.data.party.dto.PartySettlementMemberDto
 import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
 import com.example.onuldo_fe.model.party.CreatePartyCommand
+import com.example.onuldo_fe.model.party.PartyLifecycleStatus
 import com.example.onuldo_fe.model.party.PartySettlementMemberStatus
 import com.example.onuldo_fe.model.party.PartySettlementStatus
+import com.example.onuldo_fe.model.party.PartyVerificationStatus
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -49,9 +53,16 @@ class PartyRepositoryImplTest {
         assertEquals("101", party.partyId)
         assertEquals("30일 헬스 챌린지 파티", party.partyName)
         assertEquals("30일 헬스", party.challengeName)
+        assertEquals("매일 30분 운동", party.goal)
+        assertEquals("D-12", party.dDay)
         assertEquals("21:00:00", party.deadline)
         assertEquals(3, party.completedMemberCount)
         assertEquals(4, party.totalMemberCount)
+        assertEquals(PartyVerificationStatus.Success, party.verificationStatus)
+        assertEquals(PartyLifecycleStatus.Disbanded, party.status)
+        assertEquals("민지", party.members.first().nickname)
+        assertEquals("https://example.com/profiles/1.png", party.members.first().profileImageUrl)
+        assertEquals(true, party.members.first().isVerifiedToday)
     }
 
     @Test
@@ -118,6 +129,18 @@ class PartyRepositoryImplTest {
     }
 
     @Test
+    fun `이탈 설정이 true이면 실제 POST 성공 응답을 완료 처리한다`() = runBlocking {
+        val repository = PartyRepositoryImpl(
+            fakeApi = FakePartyApi(),
+            realApi = SuccessfulReadyRealApi,
+            useRealPartyListApi = false,
+            useRealPartyLeaveApi = true
+        )
+
+        repository.leaveParty("101")
+    }
+
+    @Test
     fun `정산 설정이 true이면 실제 응답의 금액과 파티원 상태를 변환한다`() = runBlocking {
         val repository = PartyRepositoryImpl(
             fakeApi = FakePartyApi(),
@@ -160,6 +183,9 @@ class PartyRepositoryImplTest {
         override suspend fun readyParty(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("Fake 모드에서 실제 준비 API가 호출되면 안 됩니다.")
 
+        override suspend fun leaveParty(partyId: Long): Response<ApiResponse<PartyLeaveResponseDto>> =
+            error("Fake 모드에서 실제 이탈 API가 호출되면 안 됩니다.")
+
         override suspend fun getPartyFeed(partyId: Long): Response<ApiResponse<PartyFeedDto>> =
             error("파티 Repository 테스트에서 피드 API가 호출되면 안 됩니다.")
 
@@ -184,12 +210,21 @@ class PartyRepositoryImplTest {
                             partyId = 101,
                             name = "30일 헬스 챌린지 파티",
                             challengeTitle = "30일 헬스",
-                            status = "ONGOING",
+                            goal = "매일 30분 운동",
+                            status = "DISSOLVED",
+                            myStatus = "SUCCESS",
                             endDate = "2026-08-20",
+                            dDay = 12,
                             verificationDeadline = "21:00:00",
                             progressRate = 0.72,
                             verifiedMemberCount = 3,
-                            totalMemberCount = 4
+                            totalMemberCount = 4,
+                            members = listOf(
+                                PartyListMemberDto(1, "민지", "https://example.com/profiles/1.png", true),
+                                PartyListMemberDto(2, "지호", "https://example.com/profiles/2.png", true),
+                                PartyListMemberDto(3, "수아", "https://example.com/profiles/3.png", true),
+                                PartyListMemberDto(4, "도윤", "https://example.com/profiles/4.png", false)
+                            )
                         )
                     ),
                     nextCursor = null,
@@ -202,6 +237,9 @@ class PartyRepositoryImplTest {
 
         override suspend fun readyParty(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("목록 테스트에서 준비 API가 호출되면 안 됩니다.")
+
+        override suspend fun leaveParty(partyId: Long): Response<ApiResponse<PartyLeaveResponseDto>> =
+            error("목록 테스트에서 이탈 API가 호출되면 안 됩니다.")
 
         override suspend fun getPartyFeed(partyId: Long): Response<ApiResponse<PartyFeedDto>> =
             error("목록 테스트에서 피드 API가 호출되면 안 됩니다.")
@@ -250,6 +288,9 @@ class PartyRepositoryImplTest {
         override suspend fun readyParty(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("대기방 테스트에서 준비 API가 호출되면 안 됩니다.")
 
+        override suspend fun leaveParty(partyId: Long): Response<ApiResponse<PartyLeaveResponseDto>> =
+            error("대기방 테스트에서 이탈 API가 호출되면 안 됩니다.")
+
         override suspend fun getSettlementResult(partyId: Long): Response<ApiResponse<PartySettlementResultDto>> =
             error("대기방 테스트에서 정산 API가 호출되면 안 됩니다.")
     }
@@ -290,6 +331,9 @@ class PartyRepositoryImplTest {
 
         override suspend fun readyParty(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("생성 테스트에서 준비 API가 호출되면 안 됩니다.")
+
+        override suspend fun leaveParty(partyId: Long): Response<ApiResponse<PartyLeaveResponseDto>> =
+            error("생성 테스트에서 이탈 API가 호출되면 안 됩니다.")
 
         override suspend fun getPartyFeed(partyId: Long): Response<ApiResponse<PartyFeedDto>> =
             error("생성 테스트에서 피드 API가 호출되면 안 됩니다.")
@@ -364,6 +408,20 @@ class PartyRepositoryImplTest {
                             PartySettlementMemberDto(3, "수아", "https://example.com/3.png", "FAIL", -12_000),
                             PartySettlementMemberDto(4, "도윤", "https://example.com/4.png", "CANCELED", 0)
                         )
+                    )
+                )
+            )
+
+        override suspend fun leaveParty(partyId: Long): Response<ApiResponse<PartyLeaveResponseDto>> =
+            Response.success(
+                ApiResponse(
+                    timestamp = "2026-07-23T13:00:00",
+                    code = "SUCCESS",
+                    message = "요청에 성공하였습니다.",
+                    result = PartyLeaveResponseDto(
+                        partyId = partyId,
+                        dissolved = false,
+                        newHostUserId = 7
                     )
                 )
             )

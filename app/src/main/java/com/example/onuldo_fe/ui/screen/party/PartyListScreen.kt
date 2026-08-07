@@ -36,7 +36,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomePartyChallenge
+import com.example.onuldo_fe.model.home.HomePartyMember
 import com.example.onuldo_fe.ui.screen.home.components.HomePartyCard
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown50
@@ -187,12 +189,22 @@ private fun PartyListEmptyContent(modifier: Modifier = Modifier) {
 // API에서 남은 일수와 시간을 숫자 타입으로 제공하면 문자열 파싱 대신 응답 값을 직접 전달
 private fun PartyCardUi.toHomePartyChallenge() = HomePartyChallenge(
     title = partyName,
-    subtitle = challengeName,
+    subtitle = goal,
     remainingDays = dDay.filter(Char::isDigit).toIntOrNull() ?: 0,
     deadlineAt = deadline.toLocalTimeOrNull(),
     completedMemberCount = completedMemberCount,
     totalMemberCount = totalMemberCount,
-    remainingMinutes = remainingText.toRemainingMinutes()
+    status = verificationStatus,
+    remainingMinutes = remainingText.toRemainingMinutes(),
+    canVerify = verificationStatus == ChallengeStatus.NeedCertification,
+    members = members.map { member ->
+        HomePartyMember(
+            memberId = member.userId.toString(),
+            profileImageUrl = member.profileImageUrl,
+            defaultCharacterId = null,
+            isVerifiedToday = member.isVerifiedToday
+        )
+    }
 )
 
 private fun String.toLocalTimeOrNull(): LocalTime? {

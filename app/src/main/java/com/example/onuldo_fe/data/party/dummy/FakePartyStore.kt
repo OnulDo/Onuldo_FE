@@ -164,7 +164,7 @@ object FakePartyStore {
             ?: throw FakePartyJoinException(PartyJoinError.Invalid)
         val stored = entry.value
         if (stored.status == "ONGOING") throw FakePartyJoinException(PartyJoinError.AlreadyStarted)
-        if (stored.status == "DISBANDED") throw FakePartyJoinException(PartyJoinError.Expired)
+        if (stored.status == "DISSOLVED") throw FakePartyJoinException(PartyJoinError.Expired)
         if (stored.room.members.size >= stored.room.maxMembers) {
             throw FakePartyJoinException(PartyJoinError.Full)
         }
@@ -212,7 +212,7 @@ object FakePartyStore {
         val leavingMember = stored.room.members.firstOrNull { it.userId == CURRENT_USER_ID } ?: return
         val remaining = stored.room.members.filterNot { it.userId == CURRENT_USER_ID }.toMutableList()
         if (remaining.isEmpty()) {
-            parties[partyId] = stored.copy(room = stored.room.withMembers(emptyList()), status = "DISBANDED")
+            parties[partyId] = stored.copy(room = stored.room.withMembers(emptyList()), status = "DISSOLVED")
             summaries.remove(partyId)
             FakePartyFeedState.removeParty(partyId)
             return

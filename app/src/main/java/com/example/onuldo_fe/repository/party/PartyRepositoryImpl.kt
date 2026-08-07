@@ -17,6 +17,8 @@ import com.example.onuldo_fe.model.party.PartyMember
 import com.example.onuldo_fe.model.party.PartyMemberReadyStatus
 import com.example.onuldo_fe.model.party.PartyRole
 import com.example.onuldo_fe.model.party.PartySummary
+import com.example.onuldo_fe.model.party.PartySummaryMember
+import com.example.onuldo_fe.model.party.PartyVerificationStatus
 import com.example.onuldo_fe.model.party.PartyWaitingRoom
 import com.example.onuldo_fe.model.party.PartySettlementMember
 import com.example.onuldo_fe.model.party.PartySettlementMemberStatus
@@ -24,11 +26,10 @@ import com.example.onuldo_fe.model.party.PartySettlementResult
 import com.example.onuldo_fe.model.party.PartySettlementStatus
 import retrofit2.HttpException
 import java.io.IOException
-import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
-// 파티 생성·대기방 API 요청과 DTO의 도메인 모델 변환 담당
+// 파티 목록·생성·대기방·이탈·시작·정산 API와 도메인 변환 담당
 class PartyRepositoryImpl(
     private val fakeApi: PartyApi,
     private val realApi: RealPartyApi,
@@ -37,7 +38,8 @@ class PartyRepositoryImpl(
     private val useRealPartyCreateApi: Boolean = false,
     private val useRealPartyReadyApi: Boolean = false,
     private val useRealPartyStartApi: Boolean = false,
-    private val useRealPartySettlementApi: Boolean = false
+    private val useRealPartySettlementApi: Boolean = false,
+    private val useRealPartyLeaveApi: Boolean = false
 ) : PartyRepository {
     // 서버의 진행 중 파티 응답 목록을 도메인 요약 모델 목록으로 변환
     override suspend fun getParties(): List<PartySummary> = if (useRealPartyListApi) {
@@ -78,7 +80,7 @@ class PartyRepositoryImpl(
     }
 
     override suspend fun readyParty(partyId: String): PartyWaitingRoom {
-        // 준비 완료만 독립적으로 전환해 아직 Fake인 시작·이탈 API에 영향을 주지 않는다.
+        // 준비 완료 API를 다른 파티 기능과 독립적으로 Real/Fake 전환한다.
         if (!useRealPartyReadyApi) return fakeApi.readyParty(partyId.toLong()).toModel()
 
         val response = realApi.readyParty(partyId.toLong())
@@ -87,7 +89,17 @@ class PartyRepositoryImpl(
         return body.result.toModel()
     }
 
-    override suspend fun leaveParty(partyId: String) = fakeApi.leaveParty(partyId.toLong())
+    override suspend fun leaveParty(partyId: String) {
+        if (!useRealPartyLeaveApi) {
+            fakeApi.leaveParty(partyId.toLong())
+            return
+        }
+
+        // 실제 이탈 성공 응답을 확인한 후에만 ViewModel이 대기방을 닫도록 한다.
+        val response = realApi.leaveParty(partyId.toLong())
+        if (!response.isSuccessful) throw HttpException(response)
+        response.body()?.result ?: throw IOException("파티 이탈 응답 본문이 비어 있습니다.")
+    }
 
     override suspend fun startParty(partyId: String) {
         if (!useRealPartyStartApi) {
@@ -204,8 +216,9 @@ internal fun RealPartyWaitingRoomDto.toModel() = PartyWaitingRoom(
 
 /** 대기방 응답의 서버 상태를 앱 공통 파티 상태로 변환한다. */
 private fun String.toLifecycleStatus() = when (this) {
+    "WAITING" -> PartyLifecycleStatus.Recruiting
     "ONGOING" -> PartyLifecycleStatus.InProgress
-    "FINISHED", "DISBANDED" -> PartyLifecycleStatus.Disbanded
+    "FINISHED", "DISSOLVED" -> PartyLifecycleStatus.Disbanded
     else -> PartyLifecycleStatus.Recruiting
 }
 
@@ -238,11 +251,7 @@ private fun PartySummaryDto.toModel() = PartySummary(
     remainingText = null,
     completedMemberCount = verifiedToday,
     totalMemberCount = totalMembers,
-    status = when (status) {
-        "ONGOING" -> PartyLifecycleStatus.InProgress
-        "DISBANDED" -> PartyLifecycleStatus.Disbanded
-        else -> PartyLifecycleStatus.Recruiting
-    }
+    status = status.toLifecycleStatus()
 )
 
 private fun RealPartyMemberDto.toModel(index: Int) = PartyMember(
@@ -264,24 +273,31 @@ private fun RealPartySummaryDto.toModel() = PartySummary(
     partyId = partyId.toString(),
     partyName = name,
     challengeName = challengeTitle,
-    // 서버 종료일과 오늘 날짜의 차이를 카드의 D-Day 문구로 변환한다.
-    dDay = "D-${daysUntil(endDate)}",
+    goal = goal,
+    // 서버의 정렬·종료일 정책과 동일한 계산 dDay를 그대로 사용한다.
+    dDay = "D-$dDay",
     deadline = verificationDeadline,
     // 인증 마감 시각과 현재 시각의 차이를 분 단위로 전달한다.
     // HomePartyCard에서 0~60분일 때만 "N분 남음" 배지를 표시한다.
     remainingText = remainingTextUntil(verificationDeadline),
     completedMemberCount = verifiedMemberCount,
     totalMemberCount = totalMemberCount,
-    status = if (status == "ONGOING") {
-        PartyLifecycleStatus.InProgress
-    } else {
-        PartyLifecycleStatus.Disbanded
+    status = status.toLifecycleStatus(),
+    verificationStatus = when (myStatus) {
+        "PENDING" -> PartyVerificationStatus.Pending
+        "SUCCESS" -> PartyVerificationStatus.Success
+        "FAIL" -> PartyVerificationStatus.Fail
+        else -> PartyVerificationStatus.NotVerified
+    },
+    members = members.map { member ->
+        PartySummaryMember(
+            userId = member.userId,
+            nickname = member.nickname,
+            profileImageUrl = member.profileImageUrl,
+            isVerifiedToday = member.isVerifiedToday
+        )
     }
 )
-
-private fun daysUntil(endDate: String): Long = runCatching {
-    ChronoUnit.DAYS.between(LocalDate.now(), LocalDate.parse(endDate)).coerceAtLeast(0)
-}.getOrDefault(0)
 
 private fun remainingTextUntil(deadline: String): String? = runCatching {
     ChronoUnit.MINUTES.between(LocalTime.now(), LocalTime.parse(deadline))
