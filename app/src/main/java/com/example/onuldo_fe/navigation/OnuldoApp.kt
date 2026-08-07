@@ -1,7 +1,11 @@
 package com.example.onuldo_fe.navigation
 
+import android.os.SystemClock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -34,6 +38,10 @@ import androidx.compose.runtime.getValue
 import com.example.onuldo_fe.camera.PhotoPreviewScreen
 import com.example.onuldo_fe.ui.screen.verification.ChallengeVerificationScreen
 import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
+import kotlinx.coroutines.delay
+
+private const val MINIMUM_REVIEWING_DURATION_MILLIS = 2_000L
+private const val FINAL_REVIEW_STEP_DISPLAY_MILLIS = 300L
 
 /** 마이 메뉴 이름. 서버가 약관 제목을 주기 전까지 상단바에 쓴다. */
 private fun termTitleOf(termType: TermType): String = when (termType) {
@@ -195,68 +203,164 @@ fun OnuldoApp() {
             )
         }
 
-        // 카메라 화면
-        composable(Routes.CAMERA) {
+        // 카메라 촬영
+        composable(
+            route = Routes.CAMERA,
+            arguments = listOf(
+                navArgument(Routes.CAMERA_CHALLENGE_ID_ARG) { type = NavType.LongType },
+                navArgument(Routes.CAMERA_CATEGORY_ARG) {
+                    type = NavType.StringType
+                    defaultValue = "시간 챌린지"
+                },
+                navArgument(Routes.CAMERA_TITLE_ARG) {
+                    type = NavType.StringType
+                    defaultValue = "오늘의 챌린지 인증"
+                }
+            )
+        ) { backStackEntry ->
+            val challengeId = backStackEntry.arguments
+                ?.getLong(Routes.CAMERA_CHALLENGE_ID_ARG)
+                ?: return@composable
+            val category = backStackEntry.arguments
+                ?.getString(Routes.CAMERA_CATEGORY_ARG)
+                .orEmpty()
+            val title = backStackEntry.arguments
+                ?.getString(Routes.CAMERA_TITLE_ARG)
+                .orEmpty()
             CameraScreen(
-                category = "",
-                title = "",
+                category = category,
+                title = title,
                 onPhotoCaptured = { uri ->
                     cameraViewModel.setImageUri(uri)
-                    navController.navigate(Routes.PHOTO_PREVIEW)
+                    navController.navigate(
+                        Routes.photoPreview(challengeId, category, title)
+                    )
                 },
                 onCloseClick = {
+                    cameraViewModel.discardPhoto()
                     navController.popBackStack()
                 }
             )
         }
 
-        //프리뷰
-        composable(Routes.PHOTO_PREVIEW) {
-
+        // 촬영 사진 확인 및 제출
+        composable(
+            route = Routes.PHOTO_PREVIEW,
+            arguments = listOf(
+                navArgument(Routes.CAMERA_CHALLENGE_ID_ARG) { type = NavType.LongType },
+                navArgument(Routes.CAMERA_CATEGORY_ARG) {
+                    type = NavType.StringType
+                    defaultValue = "시간 챌린지"
+                },
+                navArgument(Routes.CAMERA_TITLE_ARG) {
+                    type = NavType.StringType
+                    defaultValue = "오늘의 챌린지 인증"
+                }
+            )
+        ) { backStackEntry ->
+            val challengeId = backStackEntry.arguments
+                ?.getLong(Routes.CAMERA_CHALLENGE_ID_ARG)
+                ?: return@composable
+            val category = backStackEntry.arguments
+                ?.getString(Routes.CAMERA_CATEGORY_ARG)
+                .orEmpty()
+            val title = backStackEntry.arguments
+                ?.getString(Routes.CAMERA_TITLE_ARG)
+                .orEmpty()
             val imageUri by cameraViewModel.imageUri.collectAsState()
+            val submitState by cameraViewModel.submitState.collectAsState()
+            var hasStartedReviewNavigation by remember { mutableStateOf(false) }
+
+            LaunchedEffect(submitState) {
+                val shouldShowReviewing = when (submitState) {
+                    com.example.onuldo_fe.camera.VerificationSubmitState.Reviewing,
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Success,
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Failure,
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Waiting -> true
+                    else -> false
+                }
+
+                if (shouldShowReviewing && !hasStartedReviewNavigation) {
+                    hasStartedReviewNavigation = true
+                    navController.navigate(Routes.VERIFICATION_REVIEWING) {
+                        launchSingleTop = true
+                    }
+                } else if (submitState == com.example.onuldo_fe.camera.VerificationSubmitState.Idle ||
+                    submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Error
+                ) {
+                    hasStartedReviewNavigation = false
+                }
+            }
 
             PhotoPreviewScreen(
-                category = "",
-                title = "",
+                category = category,
+                title = title,
                 imageUri = imageUri,
-
                 onCloseClick = {
-                    navController.popBackStack()
+                    cameraViewModel.discardPhoto()
+                    navController.popBackStack(
+                        route = Routes.CAMERA,
+                        inclusive = true
+                    )
                 },
-
                 onRetakeClick = {
+                    cameraViewModel.discardPhoto()
                     navController.popBackStack()
                 },
-
                 onSubmitClick = {
-                    navController.navigate(Routes.VERIFICATION_WAITING)
-                }
+                    cameraViewModel.submitVerification(challengeId, category, title)
+                },
+                submitState = submitState,
+                onErrorConfirm = cameraViewModel::clearSubmitState
             )
         }
 
-        //검증 심사중
         composable(Routes.VERIFICATION_REVIEWING) {
+            val submitState by cameraViewModel.submitState.collectAsState()
+            val reviewingStartedAt = remember { SystemClock.elapsedRealtime() }
+            val isReviewResultReady =
+                submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Success ||
+                    submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Failure ||
+                    submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Waiting
+
+            LaunchedEffect(submitState) {
+                if (isReviewResultReady) {
+                    val elapsedTime = SystemClock.elapsedRealtime() - reviewingStartedAt
+                    val remainingMinimumDuration =
+                        (MINIMUM_REVIEWING_DURATION_MILLIS - elapsedTime).coerceAtLeast(0L)
+                    delay(maxOf(remainingMinimumDuration, FINAL_REVIEW_STEP_DISPLAY_MILLIS))
+                }
+
+                when (submitState) {
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Success ->
+                        navController.navigate(Routes.VERIFICATION_SUCCESS) {
+                            popUpTo(Routes.VERIFICATION_REVIEWING) { inclusive = true }
+                        }
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Failure ->
+                        navController.navigate(Routes.VERIFICATION_FAIL) {
+                            popUpTo(Routes.VERIFICATION_REVIEWING) { inclusive = true }
+                        }
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Waiting ->
+                        navController.navigate(Routes.VERIFICATION_WAITING) {
+                            popUpTo(Routes.VERIFICATION_REVIEWING) { inclusive = true }
+                        }
+                    is com.example.onuldo_fe.camera.VerificationSubmitState.Error ->
+                        navController.popBackStack()
+                    else -> Unit
+                }
+            }
+
             ChallengeVerificationScreen(
-                status = VerificationStatus.REVIEWING
+                status = VerificationStatus.REVIEWING,
+                isReviewResultReady = isReviewResultReady
             )
         }
 
         composable(Routes.VERIFICATION_SUCCESS) {
             ChallengeVerificationScreen(
-                status = VerificationStatus.SUCCESS
-            )
-        }
-
-        composable(Routes.VERIFICATION_FAIL) {
-            ChallengeVerificationScreen(
-                status = VerificationStatus.FAILURE
-            )
-        }
-
-        composable(Routes.VERIFICATION_WAITING) {
-            ChallengeVerificationScreen(
-                status = VerificationStatus.WAITING,
+                status = VerificationStatus.SUCCESS,
                 onConfirmClick = {
+                    cameraViewModel.clearSubmitState()
                     navController.navigate(Routes.MAIN) {
                         popUpTo(Routes.MAIN) { inclusive = true }
                     }
@@ -264,7 +368,47 @@ fun OnuldoApp() {
             )
         }
 
+        composable(Routes.VERIFICATION_FAIL) {
+            val state by cameraViewModel.submitState.collectAsState()
+            ChallengeVerificationScreen(
+                status = VerificationStatus.FAILURE,
+                failureReason = (state as? com.example.onuldo_fe.camera.VerificationSubmitState.Failure)?.message.orEmpty(),
+                onManualReviewClick = {
+                    navController.navigate(Routes.VERIFICATION_WAITING)
+                },
+                onRetryClick = {
+                    cameraViewModel.activeChallengeId?.let { challengeId ->
+                        val category = cameraViewModel.activeCategory
+                            .ifBlank { "시간 챌린지" }
+                        val title = cameraViewModel.activeTitle
+                            .ifBlank { "오늘의 챌린지 인증" }
+                        cameraViewModel.clearSubmitState()
+                        navController.navigate(Routes.camera(challengeId, category, title)) {
+                            popUpTo(Routes.CAMERA) { inclusive = true }
+                        }
+                    }
+                }
+            )
+        }
 
+        composable(Routes.VERIFICATION_WAITING) {
+            val state by cameraViewModel.submitState.collectAsState()
+            val submittedAt =
+                (state as? com.example.onuldo_fe.camera.VerificationSubmitState.Waiting)
+                    ?.result
+                    ?.verifiedAt
+                    ?: cameraViewModel.activeVerifiedAt
+            ChallengeVerificationScreen(
+                status = VerificationStatus.WAITING,
+                submittedAt = submittedAt,
+                onConfirmClick = {
+                    cameraViewModel.clearSubmitState()
+                    navController.navigate(Routes.MAIN) {
+                        popUpTo(Routes.MAIN) { inclusive = true }
+                    }
+                }
+            )
+        }
 
         // --- 챌린지 상세 흐름: 상세 → 참여 ---
         // challengeId 기반으로 상세 API를 조회한 뒤, CTA 동작은 호출부에서 처리한다.

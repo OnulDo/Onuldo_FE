@@ -60,7 +60,9 @@ fun MainScreen(
         ) {
             composable(BottomTab.Home.route) {
                 HomeRoute(
-                    onCameraNavigate = { onNavigate(Routes.CAMERA) },
+                    onCameraNavigate = { challengeId, category, title ->
+                        onNavigate(Routes.camera(challengeId, category, title))
+                    },
                     refreshKey = homeRefreshKey,
                     onBrowseChallengesClick = {
                         // 빈 홈 CTA에서 기존 챌린지 탭의 GalleryScreen으로 이동
@@ -103,7 +105,7 @@ fun MainScreen(
             composable(BottomTab.Party.route) {
                 PartyRoute(
                     onBottomBarVisibilityChange = { showBottomBar = it },
-                    onCameraNavigate = { onNavigate(Routes.CAMERA) },
+                    onCameraNavigate = { onNavigate(Routes.camera(2L)) },
                     onChargePoint = { onNavigate(Routes.MYPAGE_CHARGE) },
                     onHomeNavigate = {
                         // 새로 시작한 파티 재조회와 홈 상단 이동을 한 번에 요청

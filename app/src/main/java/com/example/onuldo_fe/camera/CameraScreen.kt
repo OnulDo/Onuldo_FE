@@ -1,21 +1,34 @@
 package com.example.onuldo_fe.camera
 
-import android.content.ContentValues
 import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
+import android.util.Size
+import java.io.File
+import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
@@ -33,33 +46,93 @@ fun CameraScreen(
     onCloseClick: () -> Unit
 ){
     val imageCapture = remember {
-        ImageCapture.Builder().build()
+        ImageCapture.Builder()
+            .setResolutionSelector(
+                ResolutionSelector.Builder()
+                    .setAspectRatioStrategy(AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY)
+                    .setResolutionStrategy(
+                        ResolutionStrategy(
+                            Size(1920, 1440),
+                            ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
+                        )
+                    )
+                    .build()
+            )
+            .setFlashMode(ImageCapture.FLASH_MODE_OFF)
+            .build()
     }
     var showVerificationNotice by remember { mutableStateOf(false) }
-    
-    Box(
-        modifier = Modifier.fillMaxSize()
+
+    var lensFacing by rememberSaveable {
+        mutableStateOf(CameraSelector.LENS_FACING_BACK)
+    }
+
+    var flashMode by rememberSaveable {
+        mutableStateOf(ImageCapture.FLASH_MODE_OFF)
+    }
+
+    LaunchedEffect(imageCapture, flashMode) {
+        imageCapture.flashMode = flashMode
+    }
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
     ) {
+        val layoutDimensions = calculateCameraLayoutDimensions(maxWidth, maxHeight)
+
         // 카메라 프리뷰
-         CameraPreview(
-            imageCapture = imageCapture,
-            modifier = Modifier.fillMaxSize()
-        )
-       /* Box(
+        key(lensFacing) {
+            CameraPreview(
+                imageCapture = imageCapture,
+                lensFacing = lensFacing,
+                modifier = Modifier
+                    .height(layoutDimensions.previewHeight)
+                    .aspectRatio(3f / 4f)
+                    .align(Alignment.Center)
+            )
+        }
+        /* Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black)
         )*/
-
-        CameraTopBar(
-            category = category,
-            title = title,
-            showFlashButton = true,
-            onCloseClick = onCloseClick,
-            onFlashClick = {  }
-        )
         Box(
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(layoutDimensions.topAreaHeight)
+                .align(Alignment.TopCenter)
+                .statusBarsPadding(),
+            contentAlignment = Alignment.Center
+        ) {
+            CameraTopBar(
+                category = category,
+                title = title,
+                showFlashButton =
+                    lensFacing == CameraSelector.LENS_FACING_BACK,
+                isFlashOn = flashMode == ImageCapture.FLASH_MODE_ON,
+                onCloseClick = onCloseClick,
+                onFlashClick = {
+                    val newFlashMode =
+                        if (flashMode == ImageCapture.FLASH_MODE_OFF) {
+                            ImageCapture.FLASH_MODE_ON
+                        } else {
+                            ImageCapture.FLASH_MODE_OFF
+                        }
+
+                    flashMode = newFlashMode
+                    imageCapture.flashMode = newFlashMode
+                }
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(layoutDimensions.bottomAreaHeight)
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding(),
+            contentAlignment = Alignment.Center
         ) {
             val context = LocalContext.current
             CameraBottomBar(
@@ -67,24 +140,9 @@ fun CameraScreen(
                     showVerificationNotice = true
                 },
                 onCaptureClick = {
-                    val name = System.currentTimeMillis().toString()
-                    val contentValues = ContentValues().apply {
-                        put(MediaStore.MediaColumns.DISPLAY_NAME, name)
-                        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            put(
-                                MediaStore.Images.Media.RELATIVE_PATH,
-                                "Pictures/OnulDo"
-                            )
-                        }
-                    }
-                    val outputOptions =
-                        ImageCapture.OutputFileOptions.Builder(
-                            context.contentResolver,
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                            contentValues
-                        ).build()
+                    val photoDirectory = File(context.cacheDir, "verification_photos").apply { mkdirs() }
+                    val photoFile = File(photoDirectory, "verification_${System.currentTimeMillis()}.jpg")
+                    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
                     imageCapture.takePicture(
                         outputOptions,
@@ -94,19 +152,30 @@ fun CameraScreen(
                             override fun onImageSaved(
                                 outputFileResults: ImageCapture.OutputFileResults
                             ) {
-                                val savedUri = outputFileResults.savedUri
+                                val savedUri = outputFileResults.savedUri ?: Uri.fromFile(photoFile)
                                 onPhotoCaptured(savedUri)
                             }
 
                             override fun onError(
                                 exception: ImageCaptureException
                             ) {
+                                photoFile.delete()
                                 exception.printStackTrace()
                             }
                         }
                     )
-                }
+                },
+                onSwitchClick = {
+                    lensFacing =
+                        if (lensFacing == CameraSelector.LENS_FACING_BACK) {
+                            CameraSelector.LENS_FACING_FRONT
+                        } else {
+                            CameraSelector.LENS_FACING_BACK
+                        }
 
+                    flashMode = ImageCapture.FLASH_MODE_OFF
+                    imageCapture.flashMode = ImageCapture.FLASH_MODE_OFF
+                }
             )
         }
 
