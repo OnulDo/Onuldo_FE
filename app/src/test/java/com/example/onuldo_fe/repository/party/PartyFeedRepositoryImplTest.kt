@@ -11,6 +11,7 @@ import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
+import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -82,5 +83,8 @@ class PartyFeedRepositoryImplTest {
                     )
                 )
             )
+
+        override suspend fun getSettlementResult(partyId: Long): Response<ApiResponse<PartySettlementResultDto>> =
+            error("피드 테스트에서 정산 API가 호출되면 안 됩니다.")
     }
 }

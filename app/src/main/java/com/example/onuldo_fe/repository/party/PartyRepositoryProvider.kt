@@ -15,7 +15,8 @@ object PartyRepositoryProvider {
         useRealPartyWaitingRoomApi: Boolean = PartyApiConfig.USE_REAL_WAITING_ROOM,
         useRealPartyCreateApi: Boolean = PartyApiConfig.USE_REAL_CREATE,
         useRealPartyReadyApi: Boolean = PartyApiConfig.USE_REAL_READY,
-        useRealPartyStartApi: Boolean = PartyApiConfig.USE_REAL_START
+        useRealPartyStartApi: Boolean = PartyApiConfig.USE_REAL_START,
+        useRealPartySettlementApi: Boolean = PartyApiConfig.USE_REAL_SETTLEMENT
     ): PartyRepository = PartyRepositoryImpl(
         fakeApi = fakeApi,
         realApi = realApi,
@@ -23,6 +24,7 @@ object PartyRepositoryProvider {
         useRealPartyWaitingRoomApi = useRealPartyWaitingRoomApi,
         useRealPartyCreateApi = useRealPartyCreateApi,
         useRealPartyReadyApi = useRealPartyReadyApi,
-        useRealPartyStartApi = useRealPartyStartApi
+        useRealPartyStartApi = useRealPartyStartApi,
+        useRealPartySettlementApi = useRealPartySettlementApi
     )
 }

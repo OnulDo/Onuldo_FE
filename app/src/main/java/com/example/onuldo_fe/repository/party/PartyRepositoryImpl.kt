@@ -36,7 +36,8 @@ class PartyRepositoryImpl(
     private val useRealPartyWaitingRoomApi: Boolean = false,
     private val useRealPartyCreateApi: Boolean = false,
     private val useRealPartyReadyApi: Boolean = false,
-    private val useRealPartyStartApi: Boolean = false
+    private val useRealPartyStartApi: Boolean = false,
+    private val useRealPartySettlementApi: Boolean = false
 ) : PartyRepository {
     // 서버의 진행 중 파티 응답 목록을 도메인 요약 모델 목록으로 변환
     override suspend fun getParties(): List<PartySummary> = if (useRealPartyListApi) {
@@ -101,8 +102,15 @@ class PartyRepositoryImpl(
         // TODO: 도전금 차감 실패 code가 명세되면 포인트 부족 오류로 변환한다.
     }
 
-    override suspend fun getSettlementResult(partyId: Long): PartySettlementResult =
-        fakeApi.getSettlementResult(partyId).toModel()
+    override suspend fun getSettlementResult(partyId: Long): PartySettlementResult {
+        if (!useRealPartySettlementApi) return fakeApi.getSettlementResult(partyId).toModel()
+
+        // 결과 조회 성공 시 서버가 홈 정산 배너도 확인 처리한다.
+        val response = realApi.getSettlementResult(partyId)
+        if (!response.isSuccessful) throw HttpException(response)
+        val body = response.body() ?: throw IOException("파티 정산 결과 응답 본문이 비어 있습니다.")
+        return body.result.toModel()
+    }
 }
 
 /** 화면의 주 단위 기간을 Swagger의 durationWeeks 값으로 그대로 전달한다. */
@@ -115,33 +123,55 @@ private fun CreatePartyCommand.toCreateRequestDto() = CreatePartyRequestDto(
 )
 
 // 서버 정산 상태와 파티원 결과를 앱에서 사용하는 도메인 모델로 변환
-internal fun PartySettlementResultDto.toModel() = PartySettlementResult(
-    partyId = partyId,
-    status = when (overallStatus) {
+internal fun PartySettlementResultDto.toModel(): PartySettlementResult {
+    val settlementStatus = when (resultType) {
         "ALL_SUCCESS" -> PartySettlementStatus.AllSuccess
         "PARTIAL_SUCCESS" -> PartySettlementStatus.PartialSuccess
-        "ALL_FAILED" -> PartySettlementStatus.AllFailed
-        else -> error("Unsupported settlement status: $overallStatus")
-    },
-    title = overallTitle,
-    description = overallDescription,
-    refundAmount = myResult.depositRefundAmount,
-    adjustmentAmount = myResult.bonusAmount,
-    members = memberResults.map { member ->
+        "ALL_FAIL" -> PartySettlementStatus.AllFailed
+        else -> error("Unsupported settlement result type: $resultType")
+    }
+    val memberModels = members.map { member ->
         PartySettlementMember(
             userId = member.userId,
-            name = member.name,
+            name = member.nickname,
             profileImageUrl = member.profileImageUrl,
-            defaultCharacterId = member.defaultCharacterId,
-            status = if (member.isSuccess) {
-                PartySettlementMemberStatus.Completed
-            } else {
-                PartySettlementMemberStatus.Incomplete
+            status = when (member.status) {
+                "ONGOING" -> PartySettlementMemberStatus.Ongoing
+                "SUCCESS" -> PartySettlementMemberStatus.Success
+                "FAIL" -> PartySettlementMemberStatus.Fail
+                "CANCELED" -> PartySettlementMemberStatus.Canceled
+                else -> error("Unsupported party member settlement status: ${member.status}")
             },
-            adjustmentAmount = member.bonusAmount
+            displayAmount = member.displayAmount
         )
     }
-)
+    val completedMemberCount = memberModels.count { it.status == PartySettlementMemberStatus.Success }
+    val (title, description) = settlementStatus.temporaryCopy(completedMemberCount)
+
+    return PartySettlementResult(
+        partyId = partyId,
+        partyName = name,
+        status = settlementStatus,
+        title = title,
+        description = description,
+        depositAmount = myDepositAmount,
+        displayAmount = myDisplayAmount,
+        members = memberModels
+    )
+}
+
+/** Swagger에 문구가 없어 최종 Figma 확정 전까지 기존 화면 문구를 유지한다. */
+private fun PartySettlementStatus.temporaryCopy(completedMemberCount: Int): Pair<String, String> =
+    when (this) {
+        PartySettlementStatus.AllSuccess ->
+            "전원 성공!" to "파티 전원이 챌린지를 완주했어요"
+
+        PartySettlementStatus.PartialSuccess ->
+            "${completedMemberCount}명이 완주했어요" to "미완주 파티원의 도전금이 완주자에게 배분됐어요"
+
+        PartySettlementStatus.AllFailed ->
+            "아쉽게 실패했어요" to "이번엔 아무도 목표를 채우지 못했어요"
+    }
 
 // 대기방 응답과 중첩된 파티원 DTO를 도메인 모델로 함께 변환
 internal fun PartyWaitingRoomDto.toModel() = PartyWaitingRoom(

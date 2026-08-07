@@ -126,11 +126,8 @@ fun HomeRoute(
         HomeScreen(
             uiState = viewModel.uiState,
             onNotificationClick = ::handleNotificationClick,
-            onSettlementResultClick = { partyId ->
-                // 결과 화면 이동을 요청한 뒤 현재 홈 세션에서 확인한 배너 제거
-                onSettlementResultClick(partyId)
-                viewModel.confirmSettlementResult()
-            },
+            // 정산 결과 API가 확인 처리하고, 홈 복귀 시 ON_RESUME 재조회로 배너가 사라진다.
+            onSettlementResultClick = onSettlementResultClick,
             onBrowseChallengesClick = onBrowseChallengesClick,
             onVerifyClick = ::handleVerifyClick,
             onRefresh = viewModel::refreshHome,

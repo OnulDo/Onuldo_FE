@@ -8,6 +8,7 @@ import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
+import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -59,4 +60,10 @@ interface RealPartyApi {
     suspend fun getPartyFeed(
         @Path("partyId") partyId: Long
     ): Response<ApiResponse<PartyFeedDto>>
+
+    /** 파티 정산 결과를 조회하고 해당 결과 배너를 확인 처리한다. */
+    @GET("api/parties/{partyId}/results")
+    suspend fun getSettlementResult(
+        @Path("partyId") partyId: Long
+    ): Response<ApiResponse<PartySettlementResultDto>>
 }

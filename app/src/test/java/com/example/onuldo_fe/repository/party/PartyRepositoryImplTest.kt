@@ -12,7 +12,11 @@ import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
+import com.example.onuldo_fe.data.party.dto.PartySettlementMemberDto
+import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
 import com.example.onuldo_fe.model.party.CreatePartyCommand
+import com.example.onuldo_fe.model.party.PartySettlementMemberStatus
+import com.example.onuldo_fe.model.party.PartySettlementStatus
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -113,6 +117,34 @@ class PartyRepositoryImplTest {
         repository.startParty("101")
     }
 
+    @Test
+    fun `정산 설정이 true이면 실제 응답의 금액과 파티원 상태를 변환한다`() = runBlocking {
+        val repository = PartyRepositoryImpl(
+            fakeApi = FakePartyApi(),
+            realApi = SuccessfulReadyRealApi,
+            useRealPartyListApi = false,
+            useRealPartySettlementApi = true
+        )
+
+        val result = repository.getSettlementResult(101)
+
+        assertEquals(PartySettlementStatus.PartialSuccess, result.status)
+        assertEquals("부지런 파티", result.partyName)
+        assertEquals(30_000, result.depositAmount)
+        assertEquals(-12_000, result.displayAmount)
+        assertEquals("1명이 완주했어요", result.title)
+        assertEquals(1, result.completedMemberCount)
+        assertEquals(
+            listOf(
+                PartySettlementMemberStatus.Ongoing,
+                PartySettlementMemberStatus.Success,
+                PartySettlementMemberStatus.Fail,
+                PartySettlementMemberStatus.Canceled
+            ),
+            result.members.map { it.status }
+        )
+    }
+
     private object ThrowingRealPartyApi : RealPartyApi {
         override suspend fun startParty(partyId: Long): Response<ApiResponse<PartyStartResponseDto>> = error("테스트에서 시작 API가 호출되면 안 됩니다.")
         override suspend fun joinParty(request: PartyJoinRequestDto): Response<ApiResponse<RealPartyWaitingRoomDto>> = error("테스트에서 참여 API가 호출되면 안 됩니다.")
@@ -130,6 +162,9 @@ class PartyRepositoryImplTest {
 
         override suspend fun getPartyFeed(partyId: Long): Response<ApiResponse<PartyFeedDto>> =
             error("파티 Repository 테스트에서 피드 API가 호출되면 안 됩니다.")
+
+        override suspend fun getSettlementResult(partyId: Long): Response<ApiResponse<PartySettlementResultDto>> =
+            error("Fake 모드에서 실제 정산 API가 호출되면 안 됩니다.")
     }
 
     private object SuccessfulRealPartyApi : RealPartyApi {
@@ -170,6 +205,9 @@ class PartyRepositoryImplTest {
 
         override suspend fun getPartyFeed(partyId: Long): Response<ApiResponse<PartyFeedDto>> =
             error("목록 테스트에서 피드 API가 호출되면 안 됩니다.")
+
+        override suspend fun getSettlementResult(partyId: Long): Response<ApiResponse<PartySettlementResultDto>> =
+            error("목록 테스트에서 정산 API가 호출되면 안 됩니다.")
     }
 
     private object SuccessfulWaitingRoomApi : RealPartyApi {
@@ -211,6 +249,9 @@ class PartyRepositoryImplTest {
 
         override suspend fun readyParty(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("대기방 테스트에서 준비 API가 호출되면 안 됩니다.")
+
+        override suspend fun getSettlementResult(partyId: Long): Response<ApiResponse<PartySettlementResultDto>> =
+            error("대기방 테스트에서 정산 API가 호출되면 안 됩니다.")
     }
 
     private object SuccessfulCreateRealApi : RealPartyApi {
@@ -252,6 +293,9 @@ class PartyRepositoryImplTest {
 
         override suspend fun getPartyFeed(partyId: Long): Response<ApiResponse<PartyFeedDto>> =
             error("생성 테스트에서 피드 API가 호출되면 안 됩니다.")
+
+        override suspend fun getSettlementResult(partyId: Long): Response<ApiResponse<PartySettlementResultDto>> =
+            error("생성 테스트에서 정산 API가 호출되면 안 됩니다.")
     }
 
     private object SuccessfulReadyRealApi : RealPartyApi {
@@ -301,5 +345,27 @@ class PartyRepositoryImplTest {
 
         override suspend fun getPartyFeed(partyId: Long): Response<ApiResponse<PartyFeedDto>> =
             error("준비 테스트에서 피드 API가 호출되면 안 됩니다.")
+
+        override suspend fun getSettlementResult(partyId: Long): Response<ApiResponse<PartySettlementResultDto>> =
+            Response.success(
+                ApiResponse(
+                    timestamp = "2026-07-23T13:00:00",
+                    code = "SUCCESS",
+                    message = "요청에 성공하였습니다.",
+                    result = PartySettlementResultDto(
+                        partyId = partyId,
+                        name = "부지런 파티",
+                        resultType = "PARTIAL_SUCCESS",
+                        myDepositAmount = 30_000,
+                        myDisplayAmount = -12_000,
+                        members = listOf(
+                            PartySettlementMemberDto(1, "민지", "https://example.com/1.png", "ONGOING", 0),
+                            PartySettlementMemberDto(2, "지호", "https://example.com/2.png", "SUCCESS", 5_000),
+                            PartySettlementMemberDto(3, "수아", "https://example.com/3.png", "FAIL", -12_000),
+                            PartySettlementMemberDto(4, "도윤", "https://example.com/4.png", "CANCELED", 0)
+                        )
+                    )
+                )
+            )
     }
 }
