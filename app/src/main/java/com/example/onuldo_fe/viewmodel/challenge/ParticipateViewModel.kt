@@ -12,6 +12,7 @@ import com.example.onuldo_fe.repository.challenge.ChallengeRepository
 import com.example.onuldo_fe.repository.challenge.ChallengeRepositoryProvider
 import com.example.onuldo_fe.repository.user.UserRepository
 import com.example.onuldo_fe.repository.user.UserRepositoryProvider
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 // 챌린지 참여(POST participations) ViewModel. challengeId는 진입 시 확정되므로 생성 시 주입.
@@ -25,6 +26,9 @@ class ParticipateViewModel(
     var uiState by mutableStateOf(ParticipateUiState())
         private set
 
+    // 진행 중인 지갑 조회. 새 조회가 시작되면 이전 것을 취소해 최신 응답만 반영한다(동시 요청 race 방지).
+    private var walletJob: Job? = null
+
     init {
         loadWallet()
     }
@@ -32,7 +36,8 @@ class ParticipateViewModel(
     // 보유 포인트(지갑 잔액) 로드 — 포인트 부족 안내(보유/필요/부족분)에 사용.
     // 실패 시 balance는 null로 남겨(=미확인) 화면이 0이 아니라 "-"로 표기하게 한다
     private fun loadWallet() {
-        viewModelScope.launch {
+        walletJob?.cancel()
+        walletJob = viewModelScope.launch {
             userRepository.getWalletSummary()
                 .onSuccess { summary -> uiState = uiState.copy(balance = summary.balance) }
         }
