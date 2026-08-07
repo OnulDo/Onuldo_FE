@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.data.network
 
+import android.content.Context
 import com.example.onuldo_fe.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -23,8 +24,25 @@ object NetworkModule {
 
     private const val TIMEOUT_SECONDS = 30L
 
-    /** 화면·Repository가 로그인 결과를 반영할 때 쓰는 토큰 저장소. */
-    val tokenStore: TokenStore = InMemoryTokenStore
+    /**
+     * 화면·Repository가 로그인 결과를 반영할 때 쓰는 토큰 저장소.
+     *
+     * 실제 구현은 [initialize]에서 갈아끼우지만, 이 참조 자체는 항상 같은 객체로 유지된다.
+     * [okHttpClient]가 `lazy`로 이 값을 한 번 붙잡기 때문에, 여기서 구현을 직접 바꾸면
+     * 초기화 시점에 따라 옛 저장소를 계속 쓰게 된다.
+     */
+    val tokenStore: TokenStore = DelegatingTokenStore
+
+    /**
+     * 앱 시작 시 한 번 호출해 토큰 저장소를 **영속 구현으로 교체**한다([OnuldoApplication]).
+     * 호출하지 않으면 메모리 저장소로 동작하므로, 테스트·프리뷰는 이 호출 없이도 돌아간다.
+     */
+    fun initialize(context: Context) {
+        DelegatingTokenStore.delegate = PersistentTokenStore.create(context)
+    }
+
+    /** 토큰 재발급 API. 자동 로그인(세션 복구)에서도 이 경로를 쓴다. */
+    val tokenRefreshApi: TokenRefreshApi get() = refreshApi
 
     /** 디버그에서는 요청 정보만 기록하고 인증 헤더는 마스킹한다. 릴리스에서는 로깅하지 않는다. */
     private val loggingInterceptor: HttpLoggingInterceptor by lazy {
@@ -88,4 +106,22 @@ object NetworkModule {
             .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .followSslRedirects(false)
+}
+
+/**
+ * 실제 저장소로 넘겨주기만 하는 껍데기.
+ *
+ * [NetworkModule.initialize]가 앱 시작 시 [delegate]를 영속 구현으로 바꾼다.
+ * 인터셉터·Authenticator가 붙잡는 참조는 이 객체라서, 교체 시점과 무관하게 항상 최신 저장소를 본다.
+ */
+private object DelegatingTokenStore : TokenStore {
+
+    @Volatile
+    var delegate: TokenStore = InMemoryTokenStore
+
+    override val accessToken: String? get() = delegate.accessToken
+    override val refreshToken: String? get() = delegate.refreshToken
+
+    override fun update(tokens: AuthTokens) = delegate.update(tokens)
+    override fun clear() = delegate.clear()
 }

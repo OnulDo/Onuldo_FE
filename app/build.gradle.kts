@@ -62,11 +62,20 @@ android {
         // 네트워크 로깅을 디버그 빌드에서만 켜기 위해 BuildConfig.DEBUG 사용
         buildConfig = true
     }
+    testOptions {
+        unitTests {
+            // 단위 테스트에서 android.util.Log 등 프레임워크 호출이 예외를 던지지 않게 한다.
+            // (기본값은 "not mocked" 예외 → 로그 한 줄 때문에 순수 로직 테스트가 깨진다.)
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
+    // 자동 로그인용 토큰 암호화 저장 (EncryptedSharedPreferences)
+    implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
