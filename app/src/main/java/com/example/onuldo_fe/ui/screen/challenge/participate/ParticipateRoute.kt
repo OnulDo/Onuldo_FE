@@ -2,9 +2,17 @@ package com.example.onuldo_fe.ui.screen.challenge.participate
 
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.viewmodel.challenge.ParticipateViewModel
@@ -33,6 +41,21 @@ fun ParticipateRoute(
 ) {
     val uiState = viewModel.uiState
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    // 충전 화면으로 이동한 경우에만 복귀 시 지갑을 재조회한다(앱 전환·회전 등 일반 복귀엔 불필요한 재조회 방지).
+    var shouldRefreshWallet by rememberSaveable { mutableStateOf(false) }
+
+    // 충전 후 뒤로가기로 돌아왔을 때만 지갑 잔액을 다시 조회해 최신 보유 포인트를 반영한다.
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && shouldRefreshWallet) {
+                viewModel.refreshWallet()
+                shouldRefreshWallet = false
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     // 참여 실패 시 토스트 안내 // TODO:  챌린지 토스트 추가예정
     LaunchedEffect(uiState.isError) {
@@ -81,7 +104,11 @@ fun ParticipateRoute(
             onStartClick = { durationWeeks, depositAmount ->
                 viewModel.participate(durationWeeks = durationWeeks, depositAmount = depositAmount)
             },
-            onChargePoint = onChargePoint,
+            onChargePoint = {
+                // 충전 화면으로 이동하는 경우만 표시 → 복귀 시 지갑 재조회
+                shouldRefreshWallet = true
+                onChargePoint()
+            },
             modifier = modifier
         )
     }

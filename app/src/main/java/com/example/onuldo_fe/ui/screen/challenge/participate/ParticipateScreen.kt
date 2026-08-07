@@ -283,7 +283,11 @@ fun ParticipateScreen(
         // 필요 포인트 = 선택한 도전금, 보유 포인트 = 지갑 잔액(ownedPoint)
         InsufficientPointDialog(
             onDismiss = onDismissInsufficient,
-            onCharge = onChargePoint,
+            // 충전 화면으로 가기 전에 팝업 상태를 내려, 충전 후 뒤로 돌아와도 다시 뜨지 않게 한다.
+            onCharge = {
+                onDismissInsufficient()
+                onChargePoint()
+            },
             ownedPoint = ownedPoint,
             requiredPoint = selectedDeposit ?: 0
         )
