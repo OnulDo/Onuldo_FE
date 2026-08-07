@@ -157,7 +157,7 @@ fun PartyWaitingRoomScreen(
 
     if (showPointDialog) {
         InsufficientPointDialog(
-            ownedPoint = availablePoint,
+            ownedPoint = availablePoint?.toLong(),
             requiredPoint = ui.deposit,
             onDismiss = {
                 showPointDialog = false
