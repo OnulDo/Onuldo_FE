@@ -45,7 +45,8 @@ fun PartyCreateScreen(
     errorMessage: String? = null,
     showPointShortageFromServer: Boolean = false,
     onPointShortageDismiss: () -> Unit = {},
-    selectedChallengeCategoryLabel: String? = null
+    selectedChallengeCategoryLabel: String? = null,
+    checkPointBeforeRequest: Boolean = false
 ) {
     val spacing = LocalSpacing.current
     val periods = listOf("2주", "4주", "8주", "12주")
@@ -149,8 +150,9 @@ fun PartyCreateScreen(
                     } else {
                         onPartyNameChange(normalizedPartyName)
                         val requiredDeposit = deposits[selectedDeposit]
-                        // TODO 파티 생성 API 연동 시 파티장 보유 포인트 검증 성공 후 파티 생성 요청
-                        if (availablePoint != null && availablePoint < requiredDeposit) {
+                        // Fake API에서는 화면에 설정된 테스트 포인트로 검증한다.
+                        // Real API는 ViewModel이 요청 직전에 최신 지갑 잔액을 다시 조회한다.
+                        if (checkPointBeforeRequest && availablePoint != null && availablePoint < requiredDeposit) {
                             showPointDialog = true
                         } else {
                             onCreate(periods[selectedPeriod], requiredDeposit)

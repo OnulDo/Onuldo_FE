@@ -133,6 +133,22 @@ fun PartyRoute(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    DisposableEffect(lifecycleOwner, screen) {
+        val shouldRefreshPoint = screen == PartyScreen.Create || screen == PartyScreen.WaitingRoom
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && shouldRefreshPoint) {
+                partyViewModel.refreshAvailablePoint()
+            }
+        }
+
+        // 생성·대기방 진입 시와 포인트 충전 화면에서 돌아온 시점에 표시 잔액을 갱신한다.
+        if (shouldRefreshPoint && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            partyViewModel.refreshAvailablePoint()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     DisposableEffect(lifecycleOwner, screen, waitingPartyId, waitingRoom != null) {
         val partyId = waitingPartyId
         val shouldPoll = screen == PartyScreen.WaitingRoom && partyId != null && waitingRoom != null
@@ -232,6 +248,7 @@ fun PartyRoute(
             showPointShortageFromServer = partyState.isCreatePointInsufficient,
             onPointShortageDismiss = partyViewModel::dismissCreatePointDialog,
             onChargePoint = onChargePoint,
+            checkPointBeforeRequest = !PartyApiConfig.USE_REAL_CREATE,
             onCreate = { period, deposit ->
                 // 필수 선택값이 모두 준비된 경우에만 ViewModel에 생성 명령 전달
                 val challenge = selectedChallenge ?: return@PartyCreateScreen
@@ -310,6 +327,7 @@ fun PartyRoute(
                     showPointShortageFromServer = partyState.isReadyPointInsufficient,
                     onPointShortageDismiss = partyViewModel::dismissReadyPointDialog,
                     onChargePoint = onChargePoint,
+                    checkPointBeforeRequest = !PartyApiConfig.USE_REAL_READY,
                     onBack = {
                         // 뒤로가기도 파티 탈퇴 요청으로 처리하고 성공 시에만 목록으로 이동
                         partyViewModel.leaveParty { screen = PartyScreen.List }

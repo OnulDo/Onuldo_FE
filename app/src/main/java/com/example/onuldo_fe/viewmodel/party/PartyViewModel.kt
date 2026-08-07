@@ -69,7 +69,7 @@ class PartyViewModel(
     private var hasLoadedPartyList: Boolean = false
 
     init {
-        loadAvailablePoint()
+        refreshAvailablePoint()
     }
 
     // 이전 요청의 오류가 다음 화면에 남지 않도록 화면 이동 전 초기화
@@ -85,7 +85,8 @@ class PartyViewModel(
         uiState = uiState.copy(isReadyPointInsufficient = false)
     }
 
-    private fun loadAvailablePoint() {
+    /** 포인트 충전 후 화면으로 돌아왔을 때 표시 잔액을 최신 지갑 정보로 갱신한다. */
+    fun refreshAvailablePoint() {
         viewModelScope.launch {
             fetchAvailablePoint()?.let { point ->
                 uiState = uiState.copy(availablePoint = point.coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
