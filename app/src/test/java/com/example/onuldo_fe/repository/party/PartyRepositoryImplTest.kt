@@ -219,7 +219,7 @@ class PartyRepositoryImplTest {
         override suspend fun createParty(request: CreatePartyRequestDto): Response<ApiResponse<CreatePartyResponseDto>> {
             assertEquals("갓생팟", request.name)
             assertEquals(12L, request.challengeId)
-            assertEquals(28, request.durationDays)
+            assertEquals(4, request.durationWeeks)
             assertEquals(30_000, request.depositAmount)
             assertEquals(4, request.maxMembers)
             return Response.success(

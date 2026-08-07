@@ -4,7 +4,7 @@ package com.example.onuldo_fe.data.party.dto
 data class CreatePartyRequestDto(
     val name: String,                          // 파티 이름
     val challengeId: Long,                    // 서버에 등록된 챌린지 ID
-    val durationDays: Int,                    // 파티 진행 기간(일)
+    val durationWeeks: Int,                   // 파티 진행 기간(주)
     val depositAmount: Int,                   // 파티원 1인당 도전금
     val maxMembers: Int                       // 파티장을 포함한 최대 모집 인원
 )

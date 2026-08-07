@@ -132,7 +132,8 @@ object FakePartyStore {
             name = request.name,
             goal = fakeChallengeName(request.challengeId),
             inviteCode = inviteCode,
-            durationDays = request.durationDays,
+            // 실제 생성 API는 주 단위로 받지만 Fake 대기방 모델은 일 단위를 사용한다.
+            durationDays = request.durationWeeks * 7,
             depositAmount = request.depositAmount,
             maxMembers = request.maxMembers,
             members = members

@@ -105,11 +105,11 @@ class PartyRepositoryImpl(
         fakeApi.getSettlementResult(partyId).toModel()
 }
 
-/** 화면의 주 단위 기간을 Swagger가 요구하는 일 단위 POST Body로 변환한다. */
+/** 화면의 주 단위 기간을 Swagger의 durationWeeks 값으로 그대로 전달한다. */
 private fun CreatePartyCommand.toCreateRequestDto() = CreatePartyRequestDto(
     name = name,
     challengeId = challengeId.toLong(),
-    durationDays = period.filter(Char::isDigit).toInt() * 7,
+    durationWeeks = period.filter(Char::isDigit).toInt(),
     depositAmount = deposit,
     maxMembers = capacity
 )
