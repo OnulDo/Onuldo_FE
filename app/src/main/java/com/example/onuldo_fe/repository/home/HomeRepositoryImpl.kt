@@ -10,8 +10,8 @@ import com.example.onuldo_fe.data.home.dto.HomeResponseDto
 import com.example.onuldo_fe.data.home.dto.RealHomeDailyChallengeDto
 import com.example.onuldo_fe.data.challenge.dto.DailyCompletedResultDto
 import com.example.onuldo_fe.data.party.api.RealPartyApi
-import com.example.onuldo_fe.data.party.dto.PartyFeedDto
-import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
+import com.example.onuldo_fe.data.party.dto.PartyHomeItemDto
+import com.example.onuldo_fe.data.party.dto.PartyHomeResultDto
 import com.example.onuldo_fe.data.user.api.UserApi
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomeChallenge
@@ -28,7 +28,6 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import retrofit2.HttpException
 
@@ -52,22 +51,20 @@ class HomeRepositoryImpl(
             }
             val profileDeferred = async { getProfileOrEmpty() }
             val completedDeferred = async { getCompletedOrEmpty() }
-            val partiesDeferred = async { getOngoingParties() }
+            // 홈 전용 파티 API는 카드 정보와 미확인 정산 배너를 한 번에 반환한다.
+            val partyHomeDeferred = async { getPartyHome() }
 
             val response = dailyDeferred.await()
             if (!response.isSuccessful) throw HttpException(response)
             val body = response.body() ?: throw IOException("오늘 챌린지 응답 본문이 비어 있습니다.")
 
             val dailyItems = body.result.challenges
-            // 홈의 함께하는 파티는 나의 파티 목록 API를 기준으로 구성한다.
-            val parties = partiesDeferred.await()
-            val partyFeeds = getPartyFeeds(parties)
+            val partyHome = partyHomeDeferred.await()
             val profile = profileDeferred.await()
 
             dailyItems.toHomeData(
                 now = nowProvider(),
-                parties = parties,
-                partyFeeds = partyFeeds,
+                partyHome = partyHome,
                 completed = completedDeferred.await()
             ).copy(
                 userName = profile.nickname,
@@ -76,13 +73,13 @@ class HomeRepositoryImpl(
         }
     }
 
-    /** 나의 파티 목록 중 홈에 표시할 진행 중 파티만 반환한다. */
-    private suspend fun getOngoingParties(): List<RealPartySummaryDto> {
+    /** 홈 전용 API에서 진행 중 파티 카드와 미확인 정산 배너를 조회한다. */
+    private suspend fun getPartyHome(): PartyHomeResultDto {
         val api = requireNotNull(realPartyApi) { "Real 파티 API가 설정되지 않았습니다." }
-        val response = api.getParties()
+        val response = api.getHomeParties()
         if (!response.isSuccessful) throw HttpException(response)
-        val body = response.body() ?: throw IOException("나의 파티 목록 응답 본문이 비어 있습니다.")
-        return body.content.filter { it.status == "ONGOING" }
+        val body = response.body() ?: throw IOException("홈 파티 응답 본문이 비어 있습니다.")
+        return body.result
     }
 
     /** 프로필 실패는 홈 전체 오류로 처리하지 않는다. */
@@ -117,33 +114,6 @@ class HomeRepositoryImpl(
         DailyCompletedResultDto()
     }
 
-    /** 나의 파티 목록의 partyId로 파티별 멤버 프로필을 조회한다. */
-    private suspend fun getPartyFeeds(
-        parties: List<RealPartySummaryDto>
-    ): Map<Long, PartyFeedDto> = coroutineScope {
-        val api = realPartyApi ?: return@coroutineScope emptyMap()
-        parties.asSequence()
-            .map(RealPartySummaryDto::partyId)
-            .distinct()
-            .map { partyId ->
-                async {
-                    try {
-                        val response = api.getPartyFeed(partyId)
-                        if (response.isSuccessful) response.body()?.result else null
-                    } catch (error: CancellationException) {
-                        throw error
-                    } catch (error: Exception) {
-                        Log.w(TAG, "파티 피드 조회 실패: partyId=$partyId", error)
-                        null
-                    }
-                }
-            }
-            .toList()
-            .awaitAll()
-            .filterNotNull()
-            .associateBy(PartyFeedDto::partyId)
-    }
-
     private companion object {
         const val TAG = "HomeRepository"
     }
@@ -154,17 +124,28 @@ private data class HomeProfile(
     val profileImageUrl: String? = null
 )
 
-/** 사진으로 전달받은 /daily 명세의 값만 홈 화면 모델로 변환한다. */
+/** /daily와 /parties/home 응답을 홈 화면 모델로 합친다. */
 internal fun List<RealHomeDailyChallengeDto>.toHomeData(
     now: LocalDateTime,
-    parties: List<RealPartySummaryDto> = emptyList(),
-    partyFeeds: Map<Long, PartyFeedDto> = emptyMap(),
+    partyHome: PartyHomeResultDto = PartyHomeResultDto(),
     completed: DailyCompletedResultDto = DailyCompletedResultDto()
 ): HomeData {
     // 서버의 참여 유형으로 개인과 파티 카드를 나눈다.
     val personalChallenges = filter { it.participationType == "PERSONAL" }
         .map { it.toPersonalModel(now) }
-    val partyChallenges = parties.map { it.toHomeModel(now, partyFeeds[it.partyId]) }
+    // /daily의 partyId로 홈 파티를 찾아 인증에 필요한 challengeId와 category를 연결한다.
+    val partyDailyChallenges = filter { it.participationType == "PARTY" }
+        .mapNotNull { daily ->
+            daily.partyId?.let { partyId -> partyId to daily }
+        }
+        .toMap()
+    // 카드 표시 상태와 파티원 인증 현황은 /parties/home 응답을 기준으로 구성한다.
+    val partyChallenges = partyHome.parties.map {
+        it.toHomeModel(
+            now = now,
+            dailyChallenge = partyDailyChallenges[it.partyId]
+        )
+    }
     val completedCount = count(RealHomeDailyChallengeDto::verifiedOnDate)
 
     return HomeData(
@@ -181,7 +162,10 @@ internal fun List<RealHomeDailyChallengeDto>.toHomeData(
         partyChallenges = partyChallenges,
         challenges = personalChallenges,
         completedChallenges = completed.toHomeCompletedChallenges(),
-        settlementBanner = null
+        // 현재 UI는 배너 한 건만 지원하므로 미확인 정산 중 첫 번째 항목을 노출한다.
+        settlementBanner = partyHome.settlementBanners.firstOrNull()?.let {
+            SettlementBanner(partyName = it.partyName, partyId = it.partyId)
+        }
     )
 }
 
@@ -200,25 +184,31 @@ private fun RealHomeDailyChallengeDto.toPersonalModel(now: LocalDateTime): HomeC
     )
 }
 
-private fun RealPartySummaryDto.toHomeModel(
+private fun PartyHomeItemDto.toHomeModel(
     now: LocalDateTime,
-    feed: PartyFeedDto?
+    dailyChallenge: RealHomeDailyChallengeDto?
 ): HomePartyChallenge {
     val deadline = verificationDeadline.toLocalTimeOrNull()
     val isDeadlinePassed = deadline?.let(now.toLocalTime()::isAfter) == true
+    // 시간으로 상태를 추정하지 않고 서버가 계산한 나의 오늘 인증 상태를 사용한다.
+    val challengeStatus = status.toPartyChallengeStatus()
     return HomePartyChallenge(
         title = name,
         subtitle = challengeTitle,
         remainingDays = endDate.remainingDaysFrom(now.toLocalDate()),
         deadlineAt = deadline,
-        completedMemberCount = verifiedMemberCount,
-        totalMemberCount = totalMemberCount,
-        // 목록 응답에 개인 인증 상태가 추가되기 전에는 마감 여부만 구분한다.
-        status = if (isDeadlinePassed) ChallengeStatus.Failed else ChallengeStatus.NeedCertification,
-        verifiedAt = null,
-        remainingMinutes = deadline?.remainingMinutesFrom(now.toLocalTime(), verified = false),
-        canVerify = !isDeadlinePassed,
-        members = feed?.members.orEmpty().map {
+        completedMemberCount = members.count { it.isVerifiedToday },
+        totalMemberCount = members.size,
+        status = challengeStatus,
+        verifiedAt = verifiedAt.toVerifiedTimeOrNull(),
+        remainingMinutes = deadline
+            ?.takeIf { showRemainingTime }
+            ?.remainingMinutesFrom(
+                now = now.toLocalTime(),
+                verified = challengeStatus != ChallengeStatus.NeedCertification
+            ),
+        canVerify = challengeStatus == ChallengeStatus.NeedCertification && !isDeadlinePassed,
+        members = members.map {
             HomePartyMember(
                 memberId = it.userId.toString(),
                 profileImageUrl = it.profileImageUrl,
@@ -227,6 +217,21 @@ private fun RealPartySummaryDto.toHomeModel(
             )
         }
     )
+}
+
+/** Swagger의 홈 파티 인증 상태를 화면 공통 상태로 변환한다. */
+private fun String.toPartyChallengeStatus() = when (this) {
+    "PENDING" -> ChallengeStatus.WaitingReview
+    "SUCCESS" -> ChallengeStatus.Success
+    "FAIL" -> ChallengeStatus.Failed
+    else -> ChallengeStatus.NeedCertification
+}
+
+/** verifiedAt의 date-time 형식과 시간 단독 형식을 모두 화면용 LocalTime으로 변환한다. */
+private fun String?.toVerifiedTimeOrNull(): LocalTime? = this?.let { value ->
+    runCatching { LocalDateTime.parse(value).toLocalTime() }
+        .recoverCatching { LocalTime.parse(value) }
+        .getOrNull()
 }
 
 private fun DailyCompletedResultDto.toHomeCompletedChallenges(): List<HomeCompletedChallenge> =

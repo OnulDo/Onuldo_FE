@@ -7,6 +7,7 @@ import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
 import com.example.onuldo_fe.data.party.dto.RealPartyMemberDto
 import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
 import com.example.onuldo_fe.data.party.dto.PartyFeedDto
+import com.example.onuldo_fe.data.party.dto.PartyHomeResultDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
@@ -122,6 +123,9 @@ class PartyRepositoryImplTest {
         override suspend fun getParties(cursor: String?, size: Int): Response<PartyListPageResponseDto> =
             error("Fake 모드에서 실제 API가 호출되면 안 됩니다.")
 
+        override suspend fun getHomeParties(): Response<ApiResponse<PartyHomeResultDto>> =
+            error("파티 Repository 테스트에서 홈 파티 API가 호출되면 안 됩니다.")
+
         override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("Fake 모드에서 실제 대기방 API가 호출되면 안 됩니다.")
 
@@ -162,6 +166,9 @@ class PartyRepositoryImplTest {
                 )
             )
 
+        override suspend fun getHomeParties(): Response<ApiResponse<PartyHomeResultDto>> =
+            error("목록 테스트에서 홈 파티 API가 호출되면 안 됩니다.")
+
         override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("목록 테스트에서 실제 대기방 API가 호출되면 안 됩니다.")
 
@@ -180,6 +187,9 @@ class PartyRepositoryImplTest {
 
         override suspend fun getParties(cursor: String?, size: Int): Response<PartyListPageResponseDto> =
             error("대기방 테스트에서 목록 API가 호출되면 안 됩니다.")
+
+        override suspend fun getHomeParties(): Response<ApiResponse<PartyHomeResultDto>> =
+            error("대기방 테스트에서 홈 파티 API가 호출되면 안 됩니다.")
 
         override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             Response.success(
@@ -244,6 +254,9 @@ class PartyRepositoryImplTest {
         override suspend fun getParties(cursor: String?, size: Int): Response<PartyListPageResponseDto> =
             error("생성 테스트에서 목록 API가 호출되면 안 됩니다.")
 
+        override suspend fun getHomeParties(): Response<ApiResponse<PartyHomeResultDto>> =
+            error("생성 테스트에서 홈 파티 API가 호출되면 안 됩니다.")
+
         override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("생성 테스트에서 대기방 API가 호출되면 안 됩니다.")
 
@@ -295,6 +308,9 @@ class PartyRepositoryImplTest {
 
         override suspend fun getParties(cursor: String?, size: Int): Response<PartyListPageResponseDto> =
             error("준비 테스트에서 목록 API가 호출되면 안 됩니다.")
+
+        override suspend fun getHomeParties(): Response<ApiResponse<PartyHomeResultDto>> =
+            error("준비 테스트에서 홈 파티 API가 호출되면 안 됩니다.")
 
         override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("준비 테스트에서 대기방 API가 호출되면 안 됩니다.")
