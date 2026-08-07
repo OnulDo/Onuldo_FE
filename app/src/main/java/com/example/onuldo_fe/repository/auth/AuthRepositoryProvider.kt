@@ -9,7 +9,7 @@ object AuthRepositoryProvider {
     private val authApi: AuthApi by lazy { NetworkModule.create(AuthApi::class.java) }
 
     private val repository: AuthRepository by lazy {
-        AuthRepositoryImpl(authApi, NetworkModule.tokenStore)
+        AuthRepositoryImpl(authApi, NetworkModule.tokenStore, NetworkModule.tokenRefreshApi)
     }
 
     fun provide(): AuthRepository = repository
