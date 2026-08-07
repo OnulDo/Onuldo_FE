@@ -25,6 +25,12 @@ object NetworkModule {
     private const val TIMEOUT_SECONDS = 30L
 
     /**
+     * 토큰 재발급 호출 전체에 대한 상한. 스플래시가 이 시간 이상 유지되지 않도록 한다.
+     * 정상 응답은 1초 안팎이라 여유가 충분하며, 초과해도 세션은 지워지지 않는다.
+     */
+    private const val REFRESH_CALL_TIMEOUT_SECONDS = 8L
+
+    /**
      * 화면·Repository가 로그인 결과를 반영할 때 쓰는 토큰 저장소.
      *
      * 실제 구현은 [initialize]에서 갈아끼우지만, 이 참조 자체는 항상 같은 객체로 유지된다.
@@ -60,10 +66,19 @@ object NetworkModule {
     /**
      * 토큰 재발급 전용 클라이언트.
      * [TokenAuthenticator]가 붙어 있지 않아, 재발급 요청이 401을 받아도 재귀하지 않는다.
+     *
+     * 재발급은 **앱 시작 시 스플래시를 붙잡는 경로**(세션 복구)이기도 해서, 전체 호출 시간에
+     * 별도 상한([REFRESH_CALL_TIMEOUT_SECONDS])을 둔다. 공통 타임아웃은 연결·읽기·쓰기가 각각
+     * 30초라 최악의 경우 스플래시가 1분 가까이 유지될 수 있다.
+     *
+     * `callTimeout`은 연결·전송·수신을 모두 합친 시간을 제한하며 초과 시 `InterruptedIOException`
+     * (IOException)을 던진다. [executeRefresh]가 이를 `Transient`로 처리하므로 **세션은 보존**되고,
+     * 남은 액세스 토큰의 유효기간으로 진입 화면이 정해진다.
      */
     private val refreshClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
             .applyTimeouts()
+            .callTimeout(REFRESH_CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .addInterceptor(loggingInterceptor)
             .build()
     }
