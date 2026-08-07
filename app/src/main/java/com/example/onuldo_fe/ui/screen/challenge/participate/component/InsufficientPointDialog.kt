@@ -41,8 +41,8 @@ import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red3
 import com.example.onuldo_fe.ui.theme.SourCream
 
-// 프리뷰 전용 기본값 — 실제 값은 참여 화면(지갑 잔액/선택 도전금)에서 전달된다.
-private const val DUMMY_OWNED_POINT = 5_000L
+// 더미 데이터 — 나중에 DB(서버 API) 연결하면 실제 보유/필요 포인트로 교체 예정
+private const val DUMMY_OWNED_POINT = 5_000
 private const val DUMMY_REQUIRED_POINT = 10_000
 
 /**
@@ -54,11 +54,10 @@ fun InsufficientPointDialog(
     onDismiss: () -> Unit,
     onCharge: () -> Unit,
     modifier: Modifier = Modifier,
-    ownedPoint: Long? = DUMMY_OWNED_POINT,
+    ownedPoint: Int? = DUMMY_OWNED_POINT,
     requiredPoint: Int = DUMMY_REQUIRED_POINT
 ) {
-    // 보유 포인트가 미확인(null)이면 부족분도 계산하지 않고 "-"로 둔다.
-    val shortage = ownedPoint?.let { (requiredPoint - it).coerceAtLeast(0L) }
+    val shortage = ownedPoint?.let { (requiredPoint - it).coerceAtLeast(0) }
     val spacing = LocalSpacing.current
 
     Dialog(
