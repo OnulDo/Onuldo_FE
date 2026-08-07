@@ -22,7 +22,7 @@ class ParticipateViewModel(
 ) : ViewModel() {
 
     // 보유 포인트(balance)는 지갑 요약 API로 채운다. 화면(포인트 부족 팝업의 "보유 포인트")까지 배선 완료.
-    var uiState by mutableStateOf(ParticipateUiState(balance = 0))
+    var uiState by mutableStateOf(ParticipateUiState())
         private set
 
     init {
@@ -30,11 +30,11 @@ class ParticipateViewModel(
     }
 
     // 보유 포인트(지갑 잔액) 로드 — 포인트 부족 안내(보유/필요/부족분)에 사용.
-    // GET /api/users/me/wallet/summary 의 balance를 사용. 실패 시 더미 대신 0을 유지해 오인을 막는다.
+    // 실패 시 balance는 null로 남겨(=미확인) 화면이 0이 아니라 "-"로 표기하게 한다
     private fun loadWallet() {
         viewModelScope.launch {
             userRepository.getWalletSummary()
-                .onSuccess { summary -> uiState = uiState.copy(balance = summary.balance.toInt()) }
+                .onSuccess { summary -> uiState = uiState.copy(balance = summary.balance) }
         }
     }
 
@@ -53,8 +53,11 @@ class ParticipateViewModel(
                     uiState = when (code) {
                         CODE_ALREADY_PARTICIPATING ->
                             uiState.copy(isSubmitting = false, isAlreadyParticipating = true)
-                        CODE_INSUFFICIENT_POINT ->
+                        CODE_INSUFFICIENT_POINT -> {
+                            // 부족 팝업의 보유/부족분이 정확하도록 최신 지갑 잔액을 다시 조회한다.
+                            loadWallet()
                             uiState.copy(isSubmitting = false, isInsufficientPoint = true)
+                        }
                         else ->
                             uiState.copy(isSubmitting = false, isError = true)
                     }
