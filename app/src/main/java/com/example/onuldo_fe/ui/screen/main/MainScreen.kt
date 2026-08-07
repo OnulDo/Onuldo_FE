@@ -60,8 +60,8 @@ fun MainScreen(
         ) {
             composable(BottomTab.Home.route) {
                 HomeRoute(
-                    onCameraNavigate = { challengeId, category, title ->
-                        onNavigate(Routes.camera(challengeId, category, title))
+                    onCameraNavigate = { challengeId, category, title, deadline ->
+                        onNavigate(Routes.camera(challengeId, category, title, deadline))
                     },
                     refreshKey = homeRefreshKey,
                     onBrowseChallengesClick = {

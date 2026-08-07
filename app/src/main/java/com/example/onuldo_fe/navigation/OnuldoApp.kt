@@ -215,6 +215,10 @@ fun OnuldoApp() {
                 navArgument(Routes.CAMERA_TITLE_ARG) {
                     type = NavType.StringType
                     defaultValue = "오늘의 챌린지 인증"
+                },
+                navArgument(Routes.CAMERA_DEADLINE_ARG) {
+                    type = NavType.StringType
+                    defaultValue = ""
                 }
             )
         ) { backStackEntry ->
@@ -227,13 +231,16 @@ fun OnuldoApp() {
             val title = backStackEntry.arguments
                 ?.getString(Routes.CAMERA_TITLE_ARG)
                 .orEmpty()
+            val deadline = backStackEntry.arguments
+                ?.getString(Routes.CAMERA_DEADLINE_ARG)
+                .orEmpty()
             CameraScreen(
                 category = category,
                 title = title,
                 onPhotoCaptured = { uri ->
                     cameraViewModel.setImageUri(uri)
                     navController.navigate(
-                        Routes.photoPreview(challengeId, category, title)
+                        Routes.photoPreview(challengeId, category, title, deadline)
                     )
                 },
                 onCloseClick = {
@@ -255,6 +262,10 @@ fun OnuldoApp() {
                 navArgument(Routes.CAMERA_TITLE_ARG) {
                     type = NavType.StringType
                     defaultValue = "오늘의 챌린지 인증"
+                },
+                navArgument(Routes.CAMERA_DEADLINE_ARG) {
+                    type = NavType.StringType
+                    defaultValue = ""
                 }
             )
         ) { backStackEntry ->
@@ -266,6 +277,9 @@ fun OnuldoApp() {
                 .orEmpty()
             val title = backStackEntry.arguments
                 ?.getString(Routes.CAMERA_TITLE_ARG)
+                .orEmpty()
+            val deadline = backStackEntry.arguments
+                ?.getString(Routes.CAMERA_DEADLINE_ARG)
                 .orEmpty()
             val imageUri by cameraViewModel.imageUri.collectAsState()
             val submitState by cameraViewModel.submitState.collectAsState()
@@ -308,7 +322,7 @@ fun OnuldoApp() {
                     navController.popBackStack()
                 },
                 onSubmitClick = {
-                    cameraViewModel.submitVerification(challengeId, category, title)
+                    cameraViewModel.submitVerification(challengeId, category, title, deadline)
                 },
                 submitState = submitState,
                 onErrorConfirm = cameraViewModel::clearSubmitState
@@ -373,6 +387,7 @@ fun OnuldoApp() {
             ChallengeVerificationScreen(
                 status = VerificationStatus.FAILURE,
                 failureReason = (state as? com.example.onuldo_fe.camera.VerificationSubmitState.Failure)?.message.orEmpty(),
+                verificationDeadline = cameraViewModel.activeDeadline,
                 onManualReviewClick = {
                     navController.navigate(Routes.VERIFICATION_WAITING)
                 },
@@ -383,7 +398,9 @@ fun OnuldoApp() {
                         val title = cameraViewModel.activeTitle
                             .ifBlank { "오늘의 챌린지 인증" }
                         cameraViewModel.clearSubmitState()
-                        navController.navigate(Routes.camera(challengeId, category, title)) {
+                        navController.navigate(
+                            Routes.camera(challengeId, category, title, cameraViewModel.activeDeadline)
+                        ) {
                             popUpTo(Routes.CAMERA) { inclusive = true }
                         }
                     }

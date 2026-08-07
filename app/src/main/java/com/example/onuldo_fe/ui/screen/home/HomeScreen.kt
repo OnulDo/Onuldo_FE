@@ -56,7 +56,7 @@ fun HomeScreen(
     onNotificationClick: () -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
     onSettlementResultClick: (Long) -> Unit = {},
-    onVerifyClick: (Long, String, String) -> Unit = { _, _, _ -> },
+    onVerifyClick: (Long, String, String, String) -> Unit = { _, _, _, _ -> },
     onRefresh: () -> Unit = {},
     scrollToTopKey: Int = 0,
     modifier: Modifier = Modifier
@@ -138,7 +138,7 @@ private fun HomeContent(
     uiState: HomeUiState,
     onNotificationClick: () -> Unit,
     onSettlementResultClick: (Long) -> Unit,
-    onVerifyClick: (Long, String, String) -> Unit,
+    onVerifyClick: (Long, String, String, String) -> Unit,
     scrollToTopKey: Int
 ) {
     val spacing = LocalSpacing.current
@@ -209,7 +209,8 @@ private fun HomeContent(
                                 onVerifyClick(
                                     challengeId,
                                     partyChallenge.category,
-                                    partyChallenge.subtitle
+                                    partyChallenge.subtitle,
+                                    partyChallenge.deadlineAt?.toString().orEmpty()
                                 )
                             }
                     }
@@ -232,7 +233,12 @@ private fun HomeContent(
                         challenge.challengeId
                             ?.takeIf { it > 0L }
                             ?.let { challengeId ->
-                                onVerifyClick(challengeId, challenge.category, challenge.title)
+                                onVerifyClick(
+                                    challengeId,
+                                    challenge.category,
+                                    challenge.title,
+                                    challenge.deadlineAt.toString()
+                                )
                             }
                     }
                 )
