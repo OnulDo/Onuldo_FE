@@ -13,8 +13,11 @@ import com.example.onuldo_fe.data.network.RefreshTokenRequest
 import com.example.onuldo_fe.data.network.TokenRefreshApi
 import com.example.onuldo_fe.data.network.TokenStore
 import java.io.IOException
+import java.util.Base64
 import kotlinx.coroutines.runBlocking
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
+import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.Timeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -59,16 +62,12 @@ class AuthRepositoryImplRestoreSessionTest {
     }
 
     @Test
-    fun `서버가 재발급을 거부하면 토큰을 비우고 세션을 복구하지 않는다`() = runBlocking {
+    fun `서버가 401로 거부하면 토큰을 비우고 세션을 복구하지 않는다`() = runBlocking {
         // 리프레시 토큰(14일)까지 만료된 상황 — 재로그인이 필요하다.
         val store = FakeTokenStore().apply {
             update(AuthTokens("expiredAccess", "expiredRefresh"))
         }
-        val api = FakeTokenRefreshApi(
-            response = Response.success(
-                BaseResponse<AuthTokenResponse>(code = "INVALID_REFRESH_TOKEN", message = "만료된 토큰입니다.")
-            )
-        )
+        val api = FakeTokenRefreshApi(response = errorResponse(401, "INVALID_TOKEN"))
         val repository = repository(store, api)
 
         assertFalse(repository.restoreSession())
@@ -77,11 +76,11 @@ class AuthRepositoryImplRestoreSessionTest {
     }
 
     @Test
-    fun `성공 응답인데 토큰이 비어 있으면 세션을 복구하지 않는다`() = runBlocking {
+    fun `본문에 무효 토큰 코드가 오면 거부로 본다`() = runBlocking {
         val store = FakeTokenStore().apply { update(AuthTokens("access", "refresh")) }
         val api = FakeTokenRefreshApi(
             response = Response.success(
-                BaseResponse(code = "SUCCESS", result = AuthTokenResponse(accessToken = "", refreshToken = ""))
+                BaseResponse<AuthTokenResponse>(code = "TOKEN_EXPIRED", message = "만료된 토큰입니다.")
             )
         )
         val repository = repository(store, api)
@@ -91,15 +90,53 @@ class AuthRepositoryImplRestoreSessionTest {
     }
 
     @Test
+    fun `서버 오류(500)에는 세션을 지우지 않는다`() = runBlocking {
+        // 실제로 겪은 상황 — 서버 refresh가 500(READ ONLY transaction)을 돌려줬다.
+        // 이를 거부로 처리하면 멀쩡한 사용자가 앱을 켤 때마다 로그아웃된다.
+        val store = FakeTokenStore().apply {
+            update(AuthTokens(jwt(expiresInSeconds = 600), "validRefresh"))
+        }
+        val api = FakeTokenRefreshApi(response = errorResponse(500, "INTERNAL_SERVER_ERROR"))
+        val repository = repository(store, api)
+
+        // 액세스 토큰이 아직 살아 있으므로 홈으로 보낸다.
+        assertTrue(repository.restoreSession())
+        assertEquals("validRefresh", store.refreshToken)
+    }
+
+    @Test
+    fun `서버 오류이고 액세스 토큰도 만료됐으면 세션을 복구하지 않는다`() = runBlocking {
+        val store = FakeTokenStore().apply {
+            update(AuthTokens(jwt(expiresInSeconds = -60), "validRefresh"))
+        }
+        val api = FakeTokenRefreshApi(response = errorResponse(500, "INTERNAL_SERVER_ERROR"))
+        val repository = repository(store, api)
+
+        assertFalse(repository.restoreSession())
+        // 서버가 거부한 게 아니므로 리프레시 토큰은 남겨 둔다(서버 복구 후 다시 시도할 수 있다).
+        assertEquals("validRefresh", store.refreshToken)
+    }
+
+    @Test
     fun `통신에 실패하면 세션을 지우지 않고 유지한다`() = runBlocking {
         // 비행기모드로 앱을 켠 경우. 서버가 거부한 게 아니므로 로그아웃시키면 안 된다.
-        val store = FakeTokenStore().apply { update(AuthTokens("access", "refresh")) }
+        val store = FakeTokenStore().apply {
+            update(AuthTokens(jwt(expiresInSeconds = 600), "refresh"))
+        }
         val api = FakeTokenRefreshApi(error = IOException("네트워크 없음"))
         val repository = repository(store, api)
 
         assertTrue(repository.restoreSession())
-        assertEquals("access", store.accessToken)
         assertEquals("refresh", store.refreshToken)
+    }
+
+    @Test
+    fun `만료 시각을 읽을 수 없는 토큰은 살아 있는 것으로 본다`() = runBlocking {
+        // 서버가 JWT가 아닌 토큰으로 바뀌어도 멀쩡한 사용자를 로그아웃시키지 않는다.
+        val store = FakeTokenStore().apply { update(AuthTokens("opaque-token", "refresh")) }
+        val api = FakeTokenRefreshApi(error = IOException("네트워크 없음"))
+
+        assertTrue(repository(store, api).restoreSession())
     }
 
     // ===== 테스트 더블 =====
@@ -113,6 +150,24 @@ class AuthRepositoryImplRestoreSessionTest {
     ): Response<BaseResponse<AuthTokenResponse>> = Response.success(
         BaseResponse(code = "SUCCESS", result = AuthTokenResponse(access, refresh))
     )
+
+    private fun errorResponse(
+        httpStatus: Int,
+        code: String,
+    ): Response<BaseResponse<AuthTokenResponse>> = Response.error(
+        httpStatus,
+        """{"code":"$code","message":"오류"}"""
+            .toResponseBody("application/json".toMediaType()),
+    )
+
+    /** `exp`만 담긴 서명 없는 JWT. 만료 판정은 서명을 검증하지 않으므로 이걸로 충분하다. */
+    private fun jwt(expiresInSeconds: Long): String {
+        val exp = System.currentTimeMillis() / 1000 + expiresInSeconds
+        val encoder = Base64.getUrlEncoder().withoutPadding()
+        val header = encoder.encodeToString("""{"alg":"HS256"}""".toByteArray())
+        val payload = encoder.encodeToString("""{"sub":"tester","exp":$exp}""".toByteArray())
+        return "$header.$payload.signature"
+    }
 
     private class FakeTokenStore : TokenStore {
         private var access: String? = null

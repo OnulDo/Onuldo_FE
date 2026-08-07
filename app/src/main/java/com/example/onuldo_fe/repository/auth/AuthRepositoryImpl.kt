@@ -11,12 +11,13 @@ import com.example.onuldo_fe.data.network.ApiErrorCode
 import com.example.onuldo_fe.data.network.ApiResult
 import com.example.onuldo_fe.data.network.AuthTokenResponse
 import com.example.onuldo_fe.data.network.AuthTokens
-import com.example.onuldo_fe.data.network.RefreshTokenRequest
 import com.example.onuldo_fe.data.network.TokenRefreshApi
+import com.example.onuldo_fe.data.network.TokenRefreshOutcome
 import com.example.onuldo_fe.data.network.TokenStore
+import com.example.onuldo_fe.data.network.executeRefresh
+import com.example.onuldo_fe.data.network.jwtExpiryEpochSeconds
 import com.example.onuldo_fe.data.network.safeApiCall
 import android.util.Log
-import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -105,33 +106,43 @@ class AuthRepositoryImpl(
 
         // TokenRefreshApi는 Authenticator가 붙지 않은 클라이언트를 쓰는 동기 Call이라 IO로 옮겨 호출한다.
         return withContext(Dispatchers.IO) {
-            try {
-                val body = tokenRefreshApi.refresh(RefreshTokenRequest(refreshToken))
-                    .execute()
-                    .body()
-
-                val tokens = if (body?.isSuccess == true) body.result?.toTokensOrNull() else null
-                when {
-                    tokens != null -> {
-                        tokenStore.update(tokens)
-                        true
-                    }
-                    // 서버가 명시적으로 거부했다 — 리프레시 토큰도 만료됐으므로 재로그인이 필요하다.
-                    else -> {
-                        tokenStore.clear()
-                        false
-                    }
+            when (val outcome = tokenRefreshApi.executeRefresh(refreshToken)) {
+                is TokenRefreshOutcome.Success -> {
+                    tokenStore.update(outcome.tokens)
+                    true
                 }
-            } catch (e: IOException) {
-                // 서버에 닿지 못했을 뿐이므로 세션을 유지한다.
-                Log.w(TAG, "세션 복구 통신 실패 — 세션 유지", e)
-                true
-            } catch (e: Exception) {
-                // 응답 파싱 실패 등. 서버가 거부했다는 근거가 아니라서 역시 세션을 지우지 않는다.
-                Log.w(TAG, "세션 복구 응답 처리 실패 — 세션 유지", e)
-                true
+
+                // 서버가 명시적으로 거부했다 — 리프레시 토큰도 만료됐으므로 재로그인이 필요하다.
+                TokenRefreshOutcome.Rejected -> {
+                    tokenStore.clear()
+                    false
+                }
+
+                // 서버 장애·통신 실패. 리프레시 토큰은 멀쩡할 수 있으므로 **지우지 않고**,
+                // 남아 있는 액세스 토큰이 아직 살아 있는지로 판단한다.
+                TokenRefreshOutcome.Transient -> {
+                    Log.w(TAG, "세션 복구 재발급 실패(일시적) — 액세스 토큰 유효기간으로 판단")
+                    hasUnexpiredAccessToken()
+                }
             }
         }
+    }
+
+    /**
+     * 저장된 액세스 토큰이 아직 만료되지 않았는지. 재발급이 일시적으로 실패했을 때만 쓴다.
+     *
+     * 만료 시각을 못 읽으면 **일단 살아 있다고 본다.** 서버가 JWT가 아닌 토큰을 쓰도록 바뀌어도
+     * 멀쩡한 사용자를 로그아웃시키지 않기 위해서다. 토큰이 실제로 죽었다면 첫 요청의 401을
+     * [TokenAuthenticator]가 처리한다.
+     */
+    private fun hasUnexpiredAccessToken(): Boolean {
+        val accessToken = tokenStore.accessToken
+        if (accessToken.isNullOrBlank()) return false
+
+        val expiry = jwtExpiryEpochSeconds(accessToken) ?: return true
+        val nowSeconds = System.currentTimeMillis() / 1000
+        // 화면 진입 직후 만료되는 것을 막기 위해 여유를 둔다.
+        return expiry - EXPIRY_MARGIN_SECONDS > nowSeconds
     }
 
     /**
@@ -158,5 +169,8 @@ class AuthRepositoryImpl(
 
     private companion object {
         const val TAG = "AuthRepository"
+
+        /** 액세스 토큰 만료 판정 여유(초). 진입 직후 만료되는 상황을 막는다. */
+        const val EXPIRY_MARGIN_SECONDS = 30
     }
 }
