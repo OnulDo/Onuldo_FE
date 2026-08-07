@@ -79,6 +79,12 @@ object NetworkModule {
         OkHttpClient.Builder()
             .applyTimeouts()
             .callTimeout(REFRESH_CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            // 리디렉션을 아예 따라가지 않는다. `followSslRedirects(false)`는 HTTPS↔HTTP 전환만 막고,
+            // `followRedirects`는 기본값이 true라 **다른 HTTPS 호스트**의 307/308은 그대로 따라간다.
+            // 이때 OkHttp는 메서드와 본문을 유지하므로 **리프레시 토큰이 담긴 POST 본문이 그 호스트로 전달된다.**
+            // (교차 호스트에서 떨어지는 건 `Authorization` 헤더뿐이라 본문은 보호되지 않는다.)
+            // 우리 API는 리디렉션을 쓰지 않으므로 끄더라도 정상 동작에 영향이 없다.
+            .followRedirects(false)
             .addInterceptor(loggingInterceptor)
             .build()
     }

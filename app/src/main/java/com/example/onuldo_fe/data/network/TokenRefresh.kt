@@ -2,6 +2,7 @@ package com.example.onuldo_fe.data.network
 
 import java.io.IOException
 import java.util.Base64
+import kotlinx.coroutines.CancellationException
 
 /**
  * 토큰 재발급 시도 결과.
@@ -51,7 +52,13 @@ fun TokenRefreshApi.executeRefresh(refreshToken: String): TokenRefreshOutcome =
             else -> TokenRefreshOutcome.Transient
         }
     } catch (e: IOException) {
+        // 연결 끊김·타임아웃(callTimeout 포함). 서버 판단이 아니다.
         TokenRefreshOutcome.Transient
+    } catch (e: CancellationException) {
+        // 코루틴 취소는 실패가 아니라 상위로 전파해야 한다.
+        // (`CancellationException`도 `Exception`이라 아래 catch가 삼키면 구조적 동시성이 깨진다.
+        //  `safeApiCall`의 `runCatchingApi`도 같은 이유로 이를 먼저 다시 던진다.)
+        throw e
     } catch (e: Exception) {
         // 응답 파싱 실패 등. 토큰이 무효하다는 근거가 아니다.
         TokenRefreshOutcome.Transient

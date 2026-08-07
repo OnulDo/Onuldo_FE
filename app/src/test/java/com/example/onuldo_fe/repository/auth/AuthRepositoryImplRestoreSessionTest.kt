@@ -14,6 +14,7 @@ import com.example.onuldo_fe.data.network.TokenRefreshApi
 import com.example.onuldo_fe.data.network.TokenStore
 import java.io.IOException
 import java.util.Base64
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
@@ -131,6 +132,32 @@ class AuthRepositoryImplRestoreSessionTest {
     }
 
     @Test
+    fun `예기치 못한 오류가 나도 예외를 던지지 않는다`() = runBlocking {
+        // 예외가 새어 나가면 스플래시가 결과를 못 받아 앱이 멈춘 것처럼 보인다.
+        // 토큰 저장 중 실패해도 랜딩으로 진입시키고 끝내야 한다.
+        val store = object : FakeTokenStore() {
+            override fun update(tokens: AuthTokens): Unit = throw IllegalStateException("저장소 쓰기 실패")
+        }.apply { seed(AuthTokens("access", "refresh")) }
+        val api = FakeTokenRefreshApi(response = successResponse())
+
+        assertFalse(repository(store, api).restoreSession())
+    }
+
+    @Test
+    fun `코루틴 취소는 삼키지 않고 그대로 전파한다`() {
+        val store = FakeTokenStore().apply { update(AuthTokens("access", "refresh")) }
+        val api = FakeTokenRefreshApi(error = null, response = null, cancel = true)
+
+        var propagated = false
+        try {
+            runBlocking { repository(store, api).restoreSession() }
+        } catch (e: CancellationException) {
+            propagated = true
+        }
+        assertTrue(propagated)
+    }
+
+    @Test
     fun `만료 시각을 읽을 수 없는 토큰은 살아 있는 것으로 본다`() = runBlocking {
         // 서버가 JWT가 아닌 토큰으로 바뀌어도 멀쩡한 사용자를 로그아웃시키지 않는다.
         val store = FakeTokenStore().apply { update(AuthTokens("opaque-token", "refresh")) }
@@ -169,7 +196,7 @@ class AuthRepositoryImplRestoreSessionTest {
         return "$header.$payload.signature"
     }
 
-    private class FakeTokenStore : TokenStore {
+    private open class FakeTokenStore : TokenStore {
         private var access: String? = null
         private var refresh: String? = null
 
@@ -185,11 +212,18 @@ class AuthRepositoryImplRestoreSessionTest {
             access = null
             refresh = null
         }
+
+        /** [update]를 재정의한 하위 클래스도 초기값을 넣을 수 있게 한다. */
+        fun seed(tokens: AuthTokens) {
+            access = tokens.accessToken
+            refresh = tokens.refreshToken
+        }
     }
 
     private class FakeTokenRefreshApi(
         private val response: Response<BaseResponse<AuthTokenResponse>>? = null,
         private val error: IOException? = null,
+        private val cancel: Boolean = false,
     ) : TokenRefreshApi {
         var callCount = 0
             private set
@@ -199,7 +233,7 @@ class AuthRepositoryImplRestoreSessionTest {
         override fun refresh(request: RefreshTokenRequest): Call<BaseResponse<AuthTokenResponse>> {
             callCount++
             lastSentRefreshToken = request.refreshToken
-            return FakeCall(response, error)
+            return FakeCall(response, error, cancel)
         }
     }
 
@@ -207,8 +241,10 @@ class AuthRepositoryImplRestoreSessionTest {
     private class FakeCall<T>(
         private val response: Response<T>?,
         private val error: IOException?,
+        private val cancel: Boolean = false,
     ) : Call<T> {
         override fun execute(): Response<T> {
+            if (cancel) throw CancellationException("취소됨")
             error?.let { throw it }
             return requireNotNull(response) { "response 또는 error 중 하나는 있어야 한다" }
         }
