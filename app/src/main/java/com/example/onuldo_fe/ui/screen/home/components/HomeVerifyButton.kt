@@ -77,7 +77,10 @@ fun HomeVerifyButton(
             .focusable()
             .onKeyEvent { event ->
                 if (event.type == KeyEventType.KeyUp &&
-                    (event.key == Key.Enter || event.key == Key.NumPadEnter || event.key == Key.DirectionCenter)
+                    (event.key == Key.Enter ||
+                        event.key == Key.NumPadEnter ||
+                        event.key == Key.DirectionCenter ||
+                        event.key == Key.Spacebar)
                 ) {
                     onClick()
                     true
