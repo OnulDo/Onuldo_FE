@@ -131,6 +131,8 @@ class PartyRepositoryImplTest {
 
     @Test
     fun `이탈 설정이 true이면 실제 POST 성공 응답을 완료 처리한다`() = runBlocking {
+        // 다른 테스트가 먼저 실행돼 남아있을 수 있는 호출 기록을 초기화한다.
+        SuccessfulReadyRealApi.leaveCalledWithPartyId = null
         val repository = PartyRepositoryImpl(
             fakeApi = FakePartyApi(),
             realApi = SuccessfulReadyRealApi,
@@ -139,6 +141,8 @@ class PartyRepositoryImplTest {
         )
 
         repository.leaveParty("101")
+
+        assertEquals(101L, SuccessfulReadyRealApi.leaveCalledWithPartyId)
     }
 
     @Test
@@ -166,6 +170,10 @@ class PartyRepositoryImplTest {
                 PartySettlementMemberStatus.Canceled
             ),
             result.members.map { it.status }
+        )
+        assertEquals(
+            listOf(0, 5_000, -12_000, 0),
+            result.members.map { it.displayAmount }
         )
     }
 
@@ -356,6 +364,9 @@ class PartyRepositoryImplTest {
     }
 
     private object SuccessfulReadyRealApi : RealPartyApi {
+        // 이탈 API가 실제로 호출됐는지, 어떤 partyId로 호출됐는지 테스트에서 확인하기 위한 기록.
+        var leaveCalledWithPartyId: Long? = null
+
         override suspend fun startParty(partyId: Long): Response<ApiResponse<PartyStartResponseDto>> =
             Response.success(
                 ApiResponse(
@@ -428,8 +439,9 @@ class PartyRepositoryImplTest {
                 )
             )
 
-        override suspend fun leaveParty(partyId: Long): Response<ApiResponse<PartyLeaveResponseDto>> =
-            Response.success(
+        override suspend fun leaveParty(partyId: Long): Response<ApiResponse<PartyLeaveResponseDto>> {
+            leaveCalledWithPartyId = partyId
+            return Response.success(
                 ApiResponse(
                     timestamp = "2026-07-23T13:00:00",
                     code = "SUCCESS",
@@ -441,5 +453,6 @@ class PartyRepositoryImplTest {
                     )
                 )
             )
+        }
     }
 }
