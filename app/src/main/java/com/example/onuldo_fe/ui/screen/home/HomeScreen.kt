@@ -64,6 +64,8 @@ fun HomeScreen(
     PullToRefreshBox(
         isRefreshing = uiState.isRefreshing,
         onRefresh = onRefresh,
+        // 새로고침 인디케이터(당김 화살표/스피너)는 노출하지 않고, 당겨서 새로고침 동작 자체만 유지
+        indicator = {},
         modifier = modifier
             .fillMaxSize()
             .background(SourCream)
