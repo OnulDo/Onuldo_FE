@@ -121,13 +121,18 @@ fun PartyRoute(
     var showCameraPermissionDialog by rememberSaveable {
         mutableStateOf(false)
     }
-    // pendingChallenge는 상세 확인 중인 임시 선택, selectedChallenge는 생성 화면에서 확정된 선택
+    // pendingChallenge는 상세 확인 중인 선택, selectedChallenge는 생성 화면에서 확정된 선택이다.
     // selectedChallenge는 포인트 부족 → 충전 화면 왕복처럼 화면이 사라졌다 다시 생겨도
     // 유지되어야 해서 rememberSaveable(+커스텀 Saver)을 쓴다. pendingChallenge는 탐색 중인
-    // 임시값이라 화면이 날아가도 다시 고르면 되므로 remember로 충분하다.
+    // 실제 API 챌린지 선택 상태이며, 화면이 사라지면 다시 선택할 수 있어 remember로 충분하다.
     var selectedChallenge by rememberSaveable(stateSaver = ChallengeSaver) { mutableStateOf<Challenge?>(null) }
     var pendingChallenge by remember { mutableStateOf<Challenge?>(null) }
-    var pendingVerifyParty by remember { mutableStateOf<PartyCardUi?>(null) }
+
+    // 권한 설정 화면에서 Activity가 재생성돼도 인증 대상을 복원할 수 있도록
+    // PartyCardUi 전체 대신 카메라 이동에 필요한 값만 rememberSaveable로 저장한다.
+    var pendingVerifyChallengeId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var pendingVerifyTitle by rememberSaveable { mutableStateOf("") }
+    var pendingVerifyDeadline by rememberSaveable { mutableStateOf("") }
 
     // 생성 화면을 벗어나 챌린지를 탐색해도, 포인트 충전 화면을 다녀와도 입력값을 유지하도록
     // Route가 생성 폼 상태를 rememberSaveable로 보관한다.
@@ -146,9 +151,17 @@ fun PartyRoute(
     val partyState = partyViewModel.uiState
     val waitingRoom = partyState.waitingRoom
 
+    fun clearPendingVerification() {
+        pendingVerifyChallengeId = null
+        pendingVerifyTitle = ""
+        pendingVerifyDeadline = ""
+    }
+
     fun handleVerifyClick(party: PartyCardUi) {
         if (party.challengeId <= 0L) return
-        pendingVerifyParty = party
+        pendingVerifyChallengeId = party.challengeId
+        pendingVerifyTitle = party.challengeName
+        pendingVerifyDeadline = party.deadline
         val isCameraPermissionGranted = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.CAMERA
@@ -156,7 +169,7 @@ fun PartyRoute(
 
         if (isCameraPermissionGranted) {
             onCameraNavigate(party.challengeId, party.challengeName, party.deadline)
-            pendingVerifyParty = null
+            clearPendingVerification()
         } else {
             showCameraPermissionDialog = true
         }
@@ -172,10 +185,10 @@ fun PartyRoute(
 
                 if (isCameraPermissionGranted) {
                     showCameraPermissionDialog = false
-                    pendingVerifyParty?.let { party ->
-                        onCameraNavigate(party.challengeId, party.challengeName, party.deadline)
+                    pendingVerifyChallengeId?.let { challengeId ->
+                        onCameraNavigate(challengeId, pendingVerifyTitle, pendingVerifyDeadline)
                     }
-                    pendingVerifyParty = null
+                    clearPendingVerification()
                 }
             }
         }
@@ -350,7 +363,7 @@ fun PartyRoute(
             // API category Enum에 연결된 화면 표시명을 선택 카드의 카테고리 칩에 전달
             selectedChallengeCategoryLabel = selectedChallenge?.category?.displayName,
             onChallengeClick = {
-                // 기존 확정 선택은 유지하고 새로 탐색할 임시 선택만 초기화
+                // 기존 확정 선택은 유지하고 새로 상세를 확인하던 선택만 초기화
                 pendingChallenge = null
                 screen = PartyScreen.ChallengeSelect
             },
@@ -400,7 +413,7 @@ fun PartyRoute(
         )
 
         PartyScreen.ChallengeDetail -> {
-            // 상세 진입 시 임시 선택을 우선 사용하고 없으면 기존 확정 선택 사용
+            // 상세 진입 시 현재 확인 중인 선택을 우선 사용하고, 없으면 기존 확정 선택 사용
             val challenge = pendingChallenge ?: selectedChallenge
             if (challenge == null) {
                 LaunchedEffect(Unit) { screen = PartyScreen.ChallengeSelect }
@@ -523,7 +536,7 @@ fun PartyRoute(
             type = PermissionDialogType.CAMERA,
             onDismiss = {
                 showCameraPermissionDialog = false
-                pendingVerifyParty = null
+                clearPendingVerification()
             },
             onMoveToSettings = { moveToAppSettings(context) }
         )
