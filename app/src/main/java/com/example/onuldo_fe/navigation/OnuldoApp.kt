@@ -32,7 +32,9 @@ import com.example.onuldo_fe.ui.screen.mypage.SettingScreen
 import com.example.onuldo_fe.ui.screen.mypage.TermScreen
 import com.example.onuldo_fe.data.auth.dto.TermType
 import com.example.onuldo_fe.data.network.SessionEvents
+import com.example.onuldo_fe.model.challenge.ChallengeCategory
 import com.example.onuldo_fe.viewmodel.OnboardingDraft
+import com.example.onuldo_fe.viewmodel.challenge.ChallengeDetailViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.onuldo_fe.camera.PhotoPreviewScreen
@@ -236,13 +238,28 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
             val deadline = backStackEntry.arguments
                 ?.getString(Routes.CAMERA_DEADLINE_ARG)
                 .orEmpty()
+            // 파티 목록 응답에는 category가 없으므로 challengeId로 상세를 조회해 보완한다.
+            // 카메라에서는 개인·파티 모두 한글 카테고리명으로 통일한다.
+            val challengeDetailViewModel: ChallengeDetailViewModel? = if (category.isBlank()) {
+                viewModel(
+                    key = "camera-challenge-detail-$challengeId",
+                    factory = ChallengeDetailViewModel.factory(challengeId)
+                )
+            } else {
+                null
+            }
+            val resolvedCategory = if (category.isBlank()) {
+                challengeDetailViewModel?.uiState?.detail?.category?.displayName.orEmpty()
+            } else {
+                category.toCategoryDisplayName()
+            }
             CameraScreen(
-                category = category,
+                category = resolvedCategory,
                 title = title,
                 onPhotoCaptured = { uri ->
                     cameraViewModel.setImageUri(uri)
                     navController.navigate(
-                        Routes.photoPreview(challengeId, category, title, deadline)
+                        Routes.photoPreview(challengeId, resolvedCategory, title, deadline)
                     )
                 },
                 onCloseClick = {
@@ -487,3 +504,10 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
         }
     }
 }
+
+/** 서버 enum 값은 한글 표시명으로 바꾸고, 이미 한글인 값은 그대로 유지한다. */
+private fun String.toCategoryDisplayName(): String =
+    ChallengeCategory.entries
+        .firstOrNull { it.name.equals(this, ignoreCase = true) }
+        ?.displayName
+        ?: this
