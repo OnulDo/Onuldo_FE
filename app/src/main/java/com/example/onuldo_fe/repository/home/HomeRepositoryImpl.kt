@@ -146,17 +146,24 @@ internal fun List<RealHomeDailyChallengeDto>.toHomeData(
             dailyChallenge = partyDailyChallenges[it.partyId]
         )
     }
-    val completedCount = count(RealHomeDailyChallengeDto::verifiedOnDate)
+    // 히어로의 분모/분자는 /daily 원본 리스트 크기에 기대지 않는다.
+    // /daily에 파티의 오늘 참여 기록이 아직 반영되지 않아도(생성/시작 직후 등)
+    // 개인은 /daily, 파티는 /parties/home을 각각의 출처로 삼아 항상 정확히 집계한다.
+    val personalCompletedCount = personalChallenges.count { it.status == ChallengeStatus.Success }
+    val partyCompletedCount = partyHome.parties.count { it.status == "SUCCESS" }
+    val totalCount = personalChallenges.size + partyChallenges.size
+    val completedCount = personalCompletedCount + partyCompletedCount
 
     return HomeData(
         // /daily 응답에는 닉네임이 없으므로 다른 사용자 API가 연결되기 전까지 비워 둔다.
         userName = "",
-        todayChallenge = takeIf(List<*>::isNotEmpty)?.let {
+        // 챌린지·파티 중 하나라도 있으면 히어로를 노출한다.
+        todayChallenge = totalCount.takeIf { it > 0 }?.let {
             TodayChallenge(
                 date = now.toLocalDate().toString(),
-                progress = completedCount.toFloat() / size,
+                progress = completedCount.toFloat() / totalCount,
                 completedCount = completedCount,
-                totalCount = size
+                totalCount = totalCount
             )
         },
         partyChallenges = partyChallenges,
