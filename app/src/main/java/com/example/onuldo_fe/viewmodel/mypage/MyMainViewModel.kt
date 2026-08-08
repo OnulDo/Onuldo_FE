@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 data class MyMainUiState(
     val summary: MyPageSummary? = null,
     val isLoading: Boolean = false,
+    val isDeleting: Boolean = false, // 탈퇴 전용
     val errorMessage: String? = null,
     /** 회원 탈퇴 실패 안내(일회성). 화면이 토스트로 노출한 뒤 [MyMainViewModel.onDeleteFailedShown]으로 비움
      */
@@ -82,9 +83,15 @@ class MyMainViewModel(
      * 실패 시에는 화면에 머물며 서버 문구를 노출한다.
      */
     fun deleteAccount(onDeleted: () -> Unit) {
-        if (_uiState.value.isLoading) return
+        if (_uiState.value.isDeleting) return
+
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            _uiState.update {
+                it.copy(
+                    isDeleting = true,
+                    errorMessage = null,
+                )
+            }
 
             userRepository.deleteAccount()
                 .onSuccess {
@@ -94,8 +101,19 @@ class MyMainViewModel(
                 }
                 .onError { code, message ->
                     // 그 외(진행 중 챌린지 등)는 서버 문구를, 문구가 비면 기본 안내를 노출
-                    val display = if (ApiErrorCode.isTokenInvalid(code)) null else message.ifBlank { DELETE_FAILED_MESSAGE }
-                    _uiState.update { it.copy(isLoading = false, deleteFailedMessage = display) }
+                    val display =
+                        if (ApiErrorCode.isTokenInvalid(code)) {
+                            null
+                        } else {
+                            message.ifBlank { DELETE_FAILED_MESSAGE }
+                        }
+
+                    _uiState.update {
+                        it.copy(
+                            isDeleting = false,
+                            deleteFailedMessage = display,
+                        )
+                    }
                 }
         }
     }
