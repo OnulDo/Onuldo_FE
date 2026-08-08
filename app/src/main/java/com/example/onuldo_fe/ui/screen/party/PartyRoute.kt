@@ -3,7 +3,10 @@ package com.example.onuldo_fe.ui.screen.party
 import android.Manifest
 import android.app.Activity
 import android.content.ContextWrapper
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.example.onuldo_fe.model.challenge.ChallengeCategory
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -52,6 +55,41 @@ private enum class PartyScreen {
     Settlement
 }
 
+// 파티 생성 화면에서 확정 선택한 챌린지를 구성 변경·화면 이탈(포인트 충전 등) 후에도
+// 복원할 수 있도록 저장/복원하는 Saver. Challenge가 Parcelable이 아니라 직접 정의했다.
+private val ChallengeSaver: Saver<Challenge?, Any> = listSaver(
+    save = { challenge ->
+        if (challenge == null) {
+            emptyList()
+        } else {
+            // listSaver는 원소가 null이 아니어야 해서, imageUrl이 없으면 빈 문자열로
+            // 대신 저장하고 복원할 때 다시 null로 되돌린다.
+            listOf(
+                challenge.id,
+                challenge.title,
+                challenge.participantCount,
+                challenge.category.name,
+                challenge.imageUrl.orEmpty(),
+                challenge.imageRes
+            )
+        }
+    },
+    restore = { saved ->
+        if (saved.isEmpty()) {
+            null
+        } else {
+            Challenge(
+                id = saved[0] as Long,
+                title = saved[1] as String,
+                participantCount = saved[2] as Int,
+                category = ChallengeCategory.valueOf(saved[3] as String),
+                imageUrl = (saved[4] as String).ifEmpty { null },
+                imageRes = saved[5] as Int
+            )
+        }
+    }
+)
+
 // 파티 목록부터 생성·참여·대기방·피드까지 화면 전환과 ViewModel 상태 연결
 @Composable
 fun PartyRoute(
@@ -81,12 +119,16 @@ fun PartyRoute(
         mutableStateOf(false)
     }
     // pendingChallenge는 상세 확인 중인 임시 선택, selectedChallenge는 생성 화면에서 확정된 선택
-    var selectedChallenge by remember { mutableStateOf<Challenge?>(null) }
+    // selectedChallenge는 포인트 부족 → 충전 화면 왕복처럼 화면이 사라졌다 다시 생겨도
+    // 유지되어야 해서 rememberSaveable(+커스텀 Saver)을 쓴다. pendingChallenge는 탐색 중인
+    // 임시값이라 화면이 날아가도 다시 고르면 되므로 remember로 충분하다.
+    var selectedChallenge by rememberSaveable(stateSaver = ChallengeSaver) { mutableStateOf<Challenge?>(null) }
     var pendingChallenge by remember { mutableStateOf<Challenge?>(null) }
 
-    // 생성 화면을 벗어나 챌린지를 탐색해도 입력값을 유지하도록 Route가 생성 폼 상태 보관
-    var partyName by remember { mutableStateOf("") }
-    var capacity by remember { mutableIntStateOf(5) }
+    // 생성 화면을 벗어나 챌린지를 탐색해도, 포인트 충전 화면을 다녀와도 입력값을 유지하도록
+    // Route가 생성 폼 상태를 rememberSaveable로 보관한다.
+    var partyName by rememberSaveable { mutableStateOf("") }
+    var capacity by rememberSaveable { mutableIntStateOf(5) }
 
     // 피드 재조회와 대기방 오류 재시도에 사용할 마지막 partyId 보관
     var feedPartyId by remember { mutableStateOf("1") }
