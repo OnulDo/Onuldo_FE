@@ -127,6 +127,24 @@ class HomeRepositoryImplTest {
     }
 
     @Test
+    fun `challengeId가 없으면 마감 전이라도 canVerify는 false다`() {
+        val result = listOf(dailyItem(type = "PARTY", name = "아침 운동", verified = false))
+            .toHomeData(
+                now = LocalDateTime.of(2026, 8, 5, 12, 0),
+                partyHome = PartyHomeResultDto(
+                    // challengeId를 지정하지 않아 null인 상태 — 마감 전(showRemainingTime 기본 true)이라
+                    // isDeadlinePassed는 false지만, challengeId가 없으니 canVerify도 false여야 한다.
+                    parties = listOf(partyHomeItem(status = "NOT_VERIFIED"))
+                )
+            )
+            .partyChallenges
+            .single()
+
+        assertNull(result.challengeId)
+        assertFalse(result.canVerify)
+    }
+
+    @Test
     fun `홈 전용 파티 응답의 상태와 첫 정산 배너를 반영한다`() {
         val partyHome = PartyHomeResultDto(
             settlementBanners = listOf(

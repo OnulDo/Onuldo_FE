@@ -193,6 +193,9 @@ private fun PartyHomeItemDto.toHomeModel(
     val isDeadlinePassed = deadline?.let(now.toLocalTime()::isAfter) == true
     // 시간으로 상태를 추정하지 않고 서버가 계산한 나의 오늘 인증 상태를 사용한다.
     val challengeStatus = status.toPartyChallengeStatus()
+    // 카메라 화면 이동에 필수인 값이라, 이게 없으면 canVerify도 true가 되면 안 된다
+    // (그렇지 않으면 버튼은 활성화된 것처럼 보이는데 눌러도 아무 반응이 없게 된다).
+    val verifiedChallengeId = challengeId?.takeIf { it > 0L }
     return HomePartyChallenge(
         title = name,
         subtitle = challengeTitle,
@@ -208,7 +211,9 @@ private fun PartyHomeItemDto.toHomeModel(
                 now = now.toLocalTime(),
                 verified = challengeStatus != ChallengeStatus.NeedCertification
             ),
-        canVerify = challengeStatus == ChallengeStatus.NeedCertification && !isDeadlinePassed,
+        canVerify = challengeStatus == ChallengeStatus.NeedCertification &&
+            !isDeadlinePassed &&
+            verifiedChallengeId != null,
         members = members.map {
             HomePartyMember(
                 memberId = it.userId.toString(),
@@ -218,8 +223,8 @@ private fun PartyHomeItemDto.toHomeModel(
             )
         },
         // /parties/home 응답 자체의 값을 그대로 쓴다. 백엔드가 아직 안 내려주면 null/빈 문자열이라
-        // "인증하기"를 눌러도 이동하지 않는다(challengeId가 있어야 카메라 화면 라우트가 만들어짐).
-        challengeId = challengeId?.takeIf { it > 0L },
+        // canVerify도 위에서 함께 false가 되어 "인증하기" 버튼 자체가 활성화되지 않는다.
+        challengeId = verifiedChallengeId,
         category = category.orEmpty()
     )
 }
