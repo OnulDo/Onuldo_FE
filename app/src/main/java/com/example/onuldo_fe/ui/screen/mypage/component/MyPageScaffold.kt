@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
@@ -68,6 +69,9 @@ fun MyPageMenuRow(
     value: String? = null,
     showChevron: Boolean = true,
     onClick: (() -> Unit)? = null,
+    // 값 좌우 여백. 기본값은 기존 동작(라벨과 12dp, 셰브론/끝과 8/0dp). 특정 화면에서 간격을 지정할 때 넘긴다.
+    valueStartPadding: Dp = 12.dp,
+    valueEndPadding: Dp? = null,
 ) {
     Row(
         modifier = modifier
@@ -94,7 +98,10 @@ fun MyPageMenuRow(
             textAlign = TextAlign.End,
             modifier = Modifier
                 .weight(1f)
-                .padding(start = 12.dp, end = if (showChevron) 8.dp else 0.dp),
+                .padding(
+                    start = valueStartPadding,
+                    end = valueEndPadding ?: if (showChevron) 8.dp else 0.dp,
+                ),
         )
         if (showChevron) {
             // Figma에서 추출한 셰브론(5×8). 문자 '›'를 쓰면 화면마다 크기가 달라진다.

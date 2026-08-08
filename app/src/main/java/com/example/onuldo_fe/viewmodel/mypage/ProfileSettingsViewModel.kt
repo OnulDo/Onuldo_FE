@@ -32,7 +32,9 @@ data class ProfileSettingsUiState(
 /**
  * 프로필 설정(마이 진입). `GET /api/users/me/profile`로 표시값을 채운다.
  *
- * ⚠️ 서버에 프로필 **수정** API(PATCH)가 없어 아바타 변경은 아직 저장할 수 없다.
+ * 닉네임 변경은 `NicknameEditScreen`이 `PATCH /api/users/me/profile`로 저장하며,
+ * 이 화면은 변경 후 복귀 시 `RefreshOnResume`으로 재조회해 최신 값을 반영한다.
+ * (아바타 변경은 선택 피커 UI가 아직 없어 저장 흐름이 없다.)
  */
 class ProfileSettingsViewModel(
     private val userRepository: UserRepository = UserRepositoryProvider.provide(),
@@ -41,10 +43,7 @@ class ProfileSettingsViewModel(
     private val _uiState = MutableStateFlow(ProfileSettingsUiState())
     val uiState: StateFlow<ProfileSettingsUiState> = _uiState.asStateFlow()
 
-    init {
-        load()
-    }
-
+    // 최초 표시와 변경 후 복귀 모두 화면의 RefreshOnResume이 load()를 부른다(그래서 init에서 조회하지 않는다).
     fun load() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
