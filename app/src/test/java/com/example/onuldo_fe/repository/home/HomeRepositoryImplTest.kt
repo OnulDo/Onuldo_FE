@@ -27,7 +27,9 @@ class HomeRepositoryImplTest {
 
         val result = items.toHomeData(
             now = LocalDateTime.of(2026, 8, 5, 22, 59),
-            partyHome = PartyHomeResultDto(parties = listOf(partyHomeItem()))
+            partyHome = PartyHomeResultDto(
+                parties = listOf(partyHomeItem(status = "SUCCESS"))
+            )
         )
 
         assertEquals(1, result.challenges.size)
@@ -35,7 +37,7 @@ class HomeRepositoryImplTest {
         assertEquals(ChallengeStatus.NeedCertification, result.challenges.single().status)
         assertEquals(60, result.challenges.single().remainingMinutes)
         assertEquals(1, result.partyChallenges.size)
-        assertEquals(ChallengeStatus.NeedCertification, result.partyChallenges.single().status)
+        assertEquals(ChallengeStatus.Success, result.partyChallenges.single().status)
         assertEquals(1, result.todayChallenge?.completedCount)
         assertEquals(2, result.todayChallenge?.totalCount)
     }
@@ -99,7 +101,7 @@ class HomeRepositoryImplTest {
     }
 
     @Test
-    fun `파티 인증하기에 필요한 challengeId와 category는 daily 매칭 없이 parties-home 응답 값을 그대로 쓴다`() {
+    fun `파티 인증하기에 필요한 challengeId는 parties-home 응답 값을 그대로 쓴다`() {
         val withChallengeId = listOf(dailyItem(type = "PARTY", name = "아침 운동", verified = false))
             .toHomeData(
                 now = LocalDateTime.of(2026, 8, 5, 12, 0),
@@ -112,18 +114,6 @@ class HomeRepositoryImplTest {
 
         assertEquals(99L, withChallengeId.challengeId)
         assertEquals("운동", withChallengeId.category)
-
-        // 백엔드가 아직 challengeId를 안 내려주면 daily 쪽에 같은 partyId 항목이 있어도 null을 유지한다.
-        val withoutChallengeId = listOf(dailyItem(type = "PARTY", name = "아침 운동", verified = false))
-            .toHomeData(
-                now = LocalDateTime.of(2026, 8, 5, 12, 0),
-                partyHome = PartyHomeResultDto(parties = listOf(partyHomeItem()))
-            )
-            .partyChallenges
-            .single()
-
-        assertNull(withoutChallengeId.challengeId)
-        assertEquals("", withoutChallengeId.category)
     }
 
     @Test
@@ -132,9 +122,8 @@ class HomeRepositoryImplTest {
             .toHomeData(
                 now = LocalDateTime.of(2026, 8, 5, 12, 0),
                 partyHome = PartyHomeResultDto(
-                    // challengeId를 지정하지 않아 null인 상태 — 마감 전(showRemainingTime 기본 true)이라
-                    // isDeadlinePassed는 false지만, challengeId가 없으니 canVerify도 false여야 한다.
-                    parties = listOf(partyHomeItem(status = "NOT_VERIFIED"))
+                    // 잘못된 ID(0)가 내려오면 인증 화면으로 이동시키지 않는다.
+                    parties = listOf(partyHomeItem(status = "NOT_VERIFIED", challengeId = 0))
                 )
             )
             .partyChallenges
@@ -260,7 +249,7 @@ class HomeRepositoryImplTest {
         status: String = "NOT_VERIFIED",
         verifiedAt: String? = null,
         showRemainingTime: Boolean = true,
-        challengeId: Long? = null,
+        challengeId: Long = 12,
         category: String? = null
     ) = PartyHomeItemDto(
         partyId = 10,
