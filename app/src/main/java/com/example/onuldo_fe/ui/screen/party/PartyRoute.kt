@@ -125,10 +125,10 @@ fun PartyRoute(
             }
         }
 
-        // 생성·대기방 진입 시와 포인트 충전 화면에서 돌아온 시점에 표시 잔액을 갱신한다.
-        if (shouldRefreshPoint && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            partyViewModel.refreshAvailablePoint()
-        }
+        // addObserver 시점에 이미 RESUMED 상태면 LifecycleRegistry가 ON_RESUME을
+        // 동기적으로 한 번 재생해준다. 그래서 생성·대기방 진입 시점과 포인트 충전 화면에서
+        // 돌아온 시점 모두 observer의 ON_RESUME 처리 한 경로로만 갱신하고, 직접 호출은
+        // 따로 남기지 않는다(남기면 addObserver의 동기 재생과 중복 요청이 발생함).
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
