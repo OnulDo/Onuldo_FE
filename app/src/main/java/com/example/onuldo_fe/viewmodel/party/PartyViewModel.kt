@@ -76,6 +76,9 @@ class PartyViewModel(
     private var partyListGeneration: Long = 0L
     private var hasLoadedPartyList: Boolean = false
     private var pointRequestGeneration: Long = 0L
+    // 백그라운드 전환으로 자동 이탈을 시도했지만 실패해 아직 해소되지 않은 파티 ID.
+    // 화면은 이미 목록으로 돌아갔으므로, 다음에 목록이 다시 보일 때 조용히 재시도한다.
+    private var pendingAutoLeavePartyId: String? = null
 
     init {
         // 파티 목록 로드는 PartyRoute의 화면 표시(ON_START) 옵저버가 onPartyListVisible()로
@@ -120,6 +123,9 @@ class PartyViewModel(
 
     /** 파티 목록이 보이는 시점에 최초 조회 또는 조용한 재조회를 시작한다. */
     fun onPartyListVisible() {
+        // 백그라운드 전환 때 자동 이탈이 실패해 남아있으면, 목록이 다시 보일 때(=앱이
+        // 다시 활성화됐을 때) 조용히 재시도한다.
+        retryPendingAutoLeaveIfNeeded()
         // 이미 시작한 조회가 있으면 초기 진입·ON_START 이벤트의 중복 요청을 막는다.
         if (partyListJob?.isActive == true) return
         requestPartyList(if (hasLoadedPartyList) PartyListLoadMode.SILENT else PartyListLoadMode.FULL)
@@ -355,6 +361,37 @@ class PartyViewModel(
         // 탈퇴 요청 성공 시에만 대기방 상태 제거 후 목록 화면으로 이동
         // 방장 승계와 마지막 인원 이탈에 따른 해체 처리는 서버 또는 fake store가 담당
         val partyId = uiState.waitingRoom?.partyId ?: return
+        attemptOrQueueLeave(partyId, onSuccess)
+    }
+
+    /**
+     * 대기방을 벗어나며 앱이 백그라운드로 갈 때 호출. 화면은 호출 시점에 이미 목록으로
+     * 돌아간 상태이므로 여기서는 실제 서버 이탈만 담당한다. 실패하면(네트워크 문제 등)
+     * pendingAutoLeavePartyId에 의도를 남겨두고, 목록이 다시 보이는 시점(onPartyListVisible)에
+     * 재시도한다 — 그렇지 않으면 사용자가 서버의 대기방 멤버로 남았는데도 되돌아갈 UI 경로가 없다.
+     */
+    fun autoLeaveOnBackground() {
+        val partyId = uiState.waitingRoom?.partyId ?: return
+        pendingAutoLeavePartyId = partyId
+        attemptOrQueueLeave(partyId) {
+            if (pendingAutoLeavePartyId == partyId) pendingAutoLeavePartyId = null
+        }
+    }
+
+    /** 실패한 자동 이탈이 남아있고 여전히 같은 파티의 대기방이면 조용히 재시도한다. */
+    private fun retryPendingAutoLeaveIfNeeded() {
+        val partyId = pendingAutoLeavePartyId ?: return
+        if (uiState.waitingRoom?.partyId != partyId) {
+            // 이미 다른 경로(수동 이탈, 파티 해체 등)로 해소됨
+            pendingAutoLeavePartyId = null
+            return
+        }
+        attemptOrQueueLeave(partyId) {
+            if (pendingAutoLeavePartyId == partyId) pendingAutoLeavePartyId = null
+        }
+    }
+
+    private fun attemptOrQueueLeave(partyId: String, onSuccess: () -> Unit) {
         if (uiState.action != PartyAction.Idle) {
             // 준비완료·시작하기 등 다른 요청이 이미 진행 중이면 여기서 그냥 포기하지 않고,
             // 그 요청이 끝날 때까지 기다렸다가 그때도 여전히 같은 파티의 대기방이면 이탈을

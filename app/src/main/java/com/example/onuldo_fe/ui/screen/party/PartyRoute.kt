@@ -181,15 +181,13 @@ fun PartyRoute(
                     val isChangingConfigurations =
                         context.findActivity()?.isChangingConfigurations == true
                     if (shouldLeave && !isChangingConfigurations) {
-                        // leaveParty()는 준비완료·시작하기 등 다른 요청이 이미 진행 중이면
-                        // 아무 것도 하지 않고 조용히 리턴한다(action != Idle 가드). 그 콜백에만
-                        // 의존해 화면을 List로 되돌리면, 하필 그 타이밍에 다른 요청이 겹친 경우
-                        // screen이 WaitingRoom에 영영 고정되고 하단 탭바도 계속 숨겨진 채로 남아
-                        // 하단 네비게이션 자체를 못 쓰게 되는 문제가 있었다. 그래서 화면 전환은
-                        // API 결과와 무관하게 이 시점에 바로 처리하고, 실제 이탈 요청은 별도로 보낸다
-                        // (가드에 걸려 이번에 못 보내면, 파티 목록에는 여전히 남아있을 수 있다).
+                        // 화면 전환은 API 결과와 무관하게 이 시점에 바로 처리한다(그렇지 않으면
+                        // 다른 요청과 겹쳐 leaveParty가 지연·실패할 때 화면이 WaitingRoom에 고정되고
+                        // 하단 탭바도 계속 숨겨진 채로 남아 하단 네비게이션 자체를 못 쓰게 된다).
+                        // 실제 서버 이탈은 autoLeaveOnBackground()가 맡는다 — 실패해도 의도를 남겨두고
+                        // 목록이 다시 보이는 시점(onPartyListVisible)에 스스로 재시도한다.
                         screen = PartyScreen.List
-                        partyViewModel.leaveParty {}
+                        partyViewModel.autoLeaveOnBackground()
                     }
                 }
                 else -> Unit
