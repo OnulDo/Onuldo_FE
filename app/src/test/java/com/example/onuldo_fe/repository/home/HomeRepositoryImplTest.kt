@@ -4,9 +4,10 @@ import com.example.onuldo_fe.data.home.dto.RealHomeDailyChallengeDto
 import com.example.onuldo_fe.data.challenge.dto.DailyCompletedChallengeDto
 import com.example.onuldo_fe.data.challenge.dto.DailyCompletedPartyDto
 import com.example.onuldo_fe.data.challenge.dto.DailyCompletedResultDto
-import com.example.onuldo_fe.data.party.dto.PartyFeedDto
-import com.example.onuldo_fe.data.party.dto.PartyFeedItemDto
-import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
+import com.example.onuldo_fe.data.party.dto.PartyHomeItemDto
+import com.example.onuldo_fe.data.party.dto.PartyHomeMemberDto
+import com.example.onuldo_fe.data.party.dto.PartyHomeResultDto
+import com.example.onuldo_fe.data.party.dto.PartySettlementBannerDto
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomeCompletedChallenge
 import java.time.LocalDateTime
@@ -26,7 +27,7 @@ class HomeRepositoryImplTest {
 
         val result = items.toHomeData(
             now = LocalDateTime.of(2026, 8, 5, 22, 59),
-            parties = listOf(partySummary())
+            partyHome = PartyHomeResultDto(parties = listOf(partyHomeItem()))
         )
 
         assertEquals(1, result.challenges.size)
@@ -79,32 +80,13 @@ class HomeRepositoryImplTest {
     }
 
     @Test
-    fun `partyId가 있으면 파티 피드의 인원과 프로필을 카드에 반영한다`() {
+    fun `홈 전용 파티 응답의 인원과 프로필을 카드에 반영한다`() {
         val item = dailyItem(type = "PARTY", name = "아침 운동", verified = false)
-        val feed = PartyFeedDto(
-            partyId = 10,
-            name = "갓생팟",
-            challengeTitle = "아침 운동",
-            progressRate = 0.5,
-            verifiedMemberCount = 1,
-            totalMemberCount = 2,
-            members = listOf(
-                PartyFeedItemDto(
-                    userId = 1,
-                    nickname = "오늘두",
-                    profileImageUrl = "https://cdn/profile.png",
-                    isVerifiedToday = true,
-                    verificationPhotoUrl = null,
-                    verifiedAt = null
-                )
-            )
-        )
 
         val result = listOf(item)
             .toHomeData(
                 now = LocalDateTime.of(2026, 8, 5, 12, 0),
-                parties = listOf(partySummary()),
-                partyFeeds = mapOf(10L to feed)
+                partyHome = PartyHomeResultDto(parties = listOf(partyHomeItem()))
             )
             .partyChallenges
             .single()
@@ -113,7 +95,81 @@ class HomeRepositoryImplTest {
         assertEquals("아침 운동", result.subtitle)
         assertEquals(1, result.completedMemberCount)
         assertEquals(2, result.totalMemberCount)
-        assertEquals("https://cdn/profile.png", result.members.single().profileImageUrl)
+        assertEquals("https://cdn/profile.png", result.members.first().profileImageUrl)
+    }
+
+    @Test
+    fun `홈 전용 파티 응답의 상태와 첫 정산 배너를 반영한다`() {
+        val partyHome = PartyHomeResultDto(
+            settlementBanners = listOf(
+                PartySettlementBannerDto(10, "갓생팟"),
+                PartySettlementBannerDto(20, "저녁팟")
+            ),
+            parties = listOf(
+                partyHomeItem(
+                    status = "PENDING",
+                    verifiedAt = "2026-08-05T07:10:00",
+                    showRemainingTime = true
+                )
+            )
+        )
+
+        val result = listOf(dailyItem(type = "PARTY", name = "아침 운동", verified = false))
+            .toHomeData(
+                now = LocalDateTime.of(2026, 8, 5, 12, 0),
+                partyHome = partyHome
+            )
+
+        val party = result.partyChallenges.single()
+        assertEquals(ChallengeStatus.WaitingReview, party.status)
+        assertEquals("07:10", party.verifiedAt.toString())
+        assertFalse(party.canVerify)
+        assertNull(party.remainingMinutes)
+        assertEquals("갓생팟", result.settlementBanner?.partyName)
+        assertEquals(10L, result.settlementBanner?.partyId)
+    }
+
+    @Test
+    fun `홈 파티 인증 상태를 화면 상태로 변환한다`() {
+        val expectedStatuses = listOf(
+            "NOT_VERIFIED" to ChallengeStatus.NeedCertification,
+            "PENDING" to ChallengeStatus.WaitingReview,
+            "SUCCESS" to ChallengeStatus.Success,
+            "FAIL" to ChallengeStatus.Failed
+        )
+
+        expectedStatuses.forEach { (serverStatus, expectedStatus) ->
+            val party = emptyList<RealHomeDailyChallengeDto>().toHomeData(
+                now = LocalDateTime.of(2026, 8, 5, 12, 0),
+                partyHome = PartyHomeResultDto(
+                    parties = listOf(partyHomeItem(status = serverStatus))
+                )
+            ).partyChallenges.single()
+
+            assertEquals(expectedStatus, party.status)
+        }
+    }
+
+    @Test
+    fun `서버가 요청한 경우에만 파티 인증 남은 시간을 표시한다`() {
+        val daily = listOf(dailyItem(type = "PARTY", name = "아침 운동", verified = false))
+        val now = LocalDateTime.of(2026, 8, 5, 23, 0)
+
+        val visible = daily.toHomeData(
+            now = now,
+            partyHome = PartyHomeResultDto(
+                parties = listOf(partyHomeItem(showRemainingTime = true))
+            )
+        ).partyChallenges.single()
+        val hidden = daily.toHomeData(
+            now = now,
+            partyHome = PartyHomeResultDto(
+                parties = listOf(partyHomeItem(showRemainingTime = false))
+            )
+        ).partyChallenges.single()
+
+        assertEquals(59, visible.remainingMinutes)
+        assertNull(hidden.remainingMinutes)
     }
 
     @Test
@@ -143,6 +199,7 @@ class HomeRepositoryImplTest {
         participationId = 1,
         participationStatus = "ONGOING",
         participationType = type,
+        partyId = 10L.takeIf { type == "PARTY" },
         challengeId = 12,
         challengeName = name,
         timeStart = "06:00:00",
@@ -153,15 +210,30 @@ class HomeRepositoryImplTest {
         streakDays = streakDays
     )
 
-    private fun partySummary() = RealPartySummaryDto(
+    private fun partyHomeItem(
+        status: String = "NOT_VERIFIED",
+        verifiedAt: String? = null,
+        showRemainingTime: Boolean = true
+    ) = PartyHomeItemDto(
         partyId = 10,
         name = "갓생팟",
         challengeTitle = "아침 운동",
-        status = "ONGOING",
         endDate = "2026-08-20",
         verificationDeadline = "23:59:00",
-        progressRate = 0.5,
-        verifiedMemberCount = 1,
-        totalMemberCount = 2
+        showRemainingTime = showRemainingTime,
+        status = status,
+        verifiedAt = verifiedAt,
+        members = listOf(
+            PartyHomeMemberDto(
+                userId = 1,
+                profileImageUrl = "https://cdn/profile.png",
+                isVerifiedToday = true
+            ),
+            PartyHomeMemberDto(
+                userId = 2,
+                profileImageUrl = null,
+                isVerifiedToday = false
+            )
+        )
     )
 }

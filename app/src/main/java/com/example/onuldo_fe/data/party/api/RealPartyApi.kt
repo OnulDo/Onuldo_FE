@@ -6,6 +6,7 @@ import com.example.onuldo_fe.data.party.dto.PartyFeedDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
+import com.example.onuldo_fe.data.party.dto.PartyHomeResultDto
 import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
 import retrofit2.Response
@@ -35,6 +36,10 @@ interface RealPartyApi {
         @Query("cursor") cursor: String? = null,
         @Query("size") size: Int = 10
     ): Response<PartyListPageResponseDto>
+
+    /** 홈 화면에 표시할 진행 중 파티와 미확인 정산 배너를 조회한다. */
+    @GET("api/parties/home")
+    suspend fun getHomeParties(): Response<ApiResponse<PartyHomeResultDto>>
 
     /** 로그인 사용자가 참여 중인 파티의 대기방 상태를 조회 */
     @GET("api/parties/{partyId}/waiting-room")

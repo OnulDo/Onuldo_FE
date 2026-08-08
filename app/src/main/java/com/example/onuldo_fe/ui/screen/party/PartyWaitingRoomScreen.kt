@@ -44,7 +44,8 @@ fun PartyWaitingRoomScreen(
     isActionInProgress: Boolean = false,
     errorMessage: String? = null,
     showPointShortageFromServer: Boolean = false,
-    onPointShortageDismiss: () -> Unit = {}
+    onPointShortageDismiss: () -> Unit = {},
+    checkPointBeforeRequest: Boolean = false
 ) {
     val spacing = LocalSpacing.current
     val clipboard = LocalClipboardManager.current
@@ -135,7 +136,10 @@ fun PartyWaitingRoomScreen(
                     when {
                         isLeader -> onStartClick()
                         // 대기 중에서 준비 상태로 바뀔 때만 보유 포인트를 검사한다.
-                        !isReadySubmitted && availablePoint != null && availablePoint < ui.deposit -> showPointDialog = true
+                        !isReadySubmitted &&
+                            checkPointBeforeRequest &&
+                            availablePoint != null &&
+                            availablePoint < ui.deposit -> showPointDialog = true
                         else -> onReadyClick()
                     }
                 },

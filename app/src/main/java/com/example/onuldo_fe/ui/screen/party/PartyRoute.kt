@@ -117,6 +117,22 @@ fun PartyRoute(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    DisposableEffect(lifecycleOwner, screen) {
+        val shouldRefreshPoint = screen == PartyScreen.Create || screen == PartyScreen.WaitingRoom
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && shouldRefreshPoint) {
+                partyViewModel.refreshAvailablePoint()
+            }
+        }
+
+        // addObserver 시점에 이미 RESUMED 상태면 LifecycleRegistry가 ON_RESUME을
+        // 동기적으로 한 번 재생해준다. 그래서 생성·대기방 진입 시점과 포인트 충전 화면에서
+        // 돌아온 시점 모두 observer의 ON_RESUME 처리 한 경로로만 갱신하고, 직접 호출은
+        // 따로 남기지 않는다(남기면 addObserver의 동기 재생과 중복 요청이 발생함).
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     DisposableEffect(lifecycleOwner, screen, waitingPartyId, waitingRoom != null) {
         val partyId = waitingPartyId
         val shouldPoll = screen == PartyScreen.WaitingRoom && partyId != null && waitingRoom != null
@@ -216,6 +232,7 @@ fun PartyRoute(
             showPointShortageFromServer = partyState.isCreatePointInsufficient,
             onPointShortageDismiss = partyViewModel::dismissCreatePointDialog,
             onChargePoint = onChargePoint,
+            checkPointBeforeRequest = !PartyApiConfig.USE_REAL_CREATE,
             onCreate = { period, deposit ->
                 // 필수 선택값이 모두 준비된 경우에만 ViewModel에 생성 명령 전달
                 val challenge = selectedChallenge ?: return@PartyCreateScreen
@@ -257,8 +274,11 @@ fun PartyRoute(
                     // 파티 생성 경로에서는 즉시 참여하지 않고 선택 결과를 생성 화면으로 전달
                     actionText = "파티 만들기",
                     onActionClick = { data ->
-                        // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정(제목은 API 값으로 갱신)
-                        selectedChallenge = challenge.copy(title = data.title)
+                        // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정하고, 생성 요청에는 상세 API의 id/title을 사용한다.
+                        selectedChallenge = challenge.copy(
+                            id = data.challengeId,
+                            title = data.title
+                        )
                         pendingChallenge = null
                         screen = PartyScreen.Create
                     }
@@ -294,6 +314,7 @@ fun PartyRoute(
                     showPointShortageFromServer = partyState.isReadyPointInsufficient,
                     onPointShortageDismiss = partyViewModel::dismissReadyPointDialog,
                     onChargePoint = onChargePoint,
+                    checkPointBeforeRequest = !PartyApiConfig.USE_REAL_READY,
                     onBack = {
                         // 뒤로가기도 파티 탈퇴 요청으로 처리하고 성공 시에만 목록으로 이동
                         partyViewModel.leaveParty { screen = PartyScreen.List }
