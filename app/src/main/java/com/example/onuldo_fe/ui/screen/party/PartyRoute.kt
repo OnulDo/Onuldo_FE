@@ -67,7 +67,14 @@ fun PartyRoute(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     // 현재 화면과 다이얼로그 노출 여부는 Route에서만 관리
-    var screen by remember { mutableStateOf(PartyScreen.List) }
+    // screen 자체는 rememberSaveable로 못 만드는 사설 enum이라, 구성 변경으로 recompose가
+    // 처음부터 다시 돌 때는 ViewModel에 이미 남아있는 waitingRoom을 기준으로 대기방 화면을 복원한다.
+    // (ViewModel은 구성 변경에도 유지되므로 leaveParty를 안 보냈다면 waitingRoom이 그대로 남아있다.)
+    var screen by remember {
+        mutableStateOf(
+            if (partyViewModel.uiState.waitingRoom != null) PartyScreen.WaitingRoom else PartyScreen.List
+        )
+    }
     var showInviteDialog by remember { mutableStateOf(false) }
     var showCameraPermissionDialog by rememberSaveable {
         mutableStateOf(false)
@@ -82,7 +89,8 @@ fun PartyRoute(
 
     // 피드 재조회와 대기방 오류 재시도에 사용할 마지막 partyId 보관
     var feedPartyId by remember { mutableStateOf("1") }
-    var waitingPartyId by remember { mutableStateOf<String?>(null) }
+    // screen과 마찬가지로 구성 변경 후에도 ViewModel에 남아있는 partyId로 복원한다.
+    var waitingPartyId by remember { mutableStateOf(partyViewModel.uiState.waitingRoom?.partyId) }
 
     val partyState = partyViewModel.uiState
     val waitingRoom = partyState.waitingRoom
