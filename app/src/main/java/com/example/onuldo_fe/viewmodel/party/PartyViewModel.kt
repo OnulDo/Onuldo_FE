@@ -59,7 +59,12 @@ class PartyViewModel(
 ) : ViewModel() {
     companion object {
         private const val WAITING_ROOM_POLLING_INTERVAL_MS = 3_000L
+        private const val PARTY_LIST_REFRESH_INDICATOR_MIN_MS = 300L
     }
+
+    // 파티 목록 조회 표시 방식 — 챌린지 목록(ChallengeListViewModel)과 동일한 3단계 구분
+    // FULL: 전체 화면 로딩, REFRESH: 당겨서 새로고침 인디케이터, SILENT: 표시 없이 데이터만 갱신
+    private enum class PartyListLoadMode { FULL, REFRESH, SILENT }
 
     var uiState by mutableStateOf(PartyUiState())
         private set
@@ -110,34 +115,51 @@ class PartyViewModel(
             ?: userRepository.getMyPage().getOrNull()?.currentPoint
 
     fun loadParties() {
-        requestPartyList(showFullScreenLoading = true)
+        requestPartyList(PartyListLoadMode.FULL)
     }
 
     /** 파티 목록이 보이는 시점에 최초 조회 또는 조용한 재조회를 시작한다. */
     fun onPartyListVisible() {
         // 이미 시작한 조회가 있으면 초기 진입·ON_START 이벤트의 중복 요청을 막는다.
         if (partyListJob?.isActive == true) return
-        requestPartyList(showFullScreenLoading = !hasLoadedPartyList)
+        requestPartyList(if (hasLoadedPartyList) PartyListLoadMode.SILENT else PartyListLoadMode.FULL)
     }
 
-    /** 당겨서 새로고침 제스처에서 호출: 기존 카드를 유지한 채 조용히 다시 불러온다. */
+    /** 당겨서 새로고침 제스처에서 호출: 상단 인디케이터를 표시하며 재조회한다. */
     fun refreshParties() {
-        requestPartyList(showFullScreenLoading = false)
+        // 챌린지 목록과 동일하게, 이미 조회 중이면 중복 요청을 무시한다.
+        if (uiState.isListLoading || uiState.isRefreshing) return
+        requestPartyList(PartyListLoadMode.REFRESH)
     }
 
-    private fun requestPartyList(showFullScreenLoading: Boolean) {
+    private fun requestPartyList(mode: PartyListLoadMode) {
         val generation = ++partyListGeneration
         partyListJob?.cancel()
-        // 재진입 시에는 기존 카드를 유지하고, 최초 조회·오류 재시도만 전체 로딩을 보여준다.
-        uiState = uiState.copy(
-            isListLoading = showFullScreenLoading,
-            isRefreshing = !showFullScreenLoading,
-            errorMessage = null
-        )
+
+        // 당겨서 새로고침 인디케이터 최소 표시 시간 측정용
+        val refreshStartTime = if (mode == PartyListLoadMode.REFRESH) System.currentTimeMillis() else 0L
+
+        // 표시 상태 설정: FULL=전체 로딩, REFRESH=상단 인디케이터, SILENT=아무 표시 없음(기존 목록 유지)
+        // FULL은 진행 중이던 새로고침 인디케이터를 함께 해제해 두 인디케이터가 겹쳐 보이지 않게 한다.
+        uiState = when (mode) {
+            PartyListLoadMode.FULL -> uiState.copy(isListLoading = true, isRefreshing = false, errorMessage = null)
+            PartyListLoadMode.REFRESH -> uiState.copy(isRefreshing = true, errorMessage = null)
+            PartyListLoadMode.SILENT -> uiState.copy(errorMessage = null)
+        }
+
         partyListJob = viewModelScope.launch {
             try {
                 val parties = repository.getParties()
                 if (generation != partyListGeneration) return@launch
+
+                // 당겨서 새로고침일 때만, 응답이 너무 빨라 인디케이터가 깜빡이지 않도록 최소 시간 유지
+                if (mode == PartyListLoadMode.REFRESH) {
+                    val elapsed = System.currentTimeMillis() - refreshStartTime
+                    if (elapsed < PARTY_LIST_REFRESH_INDICATOR_MIN_MS) {
+                        delay(PARTY_LIST_REFRESH_INDICATOR_MIN_MS - elapsed)
+                    }
+                }
+
                 hasLoadedPartyList = true
                 uiState = uiState.copy(
                     parties = parties.map(PartySummary::toUi),
@@ -151,7 +173,7 @@ class PartyViewModel(
                 uiState = uiState.copy(
                     isListLoading = false,
                     isRefreshing = false,
-                    // 재진입 갱신 실패는 기존 목록을 유지하고 최초 조회 실패만 오류로 표시한다.
+                    // 재진입/조용한 갱신 실패는 기존 목록을 유지하고 최초 조회 실패만 오류로 표시한다.
                     errorMessage = "파티 목록을 불러오지 못했어요."
                         .takeUnless { hasLoadedPartyList }
                 )

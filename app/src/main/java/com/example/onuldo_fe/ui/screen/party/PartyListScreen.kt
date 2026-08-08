@@ -28,6 +28,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,12 +81,22 @@ fun PartyListScreen(
     }
 ) {
     val spacing = LocalSpacing.current
+    val pullToRefreshState = rememberPullToRefreshState()
+    // 챌린지 목록과 동일하게 당길 때 상단에 실제 인디케이터를 보여준다.
+    // 탭 재진입 시의 조용한 재조회(SILENT)는 isRefreshing을 건드리지 않으므로 노출되지 않는다.
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
-        // 홈과 동일하게 새로고침 인디케이터는 노출하지 않고 당겨서 새로고침 동작만 유지
-        indicator = {},
-        modifier = modifier.fillMaxSize()
+        state = pullToRefreshState,
+        modifier = modifier.fillMaxSize(),
+        indicator = {
+            PullToRefreshDefaults.Indicator(
+                state = pullToRefreshState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+                color = Persimmon
+            )
+        }
     ) {
     Column(Modifier.fillMaxSize().background(SourCream)) {
         Text("파티", modifier = Modifier.padding(start = spacing.spacing24, top = spacing.spacing16), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
