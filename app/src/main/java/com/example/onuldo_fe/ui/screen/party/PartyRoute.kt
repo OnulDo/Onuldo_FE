@@ -217,8 +217,10 @@ fun PartyRoute(
 
     LaunchedEffect(screen, waitingRoom?.status) {
         if (screen == PartyScreen.WaitingRoom && waitingRoom?.status == PartyStatus.InProgress) {
-            // 다른 사용자가 파티를 시작하면 폴링을 멈추고 홈으로 이동한다.
-            partyViewModel.stopWaitingRoomPolling()
+            // 다른 사용자(방장)가 파티를 시작하면 폴링을 멈추고 대기방 캐시를 비운 뒤 홈으로 이동한다.
+            // startParty()의 방장 경로와 동일하게 비워두지 않으면, 파티 탭으로 돌아왔을 때
+            // 이미 시작된 파티의 낡은 대기방 화면이 되살아난다.
+            partyViewModel.clearWaitingRoomAfterStart()
             onHomeNavigate()
         }
     }
