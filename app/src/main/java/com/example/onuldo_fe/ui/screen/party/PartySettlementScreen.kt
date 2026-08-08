@@ -65,6 +65,8 @@ fun PartySettlementScreen(
 ) {
     val spacing = LocalSpacing.current
     val content = result.status.content()
+    // 서버 금액의 부호가 정산의 성격을 결정하며 resultType과는 독립적이다.
+    val displayContent = result.displayAmount.displayContent()
 
     Column(modifier.fillMaxSize().background(SourCream)) {
         PartyTopBar(title = "파티 정산 결과", onBack = onBack)
@@ -111,11 +113,11 @@ fun PartySettlementScreen(
                 SettlementSectionTitle("내 정산 결과")
                 Spacer(Modifier.height(spacing.spacing8))
                 SettlementSummaryCard(
-                    refundAmount = result.refundAmount.toPointText(),
-                    adjustmentLabel = content.adjustmentLabel,
-                    adjustmentAmount = result.adjustmentAmount.toSignedPointText(),
-                    adjustmentColor = content.adjustmentColor,
-                    refundLabelColor = content.refundLabelColor,
+                    depositAmount = result.depositAmount.toPointText(),
+                    displayLabel = displayContent.label,
+                    displayAmount = result.displayAmount.toSignedPointText(),
+                    displayColor = displayContent.color,
+                    depositLabelColor = content.depositLabelColor,
                     modifier = Modifier.padding(horizontal = spacing.spacing20)
                 )
                 Spacer(Modifier.height(spacing.spacing16))
@@ -176,11 +178,11 @@ private fun PartySettlementCharacter() {
 
 @Composable
 private fun SettlementSummaryCard(
-    refundAmount: String,
-    adjustmentLabel: String,
-    adjustmentAmount: String,
-    adjustmentColor: Color,
-    refundLabelColor: Color,
+    depositAmount: String,
+    displayLabel: String,
+    displayAmount: String,
+    displayColor: Color,
+    depositLabelColor: Color,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -191,8 +193,8 @@ private fun SettlementSummaryCard(
             .border(BorderStroke(1.dp, Persimmon.copy(alpha = 0.2f)), RoundedCornerShape(14.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        SettlementAmount("도전금 환급", refundAmount, refundLabelColor, BlackBrown, Modifier.weight(1f))
-        SettlementAmount(adjustmentLabel, adjustmentAmount, adjustmentColor, adjustmentColor, Modifier.weight(1f))
+        SettlementAmount("도전금", depositAmount, depositLabelColor, BlackBrown, Modifier.weight(1f))
+        SettlementAmount(displayLabel, displayAmount, displayColor, displayColor, Modifier.weight(1f))
     }
 }
 
@@ -231,12 +233,13 @@ private fun PartySettlementMemberCard(
     showCompletionStatus: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val resultColor = if (member.adjustmentAmount < 0) SettlementLossRed else Green
+    val resultColor = member.displayAmount.displayContent().color
 
     PartyMemberCard(
         name = member.name,
         profileImageUrl = member.profileImageUrl,
-        defaultCharacterId = member.defaultCharacterId,
+        // 회원이 가입 시 프로필을 필수로 선택하므로 정산 응답에는 기본 캐릭터가 없다.
+        defaultCharacterId = null,
         modifier = modifier,
         startPadding = 16.dp,
         endPadding = 20.dp,
@@ -244,8 +247,8 @@ private fun PartySettlementMemberCard(
         middleContent = {
             if (showCompletionStatus) {
                 Text(
-                    text = if (member.status == PartySettlementMemberStatus.Completed) "완주" else "미완주",
-                    color = if (member.status == PartySettlementMemberStatus.Completed) Green else SettlementLossRed,
+                    text = member.status.label(),
+                    color = member.status.color(),
                     fontFamily = Pretendard,
                     fontSize = 11.sp,
                     lineHeight = 22.sp,
@@ -255,7 +258,7 @@ private fun PartySettlementMemberCard(
         }
     ) {
         Text(
-            text = member.adjustmentAmount.toSignedPointText(),
+            text = member.displayAmount.toSignedPointText(),
             modifier = Modifier.width(130.dp),
             color = resultColor,
             fontFamily = Pretendard,
@@ -269,32 +272,51 @@ private fun PartySettlementMemberCard(
 
 private data class SettlementContent(
     val characterBackground: Color,
-    val adjustmentLabel: String,
-    val adjustmentColor: Color,
-    val refundLabelColor: Color
+    val depositLabelColor: Color
 )
 
 private fun PartySettlementStatus.content() = when (this) {
     PartySettlementStatus.AllSuccess -> SettlementContent(
         characterBackground = Persimmon.copy(alpha = 0.15f),
-        adjustmentLabel = "성과 보너스",
-        adjustmentColor = Green,
-        refundLabelColor = DarkBrown50
+        depositLabelColor = DarkBrown50
     )
 
     PartySettlementStatus.PartialSuccess -> SettlementContent(
         characterBackground = Persimmon.copy(alpha = 0.15f),
-        adjustmentLabel = "성과 보너스",
-        adjustmentColor = Green,
-        refundLabelColor = DarkBrown
+        depositLabelColor = DarkBrown
     )
 
     PartySettlementStatus.AllFailed -> SettlementContent(
         characterBackground = DarkBrown.copy(alpha = 0.08f),
-        adjustmentLabel = "차감",
-        adjustmentColor = SettlementLossRed,
-        refundLabelColor = DarkBrown
+        depositLabelColor = DarkBrown
     )
+}
+
+private data class SettlementDisplayContent(val label: String, val color: Color)
+
+/**
+ * myDisplayAmount·displayAmount는 결과 유형이 아니라 서버가 준 부호로 표시한다.
+ * 서버 응답에 금액의 성격(도전금 환급 / 미완주자 분배금 / 성과 보너스)을 구분하는
+ * 필드가 없어, 양수를 특정 유형으로 단정하지 않고 중립적인 라벨을 사용한다.
+ */
+private fun Int.displayContent() = when {
+    this > 0 -> SettlementDisplayContent("받은 금액", Green)
+    this < 0 -> SettlementDisplayContent("차감", SettlementLossRed)
+    else -> SettlementDisplayContent("정산 금액", DarkBrown50)
+}
+
+private fun PartySettlementMemberStatus.label() = when (this) {
+    PartySettlementMemberStatus.Ongoing -> "진행 중"
+    PartySettlementMemberStatus.Success -> "완주"
+    PartySettlementMemberStatus.Fail -> "미완주"
+    PartySettlementMemberStatus.Canceled -> "취소"
+}
+
+private fun PartySettlementMemberStatus.color() = when (this) {
+    PartySettlementMemberStatus.Success -> Green
+    PartySettlementMemberStatus.Fail -> SettlementLossRed
+    PartySettlementMemberStatus.Ongoing,
+    PartySettlementMemberStatus.Canceled -> DarkBrown50
 }
 
 private val pointFormatter = NumberFormat.getNumberInstance(Locale.KOREA)

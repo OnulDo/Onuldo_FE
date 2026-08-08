@@ -17,6 +17,8 @@ import com.example.onuldo_fe.model.party.PartyMember
 import com.example.onuldo_fe.model.party.PartyMemberReadyStatus
 import com.example.onuldo_fe.model.party.PartyRole
 import com.example.onuldo_fe.model.party.PartySummary
+import com.example.onuldo_fe.model.party.PartySummaryMember
+import com.example.onuldo_fe.model.party.PartyVerificationStatus
 import com.example.onuldo_fe.model.party.PartyWaitingRoom
 import com.example.onuldo_fe.model.party.PartySettlementMember
 import com.example.onuldo_fe.model.party.PartySettlementMemberStatus
@@ -24,11 +26,10 @@ import com.example.onuldo_fe.model.party.PartySettlementResult
 import com.example.onuldo_fe.model.party.PartySettlementStatus
 import retrofit2.HttpException
 import java.io.IOException
-import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
-// 파티 생성·대기방 API 요청과 DTO의 도메인 모델 변환 담당
+// 파티 목록·생성·대기방·이탈·시작·정산 API와 도메인 변환 담당
 class PartyRepositoryImpl(
     private val fakeApi: PartyApi,
     private val realApi: RealPartyApi,
@@ -36,7 +37,9 @@ class PartyRepositoryImpl(
     private val useRealPartyWaitingRoomApi: Boolean = false,
     private val useRealPartyCreateApi: Boolean = false,
     private val useRealPartyReadyApi: Boolean = false,
-    private val useRealPartyStartApi: Boolean = false
+    private val useRealPartyStartApi: Boolean = false,
+    private val useRealPartySettlementApi: Boolean = false,
+    private val useRealPartyLeaveApi: Boolean = false
 ) : PartyRepository {
     // 서버의 진행 중 파티 응답 목록을 도메인 요약 모델 목록으로 변환
     override suspend fun getParties(): List<PartySummary> = if (useRealPartyListApi) {
@@ -77,7 +80,7 @@ class PartyRepositoryImpl(
     }
 
     override suspend fun readyParty(partyId: String): PartyWaitingRoom {
-        // 준비 완료만 독립적으로 전환해 아직 Fake인 시작·이탈 API에 영향을 주지 않는다.
+        // 준비 완료 API를 다른 파티 기능과 독립적으로 Real/Fake 전환한다.
         if (!useRealPartyReadyApi) return fakeApi.readyParty(partyId.toLong()).toModel()
 
         val response = realApi.readyParty(partyId.toLong())
@@ -86,7 +89,17 @@ class PartyRepositoryImpl(
         return body.result.toModel()
     }
 
-    override suspend fun leaveParty(partyId: String) = fakeApi.leaveParty(partyId.toLong())
+    override suspend fun leaveParty(partyId: String) {
+        if (!useRealPartyLeaveApi) {
+            fakeApi.leaveParty(partyId.toLong())
+            return
+        }
+
+        // 실제 이탈 성공 응답을 확인한 후에만 ViewModel이 대기방을 닫도록 한다.
+        val response = realApi.leaveParty(partyId.toLong())
+        if (!response.isSuccessful) throw HttpException(response)
+        response.body()?.result ?: throw IOException("파티 이탈 응답 본문이 비어 있습니다.")
+    }
 
     override suspend fun startParty(partyId: String) {
         if (!useRealPartyStartApi) {
@@ -101,47 +114,76 @@ class PartyRepositoryImpl(
         // TODO: 도전금 차감 실패 code가 명세되면 포인트 부족 오류로 변환한다.
     }
 
-    override suspend fun getSettlementResult(partyId: Long): PartySettlementResult =
-        fakeApi.getSettlementResult(partyId).toModel()
+    override suspend fun getSettlementResult(partyId: Long): PartySettlementResult {
+        if (!useRealPartySettlementApi) return fakeApi.getSettlementResult(partyId).toModel()
+
+        // 결과 조회 성공 시 서버가 홈 정산 배너도 확인 처리한다.
+        val response = realApi.getSettlementResult(partyId)
+        if (!response.isSuccessful) throw HttpException(response)
+        val body = response.body() ?: throw IOException("파티 정산 결과 응답 본문이 비어 있습니다.")
+        return body.result.toModel()
+    }
 }
 
-/** 화면의 주 단위 기간을 Swagger가 요구하는 일 단위 POST Body로 변환한다. */
+/** 화면의 주 단위 기간을 Swagger의 durationWeeks 값으로 그대로 전달한다. */
 private fun CreatePartyCommand.toCreateRequestDto() = CreatePartyRequestDto(
     name = name,
     challengeId = challengeId.toLong(),
-    durationDays = period.filter(Char::isDigit).toInt() * 7,
+    durationWeeks = period.filter(Char::isDigit).toInt(),
     depositAmount = deposit,
     maxMembers = capacity
 )
 
 // 서버 정산 상태와 파티원 결과를 앱에서 사용하는 도메인 모델로 변환
-internal fun PartySettlementResultDto.toModel() = PartySettlementResult(
-    partyId = partyId,
-    status = when (overallStatus) {
+internal fun PartySettlementResultDto.toModel(): PartySettlementResult {
+    val settlementStatus = when (resultType) {
         "ALL_SUCCESS" -> PartySettlementStatus.AllSuccess
         "PARTIAL_SUCCESS" -> PartySettlementStatus.PartialSuccess
-        "ALL_FAILED" -> PartySettlementStatus.AllFailed
-        else -> error("Unsupported settlement status: $overallStatus")
-    },
-    title = overallTitle,
-    description = overallDescription,
-    refundAmount = myResult.depositRefundAmount,
-    adjustmentAmount = myResult.bonusAmount,
-    members = memberResults.map { member ->
+        "ALL_FAIL" -> PartySettlementStatus.AllFailed
+        else -> error("Unsupported settlement result type: $resultType")
+    }
+    val memberModels = members.map { member ->
         PartySettlementMember(
             userId = member.userId,
-            name = member.name,
+            name = member.nickname,
             profileImageUrl = member.profileImageUrl,
-            defaultCharacterId = member.defaultCharacterId,
-            status = if (member.isSuccess) {
-                PartySettlementMemberStatus.Completed
-            } else {
-                PartySettlementMemberStatus.Incomplete
+            status = when (member.status) {
+                "ONGOING" -> PartySettlementMemberStatus.Ongoing
+                "SUCCESS" -> PartySettlementMemberStatus.Success
+                "FAIL" -> PartySettlementMemberStatus.Fail
+                "CANCELED" -> PartySettlementMemberStatus.Canceled
+                else -> error("Unsupported party member settlement status: ${member.status}")
             },
-            adjustmentAmount = member.bonusAmount
+            displayAmount = member.displayAmount
         )
     }
-)
+    val completedMemberCount = memberModels.count { it.status == PartySettlementMemberStatus.Success }
+    val (title, description) = settlementStatus.temporaryCopy(completedMemberCount)
+
+    return PartySettlementResult(
+        partyId = partyId,
+        partyName = name,
+        status = settlementStatus,
+        title = title,
+        description = description,
+        depositAmount = myDepositAmount,
+        displayAmount = myDisplayAmount,
+        members = memberModels
+    )
+}
+
+/** Swagger에 문구가 없어 최종 Figma 확정 전까지 기존 화면 문구를 유지한다. */
+private fun PartySettlementStatus.temporaryCopy(completedMemberCount: Int): Pair<String, String> =
+    when (this) {
+        PartySettlementStatus.AllSuccess ->
+            "전원 성공!" to "파티 전원이 챌린지를 완주했어요"
+
+        PartySettlementStatus.PartialSuccess ->
+            "${completedMemberCount}명이 완주했어요" to "미완주 파티원의 도전금이 완주자에게 배분됐어요"
+
+        PartySettlementStatus.AllFailed ->
+            "아쉽게 실패했어요" to "이번엔 아무도 목표를 채우지 못했어요"
+    }
 
 // 대기방 응답과 중첩된 파티원 DTO를 도메인 모델로 함께 변환
 internal fun PartyWaitingRoomDto.toModel() = PartyWaitingRoom(
@@ -174,8 +216,9 @@ internal fun RealPartyWaitingRoomDto.toModel() = PartyWaitingRoom(
 
 /** 대기방 응답의 서버 상태를 앱 공통 파티 상태로 변환한다. */
 private fun String.toLifecycleStatus() = when (this) {
+    "WAITING" -> PartyLifecycleStatus.Recruiting
     "ONGOING" -> PartyLifecycleStatus.InProgress
-    "FINISHED", "DISBANDED" -> PartyLifecycleStatus.Disbanded
+    "FINISHED", "DISSOLVED" -> PartyLifecycleStatus.Disbanded
     else -> PartyLifecycleStatus.Recruiting
 }
 
@@ -208,11 +251,7 @@ private fun PartySummaryDto.toModel() = PartySummary(
     remainingText = null,
     completedMemberCount = verifiedToday,
     totalMemberCount = totalMembers,
-    status = when (status) {
-        "ONGOING" -> PartyLifecycleStatus.InProgress
-        "DISBANDED" -> PartyLifecycleStatus.Disbanded
-        else -> PartyLifecycleStatus.Recruiting
-    }
+    status = status.toLifecycleStatus()
 )
 
 private fun RealPartyMemberDto.toModel(index: Int) = PartyMember(
@@ -234,24 +273,31 @@ private fun RealPartySummaryDto.toModel() = PartySummary(
     partyId = partyId.toString(),
     partyName = name,
     challengeName = challengeTitle,
-    // 서버 종료일과 오늘 날짜의 차이를 카드의 D-Day 문구로 변환한다.
-    dDay = "D-${daysUntil(endDate)}",
+    goal = goal,
+    // 서버의 정렬·종료일 정책과 동일한 계산 dDay를 그대로 사용한다.
+    dDay = "D-$dDay",
     deadline = verificationDeadline,
     // 인증 마감 시각과 현재 시각의 차이를 분 단위로 전달한다.
     // HomePartyCard에서 0~60분일 때만 "N분 남음" 배지를 표시한다.
     remainingText = remainingTextUntil(verificationDeadline),
     completedMemberCount = verifiedMemberCount,
     totalMemberCount = totalMemberCount,
-    status = if (status == "ONGOING") {
-        PartyLifecycleStatus.InProgress
-    } else {
-        PartyLifecycleStatus.Disbanded
+    status = status.toLifecycleStatus(),
+    verificationStatus = when (myStatus) {
+        "PENDING" -> PartyVerificationStatus.Pending
+        "SUCCESS" -> PartyVerificationStatus.Success
+        "FAIL" -> PartyVerificationStatus.Fail
+        else -> PartyVerificationStatus.NotVerified
+    },
+    members = members.map { member ->
+        PartySummaryMember(
+            userId = member.userId,
+            nickname = member.nickname,
+            profileImageUrl = member.profileImageUrl,
+            isVerifiedToday = member.isVerifiedToday
+        )
     }
 )
-
-private fun daysUntil(endDate: String): Long = runCatching {
-    ChronoUnit.DAYS.between(LocalDate.now(), LocalDate.parse(endDate)).coerceAtLeast(0)
-}.getOrDefault(0)
 
 private fun remainingTextUntil(deadline: String): String? = runCatching {
     ChronoUnit.MINUTES.between(LocalTime.now(), LocalTime.parse(deadline))

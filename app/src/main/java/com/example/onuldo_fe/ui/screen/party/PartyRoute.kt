@@ -1,6 +1,8 @@
 package com.example.onuldo_fe.ui.screen.party
 
 import android.Manifest
+import android.app.Activity
+import android.content.ContextWrapper
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
@@ -65,7 +67,14 @@ fun PartyRoute(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     // 현재 화면과 다이얼로그 노출 여부는 Route에서만 관리
-    var screen by remember { mutableStateOf(PartyScreen.List) }
+    // screen 자체는 rememberSaveable로 못 만드는 사설 enum이라, 구성 변경으로 recompose가
+    // 처음부터 다시 돌 때는 ViewModel에 이미 남아있는 waitingRoom을 기준으로 대기방 화면을 복원한다.
+    // (ViewModel은 구성 변경에도 유지되므로 leaveParty를 안 보냈다면 waitingRoom이 그대로 남아있다.)
+    var screen by remember {
+        mutableStateOf(
+            if (partyViewModel.uiState.waitingRoom != null) PartyScreen.WaitingRoom else PartyScreen.List
+        )
+    }
     var showInviteDialog by remember { mutableStateOf(false) }
     var showCameraPermissionDialog by rememberSaveable {
         mutableStateOf(false)
@@ -80,7 +89,8 @@ fun PartyRoute(
 
     // 피드 재조회와 대기방 오류 재시도에 사용할 마지막 partyId 보관
     var feedPartyId by remember { mutableStateOf("1") }
-    var waitingPartyId by remember { mutableStateOf<String?>(null) }
+    // screen과 마찬가지로 구성 변경 후에도 ViewModel에 남아있는 partyId로 복원한다.
+    var waitingPartyId by remember { mutableStateOf(partyViewModel.uiState.waitingRoom?.partyId) }
 
     val partyState = partyViewModel.uiState
     val waitingRoom = partyState.waitingRoom
@@ -118,6 +128,21 @@ fun PartyRoute(
     }
 
     DisposableEffect(lifecycleOwner, screen) {
+        val isPartyListVisible = screen == PartyScreen.List
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START && isPartyListVisible) {
+                partyViewModel.onPartyListVisible()
+            }
+        }
+
+        // addObserver 시점에 이미 STARTED 이상이면 ON_START가 동기적으로 한 번 재생되므로,
+        // 탭 재진입·파티 내부 화면에서 목록으로 복귀하는 경우 모두 observer 한 경로로만 처리한다
+        // (직접 호출을 남겨두면 addObserver의 동기 재생과 중복 호출된다).
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    DisposableEffect(lifecycleOwner, screen) {
         val shouldRefreshPoint = screen == PartyScreen.Create || screen == PartyScreen.WaitingRoom
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME && shouldRefreshPoint) {
@@ -135,13 +160,36 @@ fun PartyRoute(
 
     DisposableEffect(lifecycleOwner, screen, waitingPartyId, waitingRoom != null) {
         val partyId = waitingPartyId
-        val shouldPoll = screen == PartyScreen.WaitingRoom && partyId != null && waitingRoom != null
+        // shouldLeave: 대기방 화면에 partyId만 있으면 성립한다. waitingRoom 조회가 아직
+        // 끝나지 않았거나 에러로 로딩 화면이 떠 있는 동안에도 서버에는 이미 파티가 생성·참여된
+        // 상태이므로, 이 구간에서 백그라운드로 나가도 이탈 요청은 보내야 한다.
+        val shouldLeave = screen == PartyScreen.WaitingRoom && partyId != null
+        // shouldPoll: 실제로 대기방 데이터를 받아온 뒤에만 폴링을 시작한다.
+        val shouldPoll = shouldLeave && waitingRoom != null
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_START -> if (shouldPoll) {
                     partyId?.let(partyViewModel::startWaitingRoomPolling)
                 }
-                Lifecycle.Event.ON_STOP -> partyViewModel.stopWaitingRoomPolling()
+                Lifecycle.Event.ON_STOP -> {
+                    partyViewModel.stopWaitingRoomPolling()
+                    // onDestroy는 프로세스 강제 종료 시 호출이 보장되지 않으므로, 대기방이 백그라운드로
+                    // 내려가는 시점(ON_STOP)에 이탈 요청을 대신 보낸다. 뒤로가기 확인 모달을 거치지 않고도
+                    // 앱을 벗어나면 대기방에서 자동으로 나가지는 것이 의도된 동작이다.
+                    // 단, 화면 회전 등 구성 변경으로 인한 재생성에서도 ON_STOP이 발생하므로
+                    // isChangingConfigurations일 때는 자동 이탈을 건너뛴다.
+                    val isChangingConfigurations =
+                        context.findActivity()?.isChangingConfigurations == true
+                    if (shouldLeave && !isChangingConfigurations) {
+                        // 화면 전환은 API 결과와 무관하게 이 시점에 바로 처리한다(그렇지 않으면
+                        // 다른 요청과 겹쳐 leaveParty가 지연·실패할 때 화면이 WaitingRoom에 고정되고
+                        // 하단 탭바도 계속 숨겨진 채로 남아 하단 네비게이션 자체를 못 쓰게 된다).
+                        // 실제 서버 이탈은 autoLeaveOnBackground()가 맡는다 — 실패해도 의도를 남겨두고
+                        // 목록이 다시 보이는 시점(onPartyListVisible)에 스스로 재시도한다.
+                        screen = PartyScreen.List
+                        partyViewModel.autoLeaveOnBackground()
+                    }
+                }
                 else -> Unit
             }
         }
@@ -182,6 +230,8 @@ fun PartyRoute(
             isLoading = partyState.isListLoading,
             errorMessage = partyState.errorMessage,
             onRetry = partyViewModel::loadParties,
+            isRefreshing = partyState.isRefreshing,
+            onRefresh = partyViewModel::refreshParties,
             onCreateClick = {
                 // 새 파티 만들기 시작 시 이전 생성 폼의 임시 값을 모두 초기화
                 partyViewModel.clearError()
@@ -416,4 +466,11 @@ internal fun PartyLoadingScreen(
 @Composable
 private fun PartyRoutePreview() {
     OnulDo_FETheme { PartyRoute() }
+}
+
+/** Compose Context가 감싸고 있는 실제 Activity를 찾는다(화면 회전 등 구성 변경 판별용). */
+private tailrec fun android.content.Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }

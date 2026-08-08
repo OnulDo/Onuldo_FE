@@ -12,6 +12,8 @@ import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
+import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
+import com.example.onuldo_fe.data.party.dto.PartyLeaveResponseDto
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -60,6 +62,9 @@ class PartyFeedRepositoryImplTest {
         override suspend fun readyParty(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("피드 테스트에서 준비 API가 호출되면 안 됩니다.")
 
+        override suspend fun leaveParty(partyId: Long): Response<ApiResponse<PartyLeaveResponseDto>> =
+            error("피드 테스트에서 이탈 API가 호출되면 안 됩니다.")
+
         override suspend fun getPartyFeed(partyId: Long): Response<ApiResponse<PartyFeedDto>> =
             Response.success(
                 ApiResponse(
@@ -86,5 +91,8 @@ class PartyFeedRepositoryImplTest {
                     )
                 )
             )
+
+        override suspend fun getSettlementResult(partyId: Long): Response<ApiResponse<PartySettlementResultDto>> =
+            error("피드 테스트에서 정산 API가 호출되면 안 됩니다.")
     }
 }
