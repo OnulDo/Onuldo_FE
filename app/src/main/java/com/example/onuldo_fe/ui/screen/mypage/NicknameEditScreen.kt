@@ -86,10 +86,12 @@ fun NicknameEditScreen(
         Spacer(Modifier.height(28.dp))
         OnuldoTextField(
             value = nickname,
-            onValueChange = {
-                nickname = it
-                // 수정시) 이전 서버 실패 안내는 지움
-                viewModel.clearError()
+            onValueChange = { newNickname ->
+                if (!state.isSubmitting) {
+                    nickname = newNickname
+                    // 수정시) 이전 서버 실패 안내는 지움
+                    viewModel.clearError()
+                }
             },
             label = "닉네임",
             placeholder = "2~8자 한글/영문/숫자",
