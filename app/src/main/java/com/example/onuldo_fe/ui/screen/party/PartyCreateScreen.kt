@@ -45,8 +45,8 @@ fun PartyCreateScreen(
     errorMessage: String? = null,
     showPointShortageFromServer: Boolean = false,
     onPointShortageDismiss: () -> Unit = {},
-    selectedChallengeCategoryLabel: String? = null,
-    checkPointBeforeRequest: Boolean = false
+    checkPointBeforeRequest: Boolean = false,
+    selectedChallengeCategoryLabel: String? = null
 ) {
     val spacing = LocalSpacing.current
     val periods = listOf("2주", "4주", "8주", "12주")

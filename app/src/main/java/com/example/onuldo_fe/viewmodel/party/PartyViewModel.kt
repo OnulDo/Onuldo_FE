@@ -70,6 +70,8 @@ class PartyViewModel(
     private var pointRequestGeneration: Long = 0L
 
     init {
+        // 파티 목록 로드는 PartyRoute의 화면 표시(ON_START) 옵저버가 onPartyListVisible()로
+        // 담당하므로 여기서는 다시 호출하지 않는다.
         refreshAvailablePoint()
     }
 

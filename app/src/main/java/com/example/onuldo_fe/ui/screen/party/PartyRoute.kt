@@ -303,8 +303,11 @@ fun PartyRoute(
                     // 파티 생성 경로에서는 즉시 참여하지 않고 선택 결과를 생성 화면으로 전달
                     actionText = "파티 만들기",
                     onActionClick = { data ->
-                        // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정(제목은 API 값으로 갱신)
-                        selectedChallenge = challenge.copy(title = data.title)
+                        // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정하고, 생성 요청에는 상세 API의 id/title을 사용한다.
+                        selectedChallenge = challenge.copy(
+                            id = data.challengeId,
+                            title = data.title
+                        )
                         pendingChallenge = null
                         screen = PartyScreen.Create
                     }
