@@ -278,6 +278,17 @@ class PartyViewModel(
         pollingPartyId = null
     }
 
+    /**
+     * 다른 사용자(방장)가 파티를 시작해 폴링으로 이를 감지하고 홈으로 이동할 때 호출한다.
+     * leaveParty와 달리 나는 여전히 파티원이므로 이탈 API는 보내지 않고, 더 이상 대기방이
+     * 아닌 로컬 캐시만 비운다. 비워두지 않으면 startParty()와 동일하게, 하단 탭 전환 뒤 파티
+     * 탭으로 돌아왔을 때 이미 시작된 파티의 낡은 대기방 화면·폴링이 되살아난다.
+     */
+    fun clearWaitingRoomAfterStart() {
+        stopWaitingRoomPolling()
+        uiState = uiState.copy(waitingRoom = null)
+    }
+
     private suspend fun refreshWaitingRoomSilently(partyId: String) {
         // 요청 시작 시점의 세대를 저장해 이후 상태 변경보다 오래된 응답인지 판별한다.
         val requestGeneration = waitingRoomMutationGeneration

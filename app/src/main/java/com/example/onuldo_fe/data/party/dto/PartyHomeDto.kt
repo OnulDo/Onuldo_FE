@@ -16,7 +16,11 @@ data class PartyHomeItemDto(
     val showRemainingTime: Boolean = false,                  // 마감까지 남은 시간 표시 여부
     val status: String = "NOT_VERIFIED",                    // 나의 오늘 인증 상태
     val verifiedAt: String? = null,                          // 오늘 인증 제출 또는 완료 시각
-    val members: List<PartyHomeMemberDto> = emptyList()      // 파티원별 오늘 인증 현황
+    val members: List<PartyHomeMemberDto> = emptyList(),     // 파티원별 오늘 인증 현황
+    // 인증 촬영 화면 이동에 필요한 값. 백엔드가 이 응답에 아직 안 내려주고 있어 당분간 null.
+    // (반영 전까지는 "인증하기"를 눌러도 이동하지 않음 — /daily와 매칭하는 우회 로직은 제거함)
+    val challengeId: Long? = null,
+    val category: String? = null
 )
 
 /** 홈 파티 카드에 표시할 파티원별 오늘 인증 상태. */
