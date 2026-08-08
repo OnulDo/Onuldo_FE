@@ -10,7 +10,6 @@ import com.example.onuldo_fe.model.challenge.ChallengeCategory
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -211,7 +210,7 @@ fun PartyRoute(
         val partyId = waitingPartyId
         // shouldLeave: 대기방 화면에 partyId만 있으면 성립한다. waitingRoom 조회가 아직
         // 끝나지 않았거나 에러로 로딩 화면이 떠 있는 동안에도 서버에는 이미 파티가 생성·참여된
-        // 상태이므로, 이 구간에서 백그라운드로 나가도 이탈 요청은 보내야 한다.
+        // 상태이므로, 이 구간에서 앱이 완전히 종료돼도 이탈 요청은 보내야 한다.
         val shouldLeave = screen == PartyScreen.WaitingRoom && partyId != null
         // shouldPoll: 실제로 대기방 데이터를 받아온 뒤에만 폴링을 시작한다.
         val shouldPoll = shouldLeave && waitingRoom != null
@@ -221,24 +220,22 @@ fun PartyRoute(
                     partyId?.let(partyViewModel::startWaitingRoomPolling)
                 }
                 Lifecycle.Event.ON_STOP -> {
+                    // 단순히 화면이 안 보이는 것만으로는(홈 버튼으로 백그라운드 전환 등)
+                    // 더 이상 자동으로 이탈시키지 않는다 — 사용자가 곧 돌아올 수도 있는
+                    // 상태라서, 폴링만 멈추고 대기방 멤버십은 그대로 유지한다.
+                    // (PM 확인 전까지 유예 시간 없이 "그냥 계속 대기 상태로 둔다"로 합의.)
                     partyViewModel.stopWaitingRoomPolling()
-                    // onDestroy는 프로세스 강제 종료 시 호출이 보장되지 않으므로, 대기방이 백그라운드로
-                    // 내려가는 시점(ON_STOP)에 이탈 요청을 대신 보낸다. 뒤로가기 확인 모달을 거치지 않고도
-                    // 앱을 벗어나면 대기방에서 자동으로 나가지는 것이 의도된 동작이다.
-                    // 단, 화면 회전 등 구성 변경으로 인한 재생성에서도 ON_STOP이 발생하므로
-                    // isChangingConfigurations일 때는 자동 이탈을 건너뛴다.
+                }
+                Lifecycle.Event.ON_DESTROY -> {
+                    // 최근 앱 목록에서 스와이프로 지우는 등 정말로 이 화면(과 액티비티)이
+                    // 완전히 끝나는 시점에만 이탈시킨다. 화면 회전 같은 구성 변경이나,
+                    // 탭 전환·포인트 충전 화면 이동처럼 같은 액티비티 안에서 이 화면만
+                    // 없어지는 경우는 액티비티 자체가 살아있으므로(isFinishing == false)
+                    // 자동 이탈 대상이 아니다.
                     val activity = context.findActivity()
                     val isChangingConfigurations = activity?.isChangingConfigurations == true
-                    // 포인트 충전 화면처럼 같은 액티비티 안의 다른 화면으로 이동해도, 이 화면
-                    // (NavBackStackEntry)의 lifecycleOwner에는 똑같이 ON_STOP이 전달된다.
-                    // 액티비티 자체는 아직 포그라운드(STARTED 이상)인 경우까지 백그라운드
-                    // 전환으로 취급해 자동 이탈시키면, 충전하고 돌아왔을 때 이미 파티에서
-                    // 나가진 상태가 되어버린다. 그래서 액티비티 자체가 STARTED 밑으로 내려간
-                    // 경우(진짜 백그라운드·강제종료 등)에만 자동 이탈한다.
-                    val isActivityStillForeground =
-                        (activity as? LifecycleOwner)?.lifecycle?.currentState
-                            ?.isAtLeast(Lifecycle.State.STARTED) == true
-                    if (shouldLeave && !isChangingConfigurations && !isActivityStillForeground) {
+                    val isActivityFinishing = activity?.isFinishing == true
+                    if (shouldLeave && !isChangingConfigurations && isActivityFinishing) {
                         // 화면 전환은 API 결과와 무관하게 이 시점에 바로 처리한다(그렇지 않으면
                         // 다른 요청과 겹쳐 leaveParty가 지연·실패할 때 화면이 WaitingRoom에 고정되고
                         // 하단 탭바도 계속 숨겨진 채로 남아 하단 네비게이션 자체를 못 쓰게 된다).
