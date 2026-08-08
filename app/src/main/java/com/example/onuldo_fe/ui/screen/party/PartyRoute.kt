@@ -264,7 +264,11 @@ fun PartyRoute(
             // 다른 사용자(방장)가 파티를 시작하면 폴링을 멈추고 대기방 캐시를 비운 뒤 홈으로 이동한다.
             // startParty()의 방장 경로와 동일하게 비워두지 않으면, 파티 탭으로 돌아왔을 때
             // 이미 시작된 파티의 낡은 대기방 화면이 되살아난다.
+            // screen도 List로 같이 되돌려야 한다 — screen이 rememberSaveable이라 저장된
+            // 마지막 값이 그대로 복원되므로, 여기서 안 돌려두면 다음에 파티 탭에 돌아왔을 때
+            // WaitingRoom이 그대로 복원되어버린다.
             partyViewModel.clearWaitingRoomAfterStart()
+            screen = PartyScreen.List
             onHomeNavigate()
         }
     }
@@ -428,6 +432,10 @@ fun PartyRoute(
                     onStartClick = {
                         // 시작 API 성공 후 명세에 따라 홈 화면으로 이동
                         partyViewModel.startParty {
+                            // screen도 List로 같이 되돌려야 한다 — screen이 rememberSaveable이라
+                            // 저장된 마지막 값이 그대로 복원되므로, 여기서 안 돌려두면 다음에
+                            // 파티 탭에 돌아왔을 때 WaitingRoom이 그대로 복원되어버린다.
+                            screen = PartyScreen.List
                             onHomeNavigate()
                         }
                     },
