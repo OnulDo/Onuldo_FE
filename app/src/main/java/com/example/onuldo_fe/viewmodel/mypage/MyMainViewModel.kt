@@ -2,6 +2,7 @@ package com.example.onuldo_fe.viewmodel.mypage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.onuldo_fe.data.network.ApiErrorCode
 import com.example.onuldo_fe.data.network.onError
 import com.example.onuldo_fe.data.network.onSuccess
 import com.example.onuldo_fe.model.user.MyPageSummary
@@ -20,7 +21,11 @@ import kotlinx.coroutines.launch
 data class MyMainUiState(
     val summary: MyPageSummary? = null,
     val isLoading: Boolean = false,
+    val isDeleting: Boolean = false, // 탈퇴 전용
     val errorMessage: String? = null,
+    /** 회원 탈퇴 실패 안내(일회성). 화면이 토스트로 노출한 뒤 [MyMainViewModel.onDeleteFailedShown]으로 비움
+     */
+    val deleteFailedMessage: String? = null,
 ) {
     val nickname: String get() = summary?.nickname.orEmpty()
     val email: String get() = summary?.email.orEmpty()
@@ -70,5 +75,57 @@ class MyMainViewModel(
         authRepository.logout()
         _uiState.update { MyMainUiState() }
         onLoggedOut()
+    }
+
+    /**
+     * 회원 탈퇴. `DELETE /api/users/me`로 계정을 삭제한다(서버가 보관 중인 인증 사진 등도 함께 파기).
+     * 성공하면 무효화된 토큰을 로컬에서도 폐기하고 [onDeleted]로 진입 화면으로 되돌린다.
+     * 실패 시에는 화면에 머물며 서버 문구를 노출한다.
+     */
+    fun deleteAccount(onDeleted: () -> Unit) {
+        if (_uiState.value.isDeleting) return
+
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    isDeleting = true,
+                    errorMessage = null,
+                )
+            }
+
+            userRepository.deleteAccount()
+                .onSuccess {
+                    authRepository.logout()
+                    _uiState.update { MyMainUiState() }
+                    onDeleted()
+                }
+                .onError { code, message ->
+                    // 그 외(진행 중 챌린지 등)는 서버 문구를, 문구가 비면 기본 안내를 노출
+                    val display =
+                        if (ApiErrorCode.isTokenInvalid(code)) {
+                            null
+                        } else {
+                            message.ifBlank { DELETE_FAILED_MESSAGE }
+                        }
+
+                    _uiState.update {
+                        it.copy(
+                            isDeleting = false,
+                            deleteFailedMessage = display,
+                        )
+                    }
+                }
+        }
+    }
+
+    /** 탈퇴 실패 안내를 화면이 노출한 뒤 호출해 한 번만 뜨도록 비운다.
+     TODO: 추후 토스트 추가 부탁
+     */
+    fun onDeleteFailedShown() {
+        _uiState.update { it.copy(deleteFailedMessage = null) }
+    }
+
+    private companion object {
+        const val DELETE_FAILED_MESSAGE = "회원 탈퇴에 실패했어요. 잠시 후 다시 시도해주세요."
     }
 }

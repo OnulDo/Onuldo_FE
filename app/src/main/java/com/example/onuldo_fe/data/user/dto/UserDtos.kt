@@ -9,10 +9,19 @@ data class MyPageResponseDto(
     val joinedAt: String? = null,
 )
 
-/** `GET /api/users/me/profile` — 프로필 설정 화면. */
+/** `GET /api/users/me/profile` — 프로필 설정 화면. `PATCH` 응답도  동일 - 재사용 */
 data class ProfileResponseDto(
     val nickname: String? = null,
     val email: String? = null,
+    val profileImageUrl: String? = null,
+)
+
+/**
+ * `PATCH /api/users/me/profile` 요청.
+ * 프로필 사진 / 닉네임 요청
+ */
+data class UpdateProfileRequestDto(
+    val nickname: String? = null,
     val profileImageUrl: String? = null,
 )
 
@@ -86,6 +95,17 @@ data class ChargePointRequestDto(
 )
 
 data class ChargePointResponseDto(
+    val amount: Int = 0,
+    val balanceAfter: Long = 0L,
+)
+
+/** `POST /api/users/me/wallet/withdraw` 요청 — 출금할 포인트. */
+data class WithdrawPointRequestDto(
+    val point: Int,
+)
+
+/** `POST /api/users/me/wallet/withdraw` 응답 — 출금 금액과 출금 후 잔액. */
+data class WithdrawPointResponseDto(
     val amount: Int = 0,
     val balanceAfter: Long = 0L,
 )
