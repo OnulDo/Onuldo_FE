@@ -64,12 +64,14 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
     //카메라 -> previewScreen
     val cameraViewModel: CameraViewModel = viewModel()
 
-    // 리프레시 토큰까지 만료돼 자동 재발급이 실패하면 랜딩으로 되돌린다.
+    // 리프레시 토큰까지 만료·거부되어 세션을 복구할 수 없으면 로그인 화면으로 보낸다.
     LaunchedEffect(Unit) {
         SessionEvents.sessionExpired.collect {
             SessionEvents.consume()
-            navController.navigate(Routes.LANDING) {
+            navController.navigate(Routes.LOGIN) {
+                // 만료된 세션의 메인 화면으로 뒤로 갈 수 없도록 전체 백스택을 제거한다.
                 popUpTo(0) { inclusive = true }
+                launchSingleTop = true
             }
         }
     }

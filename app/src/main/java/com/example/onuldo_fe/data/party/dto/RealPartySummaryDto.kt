@@ -3,6 +3,7 @@ package com.example.onuldo_fe.data.party.dto
 /** GET /api/parties 실제 응답의 content 항목. */
 data class RealPartySummaryDto(
     val partyId: Long,                    // 파티 ID
+    val challengeId: Long = 0,            // 연계된 챌린지 ID
     val name: String,                     // 파티 이름
     val challengeTitle: String,           // 연결된 챌린지 이름
     val goal: String,                     // 파티 카드에 표시할 목표 문구

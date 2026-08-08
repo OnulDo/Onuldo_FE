@@ -37,6 +37,7 @@ import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryRoute
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.util.moveToAppSettings
 import com.example.onuldo_fe.viewmodel.party.PartyAction
+import com.example.onuldo_fe.viewmodel.party.PartyCardUi
 import com.example.onuldo_fe.viewmodel.party.PartyFeedViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyInviteViewModel
 import com.example.onuldo_fe.viewmodel.party.PartySettlementViewModel
@@ -98,7 +99,7 @@ fun PartyRoute(
     partyFeedViewModel: PartyFeedViewModel = viewModel(),
     partySettlementViewModel: PartySettlementViewModel = viewModel(),
     onBottomBarVisibilityChange: (Boolean) -> Unit = {},
-    onCameraNavigate: () -> Unit = {},
+    onCameraNavigate: (Long, String, String) -> Unit = { _, _, _ -> },
     onChargePoint: () -> Unit = {},
     onHomeNavigate: () -> Unit = {}
 ) {
@@ -126,6 +127,7 @@ fun PartyRoute(
     // 임시값이라 화면이 날아가도 다시 고르면 되므로 remember로 충분하다.
     var selectedChallenge by rememberSaveable(stateSaver = ChallengeSaver) { mutableStateOf<Challenge?>(null) }
     var pendingChallenge by remember { mutableStateOf<Challenge?>(null) }
+    var pendingVerifyParty by remember { mutableStateOf<PartyCardUi?>(null) }
 
     // 생성 화면을 벗어나 챌린지를 탐색해도, 포인트 충전 화면을 다녀와도 입력값을 유지하도록
     // Route가 생성 폼 상태를 rememberSaveable로 보관한다.
@@ -144,14 +146,17 @@ fun PartyRoute(
     val partyState = partyViewModel.uiState
     val waitingRoom = partyState.waitingRoom
 
-    fun handleVerifyClick() {
+    fun handleVerifyClick(party: PartyCardUi) {
+        if (party.challengeId <= 0L) return
+        pendingVerifyParty = party
         val isCameraPermissionGranted = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.CAMERA
         ) == PackageManager.PERMISSION_GRANTED
 
         if (isCameraPermissionGranted) {
-            onCameraNavigate()
+            onCameraNavigate(party.challengeId, party.challengeName, party.deadline)
+            pendingVerifyParty = null
         } else {
             showCameraPermissionDialog = true
         }
@@ -167,7 +172,10 @@ fun PartyRoute(
 
                 if (isCameraPermissionGranted) {
                     showCameraPermissionDialog = false
-                    onCameraNavigate()
+                    pendingVerifyParty?.let { party ->
+                        onCameraNavigate(party.challengeId, party.challengeName, party.deadline)
+                    }
+                    pendingVerifyParty = null
                 }
             }
         }
@@ -513,7 +521,10 @@ fun PartyRoute(
     if (showCameraPermissionDialog) {
         PermissionSettingDialog(
             type = PermissionDialogType.CAMERA,
-            onDismiss = { showCameraPermissionDialog = false },
+            onDismiss = {
+                showCameraPermissionDialog = false
+                pendingVerifyParty = null
+            },
             onMoveToSettings = { moveToAppSettings(context) }
         )
     }
