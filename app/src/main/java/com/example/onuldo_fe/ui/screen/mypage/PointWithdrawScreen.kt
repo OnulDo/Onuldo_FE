@@ -1,10 +1,11 @@
 package com.example.onuldo_fe.ui.screen.mypage
 
+import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,63 +16,83 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.component.RefreshOnResume
 import com.example.onuldo_fe.ui.screen.mypage.component.AmountChip
 import com.example.onuldo_fe.ui.screen.mypage.component.AmountInputBox
+import com.example.onuldo_fe.ui.screen.mypage.component.MyPageNoticeBox
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.ui.screen.mypage.component.PointCtaButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
-import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
-
-/** 출금 API 연동 여부. 서버에 엔드포인트가 생기면 true로 바꾼다. */
-private const val WITHDRAW_API_READY = false
+import com.example.onuldo_fe.viewmodel.mypage.PointWithdrawViewModel
 
 private data class WithdrawPreset(val label: String, val value: Int)
 
-private val withdrawPresets = listOf(
-    WithdrawPreset("전액", 45_000),
-    WithdrawPreset("10,000P", 10_000),
-    WithdrawPreset("30,000P", 30_000),
-    WithdrawPreset("45,000P", 45_000),
-)
-
 /**
  * 포인트 출금 — Figma node `5154:3517`.
- * 출금 가능 금액 + 금액 입력/칩 + 보낼 곳.
+ * 출금 가능 카드 + 금액 입력/칩 + 보낼 곳(정식출시 안내).
  *
- * 출금은 충전과 달리 칩이 **금액을 지정**한다(가산이 아님).
- * 값은 더미. TODO: 서버에 출금 API가 없어 실제 이체는 미연동.
+ * 출금은 충전과 달리 칩이 **금액을 지정**한다(가산이 아님). '전액'은 실제 출금 가능액이다.
+ * '출금하기'는 `POST /api/users/me/wallet/withdraw`로 출금하고, **성공 응답에서만** [onBack]을 호출한다.
+ * (보낼 곳은 계좌/PG 연동 전이라 안내 박스로 대체한다.)
  */
 @Composable
 fun PointWithdrawScreen(
     onBack: () -> Unit,
+    viewModel: PointWithdrawViewModel = viewModel(),
 ) {
+    val state by viewModel.uiState.collectAsState()
+    // 화면이 보일 때마다 최신 출금 가능 잔액을 읽는다.
+    RefreshOnResume { viewModel.loadBalance() }
+
+    // 출금 실패 안내를 한 번만 토스트로 띄운다.
+    val context = LocalContext.current
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            viewModel.onErrorShown()
+        }
+    }
+
+    val withdrawable = state.withdrawable ?: 0L    // '전액'은 실제 출금 가능액, 나머지는 고정 빠른 금액.
+    val presets = listOf(
+        WithdrawPreset("전액", withdrawable.toInt()),
+        WithdrawPreset("10,000P", 10_000),
+        WithdrawPreset("30,000P", 30_000),
+        WithdrawPreset("50,000P", 50_000),
+    )
     // 0에서 시작해 칩으로 금액을 지정한다(Figma 기본 상태가 0P).
     var selectedPreset by remember { mutableStateOf<Int?>(null) }
-
-    val amount = selectedPreset?.let { withdrawPresets[it].value } ?: 0
+    val amount = selectedPreset?.let { presets[it].value } ?: 0
     val amountText = "%,d".format(amount)
+    // 1 이상, 출금 가능액 이내, 제출 중이 아닐 때만 출금 활성.
+    val canWithdraw = amount in 1..withdrawable.toInt() && !state.isSubmitting
 
     Column(
         modifier = Modifier
@@ -88,9 +109,13 @@ fun PointWithdrawScreen(
                 .verticalScroll(rememberScrollState()),
         ) {
             Spacer(Modifier.height(24.dp))
-            AvailableCard()
+            AvailableCard(
+                withdrawable = withdrawable,
+                balance = state.balance ?: 0L,
+                pending = state.pendingPoints,
+            )
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(30.dp))
             Text(
                 text = "얼마 출금할까요?",
                 fontFamily = Pretendard,
@@ -99,17 +124,23 @@ fun PointWithdrawScreen(
                 color = BlackBrown,
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
-            Spacer(Modifier.height(24.dp))
-            AmountInputBox(amount = amountText, unit = "원")
+            Spacer(Modifier.height(16.dp))
+            AmountInputBox(
+                amount = amountText,
+                unit = "P",
+                // 칩으로 금액을 고르면 박스 왼쪽에 X가 뜨고, 누르면 선택 해제(0).
+                clearable = amount > 0,
+                onClear = { selectedPreset = null },
+            )
 
             Spacer(Modifier.height(12.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 26.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                withdrawPresets.forEachIndexed { i, preset ->
+                presets.forEachIndexed { i, preset ->
                     AmountChip(
                         text = preset.label,
                         selected = selectedPreset == i,
@@ -119,7 +150,7 @@ fun PointWithdrawScreen(
                 }
             }
 
-            Spacer(Modifier.height(30.dp))
+            Spacer(Modifier.height(24.dp))
             Text(
                 text = "보낼 곳",
                 fontFamily = Pretendard,
@@ -129,45 +160,40 @@ fun PointWithdrawScreen(
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
             Spacer(Modifier.height(12.dp))
-            AccountCard()
-
-            Spacer(Modifier.height(20.dp))
-            ArrivalInfo()
+            MyPageNoticeBox(
+                iconRes = R.drawable.mypage_coming_soon_icon,
+                text = "정식출시 이후 업데이트 예정이에요!",
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .height(186.dp),
+            )
 
             Spacer(Modifier.height(24.dp))
         }
 
-        // 이체할 수단이 없는데 화면만 닫으면 사용자는 출금이 접수된 줄 안다.
-        // API가 붙기 전까지는 눌리지 않게 두고 이유를 밝힌다.
-        if (!WITHDRAW_API_READY) {
-            Text(
-                text = "서버 연동 준비 중이라 아직 출금할 수 없어요",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Medium,
-                fontSize = 13.sp,
-                color = DarkBrown70,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-            )
-        }
-
         PointCtaButton(
             text = "출금하기",
-            enabled = WITHDRAW_API_READY && amount > 0,
-            onClick = { /* TODO: 서버 출금 API 연동 시 성공 응답에서만 onBack() */ },
+            enabled = canWithdraw,
+            onClick = { viewModel.withdraw(amount, onSuccess = onBack) },
         )
     }
 }
 
+/**
+ * 출금 가능 금액 카드 — 흰 배경 + Persimmon 1dp 테두리(라운드 14).
+ * 금액과 보유/진행 중은 지갑 요약 API 값이다.
+ */
 @Composable
-private fun AvailableCard() {
+private fun AvailableCard(withdrawable: Long, balance: Long, pending: Long) {
     Column(
         modifier = Modifier
             .padding(horizontal = 20.dp)
             .fillMaxWidth()
-            .height(100.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color(0xFFFFEBE0))
-            .padding(20.dp),
+            .clip(RoundedCornerShape(14.dp))
+            .background(White)
+            .border(1.dp, Persimmon, RoundedCornerShape(14.dp))
+            .padding(start = 20.dp, top = 16.dp, end = 20.dp, bottom = 11.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(
             text = "출금할 수 있는 금액",
@@ -176,113 +202,20 @@ private fun AvailableCard() {
             fontSize = 12.sp,
             color = Persimmon,
         )
-        Spacer(Modifier.height(4.dp))
         Text(
-            text = "45,000원",
+            text = "${"%,d".format(withdrawable)}원",
             fontFamily = Pretendard,
             fontWeight = FontWeight.Bold,
             fontSize = 28.sp,
             color = BlackBrown,
         )
-        Spacer(Modifier.height(6.dp))
         Text(
-            text = "보유 52,000P · 진행 중 7,000P",
+            text = "보유 ${"%,d".format(balance)}P · 진행 중 ${"%,d".format(pending)}P",
             fontFamily = Pretendard,
             fontWeight = FontWeight.Medium,
             fontSize = 11.sp,
-            color = MySubText,
+            color = DarkBrown50,
         )
-    }
-}
-
-@Composable
-private fun AccountCard() {
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 20.dp)
-            .fillMaxWidth()
-            .height(72.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(White)
-            .border(1.dp, MyLine, RoundedCornerShape(16.dp))
-            .padding(horizontal = 15.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(Color(0xFFF2F2F7)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = "국민",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 11.sp,
-                color = Color(0xFF666680),
-            )
-        }
-        Spacer(Modifier.size(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "국민은행",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = BlackBrown,
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = "1234-56-78901",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Medium,
-                fontSize = 12.sp,
-                color = MySubText,
-            )
-        }
-        Text(
-            text = "바꾸기 ›",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 13.sp,
-            color = MySubText,
-            modifier = Modifier.clickable { /* TODO: 계좌 변경 화면 이동 */ },
-        )
-    }
-}
-
-@Composable
-private fun ArrivalInfo() {
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 20.dp)
-            .fillMaxWidth()
-            .height(52.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFFDBF2E3))
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(text = "🕒", fontSize = 18.sp)
-        Spacer(Modifier.size(12.dp))
-        Column {
-            Text(
-                text = "화요일 7/3 도착 예정",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = Color(0xFF26A869),
-            )
-            Spacer(Modifier.height(2.dp))
-            Text(
-                text = "국민은행으로 보내요",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Medium,
-                fontSize = 11.sp,
-                color = MySubText,
-            )
-        }
     }
 }
 

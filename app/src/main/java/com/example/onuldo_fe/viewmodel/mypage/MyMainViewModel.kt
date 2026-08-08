@@ -2,6 +2,7 @@ package com.example.onuldo_fe.viewmodel.mypage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.onuldo_fe.data.network.ApiErrorCode
 import com.example.onuldo_fe.data.network.onError
 import com.example.onuldo_fe.data.network.onSuccess
 import com.example.onuldo_fe.model.user.MyPageSummary
@@ -91,14 +92,10 @@ class MyMainViewModel(
                     _uiState.update { MyMainUiState() }
                     onDeleted()
                 }
-                .onError { _, message ->
-                    // 네트워크 오류 등으로 문구가 비면 기본 안내로 대체 TODO: 추후 토스트 멘트로 대체
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            deleteFailedMessage = message.ifBlank { DELETE_FAILED_MESSAGE },
-                        )
-                    }
+                .onError { code, message ->
+                    // 그 외(진행 중 챌린지 등)는 서버 문구를, 문구가 비면 기본 안내를 노출
+                    val display = if (ApiErrorCode.isTokenInvalid(code)) null else message.ifBlank { DELETE_FAILED_MESSAGE }
+                    _uiState.update { it.copy(isLoading = false, deleteFailedMessage = display) }
                 }
         }
     }

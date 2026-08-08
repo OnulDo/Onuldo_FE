@@ -31,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.component.RefreshOnResume
 import com.example.onuldo_fe.ui.screen.login.ProfileCharacters
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageMenuRow
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
@@ -64,6 +65,8 @@ fun ProfileSettingsScreen(
     val state by viewModel.uiState.collectAsState()
     val nickname = state.nickname
     val email = state.email
+    // 닉네임 변경 후 이 화면으로 돌아오면 최신 값이 반영되도록 - 새로
+    RefreshOnResume { viewModel.load() }
     // 서버가 배정한 캐릭터가 앱 목록에 있으면 그 캐릭터를, 없으면 기본 아바타를 쓴다.
     val avatarRes = state.characterIndex
         ?.let { ProfileCharacters.getOrNull(it) }
@@ -153,6 +156,9 @@ fun ProfileSettingsScreen(
                 } else {
                     null
                 },
+                // 값 오른쪽 17dp (8.8 피드백 반영)
+                valueStartPadding = 71.dp,
+                valueEndPadding = 17.dp,
             )
         }
         Spacer(Modifier.height(10.dp))
