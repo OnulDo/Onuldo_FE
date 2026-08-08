@@ -134,8 +134,12 @@ fun PartyRoute(
 
     // 피드 재조회와 대기방 오류 재시도에 사용할 마지막 partyId 보관
     var feedPartyId by remember { mutableStateOf("1") }
-    // screen과 마찬가지로 구성 변경 후에도 ViewModel에 남아있는 partyId로 복원한다.
-    var waitingPartyId by remember { mutableStateOf(partyViewModel.uiState.waitingRoom?.partyId) }
+    // screen과 마찬가지로 rememberSaveable로 저장한다. 그렇지 않으면 screen만 WaitingRoom으로
+    // 복원되고(특히 진짜 프로세스가 죽어 ViewModel의 waitingRoom도 함께 사라진 경우)
+    // waitingPartyId는 null로 초기화되어, 대기방 조회 재시도·폴링을 시작할 ID 자체가 없어진다.
+    var waitingPartyId by rememberSaveable {
+        mutableStateOf(partyViewModel.uiState.waitingRoom?.partyId)
+    }
 
     val partyState = partyViewModel.uiState
     val waitingRoom = partyState.waitingRoom
@@ -256,6 +260,22 @@ fun PartyRoute(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
             partyViewModel.stopWaitingRoomPolling()
+        }
+    }
+
+    LaunchedEffect(screen, waitingRoom != null, waitingPartyId, partyState.action, partyState.errorMessage) {
+        // 프로세스가 죽었다 복구된 경우처럼, WaitingRoom 화면인데 대기방 데이터도 없고
+        // 진행 중인 요청·이전 오류도 없는 상태로 남아있으면 재시도 버튼을 누르지 않아도
+        // 자동으로 한 번 조회한다. (실패하면 errorMessage가 채워지므로 무한 재시도는 안 됨 —
+        // 이후엔 PartyLoadingScreen의 수동 재시도로만 다시 시도된다.)
+        val partyId = waitingPartyId
+        if (screen == PartyScreen.WaitingRoom &&
+            waitingRoom == null &&
+            partyId != null &&
+            partyState.action == PartyAction.Idle &&
+            partyState.errorMessage == null
+        ) {
+            partyViewModel.loadWaitingRoom(partyId)
         }
     }
 
