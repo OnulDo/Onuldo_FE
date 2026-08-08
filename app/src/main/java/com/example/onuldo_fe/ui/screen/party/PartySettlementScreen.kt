@@ -294,9 +294,13 @@ private fun PartySettlementStatus.content() = when (this) {
 
 private data class SettlementDisplayContent(val label: String, val color: Color)
 
-/** myDisplayAmount·displayAmount는 결과 유형이 아니라 서버가 준 부호로 표시한다. */
+/**
+ * myDisplayAmount·displayAmount는 결과 유형이 아니라 서버가 준 부호로 표시한다.
+ * 서버 응답에 금액의 성격(도전금 환급 / 미완주자 분배금 / 성과 보너스)을 구분하는
+ * 필드가 없어, 양수를 특정 유형으로 단정하지 않고 중립적인 라벨을 사용한다.
+ */
 private fun Int.displayContent() = when {
-    this > 0 -> SettlementDisplayContent("성과 보너스", Green)
+    this > 0 -> SettlementDisplayContent("받은 금액", Green)
     this < 0 -> SettlementDisplayContent("차감", SettlementLossRed)
     else -> SettlementDisplayContent("정산 금액", DarkBrown50)
 }
