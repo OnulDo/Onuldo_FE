@@ -125,10 +125,9 @@ fun PartyRoute(
             }
         }
 
-        // 탭 재진입·파티 내부 화면에서 목록으로 복귀하면 즉시 최신 목록을 조회한다.
-        if (isPartyListVisible && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-            partyViewModel.onPartyListVisible()
-        }
+        // addObserver 시점에 이미 STARTED 이상이면 ON_START가 동기적으로 한 번 재생되므로,
+        // 탭 재진입·파티 내부 화면에서 목록으로 복귀하는 경우 모두 observer 한 경로로만 처리한다
+        // (직접 호출을 남겨두면 addObserver의 동기 재생과 중복 호출된다).
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
@@ -141,10 +140,10 @@ fun PartyRoute(
             }
         }
 
-        // 생성·대기방 진입 시와 포인트 충전 화면에서 돌아온 시점에 표시 잔액을 갱신한다.
-        if (shouldRefreshPoint && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            partyViewModel.refreshAvailablePoint()
-        }
+        // addObserver 시점에 이미 RESUMED 상태면 LifecycleRegistry가 ON_RESUME을
+        // 동기적으로 한 번 재생해준다. 그래서 생성·대기방 진입 시점과 포인트 충전 화면에서
+        // 돌아온 시점 모두 observer의 ON_RESUME 처리 한 경로로만 갱신하고, 직접 호출은
+        // 따로 남기지 않는다(남기면 addObserver의 동기 재생과 중복 요청이 발생함).
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
@@ -157,7 +156,15 @@ fun PartyRoute(
                 Lifecycle.Event.ON_START -> if (shouldPoll) {
                     partyId?.let(partyViewModel::startWaitingRoomPolling)
                 }
-                Lifecycle.Event.ON_STOP -> partyViewModel.stopWaitingRoomPolling()
+                Lifecycle.Event.ON_STOP -> {
+                    partyViewModel.stopWaitingRoomPolling()
+                    // onDestroy는 프로세스 강제 종료 시 호출이 보장되지 않으므로, 대기방이 백그라운드로
+                    // 내려가는 시점(ON_STOP)에 이탈 요청을 대신 보낸다. 뒤로가기 확인 모달을 거치지 않고도
+                    // 앱을 벗어나면 대기방에서 자동으로 나가지는 것이 의도된 동작이다.
+                    if (shouldPoll) {
+                        partyViewModel.leaveParty { screen = PartyScreen.List }
+                    }
+                }
                 else -> Unit
             }
         }
