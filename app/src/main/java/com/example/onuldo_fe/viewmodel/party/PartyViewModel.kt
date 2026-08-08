@@ -3,6 +3,7 @@ package com.example.onuldo_fe.viewmodel.party
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.onuldo_fe.model.home.ChallengeStatus
@@ -21,6 +22,7 @@ import com.example.onuldo_fe.repository.user.UserRepositoryProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -322,7 +324,23 @@ class PartyViewModel(
         // 탈퇴 요청 성공 시에만 대기방 상태 제거 후 목록 화면으로 이동
         // 방장 승계와 마지막 인원 이탈에 따른 해체 처리는 서버 또는 fake store가 담당
         val partyId = uiState.waitingRoom?.partyId ?: return
-        if (uiState.action != PartyAction.Idle) return
+        if (uiState.action != PartyAction.Idle) {
+            // 준비완료·시작하기 등 다른 요청이 이미 진행 중이면 여기서 그냥 포기하지 않고,
+            // 그 요청이 끝날 때까지 기다렸다가 그때도 여전히 같은 파티의 대기방이면 이탈을
+            // 다시 시도한다. 그냥 버리면 화면은 벗어났는데 서버 멤버십·waitingRoom은
+            // 그대로 남는 상태가 된다.
+            viewModelScope.launch {
+                snapshotFlow { uiState.action }.first { it == PartyAction.Idle }
+                if (uiState.waitingRoom?.partyId == partyId) {
+                    performLeaveParty(partyId, onSuccess)
+                }
+            }
+            return
+        }
+        performLeaveParty(partyId, onSuccess)
+    }
+
+    private fun performLeaveParty(partyId: String, onSuccess: () -> Unit) {
         waitingRoomMutationGeneration++
         uiState = uiState.copy(action = PartyAction.LeaveSubmitting, errorMessage = null)
         viewModelScope.launch {
