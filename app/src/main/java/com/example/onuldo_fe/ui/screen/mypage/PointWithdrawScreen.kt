@@ -80,9 +80,12 @@ fun PointWithdrawScreen(
         }
     }
 
-    val withdrawable = state.withdrawable ?: 0L    // '전액'은 실제 출금 가능액, 나머지는 고정 빠른 금액.
+    val withdrawable = state.withdrawable ?: 0L
+    // “전액”은 API가 허용하는 최대 출금 가능액 명시적 표기
+    val maxWithdrawable = withdrawable.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+
     val presets = listOf(
-        WithdrawPreset("전액", withdrawable.toInt()),
+        WithdrawPreset("전액", maxWithdrawable),
         WithdrawPreset("10,000P", 10_000),
         WithdrawPreset("30,000P", 30_000),
         WithdrawPreset("50,000P", 50_000),

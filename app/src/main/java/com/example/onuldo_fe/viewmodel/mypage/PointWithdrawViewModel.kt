@@ -39,12 +39,28 @@ class PointWithdrawViewModel(
         viewModelScope.launch {
             userRepository.getWalletSummary()
                 .onSuccess { summary ->
-                    _uiState.update { it.copy(balance = summary.balance, pendingPoints = summary.pendingPoints) }
+                    _uiState.update {
+                        it.copy(
+                            balance = summary.balance,
+                            pendingPoints = summary.pendingPoints,
+                            errorMessage = null,
+                        )
+                    }
                 }
-            // 잔액 조회 실패는 조용히 둔다 — 출금 시도 시 서버가 다시 검증한다.
+                .onError { code, message ->
+                    val display =
+                        if (ApiErrorCode.isTokenInvalid(code)) {
+                            null
+                        } else {
+                            message.ifBlank { DEFAULT_ERROR }
+                        }
+
+                    _uiState.update {
+                        it.copy(errorMessage = display)
+                    }
+                }
         }
     }
-
     /**
      * 출금 요청. 성공한 경우에만 [onSuccess]로 이전 화면에 되돌린다.
      * 잔액 부족·인증 오류 등 실패 사유는 서버 문구를 그대로 노출한다(인증 오류는 세션 흐름이 처리하므로 제외).
