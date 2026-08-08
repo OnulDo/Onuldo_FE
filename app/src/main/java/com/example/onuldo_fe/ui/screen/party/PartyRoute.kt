@@ -1,6 +1,8 @@
 package com.example.onuldo_fe.ui.screen.party
 
 import android.Manifest
+import android.app.Activity
+import android.content.ContextWrapper
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
@@ -161,7 +163,11 @@ fun PartyRoute(
                     // onDestroy는 프로세스 강제 종료 시 호출이 보장되지 않으므로, 대기방이 백그라운드로
                     // 내려가는 시점(ON_STOP)에 이탈 요청을 대신 보낸다. 뒤로가기 확인 모달을 거치지 않고도
                     // 앱을 벗어나면 대기방에서 자동으로 나가지는 것이 의도된 동작이다.
-                    if (shouldPoll) {
+                    // 단, 화면 회전 등 구성 변경으로 인한 재생성에서도 ON_STOP이 발생하므로
+                    // isChangingConfigurations일 때는 자동 이탈을 건너뛴다.
+                    val isChangingConfigurations =
+                        context.findActivity()?.isChangingConfigurations == true
+                    if (shouldPoll && !isChangingConfigurations) {
                         partyViewModel.leaveParty { screen = PartyScreen.List }
                     }
                 }
@@ -436,4 +442,11 @@ internal fun PartyLoadingScreen(
 @Composable
 private fun PartyRoutePreview() {
     OnulDo_FETheme { PartyRoute() }
+}
+
+/** Compose Context가 감싸고 있는 실제 Activity를 찾는다(화면 회전 등 구성 변경 판별용). */
+private tailrec fun android.content.Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
