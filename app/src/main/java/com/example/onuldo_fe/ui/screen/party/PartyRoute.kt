@@ -7,6 +7,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -178,9 +179,18 @@ fun PartyRoute(
                     // 앱을 벗어나면 대기방에서 자동으로 나가지는 것이 의도된 동작이다.
                     // 단, 화면 회전 등 구성 변경으로 인한 재생성에서도 ON_STOP이 발생하므로
                     // isChangingConfigurations일 때는 자동 이탈을 건너뛴다.
-                    val isChangingConfigurations =
-                        context.findActivity()?.isChangingConfigurations == true
-                    if (shouldLeave && !isChangingConfigurations) {
+                    val activity = context.findActivity()
+                    val isChangingConfigurations = activity?.isChangingConfigurations == true
+                    // 포인트 충전 화면처럼 같은 액티비티 안의 다른 화면으로 이동해도, 이 화면
+                    // (NavBackStackEntry)의 lifecycleOwner에는 똑같이 ON_STOP이 전달된다.
+                    // 액티비티 자체는 아직 포그라운드(STARTED 이상)인 경우까지 백그라운드
+                    // 전환으로 취급해 자동 이탈시키면, 충전하고 돌아왔을 때 이미 파티에서
+                    // 나가진 상태가 되어버린다. 그래서 액티비티 자체가 STARTED 밑으로 내려간
+                    // 경우(진짜 백그라운드·강제종료 등)에만 자동 이탈한다.
+                    val isActivityStillForeground =
+                        (activity as? LifecycleOwner)?.lifecycle?.currentState
+                            ?.isAtLeast(Lifecycle.State.STARTED) == true
+                    if (shouldLeave && !isChangingConfigurations && !isActivityStillForeground) {
                         // 화면 전환은 API 결과와 무관하게 이 시점에 바로 처리한다(그렇지 않으면
                         // 다른 요청과 겹쳐 leaveParty가 지연·실패할 때 화면이 WaitingRoom에 고정되고
                         // 하단 탭바도 계속 숨겨진 채로 남아 하단 네비게이션 자체를 못 쓰게 된다).
