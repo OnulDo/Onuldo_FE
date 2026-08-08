@@ -133,19 +133,12 @@ internal fun List<RealHomeDailyChallengeDto>.toHomeData(
     // 서버의 참여 유형으로 개인과 파티 카드를 나눈다.
     val personalChallenges = filter { it.participationType == "PERSONAL" }
         .map { it.toPersonalModel(now) }
-    // /daily의 partyId로 홈 파티를 찾아 인증에 필요한 challengeId와 category를 연결한다.
-    val partyDailyChallenges = filter { it.participationType == "PARTY" }
-        .mapNotNull { daily ->
-            daily.partyId?.let { partyId -> partyId to daily }
-        }
-        .toMap()
-    // 카드 표시 상태와 파티원 인증 현황은 /parties/home 응답을 기준으로 구성한다.
-    val partyChallenges = partyHome.parties.map {
-        it.toHomeModel(
-            now = now,
-            dailyChallenge = partyDailyChallenges[it.partyId]
-        )
-    }
+    // 카드 표시 상태와 파티원 인증 현황, 인증하기에 필요한 challengeId까지 모두
+    // /parties/home 응답 하나로 구성한다. (예전에는 challengeId가 이 응답에 없어서
+    // /daily에서 같은 partyId를 찾아 끼워 맞추는 우회 로직이 있었는데, 그 매칭이
+    // 실패하면 "인증하기"가 조용히 무반응이 되는 문제가 있어 제거했다. 백엔드가
+    // challengeId를 이 응답에 내려주기 전까지는 인증하기가 동작하지 않는다.)
+    val partyChallenges = partyHome.parties.map { it.toHomeModel(now = now) }
     // 히어로의 분모/분자는 /daily 원본 리스트 크기에 기대지 않는다.
     // /daily에 파티의 오늘 참여 기록이 아직 반영되지 않아도(생성/시작 직후 등)
     // 개인은 /daily, 파티는 /parties/home을 각각의 출처로 삼아 항상 정확히 집계한다.
@@ -194,8 +187,7 @@ private fun RealHomeDailyChallengeDto.toPersonalModel(now: LocalDateTime): HomeC
 }
 
 private fun PartyHomeItemDto.toHomeModel(
-    now: LocalDateTime,
-    dailyChallenge: RealHomeDailyChallengeDto?
+    now: LocalDateTime
 ): HomePartyChallenge {
     val deadline = verificationDeadline.toLocalTimeOrNull()
     val isDeadlinePassed = deadline?.let(now.toLocalTime()::isAfter) == true
@@ -225,8 +217,10 @@ private fun PartyHomeItemDto.toHomeModel(
                 isVerifiedToday = it.isVerifiedToday
             )
         },
-        challengeId = dailyChallenge?.challengeId?.takeIf { it > 0L },
-        category = dailyChallenge?.category.orEmpty()
+        // /parties/home 응답 자체의 값을 그대로 쓴다. 백엔드가 아직 안 내려주면 null/빈 문자열이라
+        // "인증하기"를 눌러도 이동하지 않는다(challengeId가 있어야 카메라 화면 라우트가 만들어짐).
+        challengeId = challengeId?.takeIf { it > 0L },
+        category = category.orEmpty()
     )
 }
 

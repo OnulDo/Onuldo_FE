@@ -99,6 +99,34 @@ class HomeRepositoryImplTest {
     }
 
     @Test
+    fun `파티 인증하기에 필요한 challengeId와 category는 daily 매칭 없이 parties-home 응답 값을 그대로 쓴다`() {
+        val withChallengeId = listOf(dailyItem(type = "PARTY", name = "아침 운동", verified = false))
+            .toHomeData(
+                now = LocalDateTime.of(2026, 8, 5, 12, 0),
+                partyHome = PartyHomeResultDto(
+                    parties = listOf(partyHomeItem(challengeId = 99, category = "운동"))
+                )
+            )
+            .partyChallenges
+            .single()
+
+        assertEquals(99L, withChallengeId.challengeId)
+        assertEquals("운동", withChallengeId.category)
+
+        // 백엔드가 아직 challengeId를 안 내려주면 daily 쪽에 같은 partyId 항목이 있어도 null을 유지한다.
+        val withoutChallengeId = listOf(dailyItem(type = "PARTY", name = "아침 운동", verified = false))
+            .toHomeData(
+                now = LocalDateTime.of(2026, 8, 5, 12, 0),
+                partyHome = PartyHomeResultDto(parties = listOf(partyHomeItem()))
+            )
+            .partyChallenges
+            .single()
+
+        assertNull(withoutChallengeId.challengeId)
+        assertEquals("", withoutChallengeId.category)
+    }
+
+    @Test
     fun `홈 전용 파티 응답의 상태와 첫 정산 배너를 반영한다`() {
         val partyHome = PartyHomeResultDto(
             settlementBanners = listOf(
@@ -213,7 +241,9 @@ class HomeRepositoryImplTest {
     private fun partyHomeItem(
         status: String = "NOT_VERIFIED",
         verifiedAt: String? = null,
-        showRemainingTime: Boolean = true
+        showRemainingTime: Boolean = true,
+        challengeId: Long? = null,
+        category: String? = null
     ) = PartyHomeItemDto(
         partyId = 10,
         name = "갓생팟",
@@ -223,6 +253,8 @@ class HomeRepositoryImplTest {
         showRemainingTime = showRemainingTime,
         status = status,
         verifiedAt = verifiedAt,
+        challengeId = challengeId,
+        category = category,
         members = listOf(
             PartyHomeMemberDto(
                 userId = 1,
