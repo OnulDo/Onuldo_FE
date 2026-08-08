@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,8 +52,10 @@ fun PartyCreateScreen(
     val spacing = LocalSpacing.current
     val periods = listOf("2주", "4주", "8주", "12주")
     val deposits = listOf(10_000, 20_000, 30_000, 50_000)
-    var selectedPeriod by remember(selectedChallenge?.id) { mutableIntStateOf(-1) }
-    var selectedDeposit by remember(selectedChallenge?.id) { mutableIntStateOf(-1) }
+    // 포인트 부족 → 충전 화면 왕복에도 유지되도록 rememberSaveable을 쓰되, 챌린지가 바뀌면
+    // (id가 바뀌면) 이전 선택을 초기화하는 기존 동작은 key로 그대로 유지한다.
+    var selectedPeriod by rememberSaveable(selectedChallenge?.id) { mutableIntStateOf(-1) }
+    var selectedDeposit by rememberSaveable(selectedChallenge?.id) { mutableIntStateOf(-1) }
     var showPointDialog by remember { mutableStateOf(false) }
     var isPartyNameError by remember { mutableStateOf(false) }
 

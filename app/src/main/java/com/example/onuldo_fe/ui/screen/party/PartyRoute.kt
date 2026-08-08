@@ -3,10 +3,14 @@ package com.example.onuldo_fe.ui.screen.party
 import android.Manifest
 import android.app.Activity
 import android.content.ContextWrapper
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.example.onuldo_fe.model.challenge.ChallengeCategory
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -51,6 +55,41 @@ private enum class PartyScreen {
     Settlement
 }
 
+// 파티 생성 화면에서 확정 선택한 챌린지를 구성 변경·화면 이탈(포인트 충전 등) 후에도
+// 복원할 수 있도록 저장/복원하는 Saver. Challenge가 Parcelable이 아니라 직접 정의했다.
+private val ChallengeSaver: Saver<Challenge?, Any> = listSaver(
+    save = { challenge ->
+        if (challenge == null) {
+            emptyList()
+        } else {
+            // listSaver는 원소가 null이 아니어야 해서, imageUrl이 없으면 빈 문자열로
+            // 대신 저장하고 복원할 때 다시 null로 되돌린다.
+            listOf(
+                challenge.id,
+                challenge.title,
+                challenge.participantCount,
+                challenge.category.name,
+                challenge.imageUrl.orEmpty(),
+                challenge.imageRes
+            )
+        }
+    },
+    restore = { saved ->
+        if (saved.isEmpty()) {
+            null
+        } else {
+            Challenge(
+                id = saved[0] as Long,
+                title = saved[1] as String,
+                participantCount = saved[2] as Int,
+                category = ChallengeCategory.valueOf(saved[3] as String),
+                imageUrl = (saved[4] as String).ifEmpty { null },
+                imageRes = saved[5] as Int
+            )
+        }
+    }
+)
+
 // 파티 목록부터 생성·참여·대기방·피드까지 화면 전환과 ViewModel 상태 연결
 @Composable
 fun PartyRoute(
@@ -67,10 +106,12 @@ fun PartyRoute(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     // 현재 화면과 다이얼로그 노출 여부는 Route에서만 관리
-    // screen 자체는 rememberSaveable로 못 만드는 사설 enum이라, 구성 변경으로 recompose가
-    // 처음부터 다시 돌 때는 ViewModel에 이미 남아있는 waitingRoom을 기준으로 대기방 화면을 복원한다.
-    // (ViewModel은 구성 변경에도 유지되므로 leaveParty를 안 보냈다면 waitingRoom이 그대로 남아있다.)
-    var screen by remember {
+    // PartyScreen은 Kotlin enum이라 기본적으로 Serializable이라 rememberSaveable로 바로 저장된다.
+    // 포인트 충전 화면 왕복처럼 이 컴포저블이 사라졌다 다시 생기는 경우, 대부분은 저장된 값
+    // 그대로(Create 등) 복원된다. 다만 진짜 프로세스가 죽어 저장된 값 자체가 없을 때는,
+    // ViewModel에 이미 남아있는 waitingRoom을 기준으로 대기방 화면을 복원한다(ViewModel은
+    // 구성 변경에도 유지되므로 leaveParty를 안 보냈다면 waitingRoom이 그대로 남아있다).
+    var screen by rememberSaveable {
         mutableStateOf(
             if (partyViewModel.uiState.waitingRoom != null) PartyScreen.WaitingRoom else PartyScreen.List
         )
@@ -80,17 +121,25 @@ fun PartyRoute(
         mutableStateOf(false)
     }
     // pendingChallenge는 상세 확인 중인 임시 선택, selectedChallenge는 생성 화면에서 확정된 선택
-    var selectedChallenge by remember { mutableStateOf<Challenge?>(null) }
+    // selectedChallenge는 포인트 부족 → 충전 화면 왕복처럼 화면이 사라졌다 다시 생겨도
+    // 유지되어야 해서 rememberSaveable(+커스텀 Saver)을 쓴다. pendingChallenge는 탐색 중인
+    // 임시값이라 화면이 날아가도 다시 고르면 되므로 remember로 충분하다.
+    var selectedChallenge by rememberSaveable(stateSaver = ChallengeSaver) { mutableStateOf<Challenge?>(null) }
     var pendingChallenge by remember { mutableStateOf<Challenge?>(null) }
 
-    // 생성 화면을 벗어나 챌린지를 탐색해도 입력값을 유지하도록 Route가 생성 폼 상태 보관
-    var partyName by remember { mutableStateOf("") }
-    var capacity by remember { mutableIntStateOf(5) }
+    // 생성 화면을 벗어나 챌린지를 탐색해도, 포인트 충전 화면을 다녀와도 입력값을 유지하도록
+    // Route가 생성 폼 상태를 rememberSaveable로 보관한다.
+    var partyName by rememberSaveable { mutableStateOf("") }
+    var capacity by rememberSaveable { mutableIntStateOf(5) }
 
     // 피드 재조회와 대기방 오류 재시도에 사용할 마지막 partyId 보관
     var feedPartyId by remember { mutableStateOf("1") }
-    // screen과 마찬가지로 구성 변경 후에도 ViewModel에 남아있는 partyId로 복원한다.
-    var waitingPartyId by remember { mutableStateOf(partyViewModel.uiState.waitingRoom?.partyId) }
+    // screen과 마찬가지로 rememberSaveable로 저장한다. 그렇지 않으면 screen만 WaitingRoom으로
+    // 복원되고(특히 진짜 프로세스가 죽어 ViewModel의 waitingRoom도 함께 사라진 경우)
+    // waitingPartyId는 null로 초기화되어, 대기방 조회 재시도·폴링을 시작할 ID 자체가 없어진다.
+    var waitingPartyId by rememberSaveable {
+        mutableStateOf(partyViewModel.uiState.waitingRoom?.partyId)
+    }
 
     val partyState = partyViewModel.uiState
     val waitingRoom = partyState.waitingRoom
@@ -178,9 +227,18 @@ fun PartyRoute(
                     // 앱을 벗어나면 대기방에서 자동으로 나가지는 것이 의도된 동작이다.
                     // 단, 화면 회전 등 구성 변경으로 인한 재생성에서도 ON_STOP이 발생하므로
                     // isChangingConfigurations일 때는 자동 이탈을 건너뛴다.
-                    val isChangingConfigurations =
-                        context.findActivity()?.isChangingConfigurations == true
-                    if (shouldLeave && !isChangingConfigurations) {
+                    val activity = context.findActivity()
+                    val isChangingConfigurations = activity?.isChangingConfigurations == true
+                    // 포인트 충전 화면처럼 같은 액티비티 안의 다른 화면으로 이동해도, 이 화면
+                    // (NavBackStackEntry)의 lifecycleOwner에는 똑같이 ON_STOP이 전달된다.
+                    // 액티비티 자체는 아직 포그라운드(STARTED 이상)인 경우까지 백그라운드
+                    // 전환으로 취급해 자동 이탈시키면, 충전하고 돌아왔을 때 이미 파티에서
+                    // 나가진 상태가 되어버린다. 그래서 액티비티 자체가 STARTED 밑으로 내려간
+                    // 경우(진짜 백그라운드·강제종료 등)에만 자동 이탈한다.
+                    val isActivityStillForeground =
+                        (activity as? LifecycleOwner)?.lifecycle?.currentState
+                            ?.isAtLeast(Lifecycle.State.STARTED) == true
+                    if (shouldLeave && !isChangingConfigurations && !isActivityStillForeground) {
                         // 화면 전환은 API 결과와 무관하게 이 시점에 바로 처리한다(그렇지 않으면
                         // 다른 요청과 겹쳐 leaveParty가 지연·실패할 때 화면이 WaitingRoom에 고정되고
                         // 하단 탭바도 계속 숨겨진 채로 남아 하단 네비게이션 자체를 못 쓰게 된다).
@@ -205,10 +263,32 @@ fun PartyRoute(
         }
     }
 
+    LaunchedEffect(screen, waitingRoom != null, waitingPartyId, partyState.action, partyState.errorMessage) {
+        // 프로세스가 죽었다 복구된 경우처럼, WaitingRoom 화면인데 대기방 데이터도 없고
+        // 진행 중인 요청·이전 오류도 없는 상태로 남아있으면 재시도 버튼을 누르지 않아도
+        // 자동으로 한 번 조회한다. (실패하면 errorMessage가 채워지므로 무한 재시도는 안 됨 —
+        // 이후엔 PartyLoadingScreen의 수동 재시도로만 다시 시도된다.)
+        val partyId = waitingPartyId
+        if (screen == PartyScreen.WaitingRoom &&
+            waitingRoom == null &&
+            partyId != null &&
+            partyState.action == PartyAction.Idle &&
+            partyState.errorMessage == null
+        ) {
+            partyViewModel.loadWaitingRoom(partyId)
+        }
+    }
+
     LaunchedEffect(screen, waitingRoom?.status) {
         if (screen == PartyScreen.WaitingRoom && waitingRoom?.status == PartyStatus.InProgress) {
-            // 다른 사용자가 파티를 시작하면 폴링을 멈추고 홈으로 이동한다.
-            partyViewModel.stopWaitingRoomPolling()
+            // 다른 사용자(방장)가 파티를 시작하면 폴링을 멈추고 대기방 캐시를 비운 뒤 홈으로 이동한다.
+            // startParty()의 방장 경로와 동일하게 비워두지 않으면, 파티 탭으로 돌아왔을 때
+            // 이미 시작된 파티의 낡은 대기방 화면이 되살아난다.
+            // screen도 List로 같이 되돌려야 한다 — screen이 rememberSaveable이라 저장된
+            // 마지막 값이 그대로 복원되므로, 여기서 안 돌려두면 다음에 파티 탭에 돌아왔을 때
+            // WaitingRoom이 그대로 복원되어버린다.
+            partyViewModel.clearWaitingRoomAfterStart()
+            screen = PartyScreen.List
             onHomeNavigate()
         }
     }
@@ -372,6 +452,10 @@ fun PartyRoute(
                     onStartClick = {
                         // 시작 API 성공 후 명세에 따라 홈 화면으로 이동
                         partyViewModel.startParty {
+                            // screen도 List로 같이 되돌려야 한다 — screen이 rememberSaveable이라
+                            // 저장된 마지막 값이 그대로 복원되므로, 여기서 안 돌려두면 다음에
+                            // 파티 탭에 돌아왔을 때 WaitingRoom이 그대로 복원되어버린다.
+                            screen = PartyScreen.List
                             onHomeNavigate()
                         }
                     },
