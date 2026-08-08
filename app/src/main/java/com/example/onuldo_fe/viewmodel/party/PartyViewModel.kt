@@ -67,6 +67,7 @@ class PartyViewModel(
     private var partyListJob: Job? = null
     private var partyListGeneration: Long = 0L
     private var hasLoadedPartyList: Boolean = false
+    private var pointRequestGeneration: Long = 0L
 
     init {
         refreshAvailablePoint()
@@ -87,8 +88,12 @@ class PartyViewModel(
 
     /** 포인트 충전 후 화면으로 돌아왔을 때 표시 잔액을 최신 지갑 정보로 갱신한다. */
     fun refreshAvailablePoint() {
+        // 초기 조회와 충전 후 복귀 시 조회가 겹칠 수 있어, 응답이 도착한 시점의 세대를
+        // 확인해 더 최신 요청이 이미 시작된 뒤 도착한 오래된 응답은 반영하지 않는다.
+        val requestGeneration = ++pointRequestGeneration
         viewModelScope.launch {
-            fetchAvailablePoint()?.let { point ->
+            val point = fetchAvailablePoint()
+            if (point != null && requestGeneration == pointRequestGeneration) {
                 uiState = uiState.copy(availablePoint = point.coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
             }
         }
