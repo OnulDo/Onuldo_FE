@@ -21,8 +21,7 @@ data class MyMainUiState(
     val summary: MyPageSummary? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    /** 회원 탈퇴 실패 안내(일회성). 화면이 토스트로 노출한 뒤 [MyMainViewModel.onDeleteFailedShown]으로 비운다.
-     *  TODO: 탈퇴 실패 안내 필요(ex. 파티 가입중이라서)
+    /** 회원 탈퇴 실패 안내(일회성). 화면이 토스트로 노출한 뒤 [MyMainViewModel.onDeleteFailedShown]으로 비움
      */
     val deleteFailedMessage: String? = null,
 ) {
@@ -92,10 +91,13 @@ class MyMainViewModel(
                     _uiState.update { MyMainUiState() }
                     onDeleted()
                 }
-                .onError { _, _ ->
-                    // 탈퇴는 중요 동작이라 무반응이 아니라 명확한 실패 안내를 남긴다.
+                .onError { _, message ->
+                    // 네트워크 오류 등으로 문구가 비면 기본 안내로 대체 TODO: 추후 토스트 멘트로 대체
                     _uiState.update {
-                        it.copy(isLoading = false, deleteFailedMessage = DELETE_FAILED_MESSAGE)
+                        it.copy(
+                            isLoading = false,
+                            deleteFailedMessage = message.ifBlank { DELETE_FAILED_MESSAGE },
+                        )
                     }
                 }
         }
