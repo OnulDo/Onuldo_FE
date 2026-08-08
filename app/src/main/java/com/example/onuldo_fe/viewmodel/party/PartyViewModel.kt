@@ -350,7 +350,11 @@ class PartyViewModel(
         viewModelScope.launch {
             runCatching { repository.startParty(partyId) }
                 .onSuccess {
-                    uiState = uiState.copy(action = PartyAction.Idle)
+                    // 시작한 파티는 더 이상 대기방이 아니므로 leaveParty와 동일하게 비워준다.
+                    // 비워두지 않으면 하단 탭 전환(saveState/restoreState) 뒤 파티 탭으로
+                    // 돌아왔을 때 이미 시작된 파티의 낡은 대기방 화면·폴링이 되살아난다.
+                    stopWaitingRoomPolling()
+                    uiState = uiState.copy(action = PartyAction.Idle, waitingRoom = null)
                     loadParties()
                     onSuccess(partyId)
                 }
