@@ -2,7 +2,6 @@ package com.example.onuldo_fe.ui.screen.challenge.detail.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -196,19 +195,17 @@ private fun ConditionBox(
 
         Spacer(Modifier.height(12.dp))   // 헤더 ↔ 목록
 
-        // 항목은 일정 간격(8dp)으로 배분 — 박스가 사이즈 자동 유지(항목 개수에 따라)
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items.forEach { item ->
+        // 항목 사이 간격은 패딩 4dp로 배분(첫 항목 제외) — TODO: 추후 4추가할 예정
+        Column(modifier = Modifier.fillMaxWidth()) {
+            items.forEachIndexed { index, item ->
                 Text(
                     text = item,
                     fontFamily = Pretendard,
                     fontWeight = FontWeight.Normal,  // Caption3: 12sp / 400 / lineHeight 20
                     fontSize = 12.sp,
                     lineHeight = 20.sp,
-                    color = BlackBrown
+                    color = BlackBrown,
+                    modifier = if (index == 0) Modifier else Modifier.padding(top = 4.dp)
                 )
             }
         }

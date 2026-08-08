@@ -17,11 +17,18 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import android.widget.Toast
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.auth.dto.TermType
+import com.example.onuldo_fe.ui.component.ConfirmDialog
 import com.example.onuldo_fe.viewmodel.mypage.MyMainViewModel
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,6 +78,19 @@ fun MyMainScreen(
     val nickname = state.nickname
     val email = state.email
     val point = state.pointText
+
+    // 로그아웃·회원 탈퇴는 팝업으로 검토
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    var showWithdrawDialog by remember { mutableStateOf(false) }
+
+    // 탈퇴 실패 시 무반응으로 보이지 않도록 안내 토스트를 한 번 띄운다.
+    val context = LocalContext.current
+    LaunchedEffect(state.deleteFailedMessage) {
+        state.deleteFailedMessage?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            viewModel.onDeleteFailedShown()
+        }
+    }
 
     // 충전·챌린지 참여 등으로 보유 포인트가 바뀐 뒤 이 탭으로 돌아올 수 있다. ViewModel은
     // 백스택에 살아 있어 한 번 조회한 값이 그대로 남으므로, 화면이 보일 때마다 새로 읽는다.
@@ -129,7 +149,7 @@ fun MyMainScreen(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { viewModel.logout(onLoggedOut) },
+                .clickable { showLogoutDialog = true },
         )
         Spacer(Modifier.height(8.dp))
         Text(
@@ -142,8 +162,35 @@ fun MyMainScreen(
             textDecoration = TextDecoration.Underline,
             modifier = Modifier
                 .fillMaxWidth()
-                // 서버에 회원 탈퇴 API가 없어 아직 연결하지 못했다. API 추가 시 확인 다이얼로그와 함께 연결한다.
-                .clickable { /* TODO: 회원 탈퇴 API 추가 후 연결 */ },
+                .clickable { showWithdrawDialog = true },
+        )
+    }
+
+    // 로그아웃 확인 — 확정 시 토큰 폐기 후 진입 화면으로
+    if (showLogoutDialog) {
+        ConfirmDialog(
+            title = "로그아웃",
+            description = "정말로 로그아웃 할까요?",
+            confirmText = "로그아웃",
+            onDismiss = { showLogoutDialog = false },
+            onConfirm = {
+                showLogoutDialog = false
+                viewModel.logout(onLoggedOut)
+            },
+        )
+    }
+
+    // 회원 탈퇴 확인 — 확정 시 DELETE /api/users/me (서버가 보관 사진 등도 함께 파기)
+    if (showWithdrawDialog) {
+        ConfirmDialog(
+            title = "회원탈퇴",
+            description = "정말로 회원탈퇴 할까요?",
+            confirmText = "회원탈퇴",
+            onDismiss = { showWithdrawDialog = false },
+            onConfirm = {
+                showWithdrawDialog = false
+                viewModel.deleteAccount(onLoggedOut)
+            },
         )
     }
 }

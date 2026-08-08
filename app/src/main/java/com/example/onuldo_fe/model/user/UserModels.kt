@@ -85,3 +85,9 @@ data class PointChargeResult(
     val amount: Int,
     val balanceAfter: Long,
 )
+
+/** 포인트 출금 결과 — 출금 금액과 출금 후 잔액 */
+data class PointWithdrawResult(
+    val amount: Int,
+    val balanceAfter: Long,
+)
