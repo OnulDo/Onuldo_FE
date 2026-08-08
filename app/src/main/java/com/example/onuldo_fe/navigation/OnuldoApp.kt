@@ -94,8 +94,10 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
             LoginScreen(
                 onLoginSuccess = {
                     navController.navigate(Routes.MAIN) {
-                        // 인증 완료 후에는 랜딩/로그인으로 되돌아가지 않도록 백스택 제거
-                        popUpTo(Routes.LANDING) { inclusive = true }
+                        // 일반 진입(LANDING → LOGIN)과 세션 만료(LOGIN이 루트) 모두에서
+                        // 인증 화면으로 되돌아가지 않도록 기존 백스택을 전부 제거한다.
+                        popUpTo(0) { inclusive = true }
+                        launchSingleTop = true
                     }
                 },
                 onSignupClick = { navController.navigate(Routes.SIGNUP) },
