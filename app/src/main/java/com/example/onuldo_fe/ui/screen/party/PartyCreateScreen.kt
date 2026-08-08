@@ -171,7 +171,7 @@ fun PartyCreateScreen(
 
     if (showPointDialog) {
         InsufficientPointDialog(
-            ownedPoint = availablePoint,
+            ownedPoint = availablePoint?.toLong(),
             requiredPoint = deposits[selectedDeposit],
             onDismiss = {
                 showPointDialog = false

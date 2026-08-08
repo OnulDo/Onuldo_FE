@@ -38,6 +38,8 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         private set
     var activeTitle: String = ""
         private set
+    var activeDeadline: String = ""
+        private set
     var activeVerifiedAt: String? = null
         private set
 
@@ -48,7 +50,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         _submitState.value = VerificationSubmitState.Idle
     }
 
-    fun submitVerification(challengeId: Long, category: String, title: String) {
+    fun submitVerification(challengeId: Long, category: String, title: String, deadline: String) {
         if (challengeId <= 0L) {
             _submitState.value = VerificationSubmitState.Error("챌린지 정보를 확인할 수 없습니다.")
             return
@@ -60,6 +62,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         activeChallengeId = challengeId
         activeCategory = category
         activeTitle = title
+        activeDeadline = deadline
         activeVerifiedAt = null
         val uri = _imageUri.value ?: run {
             _submitState.value = VerificationSubmitState.Error(

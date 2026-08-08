@@ -30,7 +30,7 @@ fun HomeRoute(
     viewModel: HomeViewModel = viewModel(),
     onSettlementResultClick: (Long) -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
-    onCameraNavigate: (Long, String, String) -> Unit = { _, _, _ -> },
+    onCameraNavigate: (Long, String, String, String) -> Unit = { _, _, _, _ -> },
     refreshKey: Int = 0
 ) {
     val context = LocalContext.current
@@ -41,6 +41,7 @@ fun HomeRoute(
     var pendingChallengeId by rememberSaveable { mutableStateOf<Long?>(null) }
     var pendingCategory by rememberSaveable { mutableStateOf("") }
     var pendingTitle by rememberSaveable { mutableStateOf("") }
+    var pendingDeadline by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(refreshKey) {
         if (refreshKey > 0) {
@@ -68,18 +69,19 @@ fun HomeRoute(
         }
     }
 
-    fun handleVerifyClick(challengeId: Long, category: String, title: String) {
+    fun handleVerifyClick(challengeId: Long, category: String, title: String, deadline: String) {
         if (challengeId <= 0L) return
         pendingChallengeId = challengeId
         pendingCategory = category
         pendingTitle = title
+        pendingDeadline = deadline
         val isCameraPermissionGranted = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.CAMERA
         ) == PackageManager.PERMISSION_GRANTED
 
         if (isCameraPermissionGranted) {
-            onCameraNavigate(challengeId, category, title)
+            onCameraNavigate(challengeId, category, title, deadline)
             pendingChallengeId = null
         } else {
             showCameraPermissionDialog = true
@@ -97,7 +99,7 @@ fun HomeRoute(
                 if (isCameraPermissionGranted) {
                     showCameraPermissionDialog = false
                     pendingChallengeId?.let { challengeId ->
-                        onCameraNavigate(challengeId, pendingCategory, pendingTitle)
+                        onCameraNavigate(challengeId, pendingCategory, pendingTitle, pendingDeadline)
                     }
                     pendingChallengeId = null
                 }
@@ -144,6 +146,7 @@ fun HomeRoute(
                 pendingChallengeId = null
                 pendingCategory = ""
                 pendingTitle = ""
+                pendingDeadline = ""
             },
             onMoveToSettings = { moveToAppSettings(context) }
         )
