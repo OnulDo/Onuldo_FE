@@ -160,7 +160,12 @@ fun PartyRoute(
 
     DisposableEffect(lifecycleOwner, screen, waitingPartyId, waitingRoom != null) {
         val partyId = waitingPartyId
-        val shouldPoll = screen == PartyScreen.WaitingRoom && partyId != null && waitingRoom != null
+        // shouldLeave: 대기방 화면에 partyId만 있으면 성립한다. waitingRoom 조회가 아직
+        // 끝나지 않았거나 에러로 로딩 화면이 떠 있는 동안에도 서버에는 이미 파티가 생성·참여된
+        // 상태이므로, 이 구간에서 백그라운드로 나가도 이탈 요청은 보내야 한다.
+        val shouldLeave = screen == PartyScreen.WaitingRoom && partyId != null
+        // shouldPoll: 실제로 대기방 데이터를 받아온 뒤에만 폴링을 시작한다.
+        val shouldPoll = shouldLeave && waitingRoom != null
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_START -> if (shouldPoll) {
@@ -175,7 +180,7 @@ fun PartyRoute(
                     // isChangingConfigurations일 때는 자동 이탈을 건너뛴다.
                     val isChangingConfigurations =
                         context.findActivity()?.isChangingConfigurations == true
-                    if (shouldPoll && !isChangingConfigurations) {
+                    if (shouldLeave && !isChangingConfigurations) {
                         partyViewModel.leaveParty { screen = PartyScreen.List }
                     }
                 }
