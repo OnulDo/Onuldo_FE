@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 fun ChallengeVerificationScreen(
     status: VerificationStatus,
     failureReason: String = "",
+    verificationDeadline: String = "",
     onConfirmClick: () -> Unit = {},
     onRetryClick: () -> Unit = {},
     onManualReviewClick: () -> Unit = {},
@@ -19,6 +20,7 @@ fun ChallengeVerificationScreen(
         VerificationStatus.SUCCESS -> VerificationSuccessScreen(onConfirmClick = onConfirmClick)
         VerificationStatus.FAILURE -> VerificationFailureScreen(
             failureReason = failureReason,
+            verificationDeadline = verificationDeadline,
             onRetryClick = onRetryClick,
             onManualReviewClick = onManualReviewClick
         )

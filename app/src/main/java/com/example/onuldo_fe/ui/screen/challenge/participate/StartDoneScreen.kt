@@ -59,6 +59,7 @@ fun StartDoneScreen(
         "진행 기간" to "${formatMonthDay(result.startDate)} ~ ${formatMonthDay(result.endDate)} (${result.durationDays}일)",
         "인증 시각" to formatTimeRange(timeStart, timeEnd),
         "예치 도전금" to "%,dP".format(result.depositAmount),
+        // 서버 예상 환급금 값
         "예상 환급금" to "%,dP (성공 시)".format(result.expectedRefundAmount)
     )
     val subtitle = "오늘부터 ${result.durationDays}일간 함께 갓생해요"

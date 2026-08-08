@@ -17,6 +17,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -35,13 +37,27 @@ import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
+import java.time.Duration
+import java.time.LocalTime
+import kotlinx.coroutines.delay
 
 @Composable
 fun VerificationFailureScreen(
     failureReason: String = "사진이 챌린지 인증 조건을 충족하지 못했어요.",
+    verificationDeadline: String = "",
     onRetryClick: () -> Unit = {},
     onManualReviewClick: () -> Unit = {}
 ) {
+    val remainingTimeText by produceState(
+        initialValue = verificationDeadline.toRemainingTimeText(),
+        key1 = verificationDeadline
+    ) {
+        while (true) {
+            value = verificationDeadline.toRemainingTimeText()
+            delay(60_000L)
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -146,9 +162,8 @@ fun VerificationFailureScreen(
                     }
                     Spacer(modifier = Modifier.height(9.dp))
 
-                    //추후 남은시간 계산 로직 추가
                     Text(
-                        text = "22분 남았어요. 재인증해보세요!",
+                        text = remainingTimeText,
                         color = BlackBrown,
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(bottom = 22.dp)
@@ -179,6 +194,21 @@ fun VerificationFailureScreen(
                 .padding(bottom = 42.dp)
         )
     }
+}
+
+private fun String.toRemainingTimeText(now: LocalTime = LocalTime.now()): String {
+    val deadline = runCatching { LocalTime.parse(this) }.getOrNull()
+        ?: return "남은 인증 시간을 확인할 수 없어요."
+    val remainingSeconds = Duration.between(now, deadline).seconds
+    if (remainingSeconds <= 0L) return "오늘 인증 시간이 종료되었어요."
+
+    val remainingMinutes = (remainingSeconds + 59L) / 60L
+    val remainingTime = if (remainingMinutes <= 60L) {
+        "${remainingMinutes}분"
+    } else {
+        "${remainingMinutes / 60L}시간"
+    }
+    return "$remainingTime 남았어요. 재인증해보세요!"
 }
 
 @Preview(showBackground = true)

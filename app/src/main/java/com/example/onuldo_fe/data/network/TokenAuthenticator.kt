@@ -56,22 +56,23 @@ class TokenAuthenticator(
             }
 
             // 3. 재발급 시도.
-            return when (val outcome = requestNewTokens(refreshToken)) {
-                is RefreshOutcome.Success -> {
+            return when (val outcome = refreshApiProvider().executeRefresh(refreshToken)) {
+                is TokenRefreshOutcome.Success -> {
                     tokenStore.update(outcome.tokens)
                     response.request.withToken(outcome.tokens.accessToken)
                 }
 
                 // 서버가 재발급을 거부했다 — 리프레시 토큰도 만료됐으므로 재로그인이 필요하다.
-                RefreshOutcome.Rejected -> {
+                TokenRefreshOutcome.Rejected -> {
                     expireSession()
                     null
                 }
 
-                // 통신 자체가 실패했다. 리프레시 토큰은 아직 유효할 수 있으므로 세션을 지우지 않고
-                // 이 요청만 실패시킨다. (토큰이 메모리에만 있어 지우면 복구 경로가 없다.)
+                // 통신 실패 또는 서버 장애(5xx). 리프레시 토큰은 아직 유효할 수 있으므로 세션을
+                // 지우지 않고 이 요청만 실패시킨다.
                 // 뒤따르는 요청들이 같은 실패를 반복하지 않도록 결과를 잠시 기억해 둔다.
-                RefreshOutcome.Transient -> {
+                TokenRefreshOutcome.Transient -> {
+                    Log.w(TAG, "토큰 재발급 실패(일시적) — 세션 유지")
                     markTransientFailure(refreshToken)
                     null
                 }
@@ -96,34 +97,6 @@ class TokenAuthenticator(
         lastFailedRefreshToken = refreshToken
         lastFailedAtMillis = SystemClock.elapsedRealtime()
     }
-
-    /** 재발급 시도 결과. 서버의 거부와 통신 실패를 구분해야 세션을 잘못 만료시키지 않는다. */
-    private sealed interface RefreshOutcome {
-        data class Success(val tokens: AuthTokens) : RefreshOutcome
-        data object Rejected : RefreshOutcome
-        data object Transient : RefreshOutcome
-    }
-
-    /** 동기 호출. Authenticator는 코루틴이 아닌 OkHttp 워커 스레드에서 실행된다. */
-    private fun requestNewTokens(refreshToken: String): RefreshOutcome =
-        try {
-            val body = refreshApiProvider()
-                .refresh(RefreshTokenRequest(refreshToken))
-                .execute()
-                .body()
-
-            val tokens = if (body?.isSuccess == true) body.result?.toTokensOrNull() else null
-            if (tokens != null) RefreshOutcome.Success(tokens) else RefreshOutcome.Rejected
-        } catch (e: IOException) {
-            // 연결 끊김·타임아웃 등. 서버 판단이 아니므로 세션을 유지한다.
-            Log.w(TAG, "토큰 재발급 통신 실패 — 세션 유지", e)
-            RefreshOutcome.Transient
-        } catch (e: Exception) {
-            // 응답 파싱 실패 등. 서버가 리프레시 토큰을 거부했다는 근거가 아니므로
-            // 세션을 지우지 않는다(잘못 지우면 메모리 저장소 특성상 복구할 수 없다).
-            Log.w(TAG, "토큰 재발급 응답 처리 실패 — 세션 유지", e)
-            RefreshOutcome.Transient
-        }
 
     /**
      * 세션을 정리하고 만료를 알린다.
