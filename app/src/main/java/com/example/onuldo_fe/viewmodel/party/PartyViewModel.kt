@@ -43,7 +43,8 @@ data class PartyUiState(
     val parties: List<PartyCardUi> = emptyList(),        // 파티 홈에 표시할 진행 중인 파티 목록
     val waitingRoom: PartyWaitingRoomUi? = null,         // 현재 입장한 파티의 최신 대기방 정보
     val isReadySubmitted: Boolean = false,               // 로그인 파티원의 현재 준비 상태
-    val isListLoading: Boolean = false,                  // 파티 목록을 불러오는 중인지 여부
+    val isListLoading: Boolean = false,                  // 파티 목록을 불러오는 중인지 여부(전체 화면 로딩)
+    val isRefreshing: Boolean = false,                    // 당겨서 새로고침 중인지 여부(기존 목록 유지)
     val action: PartyAction = PartyAction.Idle,          // 현재 진행 중인 파티 요청
     val errorMessage: String? = null,                    // API 요청 실패 시 화면에 표시할 문구
     val availablePoint: Int? = null,                     // 실제 지갑 API에서 조회한 보유 포인트
@@ -119,12 +120,18 @@ class PartyViewModel(
         requestPartyList(showFullScreenLoading = !hasLoadedPartyList)
     }
 
+    /** 당겨서 새로고침 제스처에서 호출: 기존 카드를 유지한 채 조용히 다시 불러온다. */
+    fun refreshParties() {
+        requestPartyList(showFullScreenLoading = false)
+    }
+
     private fun requestPartyList(showFullScreenLoading: Boolean) {
         val generation = ++partyListGeneration
         partyListJob?.cancel()
         // 재진입 시에는 기존 카드를 유지하고, 최초 조회·오류 재시도만 전체 로딩을 보여준다.
         uiState = uiState.copy(
             isListLoading = showFullScreenLoading,
+            isRefreshing = !showFullScreenLoading,
             errorMessage = null
         )
         partyListJob = viewModelScope.launch {
@@ -134,7 +141,8 @@ class PartyViewModel(
                 hasLoadedPartyList = true
                 uiState = uiState.copy(
                     parties = parties.map(PartySummary::toUi),
-                    isListLoading = false
+                    isListLoading = false,
+                    isRefreshing = false
                 )
             } catch (error: CancellationException) {
                 throw error
@@ -142,6 +150,7 @@ class PartyViewModel(
                 if (generation != partyListGeneration) return@launch
                 uiState = uiState.copy(
                     isListLoading = false,
+                    isRefreshing = false,
                     // 재진입 갱신 실패는 기존 목록을 유지하고 최초 조회 실패만 오류로 표시한다.
                     errorMessage = "파티 목록을 불러오지 못했어요."
                         .takeUnless { hasLoadedPartyList }

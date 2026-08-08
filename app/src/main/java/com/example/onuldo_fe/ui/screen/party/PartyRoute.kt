@@ -232,6 +232,8 @@ fun PartyRoute(
             isLoading = partyState.isListLoading,
             errorMessage = partyState.errorMessage,
             onRetry = partyViewModel::loadParties,
+            isRefreshing = partyState.isRefreshing,
+            onRefresh = partyViewModel::refreshParties,
             onCreateClick = {
                 // 새 파티 만들기 시작 시 이전 생성 폼의 임시 값을 모두 초기화
                 partyViewModel.clearError()

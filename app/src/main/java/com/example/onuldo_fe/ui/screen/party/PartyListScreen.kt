@@ -26,6 +26,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +55,7 @@ import com.example.onuldo_fe.viewmodel.party.samplePartyCards
 import java.time.LocalTime
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun PartyListScreen(
     parties: List<PartyCardUi>,
     onVerifyClick: () -> Unit,
@@ -62,6 +65,8 @@ fun PartyListScreen(
     isLoading: Boolean = false,
     errorMessage: String? = null,
     onRetry: () -> Unit = {},
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {},
     modifier: Modifier = Modifier,
     partyCardContent: @Composable (PartyCardUi, () -> Unit) -> Unit = { party, onClick ->
         HomePartyCard(
@@ -74,7 +79,14 @@ fun PartyListScreen(
     }
 ) {
     val spacing = LocalSpacing.current
-    Column(modifier.fillMaxSize().background(SourCream)) {
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        // 홈과 동일하게 새로고침 인디케이터는 노출하지 않고 당겨서 새로고침 동작만 유지
+        indicator = {},
+        modifier = modifier.fillMaxSize()
+    ) {
+    Column(Modifier.fillMaxSize().background(SourCream)) {
         Text("파티", modifier = Modifier.padding(start = spacing.spacing24, top = spacing.spacing16), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         // TODO 디자인 시스템에 21dp 토큰이 추가되면 LocalSpacing으로 교체
         Spacer(Modifier.height(21.dp))
@@ -141,6 +153,7 @@ fun PartyListScreen(
                 }
             }
         }
+    }
     }
 }
 
