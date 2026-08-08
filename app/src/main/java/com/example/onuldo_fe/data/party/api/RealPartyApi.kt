@@ -9,6 +9,8 @@ import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyHomeResultDto
 import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
+import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
+import com.example.onuldo_fe.data.party.dto.PartyLeaveResponseDto
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -53,6 +55,12 @@ interface RealPartyApi {
         @Path("partyId") partyId: Long
     ): Response<ApiResponse<RealPartyWaitingRoomDto>>
 
+    /** 대기 중인 파티에서 이탈하고 해체·방장 승계 결과를 받는다. */
+    @POST("api/parties/{partyId}/leave")
+    suspend fun leaveParty(
+        @Path("partyId") partyId: Long
+    ): Response<ApiResponse<PartyLeaveResponseDto>>
+
     /** 방장이 파티를 시작해 상태 전환과 전원의 도전금 차감을 요청한다. */
     @POST("api/parties/{partyId}/start")
     suspend fun startParty(
@@ -64,4 +72,10 @@ interface RealPartyApi {
     suspend fun getPartyFeed(
         @Path("partyId") partyId: Long
     ): Response<ApiResponse<PartyFeedDto>>
+
+    /** 파티 정산 결과를 조회하고 해당 결과 배너를 확인 처리한다. */
+    @GET("api/parties/{partyId}/results")
+    suspend fun getSettlementResult(
+        @Path("partyId") partyId: Long
+    ): Response<ApiResponse<PartySettlementResultDto>>
 }

@@ -16,7 +16,6 @@ class HomeViewModel(
     private val repository: HomeRepository = HomeRepositoryProvider.provide(),
     private val coroutineScope: CoroutineScope? = null
 ) : ViewModel() {
-    private val confirmedSettlementPartyIds = mutableSetOf<Long>()
     private var loadJob: Job? = null
     private var loadGeneration = 0L
 
@@ -51,16 +50,8 @@ class HomeViewModel(
                 val loadedState = repository.getHome().toUiState()
                 // 취소에 협조하지 않은 이전 요청의 늦은 응답도 무시한다.
                 if (generation != loadGeneration) return@launch
-                val settlementPartyId = loadedState.settlementBanner?.partyId
-                uiState = if (settlementPartyId in confirmedSettlementPartyIds) {
-                    loadedState.copy(
-                        settlementBanner = null,
-                        hasLoadedHome = true,
-                        isRefreshing = false
-                    )
-                } else {
-                    loadedState.copy(hasLoadedHome = true, isRefreshing = false)
-                }
+                // 정산 결과 조회가 배너를 확인 처리하므로 홈은 서버 응답을 그대로 보여준다.
+                uiState = loadedState.copy(hasLoadedHome = true, isRefreshing = false)
             } catch (error: CancellationException) {
                 // 코루틴 취소는 오류 화면으로 처리하지 않는다.
                 throw error
@@ -74,11 +65,5 @@ class HomeViewModel(
                 )
             }
         }
-    }
-
-    fun confirmSettlementResult() {
-        val partyId = uiState.settlementBanner?.partyId ?: return
-        confirmedSettlementPartyIds += partyId
-        uiState = uiState.copy(settlementBanner = null)
     }
 }
