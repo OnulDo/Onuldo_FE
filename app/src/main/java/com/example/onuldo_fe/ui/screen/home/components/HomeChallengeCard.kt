@@ -149,9 +149,10 @@ fun HomeChallengeCard(
                 }
             }
 
-            if (challenge.status == ChallengeStatus.NeedCertification && challenge.canVerify) {
+            if (challenge.status == ChallengeStatus.NeedCertification) {
                 HomeVerifyButton(
                     onClick = onVerifyClick,
+                    enabled = challenge.canVerify,
                     width = 78.dp,
                     height = 26.dp,
                     iconSize = 12.dp,

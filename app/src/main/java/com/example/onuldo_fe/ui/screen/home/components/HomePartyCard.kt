@@ -169,9 +169,10 @@ private fun PartyAction(
     party: HomePartyChallenge,
     onVerifyClick: () -> Unit
 ) {
-    if (party.status == ChallengeStatus.NeedCertification && party.canVerify) {
+    if (party.status == ChallengeStatus.NeedCertification) {
         HomeVerifyButton(
             onClick = onVerifyClick,
+            enabled = party.canVerify,
             width = 96.dp,
             height = 32.dp,
             iconSize = 14.dp,

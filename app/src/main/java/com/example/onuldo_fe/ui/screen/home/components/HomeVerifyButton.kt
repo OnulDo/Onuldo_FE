@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.theme.BlackBrown20
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 @Composable
 fun HomeVerifyButton(
     onClick: () -> Unit,
+    enabled: Boolean = true,
     width: Dp,
     height: Dp,
     iconSize: Dp,
@@ -45,15 +47,21 @@ fun HomeVerifyButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val shape = RoundedCornerShape(height / 2)
-    val contentColor = if (isPressed) White else Persimmon
+    val actionColor = if (enabled) Persimmon else BlackBrown20
+    val contentColor = when {
+        !enabled -> BlackBrown20
+        isPressed -> White
+        else -> Persimmon
+    }
 
     Row(
         modifier = modifier
             .size(width = width, height = height)
             .clip(shape)
-            .background(if (isPressed) Persimmon else Color.Transparent)
-            .border(BorderStroke(1.dp, Persimmon), shape)
+            .background(if (enabled && isPressed) Persimmon else Color.Transparent)
+            .border(BorderStroke(1.dp, actionColor), shape)
             .clickable(
+                enabled = enabled,
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
