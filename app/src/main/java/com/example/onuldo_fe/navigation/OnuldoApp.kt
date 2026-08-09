@@ -240,24 +240,25 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
             val deadline = backStackEntry.arguments
                 ?.getString(Routes.CAMERA_DEADLINE_ARG)
                 .orEmpty()
-            // 파티 목록 응답에는 category가 없으므로 challengeId로 상세를 조회해 보완한다.
-            // 카메라에서는 개인·파티 모두 한글 카테고리명으로 통일한다.
-            val challengeDetailViewModel: ChallengeDetailViewModel? = if (category.isBlank()) {
-                viewModel(
-                    key = "camera-challenge-detail-$challengeId",
-                    factory = ChallengeDetailViewModel.factory(challengeId)
-                )
-            } else {
-                null
-            }
+            // 카테고리 보완과 챌린지별 인증 유의사항을 위해 상세 API를 함께 조회한다.
+            val challengeDetailViewModel: ChallengeDetailViewModel = viewModel(
+                key = "camera-challenge-detail-$challengeId",
+                factory = ChallengeDetailViewModel.factory(challengeId)
+            )
+            val challengeDetailState = challengeDetailViewModel.uiState
             val resolvedCategory = if (category.isBlank()) {
-                challengeDetailViewModel?.uiState?.detail?.category?.displayName.orEmpty()
+                challengeDetailState.detail?.category?.displayName.orEmpty()
             } else {
                 category.toCategoryDisplayName()
             }
             CameraScreen(
                 category = resolvedCategory,
                 title = title,
+                successConditions = challengeDetailState.detail?.successConditions.orEmpty(),
+                failureConditions = challengeDetailState.detail?.failureConditions.orEmpty(),
+                isNoticeLoading = challengeDetailState.isLoading,
+                isNoticeError = challengeDetailState.isError,
+                onNoticeRetry = challengeDetailViewModel::load,
                 onPhotoCaptured = { uri ->
                     cameraViewModel.setImageUri(uri)
                     navController.navigate(
