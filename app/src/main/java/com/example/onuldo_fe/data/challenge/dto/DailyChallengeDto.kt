@@ -1,10 +1,5 @@
 package com.example.onuldo_fe.data.challenge.dto
 
-// GET /api/users/me/challenges/daily — 오늘 수행해야 하는 챌린지 (ApiResponse<result>.challenges)
-data class DailyChallengeResultDto(
-    val challenges: List<DailyChallengeItemDto> = emptyList()
-)
-
 // 오늘의 챌린지 항목. /users/me/challenges 항목과 대부분 동일하나
 // 본문 블록(challengeDescription)이 없고, 해당 날짜 인증 여부(verifiedOnDate)가 추가된다.
 data class DailyChallengeItemDto(
@@ -24,5 +19,7 @@ data class DailyChallengeItemDto(
     val durationWeeks: Int = 0,
     val startDate: String = "",                     // "yyyy-MM-dd"
     val endDate: String = "",
-    val verifiedOnDate: Boolean = false            // 오늘 날짜 인증 완료 여부
+    val dailyStatus: String? = null,               // 오늘 인증 상태(WAITING 등) — 서버 신규 필드
+    val verifiedOnDate: Boolean = false,           // 오늘 날짜 인증 완료 여부
+    val streakDays: Int? = null                    // 연속 인증 성공 일수 — 서버 신규 필드
 )

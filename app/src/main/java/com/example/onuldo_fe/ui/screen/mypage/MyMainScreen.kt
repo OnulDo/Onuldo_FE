@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -244,7 +245,7 @@ private fun ProfileCard(nickname: String, email: String, onClick: () -> Unit) {
         Image(
             painter = painterResource(R.drawable.ic_chevron_right),
             contentDescription = null,
-            modifier = Modifier.size(width = 5.dp, height = 8.dp),
+            modifier = Modifier.size(width = 9.dp, height = 17.dp),
         )
     }
 }
@@ -265,23 +266,37 @@ private fun WalletSummary(
             .border(1.dp, Persimmon20, RoundedCornerShape(14.dp))
             .padding(20.dp),
     ) {
-        Column(modifier = Modifier.clickable(onClick = onWalletClick)) {
-            Text(
-                text = "내 포인트 지갑",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 11.sp,
-                letterSpacing = 0.44.sp,
-                color = BlackBrown.copy(alpha = 0.7f),
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = point,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 28.sp,
-                letterSpacing = (-0.56).sp,
-                color = Persimmon,
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onWalletClick),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "내 포인트 지갑",
+                    fontFamily = Pretendard,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    letterSpacing = 0.44.sp,
+                    color = BlackBrown.copy(alpha = 0.7f),
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = point,
+                    fontFamily = Pretendard,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 28.sp,
+                    letterSpacing = (-0.56).sp,
+                    color = Persimmon,
+                )
+            }
+            // 프로필 카드와 같은 화살표 에셋을 주황(Persimmon)으로 틴트.
+            Image(
+                painter = painterResource(R.drawable.ic_chevron_right),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(Persimmon),
+                modifier = Modifier.size(width = 9.dp, height = 17.dp),
             )
         }
         Spacer(Modifier.height(14.dp))

@@ -30,6 +30,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
+import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.White
 
 /**
@@ -47,6 +48,8 @@ fun AmountInputBox(
     modifier: Modifier = Modifier,
     clearable: Boolean = false,
     onClear: () -> Unit = {},
+    // 에러 상태(예: 출금 가능액 초과)면 테두리를 빨갛게 표시한다.
+    isError: Boolean = false,
 ) {
     Box(
         modifier = modifier
@@ -55,7 +58,7 @@ fun AmountInputBox(
             .height(88.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(White)
-            .border(2.dp, Persimmon, RoundedCornerShape(16.dp)),
+            .border(2.dp, if (isError) Red else Persimmon, RoundedCornerShape(16.dp)),
     ) {
         // 금액이 있을 때만 왼쪽 안쪽 22dp에 지우기(X).
         if (clearable) {

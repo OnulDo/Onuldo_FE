@@ -28,7 +28,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,9 +50,14 @@ import com.example.onuldo_fe.viewmodel.mypage.WalletFilter
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.Green
+import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Pretendard
+import com.example.onuldo_fe.ui.theme.Red
+import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.White
 
 // --- 거래 카테고리별 색상 (Figma 실측) ---
@@ -62,14 +71,16 @@ private enum class TxCategory(
     val accent: Color,
     val amountColor: Color,
 ) {
-    환급("환급", Color(0xFFDBF2E3), Color(0xFF26A869), Color(0xFF26A869)),
-    충전("충전", Color(0xFFDBEBFF), Color(0xFF217DF2), Color(0xFF217DF2)),
-    예치("예치", Color(0xFFFFEBE0), Color(0xFFFF6B36), TxDark),
-    차감("차감", Color(0xFFFCE3DE), Color(0xFFD95247), Color(0xFFD95247)),
-    출금("출금", Color(0xFFF0EBE3), TxSubText, TxDark),
+    // 디자인시스템 컬러 사용. 환급 성공=green, 실패(차감)=red, 그 외(충전·출금·예치)=persimmon
+    환급("환급", Green2, Green, Green),
+    차감("차감", Red2, Red, Red),
+    // 충전만 금액 글씨도 persimmon100. 출금·예치는 금액을 검정으로 둔다.
+    충전("충전", Persimmon10, Persimmon, Persimmon),
+    예치("예치", Persimmon10, Persimmon, TxDark),
+    출금("출금", Persimmon10, Persimmon, TxDark),
 
-    /** 서버가 새 거래 종류를 추가해 앱이 해석하지 못할 때 쓰는 중립 표기. */
-    기타("기타", Color(0xFFF0EBE3), TxSubText, TxDark),
+    /** 예외) 서버가 새 거래 종류를 추가해 앱이 해석하지 못할 때 쓰는 중립 표기 */
+    기타("기타", Persimmon10, Persimmon, TxDark),
 }
 
 private data class Tx(
@@ -78,24 +89,57 @@ private data class Tx(
     val date: String,
     val amount: String,
     val balance: String,
+    // 환급(REFUND)에서 "예치금 (구분자) 조정액" 표기. 조정 없을 땐 null → 줄 자체를 안 그린다.
+    // 예치금은 회색, 조정액만 색 강조(보너스=초록/차감=빨강)라 AnnotatedString으로 담는다.
+    val breakdown: AnnotatedString? = null,
 )
 
-/** 서버 거래 종류 → 화면 배지. 서버에는 "차감" 종류가 없어 [TxCategory.차감]은 매핑되지 않는다. */
+/**
+ * 서버 거래 종류 → 화면 배지.
+ *
+ * "차감"은 별도 타입이 아니라 REFUND 안에서 `adjustmentAmount` 부호로! 구분된다
+ * (`amount = depositAmount + adjustmentAmount`, 조정액 음수 = 차감/실패)
+ * depositAmount·adjustmentAmount는 REFUND에서만 non-null로 (실제 확인 필요,,.)
+ */
 private fun PointTransaction.toTx(): Tx {
+    // REFUND 중 조정액이 음수면 실패(차감/빨강), 그 외엔 성공·순수환급(초록).
+    val isPenalty = type == PointTransactionTypeDto.REFUND && (adjustmentAmount ?: 0) < 0
     val category = when (type) {
         PointTransactionTypeDto.CHARGE -> TxCategory.충전
         PointTransactionTypeDto.WITHDRAW -> TxCategory.출금
         PointTransactionTypeDto.DEPOSIT -> TxCategory.예치
-        PointTransactionTypeDto.REFUND -> TxCategory.환급
-        // 알 수 없는 종류를 특정 배지로 표시하면 사용자에게 잘못된 정보가 된다.
+        PointTransactionTypeDto.REFUND -> if (isPenalty) TxCategory.차감 else TxCategory.환급
         null -> TxCategory.기타
     }
+    // breakdown: REFUND이고 조정액이 있을 때만. 음수는 abs로 크기만 표시하고 구분자를 - 로 쓴다.
+    // 예치금(회색) + 조정액(보너스=초록/차감=빨강)만 색 강조.
+    val breakdown: AnnotatedString? =
+        if (type == PointTransactionTypeDto.REFUND &&
+            depositAmount != null && adjustmentAmount != null && adjustmentAmount != 0
+        ) {
+            val sep = if (adjustmentAmount < 0) "-" else "+"
+            // 콤마 없이 표기. 예치금=BlackBrown, 기호=DarkBrown50, 조정액=색강조(보너스 초록/차감 빨강).
+            buildAnnotatedString {
+                withStyle(SpanStyle(color = BlackBrown)) {
+                    append("${depositAmount}P ")
+                }
+                withStyle(SpanStyle(color = DarkBrown50)) {
+                    append("$sep ")
+                }
+                withStyle(SpanStyle(color = category.amountColor)) {
+                    append("${kotlin.math.abs(adjustmentAmount)}P")
+                }
+            }
+        } else {
+            null
+        }
     return Tx(
         category = category,
         title = title,
         date = formatTransactionDate(date),
         amount = "${formatSignedAmount(amount)}P",
         balance = "잔액 ${formatPoint(balanceAfter)}",
+        breakdown = breakdown,
     )
 }
 
@@ -421,6 +465,16 @@ private fun TxRow(tx: Tx) {
                 fontSize = 14.sp,
                 color = tx.category.amountColor,
             )
+            // 환급 breakdown("예치금 · 조정액")은 값이 있을 때만 표시.
+            if (tx.breakdown != null) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = tx.breakdown,
+                    fontFamily = Pretendard,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                )
+            }
             Spacer(Modifier.height(4.dp))
             Text(
                 text = tx.balance,

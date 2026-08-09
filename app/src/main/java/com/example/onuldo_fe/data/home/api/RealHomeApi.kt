@@ -7,7 +7,7 @@ import retrofit2.Response
 import retrofit2.http.GET
 
 interface RealHomeApi {
-    /** 로그인 사용자가 오늘 수행할 개인 챌린지를 조회한다. */
+    /** 로그인 사용자가 오늘 수행할 개인 챌린지를 조회한다. (서버가 result를 배열로 직접 반환, 파티 제외) */
     @GET("api/users/me/challenges/daily")
     suspend fun getDailyChallenges(): Response<ApiResponse<List<RealHomeDailyChallengeDto>>>
 

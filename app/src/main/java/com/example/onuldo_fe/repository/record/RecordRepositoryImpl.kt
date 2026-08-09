@@ -70,7 +70,7 @@ class RecordRepositoryImpl(private val api: RecordApi) : RecordRepository {
             title = validTitle,
             resultStatus = status,
             netAmount = amount,
-            endedDate = endedDate.requireText("endedDate"),
+            endedDate = endDate.requireText("endDate"),
             achievementRate = achievementRate?.coerceIn(0, 100) ?: 0
         )
     }
