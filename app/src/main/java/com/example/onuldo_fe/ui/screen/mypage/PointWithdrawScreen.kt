@@ -80,7 +80,8 @@ fun PointWithdrawScreen(
         }
     }
 
-    val withdrawable = state.withdrawable ?: 0L
+    // 출금 가능액 = 보유 잔액. 진행 중(pendingPoints)은 표시용이며 여기는 화면
+    val withdrawable = state.balance ?: 0L
     // “전액”은 API가 허용하는 최대 출금 가능액 명시적 표기
     val maxWithdrawable = withdrawable.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
 
