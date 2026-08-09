@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.onuldo_fe.data.network.onError
 import com.example.onuldo_fe.data.network.onSuccess
-import com.example.onuldo_fe.data.user.dto.NotificationSettingType
-import com.example.onuldo_fe.model.user.NotificationSettings
+import com.example.onuldo_fe.data.notification.dto.NotificationSettingType
+import com.example.onuldo_fe.model.notification.NotificationSettings
 import com.example.onuldo_fe.repository.user.UserRepository
 import com.example.onuldo_fe.repository.user.UserRepositoryProvider
 import com.example.onuldo_fe.ui.screen.mypage.NotificationSettingsState
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
  * 마이 - 알림 설정.
  *
  * 서버 `PATCH`는 개별 항목 하나씩만 받고 "전체" 타입이 없다. 그래서 "전체 알림 수신" 토글은
- * 5종을 모두 같은 값으로 바꾸는 것으로 구현한다("모든 알림을 한 번에 끄거나 켤 수 있어요" 문구와 일치).
+ * 6종을 모두 같은 값으로 바꾸는 것으로 구현한다("모든 알림을 한 번에 끄거나 켤 수 있어요" 문구와 일치).
  * 개별 항목을 바꿀 때는 마스터 스위치를 건드리지 않는다(화면이 마스터로 개별 토글을 잠그기 때문).
  *
  * ⚠️ 마스터 스위치를 끈 상태는 서버에 저장되지 않는다 — [NotificationSettings] 주석 참고.
@@ -62,7 +62,7 @@ class NotificationSettingsViewModel(
 
         val changes: List<Pair<NotificationSettingType, Boolean>> =
             if (previous.all != newState.all) {
-                // 전체 토글: 개별 5종을 모두 같은 값으로 맞춘다.
+                // 전체 토글: 개별 6종을 모두 같은 값으로 맞춘다.
                 NotificationSettingType.entries.map { it to newState.all }
             } else {
                 buildList {
@@ -72,14 +72,17 @@ class NotificationSettingsViewModel(
                     if (previous.deadline != newState.deadline) {
                         add(NotificationSettingType.VERIFICATION_DEADLINE to newState.deadline)
                     }
+                    if (previous.endReminder != newState.endReminder) {
+                        add(NotificationSettingType.CHALLENGE_END_REMINDER to newState.endReminder)
+                    }
                     if (previous.result != newState.result) {
                         add(NotificationSettingType.VERIFICATION_RESULT to newState.result)
                     }
-                    if (previous.refund != newState.refund) {
-                        add(NotificationSettingType.REFUND_COMPLETE to newState.refund)
+                    if (previous.partyMemberVerified != newState.partyMemberVerified) {
+                        add(NotificationSettingType.PARTY_MEMBER_VERIFIED to newState.partyMemberVerified)
                     }
-                    if (previous.deduction != newState.deduction) {
-                        add(NotificationSettingType.DEDUCTION_ALERT to newState.deduction)
+                    if (previous.refund != newState.refund) {
+                        add(NotificationSettingType.SETTLEMENT_COMPLETE to newState.refund)
                     }
                 }
             }
@@ -103,22 +106,23 @@ class NotificationSettingsViewModel(
 /**
  * 서버 값을 화면 상태로 옮긴다.
  *
- * 마스터 스위치는 서버 `allEnabled`를 쓰지 않고 **개별 5종 중 하나라도 켜져 있는지**로 판단한다.
+ * 마스터 스위치는 서버 `allEnabled`를 쓰지 않고 **개별 6종 중 하나라도 켜져 있는지**로 판단한다.
  * 서버가 `all_enabled`를 갱신할 방법을 제공하지 않아(항상 `true`) 그대로 쓰면,
  * 마스터를 끄고 나갔다 들어왔을 때 "마스터는 켜짐 + 개별은 전부 꺼짐"이라는 모순된 화면이 된다.
  *
  * OR로 판단하면 저장·복원이 일치한다.
- * - 마스터 끄기(개별 5종 모두 off) → 재진입 시에도 마스터 off
+ * - 마스터 끄기(개별 6종 모두 off) → 재진입 시에도 마스터 off
  * - 개별 하나만 끄기 → 나머지가 켜져 있으므로 마스터는 on (개별 토글이 잠기지 않는다)
  *
  * 서버에 `ALL` 타입이 추가되면 이 파생을 제거하고 서버 값을 그대로 쓰면 된다.
  */
 private fun NotificationSettings.toUiState() = NotificationSettingsState(
-    all = verificationDeadline || verificationResult || challengeStart ||
-        refundComplete || deductionAlert,
+    all = verificationDeadline || challengeStart || challengeEndReminder ||
+        verificationResult || partyMemberVerified || settlementComplete,
     challengeStart = challengeStart,
     deadline = verificationDeadline,
+    endReminder = challengeEndReminder,
     result = verificationResult,
-    refund = refundComplete,
-    deduction = deductionAlert,
+    partyMemberVerified = partyMemberVerified,
+    refund = settlementComplete,
 )
