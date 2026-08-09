@@ -26,7 +26,7 @@ class VerificationRepositoryImpl(
         val (file, temporaryCopy) = imageUri.toLocalFile()
         try {
             require(file.length() in 1..MAX_IMAGE_BYTES) {
-                "사진은 비어 있지 않고 5MB 이하여야 합니다."
+                "사진은 비어 있지 않고 20MB 이하여야 합니다."
             }
             validateImage(file)
             val body = file.asRequestBody(JPEG_MEDIA_TYPE)
@@ -84,7 +84,7 @@ class VerificationRepositoryImpl(
 
                         copiedBytes += readBytes
                         require(copiedBytes <= MAX_IMAGE_BYTES) {
-                            "사진은 비어 있지 않고 5MB 이하여야 합니다."
+                            "사진은 비어 있지 않고 20MB 이하여야 합니다."
                         }
                         output.write(buffer, 0, readBytes)
                     }
@@ -116,7 +116,7 @@ class VerificationRepositoryImpl(
     )
 
     private companion object {
-        const val MAX_IMAGE_BYTES = 5L * 1024 * 1024
+        const val MAX_IMAGE_BYTES = 20L * 1024 * 1024
         val JPEG_MEDIA_TYPE = "image/jpeg".toMediaType()
     }
 }
