@@ -167,7 +167,11 @@ fun PointWithdrawScreen(
                 listOf(10_000, 30_000, 50_000).forEach { value ->
                     AmountChip(
                         text = "+${"%,d".format(value)}",
-                        onClick = { amount += value },
+                        onClick = {
+                            amount = (amount.toLong() + value)
+                                .coerceAtMost(Int.MAX_VALUE.toLong())
+                                .toInt()
+                        },
                         modifier = Modifier.weight(1f),
                     )
                 }
