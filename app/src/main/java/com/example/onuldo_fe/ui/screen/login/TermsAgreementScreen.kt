@@ -180,7 +180,7 @@ private fun AgreeAllCard(
             .padding(horizontal = 19.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        RoundCheckbox(checked = checked, size = 24.dp)
+        AgreementAllCheckbox(checked = checked)
         Spacer(Modifier.width(15.dp))
         Column {
             Text(
@@ -218,7 +218,7 @@ private fun AgreeItemRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(modifier = Modifier.clickable(onClick = onToggle)) {
-            RoundCheckbox(checked = checked, size = 22.dp)
+            TermCheckbox(checked = checked)
         }
         Spacer(Modifier.width(15.dp))
         // 필수는 Persimmon으로 강조, 선택은 본문과 같은 톤으로 낮춘다.
@@ -255,14 +255,27 @@ private fun AgreeItemRow(
 
 /** 상태별 Vector Drawable을 사용하는 약관 체크박스. */
 @Composable
-private fun RoundCheckbox(checked: Boolean, size: androidx.compose.ui.unit.Dp) {
+private fun AgreementAllCheckbox(checked: Boolean) {
     Image(
         painter = painterResource(
-            if (checked) R.drawable.ic_checkbox_checked
-            else R.drawable.ic_checkbox_unchecked
+            if (checked) R.drawable.auth_checkbox_checked
+            else R.drawable.auth_checkbox_unchecked
         ),
         contentDescription = if (checked) "선택됨" else "선택 안 됨",
-        modifier = Modifier.size(size),
+        modifier = Modifier.size(24.dp),
+    )
+}
+
+/** 개별 약관 항목 전용 체크박스. */
+@Composable
+private fun TermCheckbox(checked: Boolean) {
+    Image(
+        painter = painterResource(
+            if (checked) R.drawable.auth_term_checkbox_checked
+            else R.drawable.auth_term_checkbox_unchecked
+        ),
+        contentDescription = if (checked) "선택됨" else "선택 안 됨",
+        modifier = Modifier.size(22.dp),
     )
 }
 
