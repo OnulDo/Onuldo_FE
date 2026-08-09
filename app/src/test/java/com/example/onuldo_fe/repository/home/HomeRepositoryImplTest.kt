@@ -19,10 +19,9 @@ import org.junit.Test
 class HomeRepositoryImplTest {
 
     @Test
-    fun `daily 응답을 개인과 파티 홈 카드로 분리한다`() {
+    fun `daily 개인 배열과 parties-home 파티 배열을 홈 카드로 합친다`() {
         val items = listOf(
-            dailyItem(type = "PERSONAL", name = "30일 걷기", verified = false),
-            dailyItem(type = "PARTY", name = "아침 러닝", verified = true)
+            dailyItem(type = "PERSONAL", name = "30일 걷기", verified = false)
         )
 
         val result = items.toHomeData(
@@ -134,6 +133,26 @@ class HomeRepositoryImplTest {
     }
 
     @Test
+    fun `dailyStatus가 WAITING이 아니면 개인과 파티 인증 버튼을 비활성화한다`() {
+        val result = listOf(
+            dailyItem(
+                type = "PERSONAL",
+                name = "아침 운동",
+                verified = false,
+                dailyStatus = "COMPLETED"
+            )
+        ).toHomeData(
+            now = LocalDateTime.of(2026, 8, 5, 12, 0),
+            partyHome = PartyHomeResultDto(
+                parties = listOf(partyHomeItem(dailyStatus = "COMPLETED"))
+            )
+        )
+
+        assertFalse(result.challenges.single().canVerify)
+        assertFalse(result.partyChallenges.single().canVerify)
+    }
+
+    @Test
     fun `홈 전용 파티 응답의 상태와 첫 정산 배너를 반영한다`() {
         val partyHome = PartyHomeResultDto(
             settlementBanners = listOf(
@@ -229,18 +248,19 @@ class HomeRepositoryImplTest {
         type: String,
         name: String,
         verified: Boolean,
-        streakDays: Int? = null
+        streakDays: Int = 0,
+        dailyStatus: String = "WAITING"
     ) = RealHomeDailyChallengeDto(
         participationId = 1,
         participationStatus = "ONGOING",
         participationType = type,
-        partyId = 10L.takeIf { type == "PARTY" },
         challengeId = 12,
         challengeName = name,
         timeStart = "06:00:00",
         timeEnd = "23:59:00",
         startDate = "2026-08-01",
         endDate = "2026-08-20",
+        dailyStatus = dailyStatus,
         verifiedOnDate = verified,
         streakDays = streakDays
     )
@@ -250,7 +270,8 @@ class HomeRepositoryImplTest {
         verifiedAt: String? = null,
         showRemainingTime: Boolean = true,
         challengeId: Long = 12,
-        category: String? = null
+        category: String? = null,
+        dailyStatus: String = "WAITING"
     ) = PartyHomeItemDto(
         partyId = 10,
         name = "갓생팟",
@@ -259,6 +280,7 @@ class HomeRepositoryImplTest {
         verificationDeadline = "23:59:00",
         showRemainingTime = showRemainingTime,
         status = status,
+        dailyStatus = dailyStatus,
         verifiedAt = verifiedAt,
         challengeId = challengeId,
         category = category,
