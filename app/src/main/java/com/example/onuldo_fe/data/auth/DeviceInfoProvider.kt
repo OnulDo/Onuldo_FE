@@ -16,11 +16,13 @@ class DeviceInfoProvider private constructor(context: Context) : DeviceInfoSourc
     private val preferences = context.applicationContext
         .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    private val deviceId: String
-        get() = preferences.getString(KEY_DEVICE_ID, null)?.takeIf(String::isNotBlank)
+    private val deviceId: String by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        preferences.getString(KEY_DEVICE_ID, null)?.takeIf(String::isNotBlank)
             ?: UUID.randomUUID().toString().also {
+                // apply도 메모리 값은 즉시 바꾸므로 동기화 구간 이후 모든 호출이 같은 값을 본다.
                 preferences.edit().putString(KEY_DEVICE_ID, it).apply()
             }
+    }
 
     override suspend fun getDevice(): DeviceRequest {
         val latestToken = suspendCancellableCoroutine { continuation ->
