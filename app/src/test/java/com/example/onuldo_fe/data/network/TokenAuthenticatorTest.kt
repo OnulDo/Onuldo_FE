@@ -23,6 +23,14 @@ class TokenAuthenticatorTest {
     }
 
     @Test
+    fun `빈 errorCode는 기존 code 값을 가리지 않는다`() {
+        assertTrue(
+            response("""{"errorCode":"","code":"TOKEN_EXPIRED"}""")
+                .hasTokenExpiredCode()
+        )
+    }
+
+    @Test
     fun `본문 없는 일반 401은 재발급 대상으로 판단하지 않는다`() {
         assertFalse(response("").hasTokenExpiredCode())
     }

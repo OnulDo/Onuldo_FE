@@ -48,5 +48,5 @@ data class ErrorBody(
     val errorCode: String? = null,
     val message: String? = null,
 ) {
-    val effectiveCode: String? get() = errorCode ?: code
+    val effectiveCode: String? get() = errorCode?.takeIf(String::isNotBlank) ?: code
 }
