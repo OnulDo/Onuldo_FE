@@ -2,7 +2,6 @@ package com.example.onuldo_fe.ui.screen.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -29,9 +27,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
@@ -41,12 +39,11 @@ import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.theme.Black
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown30
-import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Pretendard
-import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.viewmodel.OnboardingDraft
 
 /**
@@ -256,26 +253,42 @@ private fun AgreeItemRow(
     }
 }
 
-/** 원형 체크박스. 미체크는 테두리만, 체크는 Persimmon 채움. */
+/** 상태별 Vector Drawable을 사용하는 약관 체크박스. */
 @Composable
 private fun RoundCheckbox(checked: Boolean, size: androidx.compose.ui.unit.Dp) {
-    Box(
-        modifier = Modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(if (checked) Persimmon else White)
-            .then(
-                if (checked) Modifier else Modifier.border(1.5.dp, DarkBrown40, CircleShape)
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (checked) {
-            Text(
-                text = "✓",
-                color = Color.White,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = (size.value * 0.55f).sp,
+    Image(
+        painter = painterResource(
+            if (checked) R.drawable.ic_checkbox_checked
+            else R.drawable.ic_checkbox_unchecked
+        ),
+        contentDescription = if (checked) "선택됨" else "선택 안 됨",
+        modifier = Modifier.size(size),
+    )
+}
+
+@Preview(
+    name = "전체 동의 카드 - 체크 전후",
+    showBackground = true,
+    backgroundColor = 0xFFFFFDF7,
+    widthDp = 390,
+)
+@Composable
+private fun AgreeAllCardPreview() {
+    OnulDo_FETheme {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 20.dp, vertical = 24.dp),
+        ) {
+            AgreeAllCard(
+                checked = false,
+                onToggle = {},
+            )
+            Spacer(Modifier.height(16.dp))
+            AgreeAllCard(
+                checked = true,
+                onToggle = {},
             )
         }
     }
