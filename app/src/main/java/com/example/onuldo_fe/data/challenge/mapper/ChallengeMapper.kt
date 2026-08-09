@@ -36,8 +36,8 @@ fun ChallengeListResultDto.toModel(): ChallengePage = ChallengePage(
     hasNext = hasNext
 )
 
-// 상세 응답 DTO → 상세 도메인 모델.
-// description(블록 JSON 문자열)은 파싱해 content 블록 리스트로, 인증 문구는 null이면 빈 문자열로 안전 처리.
+// 상세 응답 DTO → 상세 도메인 모델
+// description(블록 JSON 문자열)은 파싱해 content 블록 리스트로, 인증 문구는 null이면 빈 문자열로 안전 처리
 fun ChallengeItemDto.toDetailModel(): ChallengeDetail = ChallengeDetail(
     id = challengeId,
     title = name,
