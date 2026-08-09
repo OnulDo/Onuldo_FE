@@ -74,8 +74,11 @@ data class PointTransaction(
     val type: PointTransactionTypeDto?,
     val title: String,
     val amount: Int,
-    val depositAmount: Int,
-    val adjustmentAmount: Int,
+    // 도전금·조정액은 도전 관련 거래에만 존재하고 충전·출금 등에선 서버가 null로 준다.
+    // "값 없음"과 "실제 0"을 구분하려고 nullable 원본을 그대로 둔다(0으로 채우지 않음).
+    // breakdown 표시는 둘 다 non-null일 때만 — 하나라도 null이면 표시하지 않는다.
+    val depositAmount: Int?,
+    val adjustmentAmount: Int?,
     val balanceAfter: Long,
     val date: String,
 )
