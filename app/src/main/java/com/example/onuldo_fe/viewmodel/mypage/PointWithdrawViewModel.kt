@@ -14,17 +14,14 @@ import com.example.onuldo_fe.repository.user.UserRepository
 import com.example.onuldo_fe.repository.user.UserRepositoryProvider
 
 data class PointWithdrawUiState(
-    /** 보유 포인트(정산 완료분). null이면 아직 조회 전. */
+    /** 보유 포인트(정산 완료분) = 그대로 출금 가능 금액. null이면 아직 조회 전. */
     val balance: Long? = null,
-    /** 진행 중(예치 등으로 묶인) 포인트. */
+    /** 진행 중(예치 등으로 묶인) 포인트. 화면 표시용이며 출금 가능액에서 차감하지 않는다. */
     val pendingPoints: Long = 0L,
     val isSubmitting: Boolean = false,
     /** 출금 실패 안내(일회성). 화면이 토스트로 노출한 뒤 [onErrorShown]으로 비운다. */
     val errorMessage: String? = null,
-) {
-    /** 실제 출금 가능한 금액 = 보유 − 진행 중(음수 방지). 조회 전에는 null. */
-    val withdrawable: Long? get() = balance?.let { (it - pendingPoints).coerceAtLeast(0L) }
-}
+)
 
 /** 포인트 출금. 보유 잔액을 보여주고 `POST /api/users/me/wallet/withdraw`로 출금한다. */
 class PointWithdrawViewModel(
