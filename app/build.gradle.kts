@@ -24,6 +24,23 @@ val envProperties = Properties().apply {
 fun env(key: String): String =
     envProperties.getProperty(key)
         ?: error("Missing required environment variable: $key")
+
+fun apiBaseUrl(): String {
+    val value = env("API_BASE_URL").trim()
+
+    require(value.isNotEmpty()) {
+        "API_BASE_URL must not be blank."
+    }
+    require(value.startsWith("http://") || value.startsWith("https://")) {
+        "API_BASE_URL must start with http:// or https://"
+    }
+    require(value.endsWith("/")) {
+        "API_BASE_URL must end with '/'."
+    }
+
+    return value
+}
+
 fun secret(key: String): String = localProperties.getProperty(key).orEmpty()
 
 fun quotedBuildConfig(value: String): String =
@@ -48,7 +65,7 @@ android {
         buildConfigField(
             "String",
             "API_BASE_URL",
-            quotedBuildConfig(env("API_BASE_URL"))
+            quotedBuildConfig(apiBaseUrl())
         )
         val kakaoNativeAppKey = secret("KAKAO_NATIVE_APP_KEY")
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", quotedBuildConfig(kakaoNativeAppKey))
