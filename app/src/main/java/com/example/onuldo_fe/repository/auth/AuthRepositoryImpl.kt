@@ -1,6 +1,8 @@
 package com.example.onuldo_fe.repository.auth
 
 import com.example.onuldo_fe.data.auth.api.AuthApi
+import com.example.onuldo_fe.data.auth.DeviceInfoSource
+import com.example.onuldo_fe.data.auth.dto.DeviceRequest
 import com.example.onuldo_fe.data.auth.dto.EmailLoginRequest
 import com.example.onuldo_fe.data.auth.dto.EmailSignupRequest
 import com.example.onuldo_fe.data.auth.dto.OAuthLoginRequest
@@ -26,12 +28,17 @@ class AuthRepositoryImpl(
     private val authApi: AuthApi,
     private val tokenStore: TokenStore,
     private val tokenRefreshApi: TokenRefreshApi,
+    private val deviceInfoProvider: DeviceInfoSource = DeviceInfoSource {
+        DeviceRequest(deviceId = "", fcmToken = "")
+    },
 ) : AuthRepository {
 
     override val isLoggedIn: Boolean get() = tokenStore.isLoggedIn
 
     override suspend fun login(email: String, password: String): ApiResult<Unit> =
-        safeApiCall { authApi.login(EmailLoginRequest(email.trim(), password)) }
+        safeApiCall {
+            authApi.login(EmailLoginRequest(email.trim(), password, deviceInfoProvider.getDevice()))
+        }
             .storeTokens()
 
     override suspend fun signup(
@@ -48,6 +55,7 @@ class AuthRepositoryImpl(
                 nickname = nickname.trim(),
                 profileImageUrl = profileImageUrl,
                 termAgreements = termAgreements,
+                device = deviceInfoProvider.getDevice(),
             )
         )
     }.storeTokens()
@@ -56,7 +64,9 @@ class AuthRepositoryImpl(
         provider: SocialProvider,
         socialAccessToken: String,
     ): ApiResult<OAuthLoginOutcome> {
-        val result = safeApiCall { authApi.oauthLogin(OAuthLoginRequest(provider, socialAccessToken)) }
+        val result = safeApiCall {
+            authApi.oauthLogin(OAuthLoginRequest(provider, socialAccessToken, deviceInfoProvider.getDevice()))
+        }
 
         return when (result) {
             is ApiResult.Success -> {
@@ -93,6 +103,7 @@ class AuthRepositoryImpl(
                 nickname = nickname.trim(),
                 profileImageUrl = profileImageUrl,
                 termAgreements = termAgreements,
+                device = deviceInfoProvider.getDevice(),
             )
         )
     }.storeTokens()

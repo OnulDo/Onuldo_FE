@@ -2,6 +2,7 @@ package com.example.onuldo_fe
 
 import android.app.Application
 import com.example.onuldo_fe.data.network.NetworkModule
+import com.example.onuldo_fe.data.auth.DeviceInfoProvider
 import com.example.onuldo_fe.data.social.SocialAuthClient
 
 /**
@@ -16,6 +17,7 @@ class OnuldoApplication : Application() {
         super.onCreate()
         // 토큰 저장소를 영속 구현으로 교체한다. 네트워크가 처음 쓰이기 전에 끝나야 하므로 여기서 한다.
         NetworkModule.initialize(this)
+        DeviceInfoProvider.initialize(this)
         SocialAuthClient.initialize(this)
     }
 }

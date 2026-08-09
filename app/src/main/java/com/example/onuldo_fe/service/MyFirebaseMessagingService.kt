@@ -1,6 +1,7 @@
 package com.example.onuldo_fe.service
 
 import android.util.Log
+import com.example.onuldo_fe.data.auth.DeviceInfoProvider
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -9,8 +10,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        DeviceInfoProvider.get().saveFcmToken(token)
         // 토큰 갱신 시 로그 (백엔드 POST /api/fcm-token 연동은 추후)
-        Log.d(TAG, "onNewToken: $token")
+        Log.d(TAG, "FCM token refreshed")
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
