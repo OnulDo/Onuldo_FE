@@ -25,7 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -53,13 +53,11 @@ import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.viewmodel.mypage.PointWithdrawViewModel
 
-private data class WithdrawPreset(val label: String, val value: Int)
-
 /**
  * 포인트 출금 — Figma node `5154:3517`.
  * 출금 가능 카드 + 금액 입력/칩 + 보낼 곳(정식출시 안내).
  *
- * 출금은 충전과 달리 칩이 **금액을 지정**한다(가산이 아님). '전액'은 실제 출금 가능액이다.
+ * 충전과 동일하게 칩을 누를 때마다 금액을 더한다(예: 만원 두 번 = 2만). '전액'만 출금 가능액 전체로 지정한다.
  * '출금하기'는 `POST /api/users/me/wallet/withdraw`로 출금하고, **성공 응답에서만** [onBack]을 호출한다.
  * (보낼 곳은 계좌/PG 연동 전이라 안내 박스로 대체한다.)
  */
@@ -86,15 +84,8 @@ fun PointWithdrawScreen(
     // “전액”은 API가 허용하는 최대 출금 가능액 명시적 표기
     val maxWithdrawable = withdrawable.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
 
-    val presets = listOf(
-        WithdrawPreset("전액", maxWithdrawable),
-        WithdrawPreset("10,000P", 10_000),
-        WithdrawPreset("30,000P", 30_000),
-        WithdrawPreset("50,000P", 50_000),
-    )
-    // 0에서 시작해 칩으로 금액을 지정한다(Figma 기본 상태가 0P).
-    var selectedPreset by remember { mutableStateOf<Int?>(null) }
-    val amount = selectedPreset?.let { presets[it].value } ?: 0
+    // 충전과 동일하게 칩을 누를 때마다 금액을 더한다. 0에서 시작해 사용자가 쌓아 올린다.
+    var amount by remember { mutableIntStateOf(0) }
     val amountText = "%,d".format(amount)
     // 1 이상, 출금 가능액 이내, 제출 중이 아닐 때만 출금 활성.
     val canWithdraw = amount in 1..withdrawable.toInt() && !state.isSubmitting
@@ -135,9 +126,9 @@ fun PointWithdrawScreen(
             AmountInputBox(
                 amount = amountText,
                 unit = "P",
-                // 칩으로 금액을 고르면 박스 왼쪽에 X가 뜨고, 누르면 선택 해제(0).
+                // 칩으로 금액이 쌓이면 박스 왼쪽에 X가 뜨고, 누르면 0으로 리셋.
                 clearable = amount > 0,
-                onClear = { selectedPreset = null },
+                onClear = { amount = 0 },
                 // 출금 가능액 초과 시 테두리 빨강.
                 isError = overLimit,
             )
@@ -162,11 +153,17 @@ fun PointWithdrawScreen(
                     .padding(horizontal = 26.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                presets.forEachIndexed { i, preset ->
+                // 전액: 누적이 아니라 출금 가능액 전체로 지정.
+                AmountChip(
+                    text = "전액",
+                    onClick = { amount = maxWithdrawable },
+                    modifier = Modifier.weight(1f),
+                )
+                // 나머지는 충전처럼 누를 때마다 더한다.
+                listOf(10_000, 30_000, 50_000).forEach { value ->
                     AmountChip(
-                        text = preset.label,
-                        selected = selectedPreset == i,
-                        onClick = { selectedPreset = i },
+                        text = "+${"%,d".format(value)}",
+                        onClick = { amount += value },
                         modifier = Modifier.weight(1f),
                     )
                 }
