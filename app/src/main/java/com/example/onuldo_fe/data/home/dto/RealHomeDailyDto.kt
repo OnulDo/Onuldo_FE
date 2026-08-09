@@ -1,10 +1,5 @@
 package com.example.onuldo_fe.data.home.dto
 
-/** GET /api/users/me/challenges/daily 응답의 result. */
-data class RealHomeDailyResultDto(
-    val challenges: List<RealHomeDailyChallengeDto> = emptyList()
-)
-
 /** 오늘 수행할 챌린지 한 건의 서버 DTO. */
 data class RealHomeDailyChallengeDto(
     val partyName: String? = null,                  // PARTY 항목의 파티 이름
@@ -25,6 +20,7 @@ data class RealHomeDailyChallengeDto(
     val durationWeeks: Int = 0,                     // 진행 기간(주)
     val startDate: String = "",                    // 챌린지 시작일
     val endDate: String = "",                      // 챌린지 종료일
+    val dailyStatus: String? = null,                // 오늘 인증 상태(WAITING 등) — 서버 신규 필드
     val verifiedOnDate: Boolean = false,            // 오늘 인증 완료 여부 (백앤드에서 성공, 실패로 내려준다고 함)
     val streakDays: Int? = null                     // 연속 인증 성공 일수 (백앤드랑 확인 필요함)
 )

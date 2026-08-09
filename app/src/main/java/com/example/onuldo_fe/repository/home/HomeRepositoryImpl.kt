@@ -58,7 +58,7 @@ class HomeRepositoryImpl(
             if (!response.isSuccessful) throw HttpException(response)
             val body = response.body() ?: throw IOException("오늘 챌린지 응답 본문이 비어 있습니다.")
 
-            val dailyItems = body.result.challenges
+            val dailyItems = body.result
             val partyHome = partyHomeDeferred.await()
             val profile = profileDeferred.await()
 

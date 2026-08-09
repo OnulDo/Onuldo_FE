@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.onuldo_fe.navigation.OnuldoApp
+import com.example.onuldo_fe.data.auth.DeviceInfoProvider
 import com.example.onuldo_fe.navigation.Routes
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.viewmodel.StartupViewModel
@@ -38,7 +39,8 @@ class MainActivity : ComponentActivity() {
         FirebaseMessaging.getInstance().token
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Log.d("FCM", "token = ${task.result}")
+                    DeviceInfoProvider.get().saveFcmToken(task.result)
+                    Log.d("FCM", "token fetched")
                 } else {
                     Log.w("FCM", "token fetch failed", task.exception)
                 }

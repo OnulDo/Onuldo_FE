@@ -112,8 +112,9 @@ class UserRepositoryImpl(
                         type = dto.type,
                         title = dto.title.orEmpty(),
                         amount = dto.amount,
-                        depositAmount = dto.depositAmount ?: 0,
-                        adjustmentAmount = dto.adjustmentAmount ?: 0,
+                        // null은 그대로 둔다(0으로 채우면 "값 없음"과 "실제 0"이 섞인다).
+                        depositAmount = dto.depositAmount,
+                        adjustmentAmount = dto.adjustmentAmount,
                         balanceAfter = dto.balanceAfter,
                         date = dto.date.orEmpty(),
                     )

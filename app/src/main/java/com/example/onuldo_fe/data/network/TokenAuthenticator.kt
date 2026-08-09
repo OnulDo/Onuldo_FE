@@ -2,6 +2,7 @@ package com.example.onuldo_fe.data.network
 
 import android.os.SystemClock
 import android.util.Log
+import com.google.gson.Gson
 import java.io.IOException
 import okhttp3.Authenticator
 import okhttp3.Request
@@ -9,7 +10,7 @@ import okhttp3.Response
 import okhttp3.Route
 
 /**
- * 액세스 토큰 만료(401) 시 리프레시 토큰으로 자동 재발급하고 원래 요청을 재시도한다.
+ * 서버가 `TOKEN_EXPIRED`를 반환한 경우에만 리프레시 토큰으로 자동 재발급하고 원래 요청을 재시도한다.
  *
  * 서버 액세스 토큰 수명이 **30분**이라 이 처리가 없으면 앱을 켜둔 채 30분이 지나는 순간
  * 모든 API가 401로 실패한다. 리프레시는 14일이라 그 안에서는 재로그인 없이 이어진다.
@@ -26,9 +27,11 @@ class TokenAuthenticator(
 ) : Authenticator {
 
     override fun authenticate(route: Route?, response: Response): Request? {
-        // 1. 재시도한 요청이 또 401이면 재발급으로 해결되지 않는 상황이다.
+        // 비밀번호 오류·권한 부족 등 다른 401은 토큰 만료가 아니므로 세션을 건드리지 않는다.
+        if (!response.hasTokenExpiredCode()) return null
+
+        // 재발급 후에도 TOKEN_EXPIRED라면 무한 반복하지 않고 해당 요청만 실패시킨다.
         if (response.priorResponseCount() >= MAX_RETRY_COUNT) {
-            expireSession()
             return null
         }
 
@@ -137,3 +140,17 @@ class TokenAuthenticator(
         private const val TRANSIENT_FAILURE_WINDOW_MS = 3_000L
     }
 }
+
+/** 본문을 소비하지 않고 `errorCode`와 이전 응답 형식의 `code`를 모두 확인한다. */
+internal fun Response.hasTokenExpiredCode(): Boolean = try {
+    val error = tokenErrorGson.fromJson(
+        peekBody(MAX_ERROR_BODY_BYTES).string(),
+        ErrorBody::class.java,
+    )
+    error.effectiveCode == ApiErrorCode.TOKEN_EXPIRED
+} catch (_: Exception) {
+    false
+}
+
+private const val MAX_ERROR_BODY_BYTES = 64L * 1024L
+private val tokenErrorGson = Gson()
