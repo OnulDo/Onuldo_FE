@@ -1,6 +1,6 @@
 package com.example.onuldo_fe.model.home.notification
 
-// 표시 유형 — 알림함 아이콘 매핑의 기준. //TODO: 변동 가능
+// 표시 유형 — 알림함 아이콘 매핑의 기준
 // 정책서(NOTI-02) 카테고리는 8유형이나, "인증 마감 리마인더"의 경고성 변형(NOTI-03)과
 // "파티 일별 정산"(알림함 전용, NOTI-03)이 별도 아이콘을 써서 표시 기준으로는 10종.
 enum class NotificationType {
@@ -22,7 +22,6 @@ enum class NotificationType {
  * 서버 7종: VERIFICATION_DEADLINE / VERIFICATION_RESULT / PARTY_MEMBER_VERIFIED /
  * CHALLENGE_START / CHALLENGE_END_REMINDER / REFUND_COMPLETE / PARTY_SETTLEMENT_COMPLETE.
  * 알 수 없는 값은 마감 리마인더 아이콘으로 안전 처리한다.
- * TODO: 아이콘 세분화(경고성/통과·기각 구분 등)는 추후.
  */
 fun notificationTypeFrom(raw: String?): NotificationType = when (raw) {
     "VERIFICATION_DEADLINE" -> NotificationType.DeadlineReminder

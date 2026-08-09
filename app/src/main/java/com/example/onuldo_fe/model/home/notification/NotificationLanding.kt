@@ -1,8 +1,6 @@
 package com.example.onuldo_fe.model.home.notification
 
 /**
- * 알림 탭 시 이동할 목적지(NOTI-04). 화면 프레임워크에 의존하지 않는 순수 결과라
- * 홈 알림 오버레이와 B104 알림 페이지가 **같은 규칙**을 공유한다.
  * 각 호스트는 이 목적지를 실제 네비게이션으로 실행하되, 아직 없는 화면은 [Home]으로 폴백한다.
  */
 sealed interface NotificationLanding {
