@@ -49,6 +49,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
+import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.viewmodel.mypage.PointWithdrawViewModel
 
@@ -97,6 +98,8 @@ fun PointWithdrawScreen(
     val amountText = "%,d".format(amount)
     // 1 이상, 출금 가능액 이내, 제출 중이 아닐 때만 출금 활성.
     val canWithdraw = amount in 1..withdrawable.toInt() && !state.isSubmitting
+    // 출금 가능액을 넘는 금액을 고르면(예: 잔액보다 큰 프리셋) 빨간 안내를 띄우고 버튼은 계속 비활성.
+    val overLimit = amount > 0 && amount.toLong() > withdrawable
 
     Column(
         modifier = Modifier
@@ -135,7 +138,22 @@ fun PointWithdrawScreen(
                 // 칩으로 금액을 고르면 박스 왼쪽에 X가 뜨고, 누르면 선택 해제(0).
                 clearable = amount > 0,
                 onClear = { selectedPreset = null },
+                // 출금 가능액 초과 시 테두리 빨강.
+                isError = overLimit,
             )
+
+            // 출금 가능액 초과 안내(서버 요청 전 클라에서 즉시 알림).
+            if (overLimit) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "출금 가능 금액 ${"%,d".format(withdrawable)}P를 초과했어요",
+                    fontFamily = Pretendard,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 12.sp,
+                    color = Red,
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                )
+            }
 
             Spacer(Modifier.height(12.dp))
             Row(
