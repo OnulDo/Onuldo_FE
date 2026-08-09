@@ -70,10 +70,14 @@ fun HomeVerifyButton(
         horizontalArrangement = Arrangement.Center
     ) {
         Icon(
-            painter = painterResource(R.drawable.home_camera_icon),
+            painter = painterResource(
+                if (enabled) R.drawable.home_camera_icon
+                else R.drawable.home_camera_disabled_icon
+            ),
             contentDescription = null,
             modifier = Modifier.size(iconSize),
-            tint = contentColor
+            // 비활성 아이콘은 리소스에 지정된 색을 그대로 사용한다.
+            tint = if (enabled) contentColor else Color.Unspecified
         )
         Spacer(Modifier.width(5.dp))
         Text(

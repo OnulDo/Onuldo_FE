@@ -212,6 +212,7 @@ private fun PartyHomeItemDto.toHomeModel(
                 verified = challengeStatus != ChallengeStatus.NeedCertification
             ),
         canVerify = challengeStatus == ChallengeStatus.NeedCertification &&
+            dailyStatus == DAILY_STATUS_WAITING &&
             !isDeadlinePassed &&
             verifiedChallengeId != null,
         members = members.map {
@@ -266,12 +267,14 @@ private fun String.toHomeTimeText(): String =
         .getOrElse { substringAfter('T', this).take(5) }
 
 private fun RealHomeDailyChallengeDto.canVerifyAt(now: LocalTime): Boolean {
-    // 인증 완료 또는 인증 가능 시간 밖이면 버튼을 숨긴다.
-    if (verifiedOnDate) return false
+    // 서버가 오늘 인증 대기 상태로 내려준 경우에만 시간 범위를 추가 확인한다.
+    if (verifiedOnDate || dailyStatus != DAILY_STATUS_WAITING) return false
     val start = timeStart.toLocalTimeOrNull()
     val end = timeEnd.toLocalTimeOrNull()
     return (start == null || !now.isBefore(start)) && (end == null || !now.isAfter(end))
 }
+
+private const val DAILY_STATUS_WAITING = "WAITING"
 
 /** 인증 완료 여부와 마감 시각으로 오늘 카드 상태를 정한다. */
 private fun RealHomeDailyChallengeDto.toChallengeStatus(now: LocalTime): ChallengeStatus {
