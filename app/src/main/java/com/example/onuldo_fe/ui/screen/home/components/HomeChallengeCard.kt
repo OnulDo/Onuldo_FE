@@ -86,14 +86,11 @@ fun HomeChallengeCard(
                     fontWeight = FontWeight.Bold
                 )
                 challenge.subtitleTextOrNull()?.let { subtitle ->
-                    // 0일 연속 성공이면 문구와 간격을 모두 숨긴다.
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = subtitle,
                         color = DarkBrown50,
-                        fontFamily = Pretendard,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.labelLarge,
                         maxLines = 1
                     )
                 }
