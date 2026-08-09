@@ -21,7 +21,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,7 +72,9 @@ fun NotificationScreen(
     uiState: NotificationUiState,
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit = {},
-    onItemClick: (NotificationItem) -> Unit = {}
+    onItemClick: (NotificationItem) -> Unit = {},
+    onRetry: () -> Unit = {},
+    onLoadMore: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
     val notifications = uiState.notifications
@@ -103,26 +107,78 @@ fun NotificationScreen(
             )
         }
 
-        if (notifications.isEmpty()) {
-            // 알림 없을 때 — 빈 화면
-            NotificationEmpty()
-        } else {
-            // 알림 리스트
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = spacing.spacing20,
-                    end = spacing.spacing20,
-                    top = spacing.spacing8,
-                    bottom = spacing.spacing20
-                ),
-                verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
-            ) {
-                items(notifications) { item ->
-                    NotificationItemCard(item, onClick = { onItemClick(item) })
+        val error = uiState.errorMessage
+        when {
+            // 첫 페이지 로딩 중 — 빈 상태·에러와 구분
+            uiState.isLoading && notifications.isEmpty() -> {
+                Box(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    contentAlignment = Alignment.Center
+                ) { CircularProgressIndicator(color = Persimmon20) }
+            }
+            // 첫 로딩 실패 — 에러 문구 + 다시 시도
+            error != null && notifications.isEmpty() -> {
+                NotificationError(message = error, onRetry = onRetry)
+            }
+            // 로딩 끝 + 진짜 비었을 때만 빈 화면
+            uiState.isEmpty -> NotificationEmpty()
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = spacing.spacing20,
+                        end = spacing.spacing20,
+                        top = spacing.spacing8,
+                        bottom = spacing.spacing20
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
+                ) {
+                    items(notifications) { item ->
+                        NotificationItemCard(item, onClick = { onItemClick(item) })
+                    }
+                    // 목록 끝 도달 → 다음 페이지(커서 페이징)
+                    if (uiState.hasNext) {
+                        item {
+                            LaunchedEffect(notifications.size) { onLoadMore() }
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                                contentAlignment = Alignment.Center
+                            ) { CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Persimmon20) }
+                        }
+                    }
                 }
             }
         }
+    }
+}
+
+// 첫 로딩 실패 시 에러 + 다시 시도
+@Composable
+private fun ColumnScope.NotificationError(message: String, onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = message,
+            fontFamily = Pretendard,
+            fontWeight = FontWeight.Normal,
+            fontSize = 14.sp,
+            color = BlackBrown,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = "다시 시도",
+            fontFamily = Pretendard,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            color = Persimmon20,
+            modifier = Modifier.clickable(onClick = onRetry)
+        )
     }
 }
 

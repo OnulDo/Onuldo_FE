@@ -4,7 +4,8 @@ import com.example.onuldo_fe.model.home.notification.NotificationItem
 
 data class NotificationUiState(
     val notifications: List<NotificationItem> = emptyList(),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = false,      // 첫 페이지 로딩
+    val isLoadingMore: Boolean = false,  // 다음 페이지(무한 스크롤) 로딩
     val hasNext: Boolean = false,
     val errorMessage: String? = null,
 ) {

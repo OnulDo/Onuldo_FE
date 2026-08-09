@@ -39,4 +39,25 @@ class NotificationViewModel(
                 }
         }
     }
+
+    //목록 끝에 도달했을 때 다음 페이지를 이어 받는다(커서 페이징) - 피드백
+    fun loadMore() {
+        val cursor = nextCursor
+        if (!uiState.hasNext || cursor == null || uiState.isLoading || uiState.isLoadingMore) return
+        viewModelScope.launch {
+            uiState = uiState.copy(isLoadingMore = true)
+            repository.getNotifications(cursor)
+                .onSuccess { page ->
+                    nextCursor = page.nextCursor
+                    uiState = uiState.copy(
+                        notifications = uiState.notifications + page.items,
+                        hasNext = page.hasNext,
+                        isLoadingMore = false,
+                    )
+                }
+                .onError { _, message ->
+                    uiState = uiState.copy(isLoadingMore = false, errorMessage = message)
+                }
+        }
+    }
 }

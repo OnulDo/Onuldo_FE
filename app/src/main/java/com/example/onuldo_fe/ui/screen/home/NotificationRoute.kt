@@ -14,6 +14,8 @@ fun NotificationRoute(
     NotificationScreen(
         uiState = viewModel.uiState,
         onBackClick = onBackClick,
-        onItemClick = onItemClick
+        onItemClick = onItemClick,
+        onRetry = viewModel::loadNotifications,
+        onLoadMore = viewModel::loadMore
     )
 }
