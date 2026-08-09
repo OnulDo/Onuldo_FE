@@ -54,8 +54,7 @@ import com.example.onuldo_fe.viewmodel.OnboardingDraft
  * "만 14세 이상"은 별도 문서가 없어 이동 없이 체크만 한다.
  *
  * [required]는 화면설계서 회원가입(`3766:6295`) 항목 4 기준 —
- * 필수는 **서비스·개인정보·만 14세 3종**이고 "필수 약관 미동의 시 완료 버튼 비활성화 유지".
- * 환급 정책은 필수 목록에 없으므로 선택으로 둔다. (서버 `TermType.REQUIRED`와도 일치)
+ * 화면에 노출되는 약관은 모두 필수이며 하나라도 미동의하면 완료 버튼을 비활성화한다.
  */
 private enum class AgreeItem(
     val label: String,
@@ -65,7 +64,7 @@ private enum class AgreeItem(
     AGE_14("만 14세 이상입니다", null, required = true),
     SERVICE("서비스 이용약관 동의", TermType.SERVICE, required = true),
     PRIVACY("개인정보 처리방침 동의", TermType.PRIVACY, required = true),
-    REFUND("환급 정책 동의", TermType.REFUND, required = false),
+    REFUND("환급 정책 동의", TermType.REFUND, required = true),
 }
 
 /**
@@ -86,7 +85,7 @@ fun TermsAgreementScreen(
     // 항목별 동의 상태. 전체 동의는 개별 항목이 모두 체크됐는지로 판단한다.
     var checked by remember { mutableStateOf(emptySet<AgreeItem>()) }
     val allChecked = checked.size == AgreeItem.entries.size
-    // 진행 가능 조건은 '전체'가 아니라 '필수 전부'다. 선택 항목(환급 정책)은 막지 않는다.
+    // 화면의 모든 약관이 필수이므로 전부 체크해야 진행할 수 있다.
     val requiredChecked = AgreeItem.entries.filter { it.required }.all { it in checked }
 
     fun toggle(item: AgreeItem) {
@@ -196,7 +195,7 @@ private fun AgreeAllCard(
                 color = Black,
             )
             Text(
-                text = "필수 및 선택 항목에 모두 동의합니다",
+                text = "필수 항목에 모두 동의합니다",
                 fontFamily = Pretendard,
                 fontWeight = FontWeight.Medium,
                 fontSize = 13.sp,
