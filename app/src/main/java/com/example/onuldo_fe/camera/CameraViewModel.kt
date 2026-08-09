@@ -25,12 +25,22 @@ sealed interface VerificationSubmitState {
     data class Error(val message: String) : VerificationSubmitState
 }
 
+sealed interface ManualReviewRequestState {
+    data object Idle : ManualReviewRequestState
+    data object Loading : ManualReviewRequestState
+    data class Success(val requestedAt: String) : ManualReviewRequestState
+    data class Error(val message: String) : ManualReviewRequestState
+}
+
 class CameraViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = VerificationRepositoryProvider.create(application)
     private val _imageUri = MutableStateFlow<Uri?>(null)
     val imageUri = _imageUri.asStateFlow()
     private val _submitState = MutableStateFlow<VerificationSubmitState>(VerificationSubmitState.Idle)
     val submitState = _submitState.asStateFlow()
+    private val _manualReviewState =
+        MutableStateFlow<ManualReviewRequestState>(ManualReviewRequestState.Idle)
+    val manualReviewState = _manualReviewState.asStateFlow()
     private var uploadedFileId: String? = null
     var activeChallengeId: Long? = null
         private set
@@ -108,10 +118,47 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         _imageUri.value = null
         uploadedFileId = null
         _submitState.value = VerificationSubmitState.Idle
+        _manualReviewState.value = ManualReviewRequestState.Idle
     }
 
     fun clearSubmitState() {
         _submitState.value = VerificationSubmitState.Idle
+        _manualReviewState.value = ManualReviewRequestState.Idle
+    }
+
+    fun requestManualReview() {
+        if (_manualReviewState.value == ManualReviewRequestState.Loading) return
+        if (_submitState.value !is VerificationSubmitState.Failure) {
+            _manualReviewState.value = ManualReviewRequestState.Error(
+                "재검토할 인증 실패 기록을 확인할 수 없어요."
+            )
+            return
+        }
+        val challengeId = activeChallengeId ?: run {
+            _manualReviewState.value = ManualReviewRequestState.Error(
+                "챌린지 정보를 확인할 수 없어요."
+            )
+            return
+        }
+
+        _manualReviewState.value = ManualReviewRequestState.Loading
+        viewModelScope.launch {
+            try {
+                val result = repository.requestManualReview(challengeId)
+                activeVerifiedAt = result.requestedAt
+                _manualReviewState.value = ManualReviewRequestState.Success(result.requestedAt)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                _manualReviewState.value = ManualReviewRequestState.Error(
+                    error.toManualReviewUserMessage()
+                )
+            }
+        }
+    }
+
+    fun clearManualReviewState() {
+        _manualReviewState.value = ManualReviewRequestState.Idle
     }
 
     private fun deleteSubmittedPhoto() {
@@ -147,5 +194,19 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
         else -> "인증 요청에 실패했습니다. 다시 시도해 주세요."
+    }
+
+    private fun Throwable.toManualReviewUserMessage(): String = when (this) {
+        is IllegalArgumentException -> message ?: "재검토 요청 정보를 확인해 주세요."
+        is IOException -> "인터넷 연결을 확인한 후 다시 시도해 주세요."
+        is HttpException -> when (code()) {
+            400 -> "자동 실패한 인증만 재검토를 요청할 수 있어요."
+            401 -> "로그인이 만료되었습니다. 다시 로그인해 주세요."
+            404 -> "오늘 재검토할 인증 기록을 찾을 수 없어요."
+            409 -> "이미 재검토를 요청한 인증이에요."
+            in 500..599 -> "서버에 문제가 발생했어요. 잠시 후 다시 시도해 주세요."
+            else -> "재검토 요청에 실패했어요. 다시 시도해 주세요."
+        }
+        else -> "재검토 요청에 실패했어요. 다시 시도해 주세요."
     }
 }

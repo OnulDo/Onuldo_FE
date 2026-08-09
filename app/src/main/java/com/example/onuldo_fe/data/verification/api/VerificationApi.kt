@@ -4,6 +4,7 @@ import com.example.onuldo_fe.data.common.ApiResponse
 import com.example.onuldo_fe.data.verification.dto.ChallengeVerificationRequestDto
 import com.example.onuldo_fe.data.verification.dto.ChallengeVerificationResultDto
 import com.example.onuldo_fe.data.verification.dto.ImageUploadResultDto
+import com.example.onuldo_fe.data.verification.dto.ManualReviewResultDto
 import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.Multipart
@@ -21,4 +22,9 @@ interface VerificationApi {
         @Path("challengeId") challengeId: Long,
         @Body request: ChallengeVerificationRequestDto
     ): ApiResponse<ChallengeVerificationResultDto>
+
+    @POST("api/challenges/{challengeId}/verification/manual-review")
+    suspend fun requestManualReview(
+        @Path("challengeId") challengeId: Long
+    ): ApiResponse<ManualReviewResultDto>
 }

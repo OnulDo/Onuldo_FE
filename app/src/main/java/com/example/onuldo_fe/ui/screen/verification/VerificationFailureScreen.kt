@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.component.OnulDoButton
+import com.example.onuldo_fe.ui.component.OnulDoErrorDialog
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
@@ -45,8 +46,11 @@ import kotlinx.coroutines.delay
 fun VerificationFailureScreen(
     failureReason: String = "사진이 챌린지 인증 조건을 충족하지 못했어요.",
     verificationDeadline: String = "",
+    isManualReviewLoading: Boolean = false,
+    manualReviewErrorMessage: String? = null,
     onRetryClick: () -> Unit = {},
-    onManualReviewClick: () -> Unit = {}
+    onManualReviewClick: () -> Unit = {},
+    onManualReviewErrorDismiss: () -> Unit = {}
 ) {
     val remainingTimeText by produceState(
         initialValue = verificationDeadline.toRemainingTimeText(),
@@ -177,12 +181,15 @@ fun VerificationFailureScreen(
                 modifier = Modifier.padding(top = 28.dp)
             )
             Text(
-                text = "직접검토 요청하기",
+                text = if (isManualReviewLoading) "재검토 요청 중..." else "직접검토 요청하기",
                 color = Persimmon,
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier
                     .padding(top = 7.dp)
-                    .clickable(onClick = onManualReviewClick)
+                    .clickable(
+                        enabled = !isManualReviewLoading,
+                        onClick = onManualReviewClick
+                    )
             )
         }
 
@@ -192,6 +199,16 @@ fun VerificationFailureScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 42.dp)
+        )
+    }
+
+    manualReviewErrorMessage?.let { message ->
+        OnulDoErrorDialog(
+            title = "재검토 요청에 실패했어요",
+            description = message,
+            buttonText = "재시도",
+            onButtonClick = onManualReviewClick,
+            onDismiss = onManualReviewErrorDismiss
         )
     }
 }
@@ -216,5 +233,23 @@ private fun String.toRemainingTimeText(now: LocalTime = LocalTime.now()): String
 private fun VerificationFailureScreenPreview() {
     OnulDo_FETheme {
         VerificationFailureScreen()
+    }
+}
+
+@Preview(
+    name = "재검토 요청 실패",
+    showBackground = true,
+    widthDp = 390,
+    heightDp = 844
+)
+@Composable
+private fun ManualReviewErrorPreview() {
+    OnulDo_FETheme {
+        VerificationFailureScreen(
+            failureReason = "사진에서 사람을 감지할 수 없어요.",
+            verificationDeadline = "23:59:00",
+            manualReviewErrorMessage =
+                "인터넷 연결을 확인한 후 다시 시도해 주세요."
+        )
     }
 }

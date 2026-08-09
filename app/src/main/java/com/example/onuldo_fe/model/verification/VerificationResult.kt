@@ -24,3 +24,7 @@ data class ChallengeVerificationResult(
     val verifiedAt: String,
     val review: VerificationReview
 )
+
+data class ManualReviewResult(
+    val requestedAt: String
+)

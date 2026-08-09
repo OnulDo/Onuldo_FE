@@ -9,6 +9,7 @@ import com.example.onuldo_fe.data.verification.dto.ChallengeVerificationResultDt
 import com.example.onuldo_fe.data.verification.dto.ImageUploadResultDto
 import com.example.onuldo_fe.model.verification.ChallengeVerificationResult
 import com.example.onuldo_fe.model.verification.ImageUploadResult
+import com.example.onuldo_fe.model.verification.ManualReviewResult
 import com.example.onuldo_fe.model.verification.VerificationReview
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +53,17 @@ class VerificationRepositoryImpl(
             request = ChallengeVerificationRequestDto(fileId)
         ).result.toModel()
     }
+
+    override suspend fun requestManualReview(challengeId: Long): ManualReviewResult =
+        withContext(Dispatchers.IO) {
+            require(challengeId > 0L) { "챌린지 정보가 올바르지 않습니다." }
+            val requestedAt = api.requestManualReview(challengeId)
+                .result
+                .manualReviewRequestedAt
+                .orEmpty()
+            require(requestedAt.isNotBlank()) { "서버가 재검토 요청 시각을 반환하지 않았습니다." }
+            ManualReviewResult(requestedAt = requestedAt)
+        }
     private fun validateImage(file: File) {
         val exif = ExifInterface(file)
         val width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)

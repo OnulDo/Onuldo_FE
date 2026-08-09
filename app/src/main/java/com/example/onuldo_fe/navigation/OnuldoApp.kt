@@ -405,13 +405,26 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
 
         composable(Routes.VERIFICATION_FAIL) {
             val state by cameraViewModel.submitState.collectAsState()
+            val manualReviewState by cameraViewModel.manualReviewState.collectAsState()
+
+            LaunchedEffect(manualReviewState) {
+                if (manualReviewState is com.example.onuldo_fe.camera.ManualReviewRequestState.Success) {
+                    cameraViewModel.clearManualReviewState()
+                    navController.navigate(Routes.VERIFICATION_WAITING)
+                }
+            }
+
             ChallengeVerificationScreen(
                 status = VerificationStatus.FAILURE,
                 failureReason = (state as? com.example.onuldo_fe.camera.VerificationSubmitState.Failure)?.message.orEmpty(),
                 verificationDeadline = cameraViewModel.activeDeadline,
-                onManualReviewClick = {
-                    navController.navigate(Routes.VERIFICATION_WAITING)
-                },
+                isManualReviewLoading =
+                    manualReviewState == com.example.onuldo_fe.camera.ManualReviewRequestState.Loading,
+                manualReviewErrorMessage =
+                    (manualReviewState as? com.example.onuldo_fe.camera.ManualReviewRequestState.Error)
+                        ?.message,
+                onManualReviewClick = cameraViewModel::requestManualReview,
+                onManualReviewErrorDismiss = cameraViewModel::clearManualReviewState,
                 onRetryClick = {
                     cameraViewModel.activeChallengeId?.let { challengeId ->
                         val category = cameraViewModel.activeCategory
