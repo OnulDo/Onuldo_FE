@@ -211,20 +211,19 @@ fun SettingScreen(
 
         Spacer(Modifier.height(41.dp))
 
-        SettingSectionHeader(text = "정산 알림")
+        SettingSectionHeader(text = "항상 받는 알림")
 
         Spacer(Modifier.height(2.dp))
 
-    // 정산·환급 완료 — 서버 settlementComplete 값과 연결(토글 가능)
         SettingToggleRow(
             title = "정산·환급 완료",
-            description = "정산·환급이 완료되면 알림",
-            checked = state.refund,
-            onCheckedChange = { updateState { copy(refund = it) } },
-            enabled = subEnabled
+            description = "포인트 지급 알림은 끌 수 없어요",
+            checked = true,
+            onCheckedChange = {},
+            enabled = false,
+            trailingText = "항상 발송"
         )
     }
-
     // 알림 권한 안내 팝업(권한x) → "설정으로 이동"이면 시스템 알림설정으로
     if (showNotificationPermissionDialog) {
         PermissionSettingDialog(
