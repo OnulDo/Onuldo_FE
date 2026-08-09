@@ -106,19 +106,12 @@ class NotificationSettingsViewModel(
 /**
  * 서버 값을 화면 상태로 옮긴다.
  *
- * 마스터 스위치는 서버 `allEnabled`를 쓰지 않고 **개별 6종 중 하나라도 켜져 있는지**로 판단한다.
- * 서버가 `all_enabled`를 갱신할 방법을 제공하지 않아(항상 `true`) 그대로 쓰면,
- * 마스터를 끄고 나갔다 들어왔을 때 "마스터는 켜짐 + 개별은 전부 꺼짐"이라는 모순된 화면이 된다.
- *
- * OR로 판단하면 저장·복원이 일치한다.
- * - 마스터 끄기(개별 6종 모두 off) → 재진입 시에도 마스터 off
- * - 개별 하나만 끄기 → 나머지가 켜져 있으므로 마스터는 on (개별 토글이 잠기지 않는다)
- *
- * 서버에 `ALL` 타입이 추가되면 이 파생을 제거하고 서버 값을 그대로 쓰면 된다.
+ * 마스터 스위치는 서버 `allEnabled` 값을 그대로 표시한다.
+ * (저장 쪽은 `PATCH`에 `ALL` 타입이 없어, 마스터 토글 시 [apply]에서 개별 6종을 일괄로 바꾼다.
+ *  서버가 그에 맞춰 `allEnabled`를 재계산해 내려주지 않으면 재진입 시 표시가 어긋날 수 있다.)
  */
 private fun NotificationSettings.toUiState() = NotificationSettingsState(
-    all = verificationDeadline || challengeStart || challengeEndReminder ||
-        verificationResult || partyMemberVerified || settlementComplete,
+    all = allEnabled,
     challengeStart = challengeStart,
     deadline = verificationDeadline,
     endReminder = challengeEndReminder,

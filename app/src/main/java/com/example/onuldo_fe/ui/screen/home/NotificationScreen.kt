@@ -3,6 +3,7 @@ package com.example.onuldo_fe.ui.screen.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +36,6 @@ import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.model.home.notification.NotificationItem
 import com.example.onuldo_fe.model.home.notification.NotificationType
-import com.example.onuldo_fe.repository.notification.NotificationRepositoryImpl
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
@@ -49,7 +49,6 @@ import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.viewmodel.notification.NotificationUiState
-import com.example.onuldo_fe.viewmodel.notification.toUiState
 
 // 알림 종류별 아이콘 매핑 — API 연동 후에도 UI에서만 관리
 private fun NotificationType.iconRes(): Int = when (this) {
@@ -70,7 +69,8 @@ private fun NotificationType.iconRes(): Int = when (this) {
 fun NotificationScreen(
     uiState: NotificationUiState,
     modifier: Modifier = Modifier,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onItemClick: (NotificationItem) -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
     val notifications = uiState.notifications
@@ -119,7 +119,7 @@ fun NotificationScreen(
                 verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
             ) {
                 items(notifications) { item ->
-                    NotificationItemCard(item)
+                    NotificationItemCard(item, onClick = { onItemClick(item) })
                 }
             }
         }
@@ -154,7 +154,7 @@ private fun ColumnScope.NotificationEmpty() {
 
 // 알림 카드 — 내용(사유 등)에 따라 높이가 늘어남 (기본 76dp, 2줄이면 커짐)
 @Composable
-private fun NotificationItemCard(item: NotificationItem) {
+private fun NotificationItemCard(item: NotificationItem, onClick: () -> Unit = {}) {
     val spacing = LocalSpacing.current
     Row(
         modifier = Modifier
@@ -163,6 +163,7 @@ private fun NotificationItemCard(item: NotificationItem) {
             .clip(RoundedCornerShape(14.dp))
             .background(White)
             .border(1.dp, DarkBrown40, RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
             .padding(horizontal = spacing.spacing16, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -219,7 +220,15 @@ private fun NotificationItemCard(item: NotificationItem) {
 @Composable
 private fun NotificationScreenPreview() {
     OnulDo_FETheme {
-        NotificationScreen(uiState = NotificationRepositoryImpl().getNotifications().toUiState())
+        NotificationScreen(
+            uiState = NotificationUiState(
+                notifications = listOf(
+                    NotificationItem(1, "지금 인증할 시간이에요", "새벽 6시 기상 인증이 시작됐어요.", "3분 전", "", NotificationType.DeadlineReminder),
+                    NotificationItem(2, "인증이 승인됐어요", "30분 러닝 인증이 통과했어요.", "1시간 전", "", NotificationType.ReviewPassed),
+                    NotificationItem(3, "동동님이 인증을 완료했어요", "파티 피드에서 확인해보세요", "어제", "", NotificationType.PartyMemberVerified),
+                )
+            )
+        )
     }
 }
 

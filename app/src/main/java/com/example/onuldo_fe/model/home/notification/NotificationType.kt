@@ -15,3 +15,22 @@ enum class NotificationType {
     PartySettlement,      // 파티 정산 완료 (지급액)
     PartyDailySettlement  // 파티 일별 정산 (알림함 전용, '종료 시 지급') NOTI-03
 }
+
+/**
+ * 서버 알림 목록의 `type` 문자열 → 표시 유형.
+ *
+ * 서버 7종: VERIFICATION_DEADLINE / VERIFICATION_RESULT / PARTY_MEMBER_VERIFIED /
+ * CHALLENGE_START / CHALLENGE_END_REMINDER / REFUND_COMPLETE / PARTY_SETTLEMENT_COMPLETE.
+ * 알 수 없는 값은 마감 리마인더 아이콘으로 안전 처리한다.
+ * TODO: 아이콘 세분화(경고성/통과·기각 구분 등)는 추후.
+ */
+fun notificationTypeFrom(raw: String?): NotificationType = when (raw) {
+    "VERIFICATION_DEADLINE" -> NotificationType.DeadlineReminder
+    "VERIFICATION_RESULT" -> NotificationType.ReviewPassed
+    "PARTY_MEMBER_VERIFIED" -> NotificationType.PartyMemberVerified
+    "CHALLENGE_START" -> NotificationType.ChallengeStart
+    "CHALLENGE_END_REMINDER" -> NotificationType.ChallengeEndReminder
+    "REFUND_COMPLETE" -> NotificationType.SoloRefund
+    "PARTY_SETTLEMENT_COMPLETE" -> NotificationType.PartySettlement
+    else -> NotificationType.DeadlineReminder
+}
