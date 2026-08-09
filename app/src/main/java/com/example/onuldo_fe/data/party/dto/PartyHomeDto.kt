@@ -17,7 +17,9 @@ data class PartyHomeItemDto(
     val verificationDeadline: String? = null,                // 오늘 인증 마감 시각(HH:mm 또는 HH:mm:ss)
     val showRemainingTime: Boolean = false,                  // 마감까지 남은 시간 표시 여부
     val status: String = "NOT_VERIFIED",                    // 나의 오늘 인증 상태
+    val dailyStatus: String = "WAITING",                    // 챌린지 데일리 상태
     val verifiedAt: String? = null,                          // 오늘 인증 제출 또는 완료 시각
+    val streakDays: Int = 0,                                // 연속 인증 성공 일수
     val members: List<PartyHomeMemberDto> = emptyList(),     // 파티원별 오늘 인증 현황
     // HOME-09 응답에는 category가 없으므로 카메라 상단 표시는 빈 값으로 유지한다.
     val category: String? = null

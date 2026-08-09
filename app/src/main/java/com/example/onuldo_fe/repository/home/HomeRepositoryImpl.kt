@@ -58,7 +58,8 @@ class HomeRepositoryImpl(
             if (!response.isSuccessful) throw HttpException(response)
             val body = response.body() ?: throw IOException("오늘 챌린지 응답 본문이 비어 있습니다.")
 
-            val dailyItems = body.result.challenges
+            // Daily API의 result는 래퍼 객체가 아닌 개인 챌린지 배열이다.
+            val dailyItems = body.result
             val partyHome = partyHomeDeferred.await()
             val profile = profileDeferred.await()
 
@@ -130,9 +131,8 @@ internal fun List<RealHomeDailyChallengeDto>.toHomeData(
     partyHome: PartyHomeResultDto = PartyHomeResultDto(),
     completed: DailyCompletedResultDto = DailyCompletedResultDto()
 ): HomeData {
-    // 서버의 참여 유형으로 개인과 파티 카드를 나눈다.
-    val personalChallenges = filter { it.participationType == "PERSONAL" }
-        .map { it.toPersonalModel(now) }
+    // Daily API는 개인 챌린지만 반환하므로 result 배열 전체를 개인 카드로 변환한다.
+    val personalChallenges = map { it.toPersonalModel(now) }
     // 카드 표시 상태와 파티원 인증 현황, 인증하기에 필요한 challengeId까지 모두
     // /parties/home 응답 하나로 구성한다. (예전에는 challengeId가 이 응답에 없어서
     // /daily에서 같은 partyId를 찾아 끼워 맞추는 우회 로직이 있었는데, 그 매칭이
@@ -174,7 +174,7 @@ private fun RealHomeDailyChallengeDto.toPersonalModel(now: LocalDateTime): HomeC
     return HomeChallenge(
         title = challengeName,
         // 값이 없거나 음수이면 0일로 처리한다.
-        streakDays = streakDays?.coerceAtLeast(0) ?: 0,
+        streakDays = streakDays.coerceAtLeast(0),
         remainingDays = endDate.remainingDaysFrom(now.toLocalDate()),
         deadlineAt = deadline,
         status = toChallengeStatus(now.toLocalTime()),

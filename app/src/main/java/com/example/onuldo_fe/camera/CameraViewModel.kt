@@ -139,6 +139,10 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
                     "이미 인증에 사용한 사진입니다. 다시 촬영해 주세요."
                 code() == 409 && serverError.contains("ALREADY_VERIFIED_TODAY") ->
                     "오늘은 이미 인증을 완료했습니다."
+                code() == 409 && serverError.contains("CHALLENGE_PARTICIPATION_ENDED") ->
+                    "이미 참여가 종료된 챌린지입니다."
+                code() == 409 && serverError.contains("CHALLENGE_VERIFICATION_TIME_UNAVAILABLE") ->
+                    "현재는 인증 가능한 시간이 아닙니다."
                 code() == 413 -> "사진 용량이 너무 큽니다. 다시 촬영해 주세요."
                 code() == 415 -> "JPEG 형식의 사진만 제출할 수 있습니다."
                 code() in 500..599 ->

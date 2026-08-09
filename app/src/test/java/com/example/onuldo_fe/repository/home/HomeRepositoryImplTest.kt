@@ -19,10 +19,9 @@ import org.junit.Test
 class HomeRepositoryImplTest {
 
     @Test
-    fun `daily 응답을 개인과 파티 홈 카드로 분리한다`() {
+    fun `daily 개인 배열과 parties-home 파티 배열을 홈 카드로 합친다`() {
         val items = listOf(
-            dailyItem(type = "PERSONAL", name = "30일 걷기", verified = false),
-            dailyItem(type = "PARTY", name = "아침 러닝", verified = true)
+            dailyItem(type = "PERSONAL", name = "30일 걷기", verified = false)
         )
 
         val result = items.toHomeData(
@@ -229,12 +228,11 @@ class HomeRepositoryImplTest {
         type: String,
         name: String,
         verified: Boolean,
-        streakDays: Int? = null
+        streakDays: Int = 0
     ) = RealHomeDailyChallengeDto(
         participationId = 1,
         participationStatus = "ONGOING",
         participationType = type,
-        partyId = 10L.takeIf { type == "PARTY" },
         challengeId = 12,
         challengeName = name,
         timeStart = "06:00:00",
