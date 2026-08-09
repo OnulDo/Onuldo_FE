@@ -14,6 +14,32 @@ val localProperties = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) file.inputStream().use { load(it) }
 }
+val envProperties = Properties().apply {
+    val file = rootProject.file(".env")
+    if (file.exists()) {
+        file.inputStream().use { load(it) }
+    }
+}
+
+fun env(key: String): String =
+    envProperties.getProperty(key)
+        ?: error("Missing required environment variable: $key")
+
+fun apiBaseUrl(): String {
+    val value = env("API_BASE_URL").trim()
+
+    require(value.isNotEmpty()) {
+        "API_BASE_URL must not be blank."
+    }
+    require(value.startsWith("http://") || value.startsWith("https://")) {
+        "API_BASE_URL must start with http:// or https://"
+    }
+    require(value.endsWith("/")) {
+        "API_BASE_URL must end with '/'."
+    }
+
+    return value
+}
 
 fun secret(key: String): String = localProperties.getProperty(key).orEmpty()
 
@@ -36,10 +62,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        // 서버 API 주소는 민감정보가 아니므로 모든 빌드 타입에서 공통으로 사용한다.
-        buildConfigField("String", "API_BASE_URL", quotedBuildConfig("https://onuldo.site/"))
-
+        buildConfigField(
+            "String",
+            "API_BASE_URL",
+            quotedBuildConfig(apiBaseUrl())
+        )
         val kakaoNativeAppKey = secret("KAKAO_NATIVE_APP_KEY")
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", quotedBuildConfig(kakaoNativeAppKey))
         buildConfigField("String", "NAVER_CLIENT_ID", quotedBuildConfig(secret("NAVER_CLIENT_ID")))
