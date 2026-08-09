@@ -2,7 +2,6 @@ package com.example.onuldo_fe.ui.screen.challenge.detail.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -168,14 +167,13 @@ private fun ConditionBox(
     isSuccess: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // 고정 높이 대신 내용에 맞게 감싸도록 함 — 조건 개수/길이가 달라져도(실제 API 데이터)
-    // 잘리거나 간격이 깨지지 않고, 항목 간 간격은 항상 10dp로 일정하게 유지된다.
+    // 고정 높이 대신 내용에 맞게 감싸도록 함(조건 BOX) — 조건 개수/길이가 달라져도 ok(실제 API 데이터)
     Column(
         modifier = modifier
             .fillMaxWidth()       // 시트 폭에 맞춤 (부모 padding 20 기준 = 390 프레임에서 350)
             .clip(RoundedCornerShape(14.dp))
             .background(background)
-            .padding(start = 16.dp, end = 16.dp, top = 17.dp, bottom = 16.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
@@ -197,19 +195,17 @@ private fun ConditionBox(
 
         Spacer(Modifier.height(12.dp))   // 헤더 ↔ 목록
 
-        // 항목은 일정 간격(10dp)으로 배분 — 개수·줄바꿈에 따라 박스가 자연스럽게 늘어남
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            items.forEach { item ->
+        // 항목 사이 간격은 패딩 4dp로 배분(첫 항목 제외) — TODO: 추후 4추가할 예정
+        Column(modifier = Modifier.fillMaxWidth()) {
+            items.forEachIndexed { index, item ->
                 Text(
                     text = item,
                     fontFamily = Pretendard,
                     fontWeight = FontWeight.Normal,  // Caption3: 12sp / 400 / lineHeight 20
                     fontSize = 12.sp,
                     lineHeight = 20.sp,
-                    color = BlackBrown
+                    color = BlackBrown,
+                    modifier = if (index == 0) Modifier else Modifier.padding(top = 4.dp)
                 )
             }
         }

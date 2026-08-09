@@ -55,8 +55,8 @@ fun DetailScreen(
     successConditions: List<String> = emptyList(),
     failureConditions: List<String> = emptyList(),
     onBackClick: () -> Unit = {},
-    onJoinClick: () -> Unit = {},
-    // 파티 생성 흐름에서 상세 화면을 재사용할 때 CTA 문구만 변경할 수 있도록 외부에서 전달
+    onActionClick: () -> Unit = {},
+    // 파티 생성 흐름에서 상세 화면을 재사용 가능하게 수정
     ctaText: String = "참여하기",
     modifier: Modifier = Modifier
 ) {
@@ -154,7 +154,7 @@ fun DetailScreen(
         // 참여하기 버튼
         OnulDoButton(
             text = ctaText,
-            onClick = onJoinClick,
+            onClick = onActionClick,
             modifier = Modifier.padding(bottom = 48.dp)
         )
     }

@@ -20,10 +20,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.onuldo_fe.ui.theme.Black
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
@@ -60,24 +62,38 @@ fun CompleteRecordCard(
                     )
                 }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(title, style = MaterialTheme.typography.bodyMedium, color = BlackBrown)
+                Text(
+                    text = if (isSuccess) "보너스" else "차감",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Black
+                )
+            }
+            Spacer(Modifier.height(3.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("달성률 $progress%", style = MaterialTheme.typography.labelMedium, color = DarkBrown)
                 Text(
                     text = "${if (point > 0) "+" else ""}${"%,d".format(point)}P",
                     style = MaterialTheme.typography.bodyMedium,
                     color = statusColor
                 )
             }
-            Spacer(Modifier.height(15.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("달성률 $progress%", style = MaterialTheme.typography.labelMedium, color = DarkBrown)
+            Spacer(Modifier.height(2.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                 Text(
                     "$completeDate ${if (isSuccess) "완료" else "실패"}",
                     style = MaterialTheme.typography.labelMedium,
-                    color = DarkBrown50
+                    color = DarkBrown70
+                )
+                Text(
+                    text = "예치금",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = DarkBrown70
                 )
             }
+
         }
     }
 }

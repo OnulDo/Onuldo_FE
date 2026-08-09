@@ -2,7 +2,7 @@ package com.example.onuldo_fe.data.challenge.api
 
 import com.example.onuldo_fe.data.challenge.dto.ChallengeItemDto
 import com.example.onuldo_fe.data.challenge.dto.ChallengeListResultDto
-import com.example.onuldo_fe.data.challenge.dto.DailyChallengeResultDto
+import com.example.onuldo_fe.data.challenge.dto.DailyChallengeItemDto
 import com.example.onuldo_fe.data.challenge.dto.DailyCompletedResultDto
 import com.example.onuldo_fe.data.challenge.dto.MyChallengeListResultDto
 import com.example.onuldo_fe.data.challenge.dto.ParticipationRequestDto
@@ -23,7 +23,7 @@ interface ChallengeApi {
         @Query("keyword") search: String?      // 검색어 (서버 파라미터명: keyword)
     ): ChallengeListResultDto
 
-    // 챌린지 상세 조회 //TODO: ID 필요
+    // 챌린지 상세 조회
     @GET("api/challenges/{challengeId}")
     suspend fun getChallengeDetail(
         @Path("challengeId") challengeId: Long
@@ -44,9 +44,9 @@ interface ChallengeApi {
         @Query("size") size: Int             // 기본 10
     ): MyChallengeListResultDto
 
-    //오늘 날짜의 챌린지 조회
+    //오늘 날짜의 챌린지 조회 (result를 배열로 직접 반환) 비고: 8.9 변동
     @GET("api/users/me/challenges/daily")
-    suspend fun getDailyChallenges(): ApiResponse<DailyChallengeResultDto>
+    suspend fun getDailyChallenges(): ApiResponse<List<DailyChallengeItemDto>>
 
     //오늘 완료한 챌린지 목록 조회
     @GET("api/users/me/challenges/daily/completed")

@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,13 +46,16 @@ fun PartyCreateScreen(
     errorMessage: String? = null,
     showPointShortageFromServer: Boolean = false,
     onPointShortageDismiss: () -> Unit = {},
+    checkPointBeforeRequest: Boolean = false,
     selectedChallengeCategoryLabel: String? = null
 ) {
     val spacing = LocalSpacing.current
     val periods = listOf("2주", "4주", "8주", "12주")
     val deposits = listOf(10_000, 20_000, 30_000, 50_000)
-    var selectedPeriod by remember(selectedChallenge?.id) { mutableIntStateOf(-1) }
-    var selectedDeposit by remember(selectedChallenge?.id) { mutableIntStateOf(-1) }
+    // 포인트 부족 → 충전 화면 왕복에도 유지되도록 rememberSaveable을 쓰되, 챌린지가 바뀌면
+    // (id가 바뀌면) 이전 선택을 초기화하는 기존 동작은 key로 그대로 유지한다.
+    var selectedPeriod by rememberSaveable(selectedChallenge?.id) { mutableIntStateOf(-1) }
+    var selectedDeposit by rememberSaveable(selectedChallenge?.id) { mutableIntStateOf(-1) }
     var showPointDialog by remember { mutableStateOf(false) }
     var isPartyNameError by remember { mutableStateOf(false) }
 
@@ -149,8 +153,9 @@ fun PartyCreateScreen(
                     } else {
                         onPartyNameChange(normalizedPartyName)
                         val requiredDeposit = deposits[selectedDeposit]
-                        // TODO 파티 생성 API 연동 시 파티장 보유 포인트 검증 성공 후 파티 생성 요청
-                        if (availablePoint != null && availablePoint < requiredDeposit) {
+                        // Fake API에서는 화면에 설정된 테스트 포인트로 검증한다.
+                        // Real API는 ViewModel이 요청 직전에 최신 지갑 잔액을 다시 조회한다.
+                        if (checkPointBeforeRequest && availablePoint != null && availablePoint < requiredDeposit) {
                             showPointDialog = true
                         } else {
                             onCreate(periods[selectedPeriod], requiredDeposit)
@@ -169,7 +174,7 @@ fun PartyCreateScreen(
 
     if (showPointDialog) {
         InsufficientPointDialog(
-            ownedPoint = availablePoint,
+            ownedPoint = availablePoint?.toLong(),
             requiredPoint = deposits[selectedDeposit],
             onDismiss = {
                 showPointDialog = false

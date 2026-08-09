@@ -18,7 +18,7 @@ class PartyFeedRepositoryImpl(
     private val useRealPartyFeedApi: Boolean
 ) : PartyFeedRepository {
     override suspend fun getPartyFeed(partyId: String): PartyFeed {
-        // 피드 조회만 독립적으로 전환해 아직 Fake인 다른 파티 API에 영향을 주지 않는다.
+        // 피드 조회 API를 다른 파티 기능과 독립적으로 Real/Fake 전환한다.
         if (!useRealPartyFeedApi) return fakeApi.getPartyFeed(partyId.toLong()).toModel()
 
         val response = realApi.getPartyFeed(partyId.toLong())

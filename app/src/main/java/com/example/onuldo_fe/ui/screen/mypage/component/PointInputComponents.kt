@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.ui.screen.mypage.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,8 +11,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.ui.res.painterResource
+import com.example.onuldo_fe.R
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,46 +30,70 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
+import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.White
 
 /**
  * 충전/출금 v2 공용 컴포넌트. (금액 입력 박스 · 금액 칩 · 하단 CTA)
  */
 
-/** 큰 금액 표시 박스 — 흰 배경 + Persimmon 2dp 테두리, 우측 정렬 숫자 + 단위. */
+/**
+ * 큰 금액 표시 박스 — 흰 배경 + Persimmon 2dp 테두리. 숫자·단위는 우측(오른쪽 30dp) 정렬.
+ * [clearable]이면 왼쪽 안쪽 22dp에 지우기(X)를 띄우고, 누르면 [onClear]를 호출한다.
+ */
 @Composable
 fun AmountInputBox(
     amount: String,
     unit: String,
     modifier: Modifier = Modifier,
+    clearable: Boolean = false,
+    onClear: () -> Unit = {},
+    // 에러 상태(예: 출금 가능액 초과)면 테두리를 빨갛게 표시한다.
+    isError: Boolean = false,
 ) {
-    Row(
+    Box(
         modifier = modifier
             .padding(horizontal = 20.dp)
             .fillMaxWidth()
             .height(88.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(White)
-            .border(2.dp, Persimmon, RoundedCornerShape(16.dp))
-            .padding(horizontal = 20.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.End,
+            .border(2.dp, if (isError) Red else Persimmon, RoundedCornerShape(16.dp)),
     ) {
-        Text(
-            text = amount,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 36.sp,
-            color = BlackBrown,
-        )
-        Text(
-            text = unit,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            color = MySubText,
-            modifier = Modifier.padding(start = 8.dp),
-        )
+        // 금액이 있을 때만 왼쪽 안쪽 22dp에 지우기(X).
+        if (clearable) {
+            Image(
+                painter = painterResource(R.drawable.mypage_x_icon),
+                contentDescription = "금액 지우기",
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 22.dp)
+                    .clickable(onClick = onClear)
+                    .size(16.dp),
+            )
+        }
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 30.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = amount,
+                fontFamily = Pretendard,
+                fontWeight = FontWeight.Bold,
+                fontSize = 32.sp,
+                color = BlackBrown,
+            )
+            Text(
+                text = unit,
+                fontFamily = Pretendard,
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+                color = MySubText,
+                modifier = Modifier.padding(start = 8.dp),
+            )
+        }
     }
 }
 
@@ -116,7 +144,8 @@ fun PointCtaButton(
         text = text,
         onClick = onClick,
         enabled = enabled,
-        modifier = modifier.padding(vertical = 12.dp),
+        // 버튼은 바닥에서 42dp 띄운다.
+        modifier = modifier.padding(top = 12.dp, bottom = 42.dp),
         fontSize = 17.sp,
     )
 }

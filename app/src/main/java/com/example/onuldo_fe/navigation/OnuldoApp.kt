@@ -32,7 +32,9 @@ import com.example.onuldo_fe.ui.screen.mypage.SettingScreen
 import com.example.onuldo_fe.ui.screen.mypage.TermScreen
 import com.example.onuldo_fe.data.auth.dto.TermType
 import com.example.onuldo_fe.data.network.SessionEvents
+import com.example.onuldo_fe.model.challenge.ChallengeCategory
 import com.example.onuldo_fe.viewmodel.OnboardingDraft
+import com.example.onuldo_fe.viewmodel.challenge.ChallengeDetailViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.onuldo_fe.camera.PhotoPreviewScreen
@@ -53,28 +55,30 @@ private fun termTitleOf(termType: TermType): String = when (termType) {
 }
 
 /** 앱 전체 내비게이션 그래프. 랜딩 → 로그인/회원가입 → 프로필 설정 → 환영 → 메인(탭).
- *  (스플래시는 별도 화면이 아니라 시스템 스플래시로 처리 — [MainActivity]) */
+ *  (스플래시는 별도 화면이 아니라 시스템 스플래시로 처리 — [MainActivity])
+ *
+ *  [startDestination]은 자동 로그인 판정 결과다. 저장된 세션이 살아 있으면 [Routes.MAIN],
+ *  아니면 [Routes.LANDING]. 판정은 [MainActivity]가 스플래시를 붙잡은 채로 끝낸다. */
 @Composable
-fun OnuldoApp() {
+fun OnuldoApp(startDestination: String = Routes.LANDING) {
     val navController = rememberNavController()
-    // 앱 진입점은 랜딩. 특정 화면만 확인하고 싶을 땐 이 값을 잠시 바꿔 쓰되,
-    // 커밋에는 반드시 LANDING 상태로 되돌린다.
-    val debugStartDestination = Routes.LANDING
 
     //카메라 -> previewScreen
     val cameraViewModel: CameraViewModel = viewModel()
 
-    // 리프레시 토큰까지 만료돼 자동 재발급이 실패하면 랜딩으로 되돌린다.
+    // 리프레시 토큰까지 만료·거부되어 세션을 복구할 수 없으면 로그인 화면으로 보낸다.
     LaunchedEffect(Unit) {
         SessionEvents.sessionExpired.collect {
             SessionEvents.consume()
-            navController.navigate(Routes.LANDING) {
+            navController.navigate(Routes.LOGIN) {
+                // 만료된 세션의 메인 화면으로 뒤로 갈 수 없도록 전체 백스택을 제거한다.
                 popUpTo(0) { inclusive = true }
+                launchSingleTop = true
             }
         }
     }
 
-    NavHost(navController = navController, startDestination = debugStartDestination) {
+    NavHost(navController = navController, startDestination = startDestination) {
         composable(Routes.LANDING) {
             // 랜딩 도착 = 온보딩을 시작 전이거나 중도 이탈했다는 뜻.
             // 뒤로가기 이탈·로그아웃·세션 만료가 모두 이곳으로 모이므로, 메모리에 남은
@@ -90,8 +94,10 @@ fun OnuldoApp() {
             LoginScreen(
                 onLoginSuccess = {
                     navController.navigate(Routes.MAIN) {
-                        // 인증 완료 후에는 랜딩/로그인으로 되돌아가지 않도록 백스택 제거
-                        popUpTo(Routes.LANDING) { inclusive = true }
+                        // 일반 진입(LANDING → LOGIN)과 세션 만료(LOGIN이 루트) 모두에서
+                        // 인증 화면으로 되돌아가지 않도록 기존 백스택을 전부 제거한다.
+                        popUpTo(0) { inclusive = true }
+                        launchSingleTop = true
                     }
                 },
                 onSignupClick = { navController.navigate(Routes.SIGNUP) },
@@ -215,6 +221,10 @@ fun OnuldoApp() {
                 navArgument(Routes.CAMERA_TITLE_ARG) {
                     type = NavType.StringType
                     defaultValue = "오늘의 챌린지 인증"
+                },
+                navArgument(Routes.CAMERA_DEADLINE_ARG) {
+                    type = NavType.StringType
+                    defaultValue = ""
                 }
             )
         ) { backStackEntry ->
@@ -227,13 +237,31 @@ fun OnuldoApp() {
             val title = backStackEntry.arguments
                 ?.getString(Routes.CAMERA_TITLE_ARG)
                 .orEmpty()
+            val deadline = backStackEntry.arguments
+                ?.getString(Routes.CAMERA_DEADLINE_ARG)
+                .orEmpty()
+            // 파티 목록 응답에는 category가 없으므로 challengeId로 상세를 조회해 보완한다.
+            // 카메라에서는 개인·파티 모두 한글 카테고리명으로 통일한다.
+            val challengeDetailViewModel: ChallengeDetailViewModel? = if (category.isBlank()) {
+                viewModel(
+                    key = "camera-challenge-detail-$challengeId",
+                    factory = ChallengeDetailViewModel.factory(challengeId)
+                )
+            } else {
+                null
+            }
+            val resolvedCategory = if (category.isBlank()) {
+                challengeDetailViewModel?.uiState?.detail?.category?.displayName.orEmpty()
+            } else {
+                category.toCategoryDisplayName()
+            }
             CameraScreen(
-                category = category,
+                category = resolvedCategory,
                 title = title,
                 onPhotoCaptured = { uri ->
                     cameraViewModel.setImageUri(uri)
                     navController.navigate(
-                        Routes.photoPreview(challengeId, category, title)
+                        Routes.photoPreview(challengeId, resolvedCategory, title, deadline)
                     )
                 },
                 onCloseClick = {
@@ -255,6 +283,10 @@ fun OnuldoApp() {
                 navArgument(Routes.CAMERA_TITLE_ARG) {
                     type = NavType.StringType
                     defaultValue = "오늘의 챌린지 인증"
+                },
+                navArgument(Routes.CAMERA_DEADLINE_ARG) {
+                    type = NavType.StringType
+                    defaultValue = ""
                 }
             )
         ) { backStackEntry ->
@@ -266,6 +298,9 @@ fun OnuldoApp() {
                 .orEmpty()
             val title = backStackEntry.arguments
                 ?.getString(Routes.CAMERA_TITLE_ARG)
+                .orEmpty()
+            val deadline = backStackEntry.arguments
+                ?.getString(Routes.CAMERA_DEADLINE_ARG)
                 .orEmpty()
             val imageUri by cameraViewModel.imageUri.collectAsState()
             val submitState by cameraViewModel.submitState.collectAsState()
@@ -308,7 +343,7 @@ fun OnuldoApp() {
                     navController.popBackStack()
                 },
                 onSubmitClick = {
-                    cameraViewModel.submitVerification(challengeId, category, title)
+                    cameraViewModel.submitVerification(challengeId, category, title, deadline)
                 },
                 submitState = submitState,
                 onErrorConfirm = cameraViewModel::clearSubmitState
@@ -373,6 +408,7 @@ fun OnuldoApp() {
             ChallengeVerificationScreen(
                 status = VerificationStatus.FAILURE,
                 failureReason = (state as? com.example.onuldo_fe.camera.VerificationSubmitState.Failure)?.message.orEmpty(),
+                verificationDeadline = cameraViewModel.activeDeadline,
                 onManualReviewClick = {
                     navController.navigate(Routes.VERIFICATION_WAITING)
                 },
@@ -383,7 +419,9 @@ fun OnuldoApp() {
                         val title = cameraViewModel.activeTitle
                             .ifBlank { "오늘의 챌린지 인증" }
                         cameraViewModel.clearSubmitState()
-                        navController.navigate(Routes.camera(challengeId, category, title)) {
+                        navController.navigate(
+                            Routes.camera(challengeId, category, title, cameraViewModel.activeDeadline)
+                        ) {
                             popUpTo(Routes.CAMERA) { inclusive = true }
                         }
                     }
@@ -410,8 +448,9 @@ fun OnuldoApp() {
             )
         }
 
-        // --- 챌린지 상세 흐름 (챌린지 탭 위 풀스크린): 상세 → 참여 → 시작 완료 ---
-        // 상세는 challengeId를 받아 API로 조회(DetailRoute). 참여/완료는 콜백으로 연동.
+        // --- 챌린지 상세 흐름: 상세 → 참여 ---
+        // challengeId 기반으로 상세 API를 조회한 뒤, CTA 동작은 호출부에서 처리한다.
+        // 챌린지 탭(참여 화면 이동)/파티 생성 흐름(선택 확정)에서 공통 재사용한다.
         composable(
             route = Routes.CHALLENGE_DETAIL,
             arguments = listOf(navArgument(Routes.CHALLENGE_DETAIL_ARG) { type = NavType.LongType })
@@ -420,10 +459,15 @@ fun OnuldoApp() {
             DetailRoute(
                 challengeId = challengeId,
                 onBackClick = { navController.popBackStack() },
-                onJoinClick = { title, description, category, timeStart, timeEnd ->
+                onActionClick = { data ->
                     navController.navigate(
                         Routes.challengeParticipate(
-                            challengeId, title, description, category, timeStart, timeEnd
+                            data.challengeId,
+                            data.title,
+                            data.description,
+                            data.category,
+                            data.timeStart,
+                            data.timeEnd
                         )
                     )
                 },
@@ -462,3 +506,10 @@ fun OnuldoApp() {
         }
     }
 }
+
+/** 서버 enum 값은 한글 표시명으로 바꾸고, 이미 한글인 값은 그대로 유지한다. */
+private fun String.toCategoryDisplayName(): String =
+    ChallengeCategory.entries
+        .firstOrNull { it.name.equals(this, ignoreCase = true) }
+        ?.displayName
+        ?: this

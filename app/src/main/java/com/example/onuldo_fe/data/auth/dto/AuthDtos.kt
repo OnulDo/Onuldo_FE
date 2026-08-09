@@ -29,9 +29,15 @@ data class TermAgreementRequest(
     val value: Boolean,
 )
 
+data class DeviceRequest(
+    val deviceId: String,
+    val fcmToken: String,
+)
+
 data class EmailLoginRequest(
     val email: String,
     val password: String,
+    val device: DeviceRequest,
 )
 
 /**
@@ -48,11 +54,13 @@ data class EmailSignupRequest(
     val nickname: String,
     val profileImageUrl: String? = null,
     val termAgreements: List<TermAgreementRequest>,
+    val device: DeviceRequest,
 )
 
 data class OAuthLoginRequest(
     val provider: SocialProvider,
     val socialAccessToken: String,
+    val device: DeviceRequest,
 )
 
 data class OAuthSignupRequest(
@@ -61,6 +69,7 @@ data class OAuthSignupRequest(
     val nickname: String,
     val profileImageUrl: String? = null,
     val termAgreements: List<TermAgreementRequest>,
+    val device: DeviceRequest,
 )
 
 /** 소셜 로그인 응답. 신규 사용자면 토큰이 비어 있고 [isNewUser]가 true라 가입 절차로 보내야 한다. */

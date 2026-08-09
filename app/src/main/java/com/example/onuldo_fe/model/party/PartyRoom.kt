@@ -20,6 +20,22 @@ enum class PartyLifecycleStatus {
     Disbanded                                  // 모든 파티원이 이탈해 해체된 상태
 }
 
+// 파티 목록 카드의 로그인 사용자 오늘 인증 상태
+enum class PartyVerificationStatus {
+    NotVerified,
+    Pending,
+    Success,
+    Fail
+}
+
+// 파티 목록 카드에 노출할 파티원별 인증 정보
+data class PartySummaryMember(
+    val userId: Long,                           // 파티원 회원 ID
+    val nickname: String,                       // 파티원 닉네임
+    val profileImageUrl: String,                // 파티원 프로필 이미지 URL
+    val isVerifiedToday: Boolean                // 오늘 인증 완료 여부
+)
+
 // 파티 대기방에 참여 중인 파티원 정보
 data class PartyMember(
     val id: String,                            // 파티원 고유 ID
@@ -55,7 +71,11 @@ data class PartySummary(
     val remainingText: String?,                // 오늘 인증 마감까지 남은 시간 문구
     val completedMemberCount: Int,             // 오늘 인증을 완료한 파티원 수
     val totalMemberCount: Int,                 // 현재 참여 중인 전체 파티원 수
-    val status: PartyLifecycleStatus           // 파티 모집·진행·해체 상태
+    val status: PartyLifecycleStatus,          // 파티 모집·진행·해체 상태
+    val goal: String = challengeName,          // 카드에 표시할 파티 목표 문구
+    val verificationStatus: PartyVerificationStatus = PartyVerificationStatus.NotVerified, // 내 오늘 인증 상태
+    val members: List<PartySummaryMember> = emptyList(), // 카드에 노출할 파티원별 인증 현황
+    val challengeId: Long = 0                  // 인증 화면에 전달할 챌린지 ID
 )
 
 // 파티 생성 화면의 입력값을 Repository에 전달하는 명령

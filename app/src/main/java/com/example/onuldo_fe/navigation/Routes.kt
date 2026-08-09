@@ -80,24 +80,30 @@ object Routes {
     const val CAMERA_CHALLENGE_ID_ARG = "challengeId"
     const val CAMERA_CATEGORY_ARG = "cameraCategory"
     const val CAMERA_TITLE_ARG = "cameraTitle"
+    const val CAMERA_DEADLINE_ARG = "cameraDeadline"
     const val CAMERA = "camera/{$CAMERA_CHALLENGE_ID_ARG}" +
         "?$CAMERA_CATEGORY_ARG={$CAMERA_CATEGORY_ARG}" +
-        "&$CAMERA_TITLE_ARG={$CAMERA_TITLE_ARG}"
+        "&$CAMERA_TITLE_ARG={$CAMERA_TITLE_ARG}" +
+        "&$CAMERA_DEADLINE_ARG={$CAMERA_DEADLINE_ARG}"
     fun camera(
         challengeId: Long,
         category: String = "시간 챌린지",
-        title: String = "오늘의 챌린지 인증"
+        title: String = "오늘의 챌린지 인증",
+        deadline: String = ""
     ) = "camera/$challengeId" +
         "?$CAMERA_CATEGORY_ARG=${Uri.encode(category)}" +
-        "&$CAMERA_TITLE_ARG=${Uri.encode(title)}"
+        "&$CAMERA_TITLE_ARG=${Uri.encode(title)}" +
+        "&$CAMERA_DEADLINE_ARG=${Uri.encode(deadline)}"
 
     const val PHOTO_PREVIEW = "photo_preview/{$CAMERA_CHALLENGE_ID_ARG}" +
         "?$CAMERA_CATEGORY_ARG={$CAMERA_CATEGORY_ARG}" +
-        "&$CAMERA_TITLE_ARG={$CAMERA_TITLE_ARG}"
-    fun photoPreview(challengeId: Long, category: String, title: String) =
+        "&$CAMERA_TITLE_ARG={$CAMERA_TITLE_ARG}" +
+        "&$CAMERA_DEADLINE_ARG={$CAMERA_DEADLINE_ARG}"
+    fun photoPreview(challengeId: Long, category: String, title: String, deadline: String) =
         "photo_preview/$challengeId" +
             "?$CAMERA_CATEGORY_ARG=${Uri.encode(category)}" +
-            "&$CAMERA_TITLE_ARG=${Uri.encode(title)}"
+            "&$CAMERA_TITLE_ARG=${Uri.encode(title)}" +
+            "&$CAMERA_DEADLINE_ARG=${Uri.encode(deadline)}"
 
     //검증
     const val VERIFICATION_REVIEWING = "verification_reviewing"

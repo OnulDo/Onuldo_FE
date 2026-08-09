@@ -26,6 +26,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +40,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomePartyChallenge
+import com.example.onuldo_fe.model.home.HomePartyMember
 import com.example.onuldo_fe.ui.screen.home.components.HomePartyCard
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown50
@@ -51,20 +57,23 @@ import com.example.onuldo_fe.viewmodel.party.samplePartyCards
 import java.time.LocalTime
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun PartyListScreen(
     parties: List<PartyCardUi>,
-    onVerifyClick: () -> Unit,
+    onVerifyClick: (PartyCardUi) -> Unit,
     onCreateClick: () -> Unit,
     onInviteCodeClick: () -> Unit,
     onPartyClick: (String) -> Unit,
     isLoading: Boolean = false,
     errorMessage: String? = null,
     onRetry: () -> Unit = {},
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {},
     modifier: Modifier = Modifier,
     partyCardContent: @Composable (PartyCardUi, () -> Unit) -> Unit = { party, onClick ->
         HomePartyCard(
             partyChallenge = party.toHomePartyChallenge(),
-            onVerifyClick = onVerifyClick,
+            onVerifyClick = { onVerifyClick(party) },
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
@@ -72,7 +81,24 @@ fun PartyListScreen(
     }
 ) {
     val spacing = LocalSpacing.current
-    Column(modifier.fillMaxSize().background(SourCream)) {
+    val pullToRefreshState = rememberPullToRefreshState()
+    // 챌린지 목록과 동일하게 당길 때 상단에 실제 인디케이터를 보여준다.
+    // 탭 재진입 시의 조용한 재조회(SILENT)는 isRefreshing을 건드리지 않으므로 노출되지 않는다.
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        state = pullToRefreshState,
+        modifier = modifier.fillMaxSize(),
+        indicator = {
+            PullToRefreshDefaults.Indicator(
+                state = pullToRefreshState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+                color = Persimmon
+            )
+        }
+    ) {
+    Column(Modifier.fillMaxSize().background(SourCream)) {
         Text("파티", modifier = Modifier.padding(start = spacing.spacing24, top = spacing.spacing16), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         // TODO 디자인 시스템에 21dp 토큰이 추가되면 LocalSpacing으로 교체
         Spacer(Modifier.height(21.dp))
@@ -140,6 +166,7 @@ fun PartyListScreen(
             }
         }
     }
+    }
 }
 
 @Composable
@@ -187,12 +214,23 @@ private fun PartyListEmptyContent(modifier: Modifier = Modifier) {
 // API에서 남은 일수와 시간을 숫자 타입으로 제공하면 문자열 파싱 대신 응답 값을 직접 전달
 private fun PartyCardUi.toHomePartyChallenge() = HomePartyChallenge(
     title = partyName,
-    subtitle = challengeName,
+    subtitle = goal,
     remainingDays = dDay.filter(Char::isDigit).toIntOrNull() ?: 0,
     deadlineAt = deadline.toLocalTimeOrNull(),
     completedMemberCount = completedMemberCount,
     totalMemberCount = totalMemberCount,
-    remainingMinutes = remainingText.toRemainingMinutes()
+    status = verificationStatus,
+    remainingMinutes = remainingText.toRemainingMinutes(),
+    canVerify = verificationStatus == ChallengeStatus.NeedCertification && challengeId > 0L,
+    members = members.map { member ->
+        HomePartyMember(
+            memberId = member.userId.toString(),
+            profileImageUrl = member.profileImageUrl,
+            defaultCharacterId = null,
+            isVerifiedToday = member.isVerifiedToday
+        )
+    },
+    challengeId = challengeId
 )
 
 private fun String.toLocalTimeOrNull(): LocalTime? {

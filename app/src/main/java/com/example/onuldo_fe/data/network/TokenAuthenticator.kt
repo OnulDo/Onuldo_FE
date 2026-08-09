@@ -2,6 +2,7 @@ package com.example.onuldo_fe.data.network
 
 import android.os.SystemClock
 import android.util.Log
+import com.google.gson.Gson
 import java.io.IOException
 import okhttp3.Authenticator
 import okhttp3.Request
@@ -9,7 +10,7 @@ import okhttp3.Response
 import okhttp3.Route
 
 /**
- * 액세스 토큰 만료(401) 시 리프레시 토큰으로 자동 재발급하고 원래 요청을 재시도한다.
+ * 서버가 `TOKEN_EXPIRED`를 반환한 경우에만 리프레시 토큰으로 자동 재발급하고 원래 요청을 재시도한다.
  *
  * 서버 액세스 토큰 수명이 **30분**이라 이 처리가 없으면 앱을 켜둔 채 30분이 지나는 순간
  * 모든 API가 401로 실패한다. 리프레시는 14일이라 그 안에서는 재로그인 없이 이어진다.
@@ -26,9 +27,11 @@ class TokenAuthenticator(
 ) : Authenticator {
 
     override fun authenticate(route: Route?, response: Response): Request? {
-        // 1. 재시도한 요청이 또 401이면 재발급으로 해결되지 않는 상황이다.
+        // 비밀번호 오류·권한 부족 등 다른 401은 토큰 만료가 아니므로 세션을 건드리지 않는다.
+        if (!response.hasTokenExpiredCode()) return null
+
+        // 재발급 후에도 TOKEN_EXPIRED라면 무한 반복하지 않고 해당 요청만 실패시킨다.
         if (response.priorResponseCount() >= MAX_RETRY_COUNT) {
-            expireSession()
             return null
         }
 
@@ -56,22 +59,23 @@ class TokenAuthenticator(
             }
 
             // 3. 재발급 시도.
-            return when (val outcome = requestNewTokens(refreshToken)) {
-                is RefreshOutcome.Success -> {
+            return when (val outcome = refreshApiProvider().executeRefresh(refreshToken)) {
+                is TokenRefreshOutcome.Success -> {
                     tokenStore.update(outcome.tokens)
                     response.request.withToken(outcome.tokens.accessToken)
                 }
 
                 // 서버가 재발급을 거부했다 — 리프레시 토큰도 만료됐으므로 재로그인이 필요하다.
-                RefreshOutcome.Rejected -> {
+                TokenRefreshOutcome.Rejected -> {
                     expireSession()
                     null
                 }
 
-                // 통신 자체가 실패했다. 리프레시 토큰은 아직 유효할 수 있으므로 세션을 지우지 않고
-                // 이 요청만 실패시킨다. (토큰이 메모리에만 있어 지우면 복구 경로가 없다.)
+                // 통신 실패 또는 서버 장애(5xx). 리프레시 토큰은 아직 유효할 수 있으므로 세션을
+                // 지우지 않고 이 요청만 실패시킨다.
                 // 뒤따르는 요청들이 같은 실패를 반복하지 않도록 결과를 잠시 기억해 둔다.
-                RefreshOutcome.Transient -> {
+                TokenRefreshOutcome.Transient -> {
+                    Log.w(TAG, "토큰 재발급 실패(일시적) — 세션 유지")
                     markTransientFailure(refreshToken)
                     null
                 }
@@ -96,34 +100,6 @@ class TokenAuthenticator(
         lastFailedRefreshToken = refreshToken
         lastFailedAtMillis = SystemClock.elapsedRealtime()
     }
-
-    /** 재발급 시도 결과. 서버의 거부와 통신 실패를 구분해야 세션을 잘못 만료시키지 않는다. */
-    private sealed interface RefreshOutcome {
-        data class Success(val tokens: AuthTokens) : RefreshOutcome
-        data object Rejected : RefreshOutcome
-        data object Transient : RefreshOutcome
-    }
-
-    /** 동기 호출. Authenticator는 코루틴이 아닌 OkHttp 워커 스레드에서 실행된다. */
-    private fun requestNewTokens(refreshToken: String): RefreshOutcome =
-        try {
-            val body = refreshApiProvider()
-                .refresh(RefreshTokenRequest(refreshToken))
-                .execute()
-                .body()
-
-            val tokens = if (body?.isSuccess == true) body.result?.toTokensOrNull() else null
-            if (tokens != null) RefreshOutcome.Success(tokens) else RefreshOutcome.Rejected
-        } catch (e: IOException) {
-            // 연결 끊김·타임아웃 등. 서버 판단이 아니므로 세션을 유지한다.
-            Log.w(TAG, "토큰 재발급 통신 실패 — 세션 유지", e)
-            RefreshOutcome.Transient
-        } catch (e: Exception) {
-            // 응답 파싱 실패 등. 서버가 리프레시 토큰을 거부했다는 근거가 아니므로
-            // 세션을 지우지 않는다(잘못 지우면 메모리 저장소 특성상 복구할 수 없다).
-            Log.w(TAG, "토큰 재발급 응답 처리 실패 — 세션 유지", e)
-            RefreshOutcome.Transient
-        }
 
     /**
      * 세션을 정리하고 만료를 알린다.
@@ -164,3 +140,17 @@ class TokenAuthenticator(
         private const val TRANSIENT_FAILURE_WINDOW_MS = 3_000L
     }
 }
+
+/** 본문을 소비하지 않고 `errorCode`와 이전 응답 형식의 `code`를 모두 확인한다. */
+internal fun Response.hasTokenExpiredCode(): Boolean = try {
+    val error = tokenErrorGson.fromJson(
+        peekBody(MAX_ERROR_BODY_BYTES).string(),
+        ErrorBody::class.java,
+    )
+    error.effectiveCode == ApiErrorCode.TOKEN_EXPIRED
+} catch (_: Exception) {
+    false
+}
+
+private const val MAX_ERROR_BODY_BYTES = 64L * 1024L
+private val tokenErrorGson = Gson()

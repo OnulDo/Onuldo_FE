@@ -1,27 +1,20 @@
 package com.example.onuldo_fe.data.party.dto
 
-// 파티 정산 결과 조회 API 응답
+/** 파티 정산 결과 조회 API 응답. */
 data class PartySettlementResultDto(
-    val partyId: Long,
-    val overallStatus: String,
-    val overallTitle: String,
-    val overallDescription: String,
-    val myResult: PartyMySettlementDto,
-    val memberResults: List<PartySettlementMemberDto>
+    val partyId: Long,                         // 파티 ID
+    val name: String,                          // 파티 이름
+    val resultType: String,                    // 전체 결과: ALL_SUCCESS / PARTIAL_SUCCESS / ALL_FAIL
+    val myDepositAmount: Int,                  // 내가 처음 낸 도전금
+    val myDisplayAmount: Int,                  // 내 분배금·보너스(+) 또는 차감액(-)
+    val members: List<PartySettlementMemberDto> // 파티원별 정산 결과
 )
 
-// 현재 사용자의 환급금과 보너스 또는 차감 금액
-data class PartyMySettlementDto(
-    val depositRefundAmount: Int,
-    val bonusAmount: Int
-)
-
-// 파티원별 완주 여부와 정산 금액 및 프로필 정보
+/** 파티원별 정산 결과. */
 data class PartySettlementMemberDto(
-    val userId: Long,
-    val name: String,
-    val profileImageUrl: String?,
-    val defaultCharacterId: Int?,
-    val isSuccess: Boolean,
-    val bonusAmount: Int
+    val userId: Long,              // 회원 ID
+    val nickname: String,          // 닉네임
+    val profileImageUrl: String,   // 회원이 선택한 프로필 이미지 URL
+    val status: String,            // ONGOING / SUCCESS / FAIL / CANCELED
+    val displayAmount: Int         // 분배금·보너스(+) 또는 차감액(-)
 )

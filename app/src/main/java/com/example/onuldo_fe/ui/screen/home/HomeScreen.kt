@@ -56,7 +56,7 @@ fun HomeScreen(
     onNotificationClick: () -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
     onSettlementResultClick: (Long) -> Unit = {},
-    onVerifyClick: (Long, String, String) -> Unit = { _, _, _ -> },
+    onVerifyClick: (Long, String, String, String) -> Unit = { _, _, _, _ -> },
     onRefresh: () -> Unit = {},
     scrollToTopKey: Int = 0,
     modifier: Modifier = Modifier
@@ -64,6 +64,8 @@ fun HomeScreen(
     PullToRefreshBox(
         isRefreshing = uiState.isRefreshing,
         onRefresh = onRefresh,
+        // 새로고침 인디케이터(당김 화살표/스피너)는 노출하지 않고, 당겨서 새로고침 동작 자체만 유지
+        indicator = {},
         modifier = modifier
             .fillMaxSize()
             .background(SourCream)
@@ -138,7 +140,7 @@ private fun HomeContent(
     uiState: HomeUiState,
     onNotificationClick: () -> Unit,
     onSettlementResultClick: (Long) -> Unit,
-    onVerifyClick: (Long, String, String) -> Unit,
+    onVerifyClick: (Long, String, String, String) -> Unit,
     scrollToTopKey: Int
 ) {
     val spacing = LocalSpacing.current
@@ -209,7 +211,8 @@ private fun HomeContent(
                                 onVerifyClick(
                                     challengeId,
                                     partyChallenge.category,
-                                    partyChallenge.subtitle
+                                    partyChallenge.subtitle,
+                                    partyChallenge.deadlineAt?.toString().orEmpty()
                                 )
                             }
                     }
@@ -232,7 +235,12 @@ private fun HomeContent(
                         challenge.challengeId
                             ?.takeIf { it > 0L }
                             ?.let { challengeId ->
-                                onVerifyClick(challengeId, challenge.category, challenge.title)
+                                onVerifyClick(
+                                    challengeId,
+                                    challenge.category,
+                                    challenge.title,
+                                    challenge.deadlineAt.toString()
+                                )
                             }
                     }
                 )
@@ -241,7 +249,10 @@ private fun HomeContent(
 
         // 완료 상태일 때 완료 챌린지 목록 노출
         ChallengeSection(
-            title = stringResource(R.string.home_completed_challenge_title),
+            title = stringResource(
+                R.string.home_completed_challenge_count,
+                uiState.completedChallenges.size
+            ),
             visible = isAllCompleted,
             topSpacing = spacing.spacing26,
             itemSpacing = spacing.spacing8

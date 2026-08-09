@@ -38,6 +38,8 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         private set
     var activeTitle: String = ""
         private set
+    var activeDeadline: String = ""
+        private set
     var activeVerifiedAt: String? = null
         private set
 
@@ -48,7 +50,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         _submitState.value = VerificationSubmitState.Idle
     }
 
-    fun submitVerification(challengeId: Long, category: String, title: String) {
+    fun submitVerification(challengeId: Long, category: String, title: String, deadline: String) {
         if (challengeId <= 0L) {
             _submitState.value = VerificationSubmitState.Error("챌린지 정보를 확인할 수 없습니다.")
             return
@@ -60,6 +62,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         activeChallengeId = challengeId
         activeCategory = category
         activeTitle = title
+        activeDeadline = deadline
         activeVerifiedAt = null
         val uri = _imageUri.value ?: run {
             _submitState.value = VerificationSubmitState.Error(
@@ -136,6 +139,10 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
                     "이미 인증에 사용한 사진입니다. 다시 촬영해 주세요."
                 code() == 409 && serverError.contains("ALREADY_VERIFIED_TODAY") ->
                     "오늘은 이미 인증을 완료했습니다."
+                code() == 409 && serverError.contains("CHALLENGE_PARTICIPATION_ENDED") ->
+                    "챌린지 참여 기간이 종료되어 인증할 수 없어요."
+                code() == 409 && serverError.contains("CHALLENGE_VERIFICATION_TIME_UNAVAILABLE") ->
+                    "지금은 인증 가능 시간이 아니에요."
                 code() == 413 -> "사진 용량이 너무 큽니다. 다시 촬영해 주세요."
                 code() == 415 -> "JPEG 형식의 사진만 제출할 수 있습니다."
                 code() in 500..599 ->
