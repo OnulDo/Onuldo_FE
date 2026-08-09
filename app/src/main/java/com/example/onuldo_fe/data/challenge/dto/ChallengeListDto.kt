@@ -10,7 +10,7 @@ data class ChallengeListResultDto(
 // 목록/상세 공통 아이템 — 명세의 모든 필드를 받아두고, 화면별로 필요한 것만 매핑한다.
 // description은 블록 배열, timeStart/timeEnd는 "HH:mm:ss" 문자열로 내려온다.
 data class ChallengeItemDto(
-    val id: Long = 0,
+    val challengeId: Long = 0, //챌린지 아이디 추가
     val name: String = "",
     val explainContent: String? = null,
     val description: List<ContentBlockDto>? = null,
