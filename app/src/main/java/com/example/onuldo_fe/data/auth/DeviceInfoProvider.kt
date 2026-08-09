@@ -6,6 +6,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import java.util.UUID
 import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** 앱 설치 식별자와 FCM 토큰을 한 곳에서 관리한다. */
 fun interface DeviceInfoSource {
@@ -25,13 +26,15 @@ class DeviceInfoProvider private constructor(context: Context) : DeviceInfoSourc
     }
 
     override suspend fun getDevice(): DeviceRequest {
-        val latestToken = suspendCancellableCoroutine { continuation ->
-            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-                if (continuation.isActive) {
-                    continuation.resume(if (task.isSuccessful) task.result.orEmpty() else "")
+        val latestToken = withTimeoutOrNull(FCM_TOKEN_TIMEOUT_MS) {
+            suspendCancellableCoroutine { continuation ->
+                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                    if (continuation.isActive) {
+                        continuation.resume(if (task.isSuccessful) task.result.orEmpty() else "")
+                    }
                 }
             }
-        }
+        }.orEmpty()
         if (latestToken.isNotBlank()) saveFcmToken(latestToken)
 
         return DeviceRequest(
@@ -50,6 +53,7 @@ class DeviceInfoProvider private constructor(context: Context) : DeviceInfoSourc
         private const val PREFS_NAME = "auth_device"
         private const val KEY_DEVICE_ID = "device_id"
         private const val KEY_FCM_TOKEN = "fcm_token"
+        private const val FCM_TOKEN_TIMEOUT_MS = 5_000L
 
         @Volatile private var instance: DeviceInfoProvider? = null
 
