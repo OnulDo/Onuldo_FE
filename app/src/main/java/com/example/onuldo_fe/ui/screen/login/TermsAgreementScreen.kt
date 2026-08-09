@@ -108,10 +108,7 @@ fun TermsAgreementScreen(
 
         Text(
             text = "약관에 동의해주세요",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Black,
-            fontSize = 26.sp,
-            lineHeight = 36.sp,
+            style = MaterialTheme.typography.headlineLarge,
             color = BlackBrown,
             modifier = gutter,
         )
@@ -120,10 +117,7 @@ fun TermsAgreementScreen(
 
         Text(
             text = "서비스 이용을 위해 아래 약관에 동의해주세요",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            lineHeight = 22.sp,
+            style = MaterialTheme.typography.bodyMedium,
             color = DarkBrown70,
             modifier = gutter,
         )
@@ -185,18 +179,12 @@ private fun AgreeAllCard(
         Column {
             Text(
                 text = "전체 동의",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 17.sp,
-                lineHeight = 22.sp,
+                style = MaterialTheme.typography.bodyLarge,
                 color = Black,
             )
             Text(
                 text = "필수 항목에 모두 동의합니다",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Medium,
-                fontSize = 13.sp,
-                lineHeight = 18.sp,
+                style = MaterialTheme.typography.labelLarge,
                 color = DarkBrown70,
             )
         }
@@ -224,19 +212,13 @@ private fun AgreeItemRow(
         // 필수는 Persimmon으로 강조, 선택은 본문과 같은 톤으로 낮춘다.
         Text(
             text = if (item.required) "[필수]" else "[선택]",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
+            style = MaterialTheme.typography.bodyMedium,
             color = if (item.required) Persimmon else DarkBrown70,
         )
         Spacer(Modifier.width(6.dp))
         Text(
             text = item.label,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 15.sp,
-            lineHeight = 22.sp,
+            style = MaterialTheme.typography.bodyMedium,
             color = BlackBrown,
             modifier = Modifier.weight(1f),
         )
