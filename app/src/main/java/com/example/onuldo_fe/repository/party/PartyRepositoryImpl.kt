@@ -227,8 +227,7 @@ private fun PartyMemberDto.toModel(index: Int) = PartyMember(
     id = userId.toString(),
     nickname = nickname,
     profileImageUrl = profileImageUrl,
-    // TODO: 서버가 기본 캐릭터 정보를 제공하면 userId 기반 임시 배정을 제거한다.
-    defaultCharacterId = ((userId % 9) + 1).toInt(),
+    defaultCharacterId = null,
     role = if (role == "HOST") PartyRole.Leader else PartyRole.Member,
     readyStatus = when (status) {
         "READY" -> PartyMemberReadyStatus.Ready
@@ -258,7 +257,7 @@ private fun RealPartyMemberDto.toModel(index: Int) = PartyMember(
     id = userId.toString(),
     nickname = nickname,
     profileImageUrl = profileImageUrl,
-    defaultCharacterId = ((userId % 9) + 1).toInt(),
+    defaultCharacterId = null,
     role = if (role == "HOST") PartyRole.Leader else PartyRole.Member,
     readyStatus = when (status) {
         "READY" -> PartyMemberReadyStatus.Ready
