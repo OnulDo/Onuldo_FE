@@ -43,7 +43,6 @@ import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
-import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Persimmon80
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
@@ -117,19 +116,12 @@ fun HomePartyCard(
                 lineHeight = 20.sp,
                 fontWeight = FontWeight.Medium
             )
-            partyChallenge.remainingMinutes?.takeIf { it in 0..60 }?.let { remainingMinutes ->
+            partyChallenge.remainingMinutes
+                ?.takeIf { partyChallenge.canVerify && it >= 0 }
+                ?.let { remainingMinutes ->
                 Spacer(Modifier.width(spacing.spacing10))
-                Box(Modifier.background(Persimmon10, RoundedCornerShape(10.dp)).padding(horizontal = spacing.spacing10, vertical = 2.dp)) {
-                    Text(
-                        text = stringResource(R.string.home_challenge_minutes_left, remainingMinutes),
-                        color = Persimmon,
-                        fontFamily = Pretendard,
-                        fontSize = 13.sp,
-                        lineHeight = 20.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                HomeRemainingTimeChip(remainingMinutes = remainingMinutes)
                 }
-            }
         }
 
         Spacer(Modifier.weight(1f))
@@ -169,9 +161,10 @@ private fun PartyAction(
     party: HomePartyChallenge,
     onVerifyClick: () -> Unit
 ) {
-    if (party.status == ChallengeStatus.NeedCertification && party.canVerify) {
+    if (party.status == ChallengeStatus.NeedCertification) {
         HomeVerifyButton(
             onClick = onVerifyClick,
+            enabled = party.canVerify,
             width = 96.dp,
             height = 32.dp,
             iconSize = 14.dp,

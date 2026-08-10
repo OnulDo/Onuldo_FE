@@ -45,5 +45,8 @@ data class CursorPageResponse<T>(
  */
 data class ErrorBody(
     val code: String? = null,
+    val errorCode: String? = null,
     val message: String? = null,
-)
+) {
+    val effectiveCode: String? get() = errorCode?.takeIf(String::isNotBlank) ?: code
+}

@@ -9,41 +9,20 @@ data class MyPageResponseDto(
     val joinedAt: String? = null,
 )
 
-/** `GET /api/users/me/profile` — 프로필 설정 화면. */
+/** `GET /api/users/me/profile` — 프로필 설정 화면. `PATCH` 응답도  동일 - 재사용 */
 data class ProfileResponseDto(
     val nickname: String? = null,
     val email: String? = null,
     val profileImageUrl: String? = null,
 )
 
-/** 알림 설정 항목. 서버 `UpdateNotificationReqDto.type` enum과 이름이 일치해야 한다. */
-enum class NotificationSettingType {
-    VERIFICATION_DEADLINE,
-    VERIFICATION_RESULT,
-    CHALLENGE_START,
-    REFUND_COMPLETE,
-    DEDUCTION_ALERT,
-}
-
-/** `GET /api/users/me/notification-settings` */
-data class NotificationSettingsResponseDto(
-    val allEnabled: Boolean = false,
-    val verificationDeadline: Boolean = false,
-    val verificationResult: Boolean = false,
-    val challengeStart: Boolean = false,
-    val refundComplete: Boolean = false,
-    val deductionAlert: Boolean = false,
-)
-
-/** `PATCH /api/users/me/notification-settings` — 항목 하나씩 토글한다. */
-data class UpdateNotificationRequestDto(
-    val type: NotificationSettingType,
-    val enabled: Boolean,
-)
-
-data class UpdateNotificationResponseDto(
-    val type: NotificationSettingType? = null,
-    val enabled: Boolean = false,
+/**
+ * `PATCH /api/users/me/profile` 요청.
+ * 프로필 사진 / 닉네임 요청
+ */
+data class UpdateProfileRequestDto(
+    val nickname: String? = null,
+    val profileImageUrl: String? = null,
 )
 
 /** `GET /api/users/me/wallet/summary` */
@@ -86,6 +65,17 @@ data class ChargePointRequestDto(
 )
 
 data class ChargePointResponseDto(
+    val amount: Int = 0,
+    val balanceAfter: Long = 0L,
+)
+
+/** `POST /api/users/me/wallet/withdraw` 요청 — 출금할 포인트. */
+data class WithdrawPointRequestDto(
+    val point: Int,
+)
+
+/** `POST /api/users/me/wallet/withdraw` 응답 — 출금 금액과 출금 후 잔액. */
+data class WithdrawPointResponseDto(
     val amount: Int = 0,
     val balanceAfter: Long = 0L,
 )

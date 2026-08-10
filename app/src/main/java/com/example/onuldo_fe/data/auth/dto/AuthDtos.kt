@@ -11,9 +11,9 @@ enum class TermType {
     companion object {
         /**
          * 회원가입 시 반드시 `true`여야 하는 약관.
-         * 서버 `AuthService.REQUIRED_TERM_TYPES` 기준 — **REFUND는 필수가 아니다.**
+         * 가입 화면에 노출되는 약관은 모두 필수로 동의받는다.
          */
-        val REQUIRED = listOf(SERVICE, PRIVACY, AGE_14)
+        val REQUIRED = listOf(SERVICE, PRIVACY, REFUND, AGE_14)
     }
 }
 
@@ -29,9 +29,15 @@ data class TermAgreementRequest(
     val value: Boolean,
 )
 
+data class DeviceRequest(
+    val deviceId: String,
+    val fcmToken: String,
+)
+
 data class EmailLoginRequest(
     val email: String,
     val password: String,
+    val device: DeviceRequest,
 )
 
 /**
@@ -48,11 +54,13 @@ data class EmailSignupRequest(
     val nickname: String,
     val profileImageUrl: String? = null,
     val termAgreements: List<TermAgreementRequest>,
+    val device: DeviceRequest,
 )
 
 data class OAuthLoginRequest(
     val provider: SocialProvider,
     val socialAccessToken: String,
+    val device: DeviceRequest,
 )
 
 data class OAuthSignupRequest(
@@ -61,6 +69,7 @@ data class OAuthSignupRequest(
     val nickname: String,
     val profileImageUrl: String? = null,
     val termAgreements: List<TermAgreementRequest>,
+    val device: DeviceRequest,
 )
 
 /** 소셜 로그인 응답. 신규 사용자면 토큰이 비어 있고 [isNewUser]가 true라 가입 절차로 보내야 한다. */

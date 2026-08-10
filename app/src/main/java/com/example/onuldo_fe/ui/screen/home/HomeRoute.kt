@@ -20,6 +20,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.model.home.notification.NotificationLanding
+import com.example.onuldo_fe.model.home.notification.toLanding
 import com.example.onuldo_fe.ui.component.PermissionDialogType
 import com.example.onuldo_fe.ui.component.PermissionSettingDialog
 import com.example.onuldo_fe.util.moveToAppSettings
@@ -31,6 +33,7 @@ fun HomeRoute(
     onSettlementResultClick: (Long) -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
     onCameraNavigate: (Long, String, String, String) -> Unit = { _, _, _, _ -> },
+    onChallengeClick: (Long) -> Unit = {},
     refreshKey: Int = 0
 ) {
     val context = LocalContext.current
@@ -123,7 +126,22 @@ fun HomeRoute(
 
     if (showNotification) {
         BackHandler { showNotification = false }
-        NotificationRoute(onBackClick = { showNotification = false })
+        NotificationRoute(
+            onBackClick = { showNotification = false },
+            onItemClick = { item ->
+                // NOTI-04 공용 랜딩 규칙으로 목적지를 결정한다(B104 알림 페이지도 동일 규칙).
+                // 아직 라우트가 없는 목적지(파티 피드·솔로 기록)는 홈으로 폴백한다.
+                showNotification = false
+                when (val landing = item.toLanding()) {
+                    is NotificationLanding.ChallengeDetail -> onChallengeClick(landing.challengeId)
+                    is NotificationLanding.PartySettlement -> onSettlementResultClick(landing.partyId)
+                    // 아래는 아직 라우트가 없거나 홈이 목적지 → 홈 유지(오버레이 닫힘)
+                    is NotificationLanding.PartyFeed,
+                    NotificationLanding.SoloRecord,
+                    NotificationLanding.Home -> Unit
+                }
+            }
+        )
     } else {
         HomeScreen(
             uiState = viewModel.uiState,

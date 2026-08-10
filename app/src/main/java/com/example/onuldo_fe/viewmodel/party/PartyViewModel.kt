@@ -514,6 +514,7 @@ private fun PartyMember.toUi() = PartyMemberUi(
 // 진행 중 파티 요약 정보를 파티 홈 카드에 표시할 UI 모델로 변환
 private fun PartySummary.toUi() = PartyCardUi(
     id = partyId,
+    challengeId = challengeId,
     partyName = partyName,
     challengeName = challengeName,
     dDay = dDay,

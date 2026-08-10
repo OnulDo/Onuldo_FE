@@ -74,6 +74,10 @@ fun MainScreen(
                     },
                     onSettlementResultClick = { partyId ->
                         navController.navigate(Routes.partySettlement(partyId))
+                    },
+                    // 알림 탭 → 챌린지 상세(루트 nav)
+                    onChallengeClick = { challengeId ->
+                        onNavigate(Routes.challengeDetail(challengeId))
                     }
                 )
             }
@@ -103,7 +107,9 @@ fun MainScreen(
             composable(BottomTab.Party.route) {
                 PartyRoute(
                     onBottomBarVisibilityChange = { showBottomBar = it },
-                    onCameraNavigate = { onNavigate(Routes.camera(2L)) },
+                    onCameraNavigate = { challengeId, title, deadline ->
+                        onNavigate(Routes.camera(challengeId, "", title, deadline))
+                    },
                     onChargePoint = { onNavigate(Routes.MYPAGE_CHARGE) },
                     onHomeNavigate = {
                         // 새로 시작한 파티 재조회와 홈 상단 이동을 한 번에 요청
