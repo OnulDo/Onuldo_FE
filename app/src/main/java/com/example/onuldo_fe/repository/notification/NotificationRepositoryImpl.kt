@@ -29,7 +29,7 @@ private fun NotificationListItemDto.toModel() = NotificationItem(
     content = content,
     timeAgo = timeAgo,
     createdAt = createdAt,
-    type = notificationTypeFrom(type),
+    type = notificationTypeFrom(type, title),
     challengeId = challengeId,
     partyId = partyId,
 )
