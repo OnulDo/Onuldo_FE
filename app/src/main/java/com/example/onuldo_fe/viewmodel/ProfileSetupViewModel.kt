@@ -96,10 +96,12 @@ class ProfileSetupViewModel(
 
         if (!hasRequiredDraft) {
             // 회원가입 화면을 거치지 않고 진입한 비정상 경로.
+            // 소셜 가입에서는 이메일 변경 안내를 띄우지 않는다 — 이메일을 제공자가 정하므로
+            // 사용자가 바꿀 수 없고, 되돌아갈 회원가입 화면도 백스택에 없다.
             _uiState.update {
                 it.copy(
                     errorMessage = "회원가입 정보가 없어요. 처음부터 다시 진행해주세요.",
-                    requiresEmailChange = true,
+                    requiresEmailChange = !isSocialSignup,
                 )
             }
             return

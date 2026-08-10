@@ -272,7 +272,11 @@ object SocialAuthClient : SocialAccountLink {
             SocialProvider.NAVER -> if (isNaverConfigured) unlinkNaver()
             SocialProvider.EMAIL, null -> Unit
         }
-        SocialSessionStore.provider = null
+
+        // 연동 해제에 실패했더라도 기기에 남은 소셜 세션은 반드시 정리한다.
+        // 여기서 기록을 먼저 지우면 [logout]이 어느 SDK를 정리해야 할지 몰라 그냥 지나가고,
+        // 탈퇴한 계정의 소셜 토큰이 기기에 그대로 남는다.
+        logout()
     }
 
     private suspend fun unlinkKakao() = suspendCancellableCoroutine { continuation ->
