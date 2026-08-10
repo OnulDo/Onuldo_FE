@@ -27,9 +27,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.component.ConfirmDialog
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.component.OnulDoButton
-import com.example.onuldo_fe.ui.component.OnulDoErrorDialog
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
@@ -49,8 +49,9 @@ fun VerificationFailureScreen(
     isManualReviewLoading: Boolean = false,
     manualReviewErrorMessage: String? = null,
     onRetryClick: () -> Unit = {},
+    onBackClick: () -> Unit = {},
     onManualReviewClick: () -> Unit = {},
-    onManualReviewErrorDismiss: () -> Unit = {}
+    onManualReviewErrorConfirm: () -> Unit = {}
 ) {
     val remainingTimeText by produceState(
         initialValue = verificationDeadline.toRemainingTimeText(),
@@ -75,8 +76,7 @@ fun VerificationFailureScreen(
                     .padding(top = 27.dp)
                     .height(48.dp)
             ) {
-                OnulDoBackButton {
-                }
+                OnulDoBackButton(onClick = onBackClick)
                 Text(
                     text = "인증 결과",
                     color = BlackBrown,
@@ -205,12 +205,13 @@ fun VerificationFailureScreen(
     }
 
     manualReviewErrorMessage?.let { message ->
-        OnulDoErrorDialog(
+        ConfirmDialog(
             title = "재검토 요청에 실패했어요",
             description = message,
-            buttonText = "재시도",
-            onButtonClick = onManualReviewClick,
-            onDismiss = onManualReviewErrorDismiss
+            dismissText = "확인",
+            confirmText = "재시도",
+            onDismiss = onManualReviewErrorConfirm,
+            onConfirm = onManualReviewClick
         )
     }
 }

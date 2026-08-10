@@ -469,8 +469,17 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
                 manualReviewErrorMessage =
                     (manualReviewState as? com.example.onuldo_fe.camera.ManualReviewRequestState.Error)
                         ?.message,
+                onBackClick = {
+                    cameraViewModel.clearManualReviewState()
+                    cameraViewModel.clearSubmitState()
+                    navController.popBackStack(Routes.MAIN, inclusive = false)
+                },
                 onManualReviewClick = cameraViewModel::requestManualReview,
-                onManualReviewErrorDismiss = cameraViewModel::clearManualReviewState,
+                onManualReviewErrorConfirm = {
+                    cameraViewModel.clearManualReviewState()
+                    cameraViewModel.clearSubmitState()
+                    navController.popBackStack(Routes.MAIN, inclusive = false)
+                },
                 onRetryClick = {
                     cameraViewModel.activeChallengeId?.let { challengeId ->
                         val category = cameraViewModel.activeCategory

@@ -11,8 +11,9 @@ fun ChallengeVerificationScreen(
     manualReviewErrorMessage: String? = null,
     onConfirmClick: () -> Unit = {},
     onRetryClick: () -> Unit = {},
+    onBackClick: () -> Unit = {},
     onManualReviewClick: () -> Unit = {},
-    onManualReviewErrorDismiss: () -> Unit = {},
+    onManualReviewErrorConfirm: () -> Unit = {},
     isReviewResultReady: Boolean = false,
     submittedAt: String? = null
 ) {
@@ -27,8 +28,9 @@ fun ChallengeVerificationScreen(
             isManualReviewLoading = isManualReviewLoading,
             manualReviewErrorMessage = manualReviewErrorMessage,
             onRetryClick = onRetryClick,
+            onBackClick = onBackClick,
             onManualReviewClick = onManualReviewClick,
-            onManualReviewErrorDismiss = onManualReviewErrorDismiss
+            onManualReviewErrorConfirm = onManualReviewErrorConfirm
         )
         VerificationStatus.WAITING -> VerificationWaitingScreen(
             submittedAt = submittedAt,
