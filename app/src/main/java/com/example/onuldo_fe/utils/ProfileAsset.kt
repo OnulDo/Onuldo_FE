@@ -1,34 +1,31 @@
 package com.example.onuldo_fe.utils
 
+import com.example.onuldo_fe.BuildConfig
 /**
- * 기본 프로필 캐릭터와 서버 `profileImageUrl` 문자열 사이의 변환.
- *
- * 서버는 프로필 이미지를 `"default_asset:{번호}"` 형식으로 저장하며, 미지정 시 **1~12 중 랜덤**으로
- * 채운다(백엔드 `AuthService.resolveProfileImageUrl`).
- *
- * ⚠️ 서버 기본 에셋은 12종인데 앱 캐릭터 그리드는 9종(`ProfileCharacters`)뿐이라, 서버가 10~12번을
- * 배정하면 앱에서 보여줄 이미지가 없다. 그 경우 [toCharacterIndex]가 null을 돌려주므로 화면은
- * 기본 아바타로 대체한다. 디자인·백엔드와 개수를 맞추면 이 대체 처리는 없앨 수 있다.
+ * 기본 프로필 캐릭터와 서버 `profileImageUrl`(프리셋 URL) 사이의 변환.
+ * 회원가입 시 `profileImageUrl`은 **필수**이며 위 9종 중 하나여야 한다(그 외 값은 서버 400,
+ * 단 커스텀 업로드 URL은 예외로 그대로 저장). 프리셋이 아닌 URL은 [toCharacterIndex]가 null을
+ * 돌려주므로 화면은 기본 아바타로 대체한다.
  */
 object ProfileAsset {
 
-    private const val PREFIX = "default_asset:"
-
+    //env// S3에 저장된 프로필 프리셋 이미지의 기본 URL. 파일명은 `1.png` ~ `9.png`.
+    private val BASE_URL = BuildConfig.PROFILE_BASE_URL
     /** 앱이 제공하는 캐릭터 수. `ProfileCharacters` 목록 크기와 일치해야 한다. */
     const val CHARACTER_COUNT = 9
 
-    /** 캐릭터 그리드 인덱스(0부터) → 서버 저장 형식. */
-    fun fromCharacterIndex(index: Int): String = "$PREFIX${index + 1}"
+    /** 캐릭터 그리드 인덱스(0부터) → 프리셋 이미지 URL. (0 → 1.png … 8 → 9.png) */
+    fun fromCharacterIndex(index: Int): String = "$BASE_URL${index + 1}.png"
 
     /**
-     * 서버 문자열 → 캐릭터 그리드 인덱스.
-     * 형식이 다르거나(직접 업로드한 URL 등) 앱이 가진 범위를 벗어나면 null.
+     * 프로필 이미지 URL → 캐릭터 그리드 인덱스.
+     * 프리셋이 아니거나(커스텀 업로드 URL 등) 앱 범위를 벗어나면 null.
      */
     fun toCharacterIndex(profileImageUrl: String?): Int? {
         val raw = profileImageUrl?.trim().orEmpty()
-        if (!raw.startsWith(PREFIX)) return null
+        if (!raw.startsWith(BASE_URL)) return null
 
-        val number = raw.removePrefix(PREFIX).toIntOrNull() ?: return null
+        val number = raw.removePrefix(BASE_URL).removeSuffix(".png").toIntOrNull() ?: return null
         val index = number - 1
         return index.takeIf { it in 0 until CHARACTER_COUNT }
     }

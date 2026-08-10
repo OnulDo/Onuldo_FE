@@ -45,7 +45,7 @@ class AuthRepositoryImpl(
         email: String,
         password: String,
         nickname: String,
-        profileImageUrl: String?,
+        profileImageUrl: String,
         termAgreements: List<TermAgreementRequest>,
     ): ApiResult<Unit> = safeApiCall {
         authApi.signup(
@@ -93,7 +93,7 @@ class AuthRepositoryImpl(
         provider: SocialProvider,
         socialAccessToken: String,
         nickname: String,
-        profileImageUrl: String?,
+        profileImageUrl: String,
         termAgreements: List<TermAgreementRequest>,
     ): ApiResult<Unit> = safeApiCall {
         authApi.oauthSignup(
