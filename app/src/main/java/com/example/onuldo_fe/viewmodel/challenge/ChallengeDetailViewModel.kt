@@ -22,7 +22,7 @@ class ChallengeDetailViewModel(
 
     init { load() }
 
-    private fun load() {
+    fun load() {
         uiState = uiState.copy(isLoading = true, isError = false)
         viewModelScope.launch {
             runCatching { repository.getChallengeDetail(challengeId) }

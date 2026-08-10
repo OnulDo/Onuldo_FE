@@ -177,10 +177,13 @@ private fun RealHomeDailyChallengeDto.toPersonalModel(now: LocalDateTime): HomeC
         streakDays = streakDays.coerceAtLeast(0),
         remainingDays = endDate.remainingDaysFrom(now.toLocalDate()),
         deadlineAt = deadline,
-        status = toChallengeStatus(now.toLocalTime()),
+        status = dailyStatus.toDailyChallengeStatus(),
         verifiedAt = null,
-        remainingMinutes = deadline.remainingMinutesFrom(now.toLocalTime(), verifiedOnDate),
-        canVerify = canVerifyAt(now.toLocalTime()),
+        remainingMinutes = deadline.remainingMinutesFrom(
+            now.toLocalTime(),
+            dailyStatus != DAILY_STATUS_WAITING
+        ),
+        canVerify = dailyStatus == DAILY_STATUS_WAITING && challengeId > 0L,
         challengeId = challengeId.takeIf { it > 0L },
         category = category
     )
@@ -190,7 +193,6 @@ private fun PartyHomeItemDto.toHomeModel(
     now: LocalDateTime
 ): HomePartyChallenge {
     val deadline = verificationDeadline.toLocalTimeOrNull()
-    val isDeadlinePassed = deadline?.let(now.toLocalTime()::isAfter) == true
     // 시간으로 상태를 추정하지 않고 서버가 계산한 나의 오늘 인증 상태를 사용한다.
     val challengeStatus = status.toPartyChallengeStatus()
     // 카메라 화면 이동에 필수인 값이라, 이게 없으면 canVerify도 true가 되면 안 된다
@@ -213,7 +215,6 @@ private fun PartyHomeItemDto.toHomeModel(
             ),
         canVerify = challengeStatus == ChallengeStatus.NeedCertification &&
             dailyStatus == DAILY_STATUS_WAITING &&
-            !isDeadlinePassed &&
             verifiedChallengeId != null,
         members = members.map {
             HomePartyMember(
@@ -266,25 +267,16 @@ private fun String.toHomeTimeText(): String =
     runCatching { LocalDateTime.parse(this).toLocalTime().toString().take(5) }
         .getOrElse { substringAfter('T', this).take(5) }
 
-private fun RealHomeDailyChallengeDto.canVerifyAt(now: LocalTime): Boolean {
-    // 서버가 오늘 인증 대기 상태로 내려준 경우에만 시간 범위를 추가 확인한다.
-    if (verifiedOnDate || dailyStatus != DAILY_STATUS_WAITING) return false
-    val start = timeStart.toLocalTimeOrNull()
-    val end = timeEnd.toLocalTimeOrNull()
-    return (start == null || !now.isBefore(start)) && (end == null || !now.isAfter(end))
-}
-
 private const val DAILY_STATUS_WAITING = "WAITING"
 
-/** 인증 완료 여부와 마감 시각으로 오늘 카드 상태를 정한다. */
-private fun RealHomeDailyChallengeDto.toChallengeStatus(now: LocalTime): ChallengeStatus {
-    if (verifiedOnDate) return ChallengeStatus.Success
-    val deadline = timeEnd.toLocalTimeOrNull()
-    return if (deadline != null && now.isAfter(deadline)) {
-        ChallengeStatus.Failed
-    } else {
-        ChallengeStatus.NeedCertification
-    }
+/** 서버의 오늘 인증 상태를 홈 카드의 인증 버튼/상태 칩으로 변환한다. */
+private fun String.toDailyChallengeStatus(): ChallengeStatus = when (uppercase()) {
+    "SUCCESS" -> ChallengeStatus.Success
+    "FAIL" -> ChallengeStatus.Failed
+    "REVIEW_PENDING" -> ChallengeStatus.WaitingReview
+    // UNAVAILABLE은 인증하기 버튼을 유지하되 canVerify=false로 비활성 표시한다.
+    "WAITING", "UNAVAILABLE" -> ChallengeStatus.NeedCertification
+    else -> ChallengeStatus.NeedCertification
 }
 
 private fun String?.toLocalTimeOrNull(): LocalTime? =
