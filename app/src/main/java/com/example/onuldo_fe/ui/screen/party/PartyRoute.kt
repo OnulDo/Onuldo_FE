@@ -276,7 +276,7 @@ fun PartyRoute(
                         // 실제 서버 이탈은 autoLeaveOnBackground()가 맡는다 — 실패해도 의도를 남겨두고
                         // 목록이 다시 보이는 시점(onPartyListVisible)에 스스로 재시도한다.
                         screen = PartyScreen.List
-                        partyViewModel.autoLeaveOnBackground()
+                        partyId?.let(partyViewModel::autoLeaveOnBackground)
                     }
                 }
                 else -> Unit

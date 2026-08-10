@@ -388,8 +388,7 @@ class PartyViewModel(
      * pendingAutoLeavePartyId에 의도를 남겨두고, 목록이 다시 보이는 시점(onPartyListVisible)에
      * 재시도한다 — 그렇지 않으면 사용자가 서버의 대기방 멤버로 남았는데도 되돌아갈 UI 경로가 없다.
      */
-    fun autoLeaveOnBackground() {
-        val partyId = uiState.waitingRoom?.partyId ?: return
+    fun autoLeaveOnBackground(partyId: String) {
         pendingAutoLeavePartyId = partyId
         attemptOrQueueLeave(partyId) {
             if (pendingAutoLeavePartyId == partyId) pendingAutoLeavePartyId = null
@@ -399,7 +398,7 @@ class PartyViewModel(
     /** 실패한 자동 이탈이 남아있고 여전히 같은 파티의 대기방이면 조용히 재시도한다. */
     private fun retryPendingAutoLeaveIfNeeded() {
         val partyId = pendingAutoLeavePartyId ?: return
-        if (uiState.waitingRoom?.partyId != partyId) {
+        if (uiState.waitingRoom?.partyId?.let { it != partyId } == true) {
             // 이미 다른 경로(수동 이탈, 파티 해체 등)로 해소됨
             pendingAutoLeavePartyId = null
             return
@@ -417,7 +416,7 @@ class PartyViewModel(
             // 그대로 남는 상태가 된다.
             viewModelScope.launch {
                 snapshotFlow { uiState.action }.first { it == PartyAction.Idle }
-                if (uiState.waitingRoom?.partyId == partyId) {
+                if (uiState.waitingRoom?.partyId?.let { it != partyId } != true) {
                     performLeaveParty(partyId, onSuccess)
                 }
             }
