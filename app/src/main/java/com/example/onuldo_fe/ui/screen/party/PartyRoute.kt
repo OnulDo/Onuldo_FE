@@ -363,7 +363,7 @@ fun PartyRoute(
 
         PartyScreen.Create -> PartyCreateScreen(
             partyName = partyName,
-            onPartyNameChange = { partyName = it.take(20) },
+            onPartyNameChange = { partyName = it.take(10) },
             capacity = capacity,
             onCapacityChange = { capacity = it.coerceIn(2, 5) },
             selectedChallenge = selectedChallenge,
