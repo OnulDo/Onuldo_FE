@@ -38,21 +38,6 @@ import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 
-/** 히어로 카드 배경 — Figma `4310:1379` (#FFF4EC, 매칭 토큰 없어 로컬 정의). */
-private val HeroBackground = Color(0xFFFFF4EC)
-
-/** 히어로 카드 색종이 조각 — (히어로 기준 x, y, 색상). Figma `4310:1380~1386`. */
-private data class Confetti(val x: Int, val y: Int, val color: Color)
-
-private val confettiPieces = listOf(
-    Confetti(20, 27, Color(0xFFFF7233)),
-    Confetti(310, 37, Color(0xFFF9C955)),
-    Confetti(60, 57, Color(0xFFFF8E5A)),
-    Confetti(300, 97, Color(0xFFB23541)),
-    Confetti(40, 177, Color(0xFFFBDD8E)),
-    Confetti(280, 217, Color(0xFFFFAC7C)),
-    Confetti(100, 27, Color(0xFF18A77A)),
-)
 
 /**
  * 가입 완료(환영) 화면 — 온보딩 마지막, Figma node `4310:1375`.
