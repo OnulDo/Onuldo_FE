@@ -84,7 +84,9 @@ android {
      * 관리자가 콘솔을 다시 열어야 한다. 공용 키로 고정하면 키 해시는 하나면 된다.
      *
      * 비밀번호가 안드로이드 기본 관례값(`android`)인 **디버그 전용** 키다.
-     * 릴리스 키는 절대 저장소에 넣지 않는다.
+     * `getByName("debug")`만 재정의하므로 `release` 변형에는 영향이 없다
+     * (`:app:signingReport` 기준 release = `Config: none`).
+     * 릴리스 키는 절대 저장소에 넣지 않으며, 아래 [buildTypes] 주석을 함께 볼 것.
      */
     signingConfigs {
         getByName("debug") {
@@ -97,6 +99,10 @@ android {
 
     buildTypes {
         release {
+            // 릴리스 서명은 의도적으로 비워 둔다. 위 공용 키스토어는 디버그 전용이므로
+            // 여기에 signingConfig를 연결하면 안 된다. 출시용 키는 저장소 밖에서
+            // 따로 관리하고(로컬 keystore.properties 또는 CI 시크릿),
+            // 그때 카카오·네이버 콘솔에서 디버그 키 해시를 제거한다.
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
