@@ -456,7 +456,10 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
             LaunchedEffect(manualReviewState) {
                 if (manualReviewState is com.example.onuldo_fe.camera.ManualReviewRequestState.Success) {
                     cameraViewModel.clearManualReviewState()
-                    navController.navigate(Routes.VERIFICATION_WAITING)
+                    navController.navigate(Routes.VERIFICATION_WAITING) {
+                        popUpTo(Routes.VERIFICATION_FAIL) { inclusive = true }
+                        launchSingleTop = true
+                    }
                 }
             }
 
