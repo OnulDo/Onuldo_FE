@@ -127,7 +127,11 @@ fun HomeChallengeCard(
                 )
                 //인증 마감 1시간 전부터 표시
                 challenge.remainingMinutes
-                    ?.takeIf { challenge.canVerify && it >= 0 }
+                    ?.takeIf {
+                        challenge.status == ChallengeStatus.NeedCertification &&
+                            challenge.canVerify &&
+                            it in 0..60
+                    }
                     ?.let { minutes ->
                     Spacer(modifier = Modifier.width(spacing.spacing10))
                     HomeRemainingTimeChip(remainingMinutes = minutes)
