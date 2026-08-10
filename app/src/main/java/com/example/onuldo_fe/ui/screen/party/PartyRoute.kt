@@ -98,7 +98,10 @@ fun PartyRoute(
     onBottomBarVisibilityChange: (Boolean) -> Unit = {},
     onCameraNavigate: (Long, String, String) -> Unit = { _, _, _ -> },
     onChargePoint: () -> Unit = {},
-    onHomeNavigate: () -> Unit = {}
+    onHomeNavigate: () -> Unit = {},
+    // 기기 푸시 탭(파티원 인증 완료) 랜딩: 지정 파티 피드를 바로 연다. 소비 후 null로 되돌린다.
+    openFeedPartyId: Long? = null,
+    onFeedOpened: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -319,6 +322,15 @@ fun PartyRoute(
             screen = PartyScreen.List
             onHomeNavigate()
         }
+    }
+
+    // 푸시 탭(파티원 인증 완료)으로 넘어온 partyId가 있으면 해당 파티 피드로 진입한다.
+    LaunchedEffect(openFeedPartyId) {
+        val partyId = openFeedPartyId ?: return@LaunchedEffect
+        feedPartyId = partyId.toString()
+        partyFeedViewModel.loadPartyFeed(feedPartyId)
+        screen = PartyScreen.Feed
+        onFeedOpened()
     }
 
     LaunchedEffect(screen) {

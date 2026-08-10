@@ -10,6 +10,8 @@ import com.example.onuldo_fe.viewmodel.record.RecordViewModel
 @Composable
 fun RecordRoute(
     onBrowseChallenges: () -> Unit,
+    // 기기 푸시 탭 랜딩(종료일 리마인더→진행중, 환급 완료→완료)에서 초기 탭을 지정
+    initialTab: RecordTab = RecordTab.PROGRESS,
     viewModel: RecordViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -25,6 +27,7 @@ fun RecordRoute(
         isLoading = uiState.isLoading,
         errorMessage = uiState.errorMessage,
         onRetry = viewModel::loadRecords,
-        onBrowseChallenges = onBrowseChallenges
+        onBrowseChallenges = onBrowseChallenges,
+        initialTab = initialTab
     )
 }
