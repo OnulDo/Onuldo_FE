@@ -301,9 +301,10 @@ private fun JsonElement?.toLocalTimeTextOrNull(): String? {
             asString
         } else {
             val time = asJsonObject
-            val hour = time.get("hour")?.asInt ?: 0
-            val minute = time.get("minute")?.asInt ?: 0
-            val second = time.get("second")?.asInt ?: 0
+            val hour = time.get("hour")?.takeIf { it.isJsonPrimitive }?.asInt ?: return@runCatching null
+            val minute = time.get("minute")?.takeIf { it.isJsonPrimitive }?.asInt ?: return@runCatching null
+            val second = time.get("second")?.takeIf { it.isJsonPrimitive }?.asInt ?: return@runCatching null
+            if (hour !in 0..23 || minute !in 0..59 || second !in 0..59) return@runCatching null
             "%02d:%02d:%02d".format(hour, minute, second)
         }
     }.getOrNull()
