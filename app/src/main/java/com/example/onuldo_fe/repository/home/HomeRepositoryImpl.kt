@@ -276,14 +276,27 @@ private fun RealHomeDailyChallengeDto.canVerifyAt(now: LocalTime): Boolean {
 
 private const val DAILY_STATUS_WAITING = "WAITING"
 
-/** 인증 완료 여부와 마감 시각으로 오늘 카드 상태를 정한다. */
+/** 서버의 오늘 인증 상태를 홈 카드의 인증 버튼/상태 칩으로 변환한다. */
 private fun RealHomeDailyChallengeDto.toChallengeStatus(now: LocalTime): ChallengeStatus {
-    if (verifiedOnDate) return ChallengeStatus.Success
-    val deadline = timeEnd.toLocalTimeOrNull()
-    return if (deadline != null && now.isAfter(deadline)) {
-        ChallengeStatus.Failed
-    } else {
-        ChallengeStatus.NeedCertification
+    return when (dailyStatus.uppercase()) {
+        "WAITING" -> if (timeEnd.toLocalTimeOrNull()?.let(now::isAfter) == true) {
+            ChallengeStatus.Failed
+        } else {
+            ChallengeStatus.NeedCertification
+        }
+        "PENDING", "REVIEWING", "WAITING_REVIEW", "MANUAL_REVIEW" ->
+            ChallengeStatus.WaitingReview
+        "SUCCESS", "PASS", "COMPLETED" -> ChallengeStatus.Success
+        "FAIL", "FAILED", "AUTO_FAIL" -> ChallengeStatus.Failed
+        else -> {
+            if (verifiedOnDate) return ChallengeStatus.Success
+            val deadline = timeEnd.toLocalTimeOrNull()
+            if (deadline != null && now.isAfter(deadline)) {
+                ChallengeStatus.Failed
+            } else {
+                ChallengeStatus.NeedCertification
+            }
+        }
     }
 }
 

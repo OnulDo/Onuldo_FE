@@ -75,6 +75,8 @@ fun VerificationFailureScreen(
                     .padding(top = 27.dp)
                     .height(48.dp)
             ) {
+                OnulDoBackButton {
+                }
                 Text(
                     text = "인증 결과",
                     color = BlackBrown,
@@ -237,7 +239,7 @@ private fun VerificationFailureScreenPreview() {
 }
 
 @Preview(
-    name = "재검토 요청 실패",
+//    name = "재검토 요청 실패",
     showBackground = true,
     widthDp = 390,
     heightDp = 844

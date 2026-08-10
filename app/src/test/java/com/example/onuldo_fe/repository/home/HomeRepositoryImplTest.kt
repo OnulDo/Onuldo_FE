@@ -153,6 +153,31 @@ class HomeRepositoryImplTest {
     }
 
     @Test
+    fun `개인 챌린지 dailyStatus를 홈 상태 칩으로 변환한다`() {
+        val statuses = mapOf(
+            "WAITING" to ChallengeStatus.NeedCertification,
+            "PENDING" to ChallengeStatus.WaitingReview,
+            "SUCCESS" to ChallengeStatus.Success,
+            "FAIL" to ChallengeStatus.Failed
+        )
+
+        statuses.forEach { (dailyStatus, expected) ->
+            val challenge = listOf(
+                dailyItem(
+                    type = "PERSONAL",
+                    name = dailyStatus,
+                    verified = false,
+                    dailyStatus = dailyStatus
+                )
+            ).toHomeData(LocalDateTime.of(2026, 8, 5, 12, 0))
+                .challenges
+                .single()
+
+            assertEquals(expected, challenge.status)
+        }
+    }
+
+    @Test
     fun `홈 전용 파티 응답의 상태와 첫 정산 배너를 반영한다`() {
         val partyHome = PartyHomeResultDto(
             settlementBanners = listOf(
