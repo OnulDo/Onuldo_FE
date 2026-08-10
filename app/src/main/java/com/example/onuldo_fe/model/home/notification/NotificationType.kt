@@ -32,8 +32,6 @@ fun notificationTypeFrom(raw: String?, title: String = ""): NotificationType = w
     // 직접검토 결과: 서버가 승인/기각 타입을 분리해 내려주므로 아이콘도 정확히 갈린다.
     "VERIFICATION_APPROVED" -> NotificationType.ReviewPassed
     "VERIFICATION_REJECTED" -> NotificationType.ReviewRejected
-    // 구버전 호환: 분리 전 단일 타입. 승인/기각 구분 정보가 없어 통과 아이콘으로 안전 처리.
-    "VERIFICATION_RESULT" -> NotificationType.ReviewPassed
     "PARTY_MEMBER_VERIFIED" -> NotificationType.PartyMemberVerified
     "CHALLENGE_START" -> NotificationType.ChallengeStart
     "CHALLENGE_END_REMINDER" -> NotificationType.ChallengeEndReminder
