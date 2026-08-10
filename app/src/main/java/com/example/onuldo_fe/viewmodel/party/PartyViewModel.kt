@@ -27,6 +27,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import retrofit2.HttpException
+import java.util.Locale
 
 // 생성·조회·준비·시작·이탈 중 진행 중인 요청을 표시해 중복 실행 방지
 enum class PartyAction {
@@ -221,11 +222,16 @@ class PartyViewModel(
                     loadWaitingRoom(created.partyId)
                 }
                 .onFailure { error ->
-                    val isPointInsufficient = error.isInsufficientPartyPoint()
+                    val serverError = error.toPartyServerError()
+                    val isPointInsufficient = serverError.isInsufficientPartyPoint()
                     uiState = uiState.copy(
                         action = PartyAction.Idle,
                         isCreatePointInsufficient = isPointInsufficient,
-                        errorMessage = if (isPointInsufficient) null else "파티를 만들지 못했어요."
+                        errorMessage = when {
+                            isPointInsufficient -> null
+                            serverError.isAlreadyParticipatingChallenge() -> "이미 진행 중인 챌린지가 있습니다."
+                            else -> "파티를 만들지 못했어요."
+                        }
                     )
                 }
         }
@@ -358,7 +364,8 @@ class PartyViewModel(
                     )
                 }
                 .onFailure { error ->
-                    val isPointInsufficient = error.isInsufficientPartyPoint()
+                    val serverError = error.toPartyServerError()
+                    val isPointInsufficient = serverError.isInsufficientPartyPoint()
                     uiState = uiState.copy(
                         action = PartyAction.Idle,
                         isReadyPointInsufficient = isPointInsufficient,
@@ -465,16 +472,35 @@ class PartyViewModel(
     }
 }
 
-/** 파티 생성 실패 응답에서 서버의 포인트 부족 코드를 확인한다. */
-private fun Throwable.isInsufficientPartyPoint(): Boolean {
-    if (this !is HttpException) return false
+private data class PartyServerError(
+    val code: String = "",
+    val message: String = ""
+)
+
+/** 서버 에러 응답 바디는 한 번만 읽을 수 있으므로 code/message를 함께 꺼내 재사용한다. */
+private fun Throwable.toPartyServerError(): PartyServerError {
+    if (this !is HttpException) return PartyServerError()
     val body = runCatching { response()?.errorBody()?.string() }.getOrNull().orEmpty()
     val errorBody = runCatching { JSONObject(body) }.getOrNull()
-    val code = errorBody?.optString("code").orEmpty()
-    val message = errorBody?.optString("message").orEmpty()
+    return PartyServerError(
+        code = errorBody?.optString("code").orEmpty(),
+        message = errorBody?.optString("message").orEmpty()
+    )
+}
+
+/** 파티 생성/준비 요청 실패 응답에서 서버의 포인트 부족 코드를 확인한다. */
+private fun PartyServerError.isInsufficientPartyPoint(): Boolean {
     return code.contains("INSUFFICIENT_POINT") ||
         code == "PAR-ERR-03" ||
         message.contains("포인트") && message.contains("부족")
+}
+
+/** 이미 개인 챌린지에 참여 중이면 파티 생성도 막히므로 전용 안내 문구를 보여준다. */
+private fun PartyServerError.isAlreadyParticipatingChallenge(): Boolean {
+    val codeText = code.uppercase(Locale.ROOT)
+    return codeText.contains("ALREADY") && codeText.contains("CHALLENGE") ||
+        message.contains("이미") && message.contains("챌린지") &&
+        (message.contains("진행") || message.contains("참여"))
 }
 
 // Repository가 전달한 도메인 대기방 모델을 Compose 화면 전용 모델로 변환
