@@ -77,6 +77,9 @@ class MyMainViewModel(
     /**
      * 로그아웃. 서버에 로그아웃 API가 없어 클라이언트에서 토큰을 폐기한다.
      * (리프레시 토큰은 서버에 남아 있으므로, API가 생기면 함께 무효화해야 한다.)
+     *
+     * 소셜 연동은 **끊지 않는다.** 계정을 지우는 게 아니라 이 기기에서 나가는 것뿐이라
+     * 다음 로그인이 동의 화면 없이 이어지는 편이 맞다. 연동 해제는 [deleteAccount]에서만 한다.
      */
     fun logout(onLoggedOut: () -> Unit) {
         authRepository.logout()
@@ -102,6 +105,11 @@ class MyMainViewModel(
 
             userRepository.deleteAccount()
                 .onSuccess {
+                    // 계정이 사라졌으므로 소셜 연동도 함께 끊는다. 남겨 두면 네이버·카카오의
+                    // "연결된 서비스"에 오늘두가 계속 남는다. 실패해도 탈퇴는 이미 끝났으므로
+                    // 되돌리지 않고 그대로 진행한다(내부에서 로그만 남긴다).
+                    // logout()이 기록을 지우므로 반드시 그보다 먼저 불러야 한다.
+                    authRepository.unlinkSocialAccount()
                     authRepository.logout()
                     _uiState.update { MyMainUiState() }
                     onDeleted()

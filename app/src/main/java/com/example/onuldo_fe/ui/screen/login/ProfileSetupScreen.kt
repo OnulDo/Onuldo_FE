@@ -57,6 +57,8 @@ fun ProfileSetupScreen(
     onBack: () -> Unit,
     onDone: () -> Unit,
     onEmailChangeRequired: (String) -> Unit = {},
+    /** 소셜 가입이 "이미 가입된 계정"으로 막혔을 때 — 로그인 화면으로 되돌린다. */
+    onExistingAccount: (String) -> Unit = {},
     viewModel: ProfileSetupViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -199,7 +201,7 @@ fun ProfileSetupScreen(
 
         OnulDoButton(
             text = if (state.isLoading) "가입 중..." else "계속",
-            onClick = { viewModel.submit(onDone, onEmailChangeRequired) },
+            onClick = { viewModel.submit(onDone, onEmailChangeRequired, onExistingAccount) },
             enabled = state.isContinueEnabled,
         )
         Spacer(Modifier.height(24.dp))
