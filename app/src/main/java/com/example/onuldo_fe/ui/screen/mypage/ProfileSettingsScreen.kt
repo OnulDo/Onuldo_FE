@@ -194,7 +194,8 @@ fun ProfileSettingsScreen(
         CharacterPickerSheet(
             selectedIndex = state.characterIndex,
             onSelect = { index ->
-                viewModel.updateAvatar(index) { showCharacterPicker = false }
+                    showCharacterPicker = false
+                    viewModel.updateAvatar(index) {}
             },
             onDismiss = { showCharacterPicker = false },
         )
