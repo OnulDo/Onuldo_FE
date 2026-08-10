@@ -7,5 +7,6 @@ data class CompleteRecord(
     val title: String,
     val progress: Int,
     val completeDate: String,
+    val depositAmount: Int,
     val point: Int
 )

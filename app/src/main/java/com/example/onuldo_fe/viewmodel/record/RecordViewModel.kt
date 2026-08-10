@@ -70,7 +70,8 @@ class RecordViewModel(
                             title = item.title,
                             progress = item.achievementRate,
                             completeDate = item.endedDate,
-                            point = item.netAmount
+                            depositAmount = item.depositAmount,
+                            point = item.adjustmentAmount
                         )
                     },
                     totalCompletedCount = completed.totalCompletedCount,

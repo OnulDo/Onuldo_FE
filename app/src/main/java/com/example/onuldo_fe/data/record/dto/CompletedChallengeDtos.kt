@@ -12,7 +12,8 @@ data class CompletedChallengeDto(
     val challengeId: Long?,
     val challengeTitle: String?,
     val resultStatus: String?,
-    val refundAmount: Int?,
+    val depositAmount: Int?,
+    val adjustmentAmount: Int?,
     val endDate: String?,
     val achievementRate: Int?
 )

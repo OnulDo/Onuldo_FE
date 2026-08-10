@@ -91,7 +91,7 @@ fun ProgressRecordCard(
             )
             Spacer(Modifier.height(spacing.spacing10))
             Text(
-                "예치 : ${"%,d".format(depositAmount)}P",
+                "예치 ${"%,d".format(depositAmount)}P",
                 style = MaterialTheme.typography.labelSmall,
                 color = DarkBrown50
             )

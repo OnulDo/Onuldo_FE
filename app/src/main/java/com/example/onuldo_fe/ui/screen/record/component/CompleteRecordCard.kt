@@ -39,6 +39,7 @@ fun CompleteRecordCard(
     title: String,
     progress: Int,
     completeDate: String,
+    depositAmount: Int,
     point: Int
 ) {
     val statusColor = if (isSuccess) Green else Red
@@ -88,7 +89,7 @@ fun CompleteRecordCard(
                     color = DarkBrown70
                 )
                 Text(
-                    text = "예치금",
+                    text = "예치금 ${"%,d".format(depositAmount)}P",
                     style = MaterialTheme.typography.labelMedium,
                     color = DarkBrown70
                 )
@@ -101,5 +102,7 @@ fun CompleteRecordCard(
 @Preview(showBackground = true)
 @Composable
 private fun CompleteRecordCardPreview() {
-    OnulDo_FETheme { CompleteRecordCard(true, "매일 6시 기상", 92, "2026-08-10", 30000) }
+    OnulDo_FETheme {
+        CompleteRecordCard(true, "매일 6시 기상", 92, "2026-08-10", 30_000, 2_500)
+    }
 }
