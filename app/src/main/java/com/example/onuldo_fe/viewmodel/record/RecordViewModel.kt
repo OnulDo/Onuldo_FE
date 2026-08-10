@@ -33,9 +33,16 @@ class RecordViewModel(
     private val _uiState = MutableStateFlow(RecordUiState(isLoading = true))
     val uiState = _uiState.asStateFlow()
 
+    init {
+        loadRecords()
+    }
+
     fun loadRecords() = fetchRecords(showLoading = true)
 
-    fun refreshRecords() = fetchRecords(showLoading = false)
+    fun refreshRecords() {
+        if (_uiState.value.isLoading) return
+        fetchRecords(showLoading = false)
+    }
 
     private fun fetchRecords(showLoading: Boolean) {
         viewModelScope.launch {
