@@ -8,6 +8,7 @@ import com.example.onuldo_fe.model.verification.ChallengeVerificationResult
 import com.example.onuldo_fe.model.verification.VerificationReview
 import com.example.onuldo_fe.repository.verification.VerificationRepositoryProvider
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -41,6 +42,8 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     private val _manualReviewState =
         MutableStateFlow<ManualReviewRequestState>(ManualReviewRequestState.Idle)
     val manualReviewState = _manualReviewState.asStateFlow()
+    private var manualReviewJob: Job? = null
+    private var manualReviewRequestGeneration = 0L
     private var uploadedFileId: String? = null
     var activeChallengeId: Long? = null
         private set
@@ -118,12 +121,12 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         _imageUri.value = null
         uploadedFileId = null
         _submitState.value = VerificationSubmitState.Idle
-        _manualReviewState.value = ManualReviewRequestState.Idle
+        invalidateManualReviewRequest()
     }
 
     fun clearSubmitState() {
         _submitState.value = VerificationSubmitState.Idle
-        _manualReviewState.value = ManualReviewRequestState.Idle
+        invalidateManualReviewRequest()
     }
 
     fun requestManualReview() {
@@ -142,22 +145,36 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         }
 
         _manualReviewState.value = ManualReviewRequestState.Loading
-        viewModelScope.launch {
+        val requestGeneration = ++manualReviewRequestGeneration
+        manualReviewJob = viewModelScope.launch {
             try {
                 val result = repository.requestManualReview(challengeId)
+                if (requestGeneration != manualReviewRequestGeneration) return@launch
                 activeVerifiedAt = result.requestedAt
                 _manualReviewState.value = ManualReviewRequestState.Success(result.requestedAt)
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Throwable) {
+                if (requestGeneration != manualReviewRequestGeneration) return@launch
                 _manualReviewState.value = ManualReviewRequestState.Error(
                     error.toManualReviewUserMessage()
                 )
+            } finally {
+                if (requestGeneration == manualReviewRequestGeneration) {
+                    manualReviewJob = null
+                }
             }
         }
     }
 
     fun clearManualReviewState() {
+        invalidateManualReviewRequest()
+    }
+
+    private fun invalidateManualReviewRequest() {
+        manualReviewRequestGeneration++
+        manualReviewJob?.cancel()
+        manualReviewJob = null
         _manualReviewState.value = ManualReviewRequestState.Idle
     }
 
