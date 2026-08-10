@@ -17,11 +17,8 @@ class NotificationViewModel(
     var uiState by mutableStateOf(NotificationUiState())
         private set
 
-    // 다음 페이지 커서(향후 무한 스크롤 연결용).
+    // 다음 페이지 커서(무한 스크롤·다음 페이지 조회용).
     private var nextCursor: String? = null
-
-    init { loadNotifications() }
-
     fun loadNotifications() {
         viewModelScope.launch {
             uiState = uiState.copy(isLoading = true, errorMessage = null)
