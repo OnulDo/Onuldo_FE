@@ -2,7 +2,7 @@ package com.example.onuldo_fe.model.home.notification
 
 // 표시 유형 — 알림함 아이콘 매핑의 기준
 // 정책서(NOTI-02) 카테고리는 8유형이나, "인증 마감 리마인더"의 경고성 변형(NOTI-03)과
-// "파티 일별 정산"(알림함 전용, NOTI-03)이 별도 아이콘을 써서 표시 기준으로는 10종.
+// "파티 일별 정산"(알림함 전용, NOTI-03)이 별도 아이콘을 써서 UI 기준으로는 10종.
 enum class NotificationType {
     DeadlineReminder,     // 인증 마감 리마인더 (일반, 시계)
     DeadlineWarning,      // 인증 마감 리마인더 - 경고성 (마감 1시간 전·22:00, 느낌표) NOTI-03
@@ -23,8 +23,12 @@ enum class NotificationType {
  * CHALLENGE_START / CHALLENGE_END_REMINDER / REFUND_COMPLETE / PARTY_SETTLEMENT_COMPLETE.
  * 알 수 없는 값은 마감 리마인더 아이콘으로 안전 처리한다.
  */
-fun notificationTypeFrom(raw: String?): NotificationType = when (raw) {
-    "VERIFICATION_DEADLINE" -> NotificationType.DeadlineReminder
+fun notificationTypeFrom(raw: String?, title: String = ""): NotificationType = when (raw) {
+    // 같은 type이라 문구로 구분: "마감" 임박이면 경고 아이콘, 그 외 마감 알림은 일반 시계
+    "VERIFICATION_DEADLINE" ->
+        if (title.contains("마감")) NotificationType.DeadlineWarning
+        else NotificationType.DeadlineReminder
+    // TODO: 성공/실패는 서버가 구분 필드(또는 type 분리)를 줘야 정확. 현재는 통과로 고정(백엔드 대기)
     "VERIFICATION_RESULT" -> NotificationType.ReviewPassed
     "PARTY_MEMBER_VERIFIED" -> NotificationType.PartyMemberVerified
     "CHALLENGE_START" -> NotificationType.ChallengeStart
