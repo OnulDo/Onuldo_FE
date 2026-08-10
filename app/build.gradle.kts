@@ -14,6 +14,32 @@ val localProperties = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) file.inputStream().use { load(it) }
 }
+val envProperties = Properties().apply {
+    val file = rootProject.file(".env")
+    if (file.exists()) {
+        file.inputStream().use { load(it) }
+    }
+}
+
+fun env(key: String): String =
+    envProperties.getProperty(key)
+        ?: error("Missing required environment variable: $key")
+
+fun apiBaseUrl(): String {
+    val value = env("API_BASE_URL").trim()
+
+    require(value.isNotEmpty()) {
+        "API_BASE_URL must not be blank."
+    }
+    require(value.startsWith("http://") || value.startsWith("https://")) {
+        "API_BASE_URL must start with http:// or https://"
+    }
+    require(value.endsWith("/")) {
+        "API_BASE_URL must end with '/'."
+    }
+
+    return value
+}
 
 fun secret(key: String): String = localProperties.getProperty(key).orEmpty()
 
@@ -36,10 +62,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        // 서버 API 주소는 민감정보가 아니므로 모든 빌드 타입에서 공통으로 사용한다.
-        buildConfigField("String", "API_BASE_URL", quotedBuildConfig("https://onuldo.site/"))
-
+        buildConfigField(
+            "String",
+            "API_BASE_URL",
+            quotedBuildConfig(apiBaseUrl())
+        )
+        buildConfigField("String", "PROFILE_BASE_URL", quotedBuildConfig(env("PROFILE_BASE_URL")))
         val kakaoNativeAppKey = secret("KAKAO_NATIVE_APP_KEY")
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", quotedBuildConfig(kakaoNativeAppKey))
         buildConfigField("String", "NAVER_CLIENT_ID", quotedBuildConfig(secret("NAVER_CLIENT_ID")))
@@ -49,8 +77,33 @@ android {
         manifestPlaceholders["kakaoNativeAppKey"] = kakaoNativeAppKey
     }
 
+    /**
+     * 디버그 서명을 팀 공용 키스토어로 고정한다(`keystore/debug.keystore`, 저장소에 포함).
+     *
+     * 기본값인 `~/.android/debug.keystore`는 PC마다 자동 생성돼 서명이 전부 달라진다.
+     * 그러면 카카오 콘솔에 팀원 수만큼 키 해시를 등록해야 하고, 새 팀원이 올 때마다
+     * 관리자가 콘솔을 다시 열어야 한다. 공용 키로 고정하면 키 해시는 하나면 된다.
+     *
+     * 비밀번호가 안드로이드 기본 관례값(`android`)인 **디버그 전용** 키다.
+     * `getByName("debug")`만 재정의하므로 `release` 변형에는 영향이 없다
+     * (`:app:signingReport` 기준 release = `Config: none`).
+     * 릴리스 키는 절대 저장소에 넣지 않으며, 아래 [buildTypes] 주석을 함께 볼 것.
+     */
+    signingConfigs {
+        getByName("debug") {
+            storeFile = rootProject.file("keystore/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
+            // 릴리스 서명은 의도적으로 비워 둔다. 위 공용 키스토어는 디버그 전용이므로
+            // 여기에 signingConfig를 연결하면 안 된다. 출시용 키는 저장소 밖에서
+            // 따로 관리하고(로컬 keystore.properties 또는 CI 시크릿),
+            // 그때 카카오·네이버 콘솔에서 디버그 키 해시를 제거한다.
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

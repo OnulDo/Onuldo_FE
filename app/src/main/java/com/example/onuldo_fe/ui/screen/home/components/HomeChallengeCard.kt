@@ -40,7 +40,6 @@ import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon80
-import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
@@ -87,14 +86,11 @@ fun HomeChallengeCard(
                     fontWeight = FontWeight.Bold
                 )
                 challenge.subtitleTextOrNull()?.let { subtitle ->
-                    // 0일 연속 성공이면 문구와 간격을 모두 숨긴다.
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = subtitle,
                         color = DarkBrown50,
-                        fontFamily = Pretendard,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.labelLarge,
                         maxLines = 1
                     )
                 }
@@ -130,28 +126,22 @@ fun HomeChallengeCard(
                     fontWeight = FontWeight.Medium
                 )
                 //인증 마감 1시간 전부터 표시
-                challenge.remainingMinutes?.takeIf { it in 0..60 }?.let { minutes ->
-                    Spacer(modifier = Modifier.width(spacing.spacing10))
-                    Box(
-                        modifier = Modifier
-                            .background(Persimmon10, RoundedCornerShape(10.dp))
-                            .padding(horizontal = spacing.spacing10, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = minutes.toRemainingTimeText(),
-                            color = Persimmon,
-                            fontFamily = Pretendard,
-                            fontSize = 13.sp,
-                            lineHeight = 20.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                challenge.remainingMinutes
+                    ?.takeIf {
+                        challenge.status == ChallengeStatus.NeedCertification &&
+                            challenge.canVerify &&
+                            it in 0..60
                     }
-                }
+                    ?.let { minutes ->
+                    Spacer(modifier = Modifier.width(spacing.spacing10))
+                    HomeRemainingTimeChip(remainingMinutes = minutes)
+                    }
             }
 
-            if (challenge.status == ChallengeStatus.NeedCertification && challenge.canVerify) {
+            if (challenge.status == ChallengeStatus.NeedCertification) {
                 HomeVerifyButton(
                     onClick = onVerifyClick,
+                    enabled = challenge.canVerify,
                     width = 78.dp,
                     height = 26.dp,
                     iconSize = 12.dp,
@@ -216,17 +206,6 @@ private fun HomeChallenge.deadlineColor(): Color = when (status) {
     // TODO: Red80 색상 토큰 추가 후 교체
     ChallengeStatus.Failed -> Red.copy(alpha = 0.8f)
     ChallengeStatus.Success -> Green
-}
-
-@Composable
-private fun Int.toRemainingTimeText(): String {
-    val hours = this / 60
-    val minutes = this % 60
-    return when {
-        hours > 0 && minutes > 0 -> stringResource(R.string.home_challenge_hours_minutes_left, hours, minutes)
-        hours > 0 -> stringResource(R.string.home_challenge_hours_left, hours)
-        else -> stringResource(R.string.home_challenge_minutes_left, minutes)
-    }
 }
 
 private fun ChallengeStatus.actionTextRes(): Int = when (this) {

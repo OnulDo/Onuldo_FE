@@ -69,7 +69,10 @@ class ProfileSetupViewModel(
      * 화면 에러로 노출한다. 이메일 중복(`DUPLICATE_EMAIL`)은 이 화면에서 고칠 수 없는 값이라
      * [ProfileSetupUiState.requiresEmailChange]를 세워 회원가입 화면으로 되돌릴 수 있게 한다.
      */
-    fun submit(onDone: () -> Unit) {
+    fun submit(
+        onDone: () -> Unit,
+        onEmailChangeRequired: (String) -> Unit = {},
+    ) {
         val state = _uiState.value
         if (!state.isContinueEnabled) return
 
@@ -128,6 +131,9 @@ class ProfileSetupViewModel(
                     onDone()
                 }
                 .onError { code, message ->
+                    if (code == ApiErrorCode.DUPLICATE_EMAIL && !isSocialSignup) {
+                        onEmailChangeRequired(message)
+                    }
                     _uiState.update {
                         it.copy(
                             isLoading = false,

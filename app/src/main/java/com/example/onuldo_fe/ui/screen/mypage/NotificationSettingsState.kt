@@ -1,15 +1,13 @@
 package com.example.onuldo_fe.ui.screen.mypage
 
-// 알림 설정 화면 상태 (더미 기본값 — API 연동 시 서버 값으로 교체)
-// TODO(알림 스펙 변경 예정): [NotificationType]이 "8유형"으로 바뀌면 이 필드들도 그에 맞춰 교체.
+// 알림 설정 화면 상태. 서버 6종 개별 항목 + 마스터(all)와 매핑된다.
+// (NotificationSettingsViewModel의 toUiState/apply 참고)
 data class NotificationSettingsState(
     val all: Boolean = true,
-    val challengeStart: Boolean = true,
-    val deadline: Boolean = true,
-    val endReminder: Boolean = true,
-    val result: Boolean = true,
-    // 파티원 인증 완료 — 서버 PATCH 타입이 없어 로컬 전용 (인증 결과와 상태 공유 금지)
-    val partyMemberVerified: Boolean = true,
-    val refund: Boolean = true,
-    val deduction: Boolean = false
+    val challengeStart: Boolean = true,        // CHALLENGE_START
+    val deadline: Boolean = true,              // VERIFICATION_DEADLINE
+    val endReminder: Boolean = true,           // CHALLENGE_END_REMINDER (종료일 리마인더)
+    val result: Boolean = true,                // VERIFICATION_RESULT
+    val partyMemberVerified: Boolean = true,   // PARTY_MEMBER_VERIFIED (파티원 인증 완료)
+    val refund: Boolean = true,                // SETTLEMENT_COMPLETE (정산/환급 완료) / 항상 true
 )

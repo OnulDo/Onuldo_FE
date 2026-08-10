@@ -44,6 +44,7 @@ import kotlinx.coroutines.delay
 
 private const val MINIMUM_REVIEWING_DURATION_MILLIS = 2_000L
 private const val FINAL_REVIEW_STEP_DISPLAY_MILLIS = 300L
+private const val DUPLICATE_EMAIL_MESSAGE_KEY = "duplicate_email_message"
 
 /** 마이 메뉴 이름. 서버가 약관 제목을 주기 전까지 상단바에 쓴다. */
 private fun termTitleOf(termType: TermType): String = when (termType) {
@@ -114,10 +115,21 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
             )
         }
         composable(Routes.SIGNUP) {
+            val duplicateEmailMessage by navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.getStateFlow<String?>(DUPLICATE_EMAIL_MESSAGE_KEY, null)
+                ?.collectAsState()
+                ?: remember { mutableStateOf(null) }
             SignupScreen(
                 onBack = { navController.popBackStack() },
                 // 회원가입 입력 → 약관 동의 → 프로필 설정 순으로 진행한다.
                 onNext = { navController.navigate(Routes.TERMS_AGREEMENT) },
+                serverEmailError = duplicateEmailMessage,
+                onEmailEdited = {
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set<String?>(DUPLICATE_EMAIL_MESSAGE_KEY, null)
+                },
             )
         }
         composable(Routes.PROFILE_SETUP) {
@@ -125,6 +137,11 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
                 onBack = { navController.popBackStack() },
                 // 프로필 완료 → 가입 완료(환영) 화면.
                 onDone = { navController.navigate(Routes.WELCOME) },
+                onEmailChangeRequired = { message ->
+                    navController.getBackStackEntry(Routes.SIGNUP)
+                        .savedStateHandle[DUPLICATE_EMAIL_MESSAGE_KEY] = message
+                    navController.popBackStack(Routes.SIGNUP, inclusive = false)
+                },
             )
         }
         composable(Routes.WELCOME) {

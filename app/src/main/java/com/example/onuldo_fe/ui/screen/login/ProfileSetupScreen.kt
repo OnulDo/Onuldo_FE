@@ -56,6 +56,7 @@ import com.example.onuldo_fe.viewmodel.ProfileSetupViewModel
 fun ProfileSetupScreen(
     onBack: () -> Unit,
     onDone: () -> Unit,
+    onEmailChangeRequired: (String) -> Unit = {},
     viewModel: ProfileSetupViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -198,7 +199,7 @@ fun ProfileSetupScreen(
 
         OnulDoButton(
             text = if (state.isLoading) "가입 중..." else "계속",
-            onClick = { viewModel.submit(onDone) },
+            onClick = { viewModel.submit(onDone, onEmailChangeRequired) },
             enabled = state.isContinueEnabled,
         )
         Spacer(Modifier.height(24.dp))

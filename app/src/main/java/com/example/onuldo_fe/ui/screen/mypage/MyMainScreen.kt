@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.RefreshOnResume
+import com.example.onuldo_fe.ui.screen.login.ProfileCharacters
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageMenuRow
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
@@ -106,7 +108,12 @@ fun MyMainScreen(
         Spacer(Modifier.height(20.dp))
 
         // 프로필 카드 → 프로필 설정
-        ProfileCard(nickname = nickname, email = email, onClick = onProfileClick)
+        // 서버가 배정한 캐릭터가 앱 목록에 있으면 그 캐릭터를, 없으면 기본 아바타.
+        // 프로필 RefreshOnResume 재조회로 변경 적용 완
+        val avatarRes = state.characterIndex
+            ?.let { ProfileCharacters.getOrNull(it) }
+            ?: R.drawable.img_avatar_running
+        ProfileCard(nickname = nickname, email = email, avatarRes = avatarRes, onClick = onProfileClick)
 
         Spacer(Modifier.height(16.dp))
 
@@ -196,7 +203,7 @@ fun MyMainScreen(
 }
 
 @Composable
-private fun ProfileCard(nickname: String, email: String, onClick: () -> Unit) {
+private fun ProfileCard(nickname: String, email: String, avatarRes: Int, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .padding(horizontal = 20.dp)
@@ -217,7 +224,7 @@ private fun ProfileCard(nickname: String, email: String, onClick: () -> Unit) {
             contentAlignment = Alignment.Center,
         ) {
             Image(
-                painter = painterResource(R.drawable.img_avatar_running),
+                painter = painterResource(avatarRes),
                 contentDescription = null,
                 modifier = Modifier.size(57.dp),
             )
@@ -244,7 +251,7 @@ private fun ProfileCard(nickname: String, email: String, onClick: () -> Unit) {
         Image(
             painter = painterResource(R.drawable.ic_chevron_right),
             contentDescription = null,
-            modifier = Modifier.size(width = 5.dp, height = 8.dp),
+            modifier = Modifier.size(width = 9.dp, height = 17.dp),
         )
     }
 }
@@ -265,23 +272,37 @@ private fun WalletSummary(
             .border(1.dp, Persimmon20, RoundedCornerShape(14.dp))
             .padding(20.dp),
     ) {
-        Column(modifier = Modifier.clickable(onClick = onWalletClick)) {
-            Text(
-                text = "내 포인트 지갑",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 11.sp,
-                letterSpacing = 0.44.sp,
-                color = BlackBrown.copy(alpha = 0.7f),
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = point,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 28.sp,
-                letterSpacing = (-0.56).sp,
-                color = Persimmon,
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onWalletClick),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "내 포인트 지갑",
+                    fontFamily = Pretendard,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    letterSpacing = 0.44.sp,
+                    color = BlackBrown.copy(alpha = 0.7f),
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = point,
+                    fontFamily = Pretendard,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 28.sp,
+                    letterSpacing = (-0.56).sp,
+                    color = Persimmon,
+                )
+            }
+            // 프로필 카드와 같은 화살표 에셋을 주황(Persimmon)으로 틴트.
+            Image(
+                painter = painterResource(R.drawable.ic_chevron_right),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(Persimmon),
+                modifier = Modifier.size(width = 9.dp, height = 17.dp),
             )
         }
         Spacer(Modifier.height(14.dp))

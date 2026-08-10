@@ -84,9 +84,8 @@ object OnboardingDraft {
     /**
      * 서버에 보낼 약관 동의 목록.
      *
-     * 화면의 "전체 약관에 동의합니다"는 서버 필수 3종(서비스·개인정보·만 14세)과 대응한다.
+     * 화면에 노출되는 필수 4종(서비스·개인정보·환급·만 14세)을 동의 상태로 전송한다.
      * 마케팅 수신은 화면에 항목이 없어 **동의하지 않음(false)** 으로 보낸다.
-     * (환급 정책은 서버 필수 목록에 없어 전송하지 않는다.)
      */
     fun toTermAgreements(): List<TermAgreementRequest> =
         TermType.REQUIRED.map { TermAgreementRequest(it, agreedRequiredTerms) } +

@@ -3,6 +3,7 @@ package com.example.onuldo_fe.ui.screen.mypage
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,11 +18,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,7 +39,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.component.AuthErrorBanner
 import com.example.onuldo_fe.ui.component.RefreshOnResume
+import com.example.onuldo_fe.ui.screen.login.CharacterPickerSheet
 import com.example.onuldo_fe.ui.screen.login.ProfileCharacters
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageMenuRow
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
@@ -53,7 +63,8 @@ private val AvatarBackground = Persimmon.copy(alpha = 0.15f)
  * 아바타 + 닉네임/이메일 + 기본 정보(닉네임·이메일) 행.
  *
  * 표시값은 `GET /api/users/me/profile`로 채운다.
- * 아바타 편집 배지는 서버에 프로필 수정 API가 없어 아직 동작하지 않는다.
+ * 아바타 편집 배지를 누르면 캐릭터 선택 시트가 열리고, 고른 캐릭터는
+ * `PATCH /api/users/me/profile`(`profileImageUrl`)로 바로 저장된다.
  */
 @Composable
 fun ProfileSettingsScreen(
@@ -65,9 +76,10 @@ fun ProfileSettingsScreen(
     val state by viewModel.uiState.collectAsState()
     val nickname = state.nickname
     val email = state.email
+    var showCharacterPicker by remember { mutableStateOf(false) }
     // 닉네임 변경 후 이 화면으로 돌아오면 최신 값이 반영되도록 - 새로
     RefreshOnResume { viewModel.load() }
-    // 서버가 배정한 캐릭터가 앱 목록에 있으면 그 캐릭터를, 없으면 기본 아바타를 쓴다.
+    // 서버가 배정한 캐릭터가 앱 목록에 있으면 그 캐릭터를, 없으면 기본 아바타
     val avatarRes = state.characterIndex
         ?.let { ProfileCharacters.getOrNull(it) }
         ?: R.drawable.img_avatar_running
@@ -104,14 +116,27 @@ fun ProfileSettingsScreen(
                     )
                 }
                 // 편집 배지는 Figma 에셋(연필). 이모지를 쓰면 기기마다 모양이 달라진다.
-                // 아직 클릭 동작이 없어 장식으로만 두고 스크린리더에서 감춘다.
-                // (프로필 수정 API 연동 시 클릭과 함께 contentDescription을 되살릴 것.)
+                // 누르면 캐릭터 선택 시트가 열리고, 고른 캐릭터가 프로필 사진으로 저장된다.
                 Image(
                     painter = painterResource(R.drawable.ic_profile_edit_badge),
                     contentDescription = null,
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .clickable(onClick = { showCharacterPicker = true })
+                        .semantics {
+                            role = Role.Button
+                            contentDescription = "프로필 사진 변경"
+                        },
                 )
             }
+        }
+
+        if (state.avatarErrorMessage != null) {
+            AuthErrorBanner(
+                text = state.avatarErrorMessage.orEmpty(),
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+            )
         }
 
         Text(
@@ -163,6 +188,17 @@ fun ProfileSettingsScreen(
         }
         Spacer(Modifier.height(10.dp))
         RowCard { MyPageMenuRow(title = "이메일", value = email, showChevron = false) }
+    }
+
+    if (showCharacterPicker) {
+        CharacterPickerSheet(
+            selectedIndex = state.characterIndex,
+            onSelect = { index ->
+                    showCharacterPicker = false
+                    viewModel.updateAvatar(index) {}
+            },
+            onDismiss = { showCharacterPicker = false },
+        )
     }
 }
 

@@ -2,10 +2,10 @@ package com.example.onuldo_fe.repository.user
 
 import com.example.onuldo_fe.data.network.ApiResult
 import com.example.onuldo_fe.data.network.CursorPage
-import com.example.onuldo_fe.data.user.dto.NotificationSettingType
+import com.example.onuldo_fe.data.notification.dto.NotificationSettingType
 import com.example.onuldo_fe.data.user.dto.PointTransactionTypeDto
 import com.example.onuldo_fe.model.user.MyPageSummary
-import com.example.onuldo_fe.model.user.NotificationSettings
+import com.example.onuldo_fe.model.notification.NotificationSettings
 import com.example.onuldo_fe.model.user.PointChargeResult
 import com.example.onuldo_fe.model.user.PointTransaction
 import com.example.onuldo_fe.model.user.PointWithdrawResult

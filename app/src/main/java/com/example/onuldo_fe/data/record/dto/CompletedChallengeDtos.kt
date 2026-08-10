@@ -13,6 +13,6 @@ data class CompletedChallengeDto(
     val challengeTitle: String?,
     val resultStatus: String?,
     val refundAmount: Int?,
-    val endedDate: String?,
+    val endDate: String?,
     val achievementRate: Int?
 )

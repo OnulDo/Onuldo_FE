@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit
  */
 object NetworkModule {
 
-    const val BASE_URL = "https://onuldo.site/"
 
     private const val TIMEOUT_SECONDS = 30L
 
@@ -91,7 +90,7 @@ object NetworkModule {
 
     private val refreshApi: TokenRefreshApi by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.API_BASE_URL)
             .client(refreshClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -110,7 +109,7 @@ object NetworkModule {
     /** 공통 Retrofit 인스턴스. 직접 쓰기보다 [create]를 권장하며, [RetrofitClient]가 이 값을 노출한다. */
     val retrofit: Retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.API_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
