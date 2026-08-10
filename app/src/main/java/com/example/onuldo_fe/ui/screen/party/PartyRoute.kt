@@ -39,7 +39,6 @@ import com.example.onuldo_fe.viewmodel.party.PartyAction
 import com.example.onuldo_fe.viewmodel.party.PartyCardUi
 import com.example.onuldo_fe.viewmodel.party.PartyFeedViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyInviteViewModel
-import com.example.onuldo_fe.viewmodel.party.PartySettlementViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyStatus
 import com.example.onuldo_fe.viewmodel.party.PartyViewModel
 import java.text.Normalizer
@@ -51,8 +50,7 @@ private enum class PartyScreen {
     ChallengeSelect,
     ChallengeDetail,
     WaitingRoom,
-    Feed,
-    Settlement
+    Feed
 }
 
 // 파티 생성 화면에서 확정 선택한 챌린지를 구성 변경·화면 이탈(포인트 충전 등) 후에도
@@ -96,7 +94,6 @@ fun PartyRoute(
     partyViewModel: PartyViewModel = viewModel(),
     inviteViewModel: PartyInviteViewModel = viewModel(),
     partyFeedViewModel: PartyFeedViewModel = viewModel(),
-    partySettlementViewModel: PartySettlementViewModel = viewModel(),
     tabClickKey: Int = 0,
     onBottomBarVisibilityChange: (Boolean) -> Unit = {},
     onCameraNavigate: (Long, String, String) -> Unit = { _, _, _ -> },
@@ -509,13 +506,6 @@ fun PartyRoute(
             onBack = { screen = PartyScreen.List }
         )
 
-        PartyScreen.Settlement -> {
-            PartySettlementRoute(
-                partyId = feedPartyId.toLong(),
-                onBack = { screen = PartyScreen.List },
-                viewModel = partySettlementViewModel
-            )
-        }
     }
 
     if (showInviteDialog) {
