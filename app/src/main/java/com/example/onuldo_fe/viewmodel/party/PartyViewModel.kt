@@ -211,29 +211,30 @@ class PartyViewModel(
                 }
             }
 
-            runCatching { repository.createParty(command) }
-                .onSuccess { created ->
-                    uiState = uiState.copy(
-                        waitingRoom = null,
-                        isReadySubmitted = false,
-                        action = PartyAction.Idle
-                    )
-                    onSuccess(created.partyId)
-                    loadWaitingRoom(created.partyId)
-                }
-                .onFailure { error ->
-                    val serverError = error.toPartyServerError()
-                    val isPointInsufficient = serverError.isInsufficientPartyPoint()
-                    uiState = uiState.copy(
-                        action = PartyAction.Idle,
-                        isCreatePointInsufficient = isPointInsufficient,
-                        errorMessage = when {
-                            isPointInsufficient -> null
-                            serverError.isAlreadyParticipatingChallenge() -> "이미 진행 중인 챌린지가 있습니다."
-                            else -> "파티를 만들지 못했어요."
-                        }
-                    )
-                }
+            try {
+                val created = repository.createParty(command)
+                uiState = uiState.copy(
+                    waitingRoom = null,
+                    isReadySubmitted = false,
+                    action = PartyAction.Idle
+                )
+                onSuccess(created.partyId)
+                loadWaitingRoom(created.partyId)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                val serverError = error.toPartyServerError()
+                val isPointInsufficient = serverError.isInsufficientPartyPoint()
+                uiState = uiState.copy(
+                    action = PartyAction.Idle,
+                    isCreatePointInsufficient = isPointInsufficient,
+                    errorMessage = when {
+                        isPointInsufficient -> null
+                        serverError.isAlreadyParticipatingChallenge() -> "이미 진행 중인 챌린지가 있습니다."
+                        else -> "파티를 만들지 못했어요."
+                    }
+                )
+            }
         }
     }
 
@@ -354,24 +355,25 @@ class PartyViewModel(
                 }
             }
 
-            runCatching { repository.readyParty(partyId) }
-                .onSuccess { room ->
-                    // 서버의 토글 결과에 맞춰 준비하기와 대기 상태를 전환한다.
-                    uiState = uiState.copy(
-                        waitingRoom = room.toUi(),
-                        isReadySubmitted = !uiState.isReadySubmitted,
-                        action = PartyAction.Idle
-                    )
-                }
-                .onFailure { error ->
-                    val serverError = error.toPartyServerError()
-                    val isPointInsufficient = serverError.isInsufficientPartyPoint()
-                    uiState = uiState.copy(
-                        action = PartyAction.Idle,
-                        isReadyPointInsufficient = isPointInsufficient,
-                        errorMessage = if (isPointInsufficient) null else "준비완료 처리에 실패했어요."
-                    )
-                }
+            try {
+                val room = repository.readyParty(partyId)
+                // 서버의 토글 결과에 맞춰 준비하기와 대기 상태를 전환한다.
+                uiState = uiState.copy(
+                    waitingRoom = room.toUi(),
+                    isReadySubmitted = !uiState.isReadySubmitted,
+                    action = PartyAction.Idle
+                )
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                val serverError = error.toPartyServerError()
+                val isPointInsufficient = serverError.isInsufficientPartyPoint()
+                uiState = uiState.copy(
+                    action = PartyAction.Idle,
+                    isReadyPointInsufficient = isPointInsufficient,
+                    errorMessage = if (isPointInsufficient) null else "준비완료 처리에 실패했어요."
+                )
+            }
         }
     }
 
