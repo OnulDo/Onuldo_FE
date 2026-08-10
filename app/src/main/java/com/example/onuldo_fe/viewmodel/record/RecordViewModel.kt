@@ -33,11 +33,16 @@ class RecordViewModel(
     private val _uiState = MutableStateFlow(RecordUiState(isLoading = true))
     val uiState = _uiState.asStateFlow()
 
-    init { loadRecords() }
+    fun loadRecords() = fetchRecords(showLoading = true)
 
-    fun loadRecords() {
+    fun refreshRecords() = fetchRecords(showLoading = false)
+
+    private fun fetchRecords(showLoading: Boolean) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            _uiState.value = _uiState.value.copy(
+                isLoading = showLoading || _uiState.value.isLoading,
+                errorMessage = null
+            )
             try {
                 val (ongoing, completed) = supervisorScope {
                     val ongoingRequest = async { repository.getOngoingChallenges() }
