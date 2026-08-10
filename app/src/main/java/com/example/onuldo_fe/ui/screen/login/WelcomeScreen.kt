@@ -35,6 +35,7 @@ import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 
 /** 히어로 카드 배경 — Figma `4310:1379` (#FFF4EC, 매칭 토큰 없어 로컬 정의). */
@@ -71,7 +72,7 @@ fun WelcomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // 상태바(44) 아래 히어로 top 79 → 여백 35
-        Spacer(Modifier.height(35.dp))
+        Spacer(Modifier.height(230.dp))
 
         HeroCard()
 
@@ -79,10 +80,7 @@ fun WelcomeScreen(
 
         Text(
             text = "환영해요!",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.ExtraBold, // Figma는 Black(900)이나 Pretendard 최대 굵기가 ExtraBold
-            fontSize = 32.sp,
-            letterSpacing = (-0.8).sp,
+            style = MaterialTheme.typography.headlineLarge,
             color = BlackBrown,
             textAlign = TextAlign.Center,
         )
@@ -90,11 +88,8 @@ fun WelcomeScreen(
         Spacer(Modifier.height(12.dp))
 
         Text(
-            text = "오늘두 가족이 되신 걸 축하드려요\n이제 첫 챌린지를 등록해볼까요?",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Normal,
-            fontSize = 14.sp,
-            lineHeight = 24.sp, // 1.7 배
+            text = "오늘DO 가족이 되신 걸 축하드려요\n이제 첫 챌린지를 등록해볼까요?",
+            style = MaterialTheme.typography.labelLarge,
             color = DarkBrown70,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 20.dp),
@@ -102,8 +97,16 @@ fun WelcomeScreen(
 
         Spacer(Modifier.weight(1f))
 
+        Text(
+            text = "가입 시 환영 보너스 100,000P가 함께 시작돼요",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Persimmon
+            )
+
+        Spacer(Modifier.height(12.dp))
+
         OnulDoButton(
-            text = "오늘두 시작하기",
+            text = "오늘DO 시작하기",
             onClick = onStart,
         )
 
@@ -115,39 +118,12 @@ fun WelcomeScreen(
 private fun HeroCard(
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .padding(horizontal = 20.dp)
-            .fillMaxWidth()
-            .height(320.dp)
-            // 히어로 배경은 둥근 사각형이 아니라 원형이다(2026-08-04 디자인 확정).
-            .clip(CircleShape)
-            .background(HeroBackground),
-    ) {
-        // 색종이 조각 (6dp 사각형, -30도 회전)
-        confettiPieces.forEach { piece ->
-            Box(
-                modifier = Modifier
-                    .offset(x = piece.x.dp, y = piece.y.dp)
-                    .size(6.dp)
-                    .rotate(-30f)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(piece.color),
-            )
-        }
-
-        // 파티 캐릭터 (히어로 기준 left 69, top 54, 211×249)
-        Image(
-            painter = painterResource(R.drawable.img_character_party),
-            contentDescription = null,
-            modifier = Modifier
-                .offset(x = 69.dp, y = 54.dp)
-                .width(211.dp)
-                .height(249.dp),
-        )
-    }
+    Image(
+        painter = painterResource(R.drawable.auth_welcome_icon),
+        contentDescription = null,
+        modifier = modifier.size(135.dp),
+    )
 }
-
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 private fun WelcomeScreenPreview() {
