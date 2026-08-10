@@ -10,9 +10,6 @@ import coil.compose.AsyncImage
 import com.example.onuldo_fe.ui.screen.login.ProfileCharacters
 import com.example.onuldo_fe.utils.ProfileAsset
 
-/**
- * API 이미지 URL을 우선 표시하고 URL이 없거나 로드에 실패하면 로컬 이미지 표시.
- */
 @Composable
 fun PartyNetworkImage(
     imageUrl: String?,
