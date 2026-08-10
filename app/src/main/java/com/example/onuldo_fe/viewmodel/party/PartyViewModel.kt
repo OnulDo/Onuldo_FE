@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.viewmodel.party
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -175,7 +176,8 @@ class PartyViewModel(
                 )
             } catch (error: CancellationException) {
                 throw error
-            } catch (_: Exception) {
+            } catch (error: Exception) {
+                Log.w(PARTY_VIEW_MODEL_TAG, "파티 목록 조회 실패", error)
                 if (generation != partyListGeneration) return@launch
                 uiState = uiState.copy(
                     isListLoading = false,
@@ -524,6 +526,8 @@ private fun PartyWaitingRoom.toUi() = PartyWaitingRoomUi(
     }
 )
 
+private const val PARTY_VIEW_MODEL_TAG = "PartyViewModel"
+
 // 서버 문자열 상태가 변환된 도메인 enum을 화면에서 사용하는 enum으로 매핑
 private fun PartyMember.toUi() = PartyMemberUi(
     name = nickname,
@@ -557,6 +561,7 @@ private fun PartySummary.toUi() = PartyCardUi(
         PartyVerificationStatus.Success -> ChallengeStatus.Success
         PartyVerificationStatus.Fail -> ChallengeStatus.Failed
     },
+    myDailyStatus = myDailyStatus,
     members = members.map { member ->
         PartyCardMemberUi(
             userId = member.userId,

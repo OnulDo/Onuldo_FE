@@ -214,14 +214,16 @@ private fun PartyListEmptyContent(modifier: Modifier = Modifier) {
 // API에서 남은 일수와 시간을 숫자 타입으로 제공하면 문자열 파싱 대신 응답 값을 직접 전달
 private fun PartyCardUi.toHomePartyChallenge() = HomePartyChallenge(
     title = partyName,
-    subtitle = goal,
+    subtitle = challengeName,
     remainingDays = dDay.filter(Char::isDigit).toIntOrNull() ?: 0,
     deadlineAt = deadline.toLocalTimeOrNull(),
     completedMemberCount = completedMemberCount,
     totalMemberCount = totalMemberCount,
     status = verificationStatus,
     remainingMinutes = remainingText.toRemainingMinutes(),
-    canVerify = verificationStatus == ChallengeStatus.NeedCertification && challengeId > 0L,
+    canVerify = verificationStatus == ChallengeStatus.NeedCertification &&
+        myDailyStatus.equals("WAITING", ignoreCase = true) &&
+        challengeId > 0L,
     members = members.map { member ->
         HomePartyMember(
             memberId = member.userId.toString(),

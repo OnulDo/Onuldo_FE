@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
@@ -64,7 +66,7 @@ fun PartySettlementScreen(
     onConfirm: () -> Unit = onBack
 ) {
     val spacing = LocalSpacing.current
-    val content = result.status.content()
+    val content = result.content()
     // 서버 금액의 부호가 정산의 성격을 결정하며 resultType과는 독립적이다.
     val displayContent = result.displayAmount.displayContent()
 
@@ -85,12 +87,16 @@ fun PartySettlementScreen(
                             .background(content.characterBackground, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        PartySettlementCharacter()
+                        PartySettlementCharacter(
+                            iconRes = content.characterRes,
+                            width = content.characterWidth,
+                            height = content.characterHeight
+                        )
                     }
                 }
                 Spacer(Modifier.height(spacing.spacing12))
                 Text(
-                    text = result.title,
+                    text = content.title,
                     modifier = Modifier.fillMaxWidth(),
                     color = BlackBrown,
                     fontFamily = Pretendard,
@@ -100,7 +106,7 @@ fun PartySettlementScreen(
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = result.description,
+                    text = content.description,
                     modifier = Modifier.fillMaxWidth(),
                     color = DarkBrown,
                     fontFamily = Pretendard,
@@ -114,7 +120,7 @@ fun PartySettlementScreen(
                 Spacer(Modifier.height(spacing.spacing8))
                 SettlementSummaryCard(
                     depositAmount = result.depositAmount.toPointText(),
-                    displayLabel = displayContent.label,
+                    displayLabel = content.displayLabel,
                     displayAmount = result.displayAmount.toSignedPointText(),
                     displayColor = displayContent.color,
                     depositLabelColor = content.depositLabelColor,
@@ -128,7 +134,7 @@ fun PartySettlementScreen(
             items(result.members, key = { it.userId }) { member ->
                 PartySettlementMemberCard(
                     member = member,
-                    showCompletionStatus = result.status == PartySettlementStatus.PartialSuccess,
+                    showCompletionStatus = content.showCompletionStatus,
                     modifier = Modifier.padding(horizontal = spacing.spacing20)
                 )
                 Spacer(Modifier.height(spacing.spacing8))
@@ -167,11 +173,15 @@ private fun SettlementSectionTitle(text: String) {
 }
 
 @Composable
-private fun PartySettlementCharacter() {
+private fun PartySettlementCharacter(
+    @DrawableRes iconRes: Int,
+    width: Dp,
+    height: Dp
+) {
     Image(
-        painter = painterResource(R.drawable.party_settlement_success_icon),
+        painter = painterResource(iconRes),
         contentDescription = null,
-        modifier = Modifier.size(width = 73.dp, height = 104.dp),
+        modifier = Modifier.size(width = width, height = height),
         contentScale = ContentScale.Fit
     )
 }
@@ -271,24 +281,52 @@ private fun PartySettlementMemberCard(
 }
 
 private data class SettlementContent(
+    val title: String,
+    val description: String,
+    @param:DrawableRes val characterRes: Int,
+    val characterWidth: Dp,
+    val characterHeight: Dp,
     val characterBackground: Color,
-    val depositLabelColor: Color
+    val depositLabelColor: Color,
+    val displayLabel: String,
+    val showCompletionStatus: Boolean
 )
 
-private fun PartySettlementStatus.content() = when (this) {
+private fun PartySettlementResult.content() = when (status) {
     PartySettlementStatus.AllSuccess -> SettlementContent(
+        title = "전원 성공!",
+        description = "파티 전원이 챌린지를 완주했어요",
+        characterRes = R.drawable.party_settlement_all_success_icon,
+        characterWidth = 73.dp,
+        characterHeight = 104.dp,
         characterBackground = Persimmon.copy(alpha = 0.15f),
-        depositLabelColor = DarkBrown50
+        depositLabelColor = DarkBrown,
+        displayLabel = "성과 보너스",
+        showCompletionStatus = false
     )
 
     PartySettlementStatus.PartialSuccess -> SettlementContent(
+        title = "${completedMemberCount}명이 완주했어요",
+        description = "미완주 파티원의 도전금이 완주자에게 배분됐어요",
+        characterRes = R.drawable.party_settlement_partial_success_icon,
+        characterWidth = 116.dp,
+        characterHeight = 116.dp,
         characterBackground = Persimmon.copy(alpha = 0.15f),
-        depositLabelColor = DarkBrown
+        depositLabelColor = DarkBrown,
+        displayLabel = "도전 분배금",
+        showCompletionStatus = true
     )
 
     PartySettlementStatus.AllFailed -> SettlementContent(
+        title = "아쉽게 실패했어요",
+        description = "이번엔 아무도 목표를 채우지 못했어요",
+        characterRes = R.drawable.party_settlement_all_failed_icon,
+        characterWidth = 89.dp,
+        characterHeight = 105.dp,
         characterBackground = DarkBrown.copy(alpha = 0.08f),
-        depositLabelColor = DarkBrown
+        depositLabelColor = DarkBrown,
+        displayLabel = "차감",
+        showCompletionStatus = false
     )
 }
 

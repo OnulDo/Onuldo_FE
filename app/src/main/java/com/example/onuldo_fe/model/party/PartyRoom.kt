@@ -32,7 +32,7 @@ enum class PartyVerificationStatus {
 data class PartySummaryMember(
     val userId: Long,                           // 파티원 회원 ID
     val nickname: String,                       // 파티원 닉네임
-    val profileImageUrl: String,                // 파티원 프로필 이미지 URL
+    val profileImageUrl: String?,               // 파티원 프로필 이미지 URL
     val isVerifiedToday: Boolean                // 오늘 인증 완료 여부
 )
 
@@ -74,6 +74,7 @@ data class PartySummary(
     val status: PartyLifecycleStatus,          // 파티 모집·진행·해체 상태
     val goal: String = challengeName,          // 카드에 표시할 파티 목표 문구
     val verificationStatus: PartyVerificationStatus = PartyVerificationStatus.NotVerified, // 내 오늘 인증 상태
+    val myDailyStatus: String = "WAITING",     // 내 오늘 데일리 인증 가능 상태
     val members: List<PartySummaryMember> = emptyList(), // 카드에 노출할 파티원별 인증 현황
     val challengeId: Long = 0                  // 인증 화면에 전달할 챌린지 ID
 )
