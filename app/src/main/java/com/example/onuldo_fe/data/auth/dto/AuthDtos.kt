@@ -11,9 +11,9 @@ enum class TermType {
     companion object {
         /**
          * 회원가입 시 반드시 `true`여야 하는 약관.
-         * 서버 `AuthService.REQUIRED_TERM_TYPES` 기준 — **REFUND는 필수가 아니다.**
+         * 가입 화면에 노출되는 약관은 모두 필수로 동의받는다.
          */
-        val REQUIRED = listOf(SERVICE, PRIVACY, AGE_14)
+        val REQUIRED = listOf(SERVICE, PRIVACY, REFUND, AGE_14)
     }
 }
 

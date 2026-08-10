@@ -57,6 +57,8 @@ import com.example.onuldo_fe.viewmodel.SignupViewModel
 fun SignupScreen(
     onBack: () -> Unit,
     onNext: () -> Unit,
+    serverEmailError: String? = null,
+    onEmailEdited: () -> Unit = {},
     viewModel: SignupViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -84,12 +86,15 @@ fun SignupScreen(
 
         OnuldoTextField(
             value = state.email,
-            onValueChange = viewModel::onEmailChange,
+            onValueChange = {
+                onEmailEdited()
+                viewModel.onEmailChange(it)
+            },
             label = "이메일",
             placeholder = "example@email.com",
             isSuccess = state.emailSuccess,
-            isError = state.emailError,
-            supportingText = state.emailSupport,
+            isError = state.emailError || serverEmailError != null,
+            supportingText = serverEmailError ?: state.emailSupport,
             keyboardType = KeyboardType.Email,
             imeAction = ImeAction.Next,
         )
@@ -123,17 +128,6 @@ fun SignupScreen(
         )
 
         Spacer(Modifier.height(24.dp))
-
-        Text(
-            text = "가입 시 환영 보너스 100,000P가 함께 시작돼요",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 13.sp,
-            color = Persimmon,
-            modifier = gutter,
-        )
-
-        // 약관 동의는 다음 단계인 [TermsAgreementScreen]에서 받는다(2026-08-04 디자인 확정).
 
         Spacer(Modifier.weight(1f))
 
