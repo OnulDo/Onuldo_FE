@@ -9,6 +9,7 @@ import com.example.onuldo_fe.model.user.UserProfile
 import com.example.onuldo_fe.repository.user.UserRepository
 import com.example.onuldo_fe.repository.user.UserRepositoryProvider
 import com.example.onuldo_fe.utils.ProfileAsset
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,9 +49,15 @@ class ProfileSettingsViewModel(
     private val _uiState = MutableStateFlow(ProfileSettingsUiState())
     val uiState: StateFlow<ProfileSettingsUiState> = _uiState.asStateFlow()
 
+    // 진행 중인 프로필 재조회. 아바타 저장(PATCH)이 이 조회보다 먼저 끝나면,
+    // 늦게 도착한 조회 응답이 저장 결과를 덮어쓰지 않도록 취소한다.
+    private var loadJob: Job? = null
+
     // 최초 표시와 변경 후 복귀 모두 화면의 RefreshOnResume이 load()를 부른다(그래서 init에서 조회하지 않는다).
     fun load() {
-        viewModelScope.launch {
+        // 화면이 보일 때마다 불릴 수 있어, 이전 조회가 아직 돌고 있으면 끊는다.
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             userRepository.getProfile()
@@ -70,6 +77,8 @@ class ProfileSettingsViewModel(
      */
     fun updateAvatar(characterIndex: Int, onSuccess: () -> Unit) {
         if (_uiState.value.isSavingAvatar) return
+        // 진행 중인 재조회(GET)가 늦게 끝나 이 저장 결과를 덮어쓰지 않도록 먼저 끊는다.
+        loadJob?.cancel()
         viewModelScope.launch {
             _uiState.update { it.copy(isSavingAvatar = true, avatarErrorMessage = null) }
 
