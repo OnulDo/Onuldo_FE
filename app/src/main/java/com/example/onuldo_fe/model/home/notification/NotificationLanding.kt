@@ -9,6 +9,39 @@ sealed interface NotificationLanding {
     data class PartySettlement(val partyId: Long) : NotificationLanding
     data class PartyFeed(val partyId: Long) : NotificationLanding
     data object SoloRecord : NotificationLanding
+
+    // 기기 푸시 탭 랜딩
+    data object RecordOngoing : NotificationLanding   // 기록 진행중 탭
+    data object RecordCompleted : NotificationLanding // 기록 완료 탭
+}
+
+/**
+ * 기기 푸시(FCM) 탭 → 랜딩 목적지 결정
+ * - VERIFICATION_DEADLINE / CHALLENGE_START → 홈
+ * - VERIFICATION_APPROVED / VERIFICATION_REJECTED (구버전 VERIFICATION_RESULT 포함)
+ *   → challengeId 있으면 챌린지 상세, 없으면 홈
+ * - CHALLENGE_END_REMINDER → 기록 진행중 탭
+ * - REFUND_COMPLETE → 기록 완료 탭
+ * - PARTY_MEMBER_VERIFIED → partyId 있으면 파티 피드, 없으면 홈
+ * - PARTY_SETTLEMENT_COMPLETE → partyId 있으면 파티 정산 결과, 없으면 홈
+ * - 예외)))) 그 외/미상 → 홈(안전값)
+ */
+fun pushLandingOf(
+    notificationType: String?,
+    challengeId: Long?,
+    partyId: Long?,
+): NotificationLanding = when (notificationType) {
+    "VERIFICATION_DEADLINE", "CHALLENGE_START" -> NotificationLanding.Home
+    // 승인/기각 모두 해당 챌린지 상세로. VERIFICATION_RESULT는 구버전 데이터 호환용.
+    "VERIFICATION_APPROVED", "VERIFICATION_REJECTED", "VERIFICATION_RESULT" ->
+        challengeId?.let(NotificationLanding::ChallengeDetail) ?: NotificationLanding.Home
+    "CHALLENGE_END_REMINDER" -> NotificationLanding.RecordOngoing
+    "REFUND_COMPLETE" -> NotificationLanding.RecordCompleted
+    "PARTY_MEMBER_VERIFIED" ->
+        partyId?.let(NotificationLanding::PartyFeed) ?: NotificationLanding.Home
+    "PARTY_SETTLEMENT_COMPLETE" ->
+        partyId?.let(NotificationLanding::PartySettlement) ?: NotificationLanding.Home
+    else -> NotificationLanding.Home
 }
 
 /**

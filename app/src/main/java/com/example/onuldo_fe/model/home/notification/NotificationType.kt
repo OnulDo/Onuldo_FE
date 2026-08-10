@@ -19,8 +19,9 @@ enum class NotificationType {
 /**
  * 서버 알림 목록의 `type` 문자열 → 표시 유형.
  *
- * 서버 7종: VERIFICATION_DEADLINE / VERIFICATION_RESULT / PARTY_MEMBER_VERIFIED /
- * CHALLENGE_START / CHALLENGE_END_REMINDER / REFUND_COMPLETE / PARTY_SETTLEMENT_COMPLETE.
+ * 서버 타입: VERIFICATION_DEADLINE / VERIFICATION_APPROVED / VERIFICATION_REJECTED /
+ * PARTY_MEMBER_VERIFIED / CHALLENGE_START / CHALLENGE_END_REMINDER / REFUND_COMPLETE /
+ * PARTY_SETTLEMENT_COMPLETE.
  * 알 수 없는 값은 마감 리마인더 아이콘으로 안전 처리한다.
  */
 fun notificationTypeFrom(raw: String?, title: String = ""): NotificationType = when (raw) {
@@ -28,7 +29,10 @@ fun notificationTypeFrom(raw: String?, title: String = ""): NotificationType = w
     "VERIFICATION_DEADLINE" ->
         if (title.contains("마감")) NotificationType.DeadlineWarning
         else NotificationType.DeadlineReminder
-    // TODO: 성공/실패는 서버가 구분 필드(또는 type 분리)를 줘야 정확. 현재는 통과로 고정(백엔드 대기)
+    // 직접검토 결과: 서버가 승인/기각 타입을 분리해 내려주므로 아이콘도 정확히 갈린다.
+    "VERIFICATION_APPROVED" -> NotificationType.ReviewPassed
+    "VERIFICATION_REJECTED" -> NotificationType.ReviewRejected
+    // 구버전 호환: 분리 전 단일 타입. 승인/기각 구분 정보가 없어 통과 아이콘으로 안전 처리.
     "VERIFICATION_RESULT" -> NotificationType.ReviewPassed
     "PARTY_MEMBER_VERIFIED" -> NotificationType.PartyMemberVerified
     "CHALLENGE_START" -> NotificationType.ChallengeStart

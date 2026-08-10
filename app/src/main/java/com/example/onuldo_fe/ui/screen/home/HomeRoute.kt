@@ -138,6 +138,8 @@ fun HomeRoute(
                     // 아래는 아직 라우트가 없거나 홈이 목적지 → 홈 유지(오버레이 닫힘)
                     is NotificationLanding.PartyFeed,
                     NotificationLanding.SoloRecord,
+                    NotificationLanding.RecordOngoing,
+                    NotificationLanding.RecordCompleted,
                     NotificationLanding.Home -> Unit
                 }
             }
