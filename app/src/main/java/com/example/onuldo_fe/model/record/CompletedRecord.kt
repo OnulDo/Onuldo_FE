@@ -7,7 +7,8 @@ data class CompletedChallenge(
     val challengeId: Long,
     val title: String,
     val resultStatus: CompletedResultStatus,
-    val netAmount: Int,
+    val depositAmount: Int,
+    val adjustmentAmount: Int,
     val endedDate: String,
     val achievementRate: Int
 )

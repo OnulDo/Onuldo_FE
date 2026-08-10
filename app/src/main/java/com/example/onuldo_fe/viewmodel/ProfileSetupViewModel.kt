@@ -27,8 +27,13 @@ data class ProfileSetupUiState(
     val selectedCharacterIndex: Int? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    /** 이메일이 중복돼 회원가입 화면으로 되돌아가야 하는 상황인지. */
+    /** 이메일이 중복돼 회원가입 화면으로 되돌아가야 하는 상황인지. (이메일 가입 전용) */
     val requiresEmailChange: Boolean = false,
+    /**
+     * 소셜 계정의 이메일로 **이미 이메일 가입이 되어 있어** 소셜 가입이 불가능한 상황인지.
+     * 이 화면에서는 풀 수 없으므로 로그인 화면으로 되돌린다.
+     */
+    val requiresLoginRedirect: Boolean = false,
 ) {
     private val nicknameErrorMsg get() = Validators.nicknameErrorMessage(nickname)
     private val nicknameValid get() = nickname.isNotEmpty() && nicknameErrorMsg == null
@@ -68,8 +73,17 @@ class ProfileSetupViewModel(
      * 닉네임 규칙 위반(`INVALID_NICKNAME` 등)은 서버 문구를 닉네임 입력칸 아래가 아니라
      * 화면 에러로 노출한다. 이메일 중복(`DUPLICATE_EMAIL`)은 이 화면에서 고칠 수 없는 값이라
      * [ProfileSetupUiState.requiresEmailChange]를 세워 회원가입 화면으로 되돌릴 수 있게 한다.
+     *
+     * **소셜 가입에서 이메일이 중복된 경우는 되돌릴 회원가입 화면이 없다.** 이메일을 소셜 제공자가
+     * 정해 주기 때문에 사용자가 바꿀 수 없고, 소셜 로그인을 다시 눌러도 서버는 여전히 신규 회원으로
+     * 판정해 같은 자리로 돌아온다(무한 반복). 그래서 [onExistingAccount]로 로그인 화면에 돌려보내
+     * **이미 있는 이메일 계정으로 로그인**하도록 안내한다.
      */
-    fun submit(onDone: () -> Unit) {
+    fun submit(
+        onDone: () -> Unit,
+        onEmailChangeRequired: (String) -> Unit = {},
+        onExistingAccount: (String) -> Unit = {},
+    ) {
         val state = _uiState.value
         if (!state.isContinueEnabled) return
 
@@ -82,10 +96,12 @@ class ProfileSetupViewModel(
 
         if (!hasRequiredDraft) {
             // 회원가입 화면을 거치지 않고 진입한 비정상 경로.
+            // 소셜 가입에서는 이메일 변경 안내를 띄우지 않는다 — 이메일을 제공자가 정하므로
+            // 사용자가 바꿀 수 없고, 되돌아갈 회원가입 화면도 백스택에 없다.
             _uiState.update {
                 it.copy(
                     errorMessage = "회원가입 정보가 없어요. 처음부터 다시 진행해주세요.",
-                    requiresEmailChange = true,
+                    requiresEmailChange = !isSocialSignup,
                 )
             }
             return
@@ -128,11 +144,33 @@ class ProfileSetupViewModel(
                     onDone()
                 }
                 .onError { code, message ->
+                    val duplicateEmail = code == ApiErrorCode.DUPLICATE_EMAIL
+
+                    if (duplicateEmail && isSocialSignup) {
+                        // 소셜 계정의 이메일로 이미 이메일 가입이 되어 있다. 여기서도, 소셜 로그인을
+                        // 다시 눌러서도 풀 수 없으므로(서버가 기존 계정에 소셜을 연동해 주기 전까지는
+                        // 계속 신규 회원으로 판정된다) 남은 소셜 토큰을 버리고 로그인 화면으로 보낸다.
+                        // 지우지 않으면 다음 시도에서 죽은 토큰으로 가입을 또 호출한다.
+                        OnboardingDraft.clear()
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = message.ifBlank { EXISTING_ACCOUNT_MESSAGE },
+                                requiresLoginRedirect = true,
+                            )
+                        }
+                        onExistingAccount(
+                            "${message.ifBlank { EXISTING_ACCOUNT_MESSAGE }}\n$EXISTING_ACCOUNT_GUIDE"
+                        )
+                        return@onError
+                    }
+
+                    if (duplicateEmail) onEmailChangeRequired(message)
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             errorMessage = message,
-                            requiresEmailChange = code == ApiErrorCode.DUPLICATE_EMAIL,
+                            requiresEmailChange = duplicateEmail,
                         )
                     }
                 }
@@ -141,5 +179,19 @@ class ProfileSetupViewModel(
 
     /** 에러 안내를 확인한 뒤 호출해 상태를 되돌린다. */
     fun consumeError() =
-        _uiState.update { it.copy(errorMessage = null, requiresEmailChange = false) }
+        _uiState.update {
+            it.copy(errorMessage = null, requiresEmailChange = false, requiresLoginRedirect = false)
+        }
+
+    private companion object {
+        /** 서버가 문구를 비워 보냈을 때만 쓰는 대체 문구. */
+        const val EXISTING_ACCOUNT_MESSAGE = "이미 가입된 계정이에요."
+
+        /**
+         * 되돌아간 로그인 화면에서 할 수 있는 선택지를 그대로 알려준다.
+         * 소셜 버튼을 다시 누르면 계정 선택 화면이 뜬다([LoginViewModel.showExistingAccountNotice]).
+         */
+        const val EXISTING_ACCOUNT_GUIDE =
+            "이메일로 로그인하거나, 소셜 로그인을 다시 눌러 다른 계정을 선택해주세요."
+    }
 }

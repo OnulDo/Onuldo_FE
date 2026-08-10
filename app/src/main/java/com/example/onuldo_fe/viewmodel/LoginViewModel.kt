@@ -25,6 +25,13 @@ data class LoginUiState(
     val errorMessage: String? = null,
     /** 소셜 로그인 진행 중인 제공자. 버튼 중복 탭을 막고 로딩 표시에 쓴다. */
     val socialInProgress: SocialProvider? = null,
+    /**
+     * 다음 소셜 로그인에서 **계정 선택 화면을 강제로 띄울지.**
+     *
+     * 소셜 가입이 "이미 가입된 계정"으로 막혀 이 화면으로 되돌아온 뒤에 세운다. 그대로 두면
+     * SDK가 직전에 쓴 계정으로 조용히 다시 로그인해 버려서 다른 계정으로 갈아탈 방법이 없다.
+     */
+    val forceSocialAccountSelection: Boolean = false,
 ) {
     val isBusy: Boolean get() = isLoading || socialInProgress != null
 
@@ -113,8 +120,11 @@ class LoginViewModel(
         // 로그인 시작 표시도 launch 밖에서 세워 중복 실행을 막는다.
         _uiState.update { it.copy(socialInProgress = provider, errorMessage = null) }
 
+        // 직전 시도가 기존 계정과 충돌했다면 이번에는 계정을 다시 고르게 한다.
+        val forceAccountSelection = _uiState.value.forceSocialAccountSelection
+
         viewModelScope.launch {
-            when (val social = SocialAuthClient.login(context, provider)) {
+            when (val social = SocialAuthClient.login(context, provider, forceAccountSelection)) {
                 is SocialAuthResult.Cancelled ->
                     _uiState.update { it.copy(socialInProgress = null) }
 
@@ -124,7 +134,11 @@ class LoginViewModel(
                 is SocialAuthResult.Success -> {
                     authRepository.oauthLogin(provider, social.accessToken)
                         .onSuccess { outcome ->
-                            _uiState.update { it.copy(socialInProgress = null) }
+                            // 쓸 수 있는 계정을 받았으므로 강제 계정 선택 표시를 내린다.
+                            // (취소·실패 시에는 남겨 둬야 다시 눌렀을 때도 선택 화면이 뜬다.)
+                            _uiState.update {
+                                it.copy(socialInProgress = null, forceSocialAccountSelection = false)
+                            }
                             if (outcome.loggedIn) {
                                 onLoggedIn()
                             } else {
@@ -141,6 +155,17 @@ class LoginViewModel(
                 }
             }
         }
+    }
+
+    /**
+     * 소셜 가입이 **기존 계정과 충돌해** 되돌아왔음을 알린다.
+     *
+     * 안내 문구를 배너에 띄우고, 다음 소셜 로그인이 계정 선택 화면을 거치도록 표시해 둔다.
+     * 이 표시가 없으면 SDK가 직전 계정으로 조용히 재로그인해 같은 실패가 반복된다.
+     */
+    fun showExistingAccountNotice(message: String) {
+        if (message.isBlank()) return
+        _uiState.update { it.copy(errorMessage = message, forceSocialAccountSelection = true) }
     }
 
     private companion object {

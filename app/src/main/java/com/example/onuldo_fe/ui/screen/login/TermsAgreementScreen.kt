@@ -2,7 +2,6 @@ package com.example.onuldo_fe.ui.screen.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -24,14 +22,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
@@ -41,12 +40,11 @@ import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.theme.Black
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown30
-import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Pretendard
-import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.viewmodel.OnboardingDraft
 
 /**
@@ -54,8 +52,7 @@ import com.example.onuldo_fe.viewmodel.OnboardingDraft
  * "만 14세 이상"은 별도 문서가 없어 이동 없이 체크만 한다.
  *
  * [required]는 화면설계서 회원가입(`3766:6295`) 항목 4 기준 —
- * 필수는 **서비스·개인정보·만 14세 3종**이고 "필수 약관 미동의 시 완료 버튼 비활성화 유지".
- * 환급 정책은 필수 목록에 없으므로 선택으로 둔다. (서버 `TermType.REQUIRED`와도 일치)
+ * 화면에 노출되는 약관은 모두 필수이며 하나라도 미동의하면 완료 버튼을 비활성화한다.
  */
 private enum class AgreeItem(
     val label: String,
@@ -65,8 +62,16 @@ private enum class AgreeItem(
     AGE_14("만 14세 이상입니다", null, required = true),
     SERVICE("서비스 이용약관 동의", TermType.SERVICE, required = true),
     PRIVACY("개인정보 처리방침 동의", TermType.PRIVACY, required = true),
-    REFUND("환급 정책 동의", TermType.REFUND, required = false),
+    REFUND("환급 정책 동의", TermType.REFUND, required = true),
 }
+
+/**
+ * 약관 상세로 이동했다가 뒤로 돌아와도 체크 상태를 유지하기 위한 Saver
+ */
+private val AgreeCheckedSaver = listSaver<Set<AgreeItem>, Int>(
+    save = { checked -> checked.map(AgreeItem::ordinal) },
+    restore = { ordinals -> ordinals.map { AgreeItem.entries[it] }.toSet() },
+)
 
 /**
  * 약관 동의 화면 — Figma node `5580:3391`.
@@ -84,9 +89,13 @@ fun TermsAgreementScreen(
     onTermClick: (TermType) -> Unit = {},
 ) {
     // 항목별 동의 상태. 전체 동의는 개별 항목이 모두 체크됐는지로 판단한다.
-    var checked by remember { mutableStateOf(emptySet<AgreeItem>()) }
+    // 약관 상세로 이동하면 이 화면이 컴포지션에서 빠져 remember가 초기화되므로,
+    // 뒤로 돌아와도 체크가 유지되도록 rememberSaveable로 보존
+    var checked by rememberSaveable(stateSaver = AgreeCheckedSaver) {
+        mutableStateOf(emptySet<AgreeItem>())
+    }
     val allChecked = checked.size == AgreeItem.entries.size
-    // 진행 가능 조건은 '전체'가 아니라 '필수 전부'다. 선택 항목(환급 정책)은 막지 않는다.
+    // 화면의 모든 약관이 필수이므로 전부 체크해야 진행할 수 있다.
     val requiredChecked = AgreeItem.entries.filter { it.required }.all { it in checked }
 
     fun toggle(item: AgreeItem) {
@@ -112,10 +121,7 @@ fun TermsAgreementScreen(
 
         Text(
             text = "약관에 동의해주세요",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Black,
-            fontSize = 26.sp,
-            lineHeight = 36.sp,
+            style = MaterialTheme.typography.headlineLarge,
             color = BlackBrown,
             modifier = gutter,
         )
@@ -124,10 +130,7 @@ fun TermsAgreementScreen(
 
         Text(
             text = "서비스 이용을 위해 아래 약관에 동의해주세요",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            lineHeight = 22.sp,
+            style = MaterialTheme.typography.bodyMedium,
             color = DarkBrown70,
             modifier = gutter,
         )
@@ -184,23 +187,17 @@ private fun AgreeAllCard(
             .padding(horizontal = 19.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        RoundCheckbox(checked = checked, size = 24.dp)
+        AgreementAllCheckbox(checked = checked)
         Spacer(Modifier.width(15.dp))
         Column {
             Text(
                 text = "전체 동의",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 17.sp,
-                lineHeight = 22.sp,
+                style = MaterialTheme.typography.bodyLarge,
                 color = Black,
             )
             Text(
-                text = "필수 및 선택 항목에 모두 동의합니다",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Medium,
-                fontSize = 13.sp,
-                lineHeight = 18.sp,
+                text = "필수 항목에 모두 동의합니다",
+                style = MaterialTheme.typography.labelLarge,
                 color = DarkBrown70,
             )
         }
@@ -222,25 +219,19 @@ private fun AgreeItemRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(modifier = Modifier.clickable(onClick = onToggle)) {
-            RoundCheckbox(checked = checked, size = 22.dp)
+            TermCheckbox(checked = checked)
         }
         Spacer(Modifier.width(15.dp))
         // 필수는 Persimmon으로 강조, 선택은 본문과 같은 톤으로 낮춘다.
         Text(
             text = if (item.required) "[필수]" else "[선택]",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
+            style = MaterialTheme.typography.bodyMedium,
             color = if (item.required) Persimmon else DarkBrown70,
         )
         Spacer(Modifier.width(6.dp))
         Text(
             text = item.label,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 15.sp,
-            lineHeight = 22.sp,
+            style = MaterialTheme.typography.bodyMedium,
             color = BlackBrown,
             modifier = Modifier.weight(1f),
         )
@@ -257,26 +248,55 @@ private fun AgreeItemRow(
     }
 }
 
-/** 원형 체크박스. 미체크는 테두리만, 체크는 Persimmon 채움. */
+/** 상태별 Vector Drawable을 사용하는 약관 체크박스. */
 @Composable
-private fun RoundCheckbox(checked: Boolean, size: androidx.compose.ui.unit.Dp) {
-    Box(
-        modifier = Modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(if (checked) Persimmon else White)
-            .then(
-                if (checked) Modifier else Modifier.border(1.5.dp, DarkBrown40, CircleShape)
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (checked) {
-            Text(
-                text = "✓",
-                color = Color.White,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = (size.value * 0.55f).sp,
+private fun AgreementAllCheckbox(checked: Boolean) {
+    Image(
+        painter = painterResource(
+            if (checked) R.drawable.auth_checkbox_checked
+            else R.drawable.auth_checkbox_unchecked
+        ),
+        contentDescription = if (checked) "선택됨" else "선택 안 됨",
+        modifier = Modifier.size(24.dp),
+    )
+}
+
+/** 개별 약관 항목 전용 체크박스. */
+@Composable
+private fun TermCheckbox(checked: Boolean) {
+    Image(
+        painter = painterResource(
+            if (checked) R.drawable.auth_term_checkbox_checked
+            else R.drawable.auth_term_checkbox_unchecked
+        ),
+        contentDescription = if (checked) "선택됨" else "선택 안 됨",
+        modifier = Modifier.size(22.dp),
+    )
+}
+
+@Preview(
+    name = "전체 동의 카드 - 체크 전후",
+    showBackground = true,
+    backgroundColor = 0xFFFFFDF7,
+    widthDp = 390,
+)
+@Composable
+private fun AgreeAllCardPreview() {
+    OnulDo_FETheme {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 20.dp, vertical = 24.dp),
+        ) {
+            AgreeAllCard(
+                checked = false,
+                onToggle = {},
+            )
+            Spacer(Modifier.height(16.dp))
+            AgreeAllCard(
+                checked = true,
+                onToggle = {},
             )
         }
     }
