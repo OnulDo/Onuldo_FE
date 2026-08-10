@@ -36,7 +36,10 @@ private val UnselectedTint = BlackBrown.copy(alpha = 0.5f)
  * 라벨 = Pretendard Bold 12px. 선택 표시는 pill 없이 아이콘·라벨 색상만 변경한다.
  */
 @Composable
-fun OnuldoBottomBar(navController: NavController) {
+fun OnuldoBottomBar(
+    navController: NavController,
+    onTabClick: (BottomTab) -> Unit = {}
+) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
@@ -51,7 +54,10 @@ fun OnuldoBottomBar(navController: NavController) {
                 NavigationBarItem(
                     selected = selected,
                     onClick = {
-                        if (!selected) {
+                        onTabClick(tab)
+                        if (selected) {
+                            return@NavigationBarItem
+                        } else {
                             navController.navigate(tab.route) {
                                 // 탭 전환 시 백스택이 쌓이지 않도록 시작 목적지까지 pop + 상태 저장/복원
                                 popUpTo(navController.graph.findStartDestination().id) {

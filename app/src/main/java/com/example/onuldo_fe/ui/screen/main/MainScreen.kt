@@ -43,11 +43,17 @@ fun MainScreen(
     val navController = rememberNavController()
     var showBottomBar by remember { mutableStateOf(true) }
     var homeRefreshKey by rememberSaveable { mutableIntStateOf(0) }
+    var partyTabClickKey by rememberSaveable { mutableIntStateOf(0) }
 
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                OnuldoBottomBar(navController)
+                OnuldoBottomBar(
+                    navController = navController,
+                    onTabClick = { tab ->
+                        if (tab == BottomTab.Party) partyTabClickKey++
+                    }
+                )
             }
         },
     ) { innerPadding ->
@@ -106,6 +112,7 @@ fun MainScreen(
             }
             composable(BottomTab.Party.route) {
                 PartyRoute(
+                    tabClickKey = partyTabClickKey,
                     onBottomBarVisibilityChange = { showBottomBar = it },
                     onCameraNavigate = { challengeId, title, deadline ->
                         onNavigate(Routes.camera(challengeId, "", title, deadline))

@@ -97,6 +97,7 @@ fun PartyRoute(
     inviteViewModel: PartyInviteViewModel = viewModel(),
     partyFeedViewModel: PartyFeedViewModel = viewModel(),
     partySettlementViewModel: PartySettlementViewModel = viewModel(),
+    tabClickKey: Int = 0,
     onBottomBarVisibilityChange: (Boolean) -> Unit = {},
     onCameraNavigate: (Long, String, String) -> Unit = { _, _, _ -> },
     onChargePoint: () -> Unit = {},
@@ -148,6 +149,16 @@ fun PartyRoute(
     }
 
     val partyState = partyViewModel.uiState
+
+    LaunchedEffect(tabClickKey) {
+        if (tabClickKey > 0) {
+            partyViewModel.clearError()
+            screen = PartyScreen.List
+            showInviteDialog = false
+            showCameraPermissionDialog = false
+            pendingChallenge = null
+        }
+    }
     val waitingRoom = partyState.waitingRoom
 
     fun clearPendingVerification() {
