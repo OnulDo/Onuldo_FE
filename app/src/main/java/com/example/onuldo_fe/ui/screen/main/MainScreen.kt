@@ -24,6 +24,7 @@ import com.example.onuldo_fe.ui.component.OnuldoBottomBar
 import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryRoute
 import com.example.onuldo_fe.ui.screen.home.HomeRoute
 import com.example.onuldo_fe.ui.screen.mypage.MyMainScreen
+import com.example.onuldo_fe.ui.screen.mypage.PointChargeScreen
 import com.example.onuldo_fe.ui.screen.party.PartyRoute
 import com.example.onuldo_fe.ui.screen.party.PartySettlementRoute
 import com.example.onuldo_fe.ui.screen.record.RecordRoute
@@ -103,6 +104,14 @@ fun MainScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
+            composable(Routes.MYPAGE_CHARGE) {
+                LaunchedEffect(Unit) { showBottomBar = false }
+                DisposableEffect(Unit) {
+                    onDispose { showBottomBar = true }
+                }
+
+                PointChargeScreen(onBack = { navController.popBackStack() })
+            }
             composable(BottomTab.Challenge.route) {
                 GalleryRoute(
                     onChallengeClick = { challenge ->
@@ -117,7 +126,7 @@ fun MainScreen(
                     onCameraNavigate = { challengeId, title, deadline ->
                         onNavigate(Routes.camera(challengeId, "", title, deadline))
                     },
-                    onChargePoint = { onNavigate(Routes.MYPAGE_CHARGE) },
+                    onChargePoint = { navController.navigate(Routes.MYPAGE_CHARGE) },
                     onHomeNavigate = {
                         // 새로 시작한 파티 재조회와 홈 상단 이동을 한 번에 요청
                         homeRefreshKey++
