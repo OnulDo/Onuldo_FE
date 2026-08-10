@@ -67,6 +67,7 @@ android {
             "API_BASE_URL",
             quotedBuildConfig(apiBaseUrl())
         )
+        buildConfigField("String", "PROFILE_BASE_URL", quotedBuildConfig(env("PROFILE_BASE_URL")))
         val kakaoNativeAppKey = secret("KAKAO_NATIVE_APP_KEY")
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", quotedBuildConfig(kakaoNativeAppKey))
         buildConfigField("String", "NAVER_CLIENT_ID", quotedBuildConfig(secret("NAVER_CLIENT_ID")))

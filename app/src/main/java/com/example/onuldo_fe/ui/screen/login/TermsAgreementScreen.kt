@@ -22,7 +22,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +66,14 @@ private enum class AgreeItem(
 }
 
 /**
+ * 약관 상세로 이동했다가 뒤로 돌아와도 체크 상태를 유지하기 위한 Saver
+ */
+private val AgreeCheckedSaver = listSaver<Set<AgreeItem>, Int>(
+    save = { checked -> checked.map(AgreeItem::ordinal) },
+    restore = { ordinals -> ordinals.map { AgreeItem.entries[it] }.toSet() },
+)
+
+/**
  * 약관 동의 화면 — Figma node `5580:3391`.
  *
  * 이메일 회원가입과 소셜 신규 가입이 **공통으로** 거치는 단계다.
@@ -80,7 +89,11 @@ fun TermsAgreementScreen(
     onTermClick: (TermType) -> Unit = {},
 ) {
     // 항목별 동의 상태. 전체 동의는 개별 항목이 모두 체크됐는지로 판단한다.
-    var checked by remember { mutableStateOf(emptySet<AgreeItem>()) }
+    // 약관 상세로 이동하면 이 화면이 컴포지션에서 빠져 remember가 초기화되므로,
+    // 뒤로 돌아와도 체크가 유지되도록 rememberSaveable로 보존
+    var checked by rememberSaveable(stateSaver = AgreeCheckedSaver) {
+        mutableStateOf(emptySet<AgreeItem>())
+    }
     val allChecked = checked.size == AgreeItem.entries.size
     // 화면의 모든 약관이 필수이므로 전부 체크해야 진행할 수 있다.
     val requiredChecked = AgreeItem.entries.filter { it.required }.all { it in checked }

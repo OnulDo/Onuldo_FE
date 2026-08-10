@@ -46,13 +46,13 @@ data class EmailLoginRequest(
  * 서버는 이메일·비밀번호·닉네임·약관동의를 **한 번에** 받는다. 그래서 앱의 회원가입 화면과
  * 프로필 설정 화면 입력을 모두 모은 뒤 마지막에 한 번만 호출한다.
  *
- * [profileImageUrl]은 `"default_asset:{1~12}"` 형식이며, 비워 보내면 서버가 랜덤으로 채운다.
+ * [profileImageUrl]은 프리셋 9종 URL(.../profile/1~9.png) 중 하나여야 하며 **필수**다.
  */
 data class EmailSignupRequest(
     val email: String,
     val password: String,
     val nickname: String,
-    val profileImageUrl: String? = null,
+    val profileImageUrl: String,
     val termAgreements: List<TermAgreementRequest>,
     val device: DeviceRequest,
 )
@@ -67,7 +67,7 @@ data class OAuthSignupRequest(
     val provider: SocialProvider,
     val socialAccessToken: String,
     val nickname: String,
-    val profileImageUrl: String? = null,
+    val profileImageUrl: String,
     val termAgreements: List<TermAgreementRequest>,
     val device: DeviceRequest,
 )
