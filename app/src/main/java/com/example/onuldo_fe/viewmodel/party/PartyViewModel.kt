@@ -498,7 +498,8 @@ private fun PartyServerError.isInsufficientPartyPoint(): Boolean {
 /** 이미 개인 챌린지에 참여 중이면 파티 생성도 막히므로 전용 안내 문구를 보여준다. */
 private fun PartyServerError.isAlreadyParticipatingChallenge(): Boolean {
     val codeText = code.uppercase(Locale.ROOT)
-    return codeText.contains("ALREADY") && codeText.contains("CHALLENGE") ||
+    return codeText.contains("CHALLENGE") &&
+        (codeText.contains("ALREADY") || codeText.contains("ONGOING") || codeText.contains("IN_PROGRESS")) ||
         message.contains("이미") && message.contains("챌린지") &&
         (message.contains("진행") || message.contains("참여"))
 }

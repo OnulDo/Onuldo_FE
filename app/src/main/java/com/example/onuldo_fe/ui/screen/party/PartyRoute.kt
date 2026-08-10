@@ -361,6 +361,7 @@ fun PartyRoute(
             selectedChallengeCategoryLabel = selectedChallenge?.category?.displayName,
             onChallengeClick = {
                 // 기존 확정 선택은 유지하고 새로 상세를 확인하던 선택만 초기화
+                partyViewModel.clearError()
                 pendingChallenge = null
                 screen = PartyScreen.ChallengeSelect
             },
@@ -370,6 +371,7 @@ fun PartyRoute(
             },
             isSubmitting = partyState.action == PartyAction.Creating,
             errorMessage = partyState.errorMessage,
+            onFormChange = partyViewModel::clearError,
             // fake 포인트 부족 테스트 시 PartyTestConfig.AVAILABLE_POINT를 5_000으로 변경
             // Real 생성에서는 서버가 보유 포인트를 최종 검증하므로 Fake 포인트로 요청을 막지 않는다.
             availablePoint = if (PartyApiConfig.USE_REAL_CREATE) {
@@ -423,6 +425,7 @@ fun PartyRoute(
                     actionText = "파티 만들기",
                     onActionClick = { data ->
                         // 상세 CTA 선택 시에만 임시 챌린지를 최종 선택으로 확정하고, 생성 요청에는 상세 API의 id/title을 사용한다.
+                        partyViewModel.clearError()
                         selectedChallenge = challenge.copy(
                             id = data.challengeId,
                             title = data.title

@@ -44,6 +44,7 @@ fun PartyCreateScreen(
     onChargePoint: () -> Unit = {},
     isSubmitting: Boolean = false,
     errorMessage: String? = null,
+    onFormChange: () -> Unit = {},
     showPointShortageFromServer: Boolean = false,
     onPointShortageDismiss: () -> Unit = {},
     checkPointBeforeRequest: Boolean = false,
@@ -91,6 +92,7 @@ fun PartyCreateScreen(
                 value = partyName,
                 onValueChange = {
                     isPartyNameError = false
+                    onFormChange()
                     onPartyNameChange(it)
                 },
                 isError = isPartyNameError
@@ -119,19 +121,28 @@ fun PartyCreateScreen(
                 SectionTitle("진행 기간", 14)
                 // TODO 디자인 시스템에 7dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(7.dp))
-                PartyOptionSelector(periods, selectedPeriod, onSelect = { selectedPeriod = it }, textSize = 14.sp)
+                PartyOptionSelector(periods, selectedPeriod, onSelect = {
+                    onFormChange()
+                    selectedPeriod = it
+                }, textSize = 14.sp)
                 // TODO 디자인 시스템에 23dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(23.dp))
                 SectionTitle("도전금", 14)
                 // TODO 디자인 시스템에 7dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(7.dp))
-                PartyOptionSelector(deposits.map { "%,dP".format(it) }, selectedDeposit, onSelect = { selectedDeposit = it }, textSize = 12.sp)
+                PartyOptionSelector(deposits.map { "%,dP".format(it) }, selectedDeposit, onSelect = {
+                    onFormChange()
+                    selectedDeposit = it
+                }, textSize = 12.sp)
             }
             // TODO 디자인 시스템에 22dp 토큰이 추가되면 LocalSpacing으로 교체
             Spacer(Modifier.height(if (selectedChallenge == null) spacing.spacing26 else 22.dp))
             SectionTitle("모집 인원 (2~5명)", 12)
             Spacer(Modifier.height(spacing.spacing8))
-            PartyCapacitySelector(capacity = capacity, onCapacityChange = onCapacityChange)
+            PartyCapacitySelector(capacity = capacity, onCapacityChange = {
+                onFormChange()
+                onCapacityChange(it)
+            })
             Spacer(Modifier.height(spacing.spacing16))
         }
         Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
