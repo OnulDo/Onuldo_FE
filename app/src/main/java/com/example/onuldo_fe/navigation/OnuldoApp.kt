@@ -46,6 +46,9 @@ private const val MINIMUM_REVIEWING_DURATION_MILLIS = 2_000L
 private const val FINAL_REVIEW_STEP_DISPLAY_MILLIS = 300L
 private const val DUPLICATE_EMAIL_MESSAGE_KEY = "duplicate_email_message"
 
+/** 소셜 가입이 기존 이메일 계정과 충돌해 로그인 화면으로 되돌아올 때 실어 보내는 안내. */
+private const val EXISTING_ACCOUNT_MESSAGE_KEY = "existing_account_message"
+
 /** 마이 메뉴 이름. 서버가 약관 제목을 주기 전까지 상단바에 쓴다. */
 private fun termTitleOf(termType: TermType): String = when (termType) {
     TermType.SERVICE -> "서비스 이용약관"
@@ -92,7 +95,19 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
             )
         }
         composable(Routes.LOGIN) {
+            // 소셜 가입이 기존 이메일 계정과 충돌해 되돌아온 경우의 안내 문구.
+            val existingAccountMessage by navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.getStateFlow<String?>(EXISTING_ACCOUNT_MESSAGE_KEY, null)
+                ?.collectAsState()
+                ?: remember { mutableStateOf(null) }
             LoginScreen(
+                existingAccountNotice = existingAccountMessage,
+                onNoticeShown = {
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set<String?>(EXISTING_ACCOUNT_MESSAGE_KEY, null)
+                },
                 onLoginSuccess = {
                     navController.navigate(Routes.MAIN) {
                         // 일반 진입(LANDING → LOGIN)과 세션 만료(LOGIN이 루트) 모두에서
@@ -141,6 +156,19 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
                     navController.getBackStackEntry(Routes.SIGNUP)
                         .savedStateHandle[DUPLICATE_EMAIL_MESSAGE_KEY] = message
                     navController.popBackStack(Routes.SIGNUP, inclusive = false)
+                },
+                // 소셜 가입이 기존 이메일 계정과 충돌 — 이 화면에서 고칠 수 없으므로
+                // 안내를 실어 로그인 화면으로 되돌린다.
+                onExistingAccount = { message ->
+                    val loginEntry =
+                        runCatching { navController.getBackStackEntry(Routes.LOGIN) }.getOrNull()
+                    if (loginEntry != null) {
+                        loginEntry.savedStateHandle[EXISTING_ACCOUNT_MESSAGE_KEY] = message
+                        navController.popBackStack(Routes.LOGIN, inclusive = false)
+                    } else {
+                        // 로그인 화면을 거치지 않은 비정상 경로. 최소한 온보딩 밖으로는 내보낸다.
+                        navController.popBackStack(Routes.LANDING, inclusive = false)
+                    }
                 },
             )
         }

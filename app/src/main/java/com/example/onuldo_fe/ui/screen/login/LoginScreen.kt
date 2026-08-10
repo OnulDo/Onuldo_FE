@@ -23,6 +23,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -64,9 +65,26 @@ fun LoginScreen(
     onSignupClick: () -> Unit,
     // 소셜 로그인 결과 신규 회원이면 약관 동의 화면으로 보낸다.
     onSocialSignupNeeded: () -> Unit = {},
+    /**
+     * 소셜 가입이 "이미 가입된 계정"으로 막혀 이 화면으로 되돌아오며 전달된 안내 문구.
+     * 이 값이 들어오면 다음 소셜 로그인은 계정 선택 화면을 거친다.
+     */
+    existingAccountNotice: String? = null,
+    /**
+     * [existingAccountNotice]를 배너에 반영한 뒤 호출된다. 호출부는 여기서 값을 비워야 한다 —
+     * 남겨 두면 같은 문구가 다시 전달될 때 값이 변하지 않아 배너가 뜨지 않는다.
+     */
+    onNoticeShown: () -> Unit = {},
     viewModel: LoginViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(existingAccountNotice) {
+        existingAccountNotice?.let {
+            viewModel.showExistingAccountNotice(it)
+            onNoticeShown()
+        }
+    }
     val isError = state.errorMessage != null
     // 소셜 SDK는 로그인 창을 띄우기 위해 Activity 컨텍스트가 필요하다.
     val context = LocalContext.current
