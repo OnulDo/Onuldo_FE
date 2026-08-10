@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -42,13 +43,17 @@ fun MainScreen(
     onLoggedOut: () -> Unit = {},
 ) {
     val navController = rememberNavController()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
     var showBottomBar by remember { mutableStateOf(true) }
     var homeRefreshKey by rememberSaveable { mutableIntStateOf(0) }
     var partyTabClickKey by rememberSaveable { mutableIntStateOf(0) }
+    val isFullScreenRoute = currentRoute == Routes.MYPAGE_CHARGE ||
+        currentRoute == Routes.PARTY_SETTLEMENT
 
     Scaffold(
         bottomBar = {
-            if (showBottomBar) {
+            if (showBottomBar && !isFullScreenRoute) {
                 OnuldoBottomBar(
                     navController = navController,
                     onTabClick = { tab ->
@@ -106,9 +111,6 @@ fun MainScreen(
             }
             composable(Routes.MYPAGE_CHARGE) {
                 LaunchedEffect(Unit) { showBottomBar = false }
-                DisposableEffect(Unit) {
-                    onDispose { showBottomBar = true }
-                }
 
                 PointChargeScreen(onBack = { navController.popBackStack() })
             }

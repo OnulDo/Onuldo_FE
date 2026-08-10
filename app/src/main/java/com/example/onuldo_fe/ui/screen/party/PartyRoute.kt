@@ -149,9 +149,11 @@ fun PartyRoute(
     }
 
     val partyState = partyViewModel.uiState
+    var handledTabClickKey by rememberSaveable { mutableIntStateOf(tabClickKey) }
 
     LaunchedEffect(tabClickKey) {
-        if (tabClickKey > 0) {
+        if (tabClickKey != handledTabClickKey) {
+            handledTabClickKey = tabClickKey
             partyViewModel.clearError()
             screen = PartyScreen.List
             showInviteDialog = false
