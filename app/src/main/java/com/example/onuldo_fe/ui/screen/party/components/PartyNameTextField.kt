@@ -40,7 +40,7 @@ fun PartyNameTextField(
     BasicTextField(
         value = value,
         // 문자 규칙은 [파티 만들기] 클릭 시 검증하고 여기서는 최대 길이만 제한
-        onValueChange = { input -> onValueChange(input.take(20)) },
+        onValueChange = { input -> onValueChange(input.take(10)) },
         modifier = modifier.fillMaxWidth(),
         singleLine = true,
         textStyle = TextStyle(

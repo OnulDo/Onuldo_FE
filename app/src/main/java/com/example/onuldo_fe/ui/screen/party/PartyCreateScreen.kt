@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +44,7 @@ fun PartyCreateScreen(
     onChargePoint: () -> Unit = {},
     isSubmitting: Boolean = false,
     errorMessage: String? = null,
+    onFormChange: () -> Unit = {},
     showPointShortageFromServer: Boolean = false,
     onPointShortageDismiss: () -> Unit = {},
     checkPointBeforeRequest: Boolean = false,
@@ -51,8 +53,10 @@ fun PartyCreateScreen(
     val spacing = LocalSpacing.current
     val periods = listOf("2주", "4주", "8주", "12주")
     val deposits = listOf(10_000, 20_000, 30_000, 50_000)
-    var selectedPeriod by remember(selectedChallenge?.id) { mutableIntStateOf(-1) }
-    var selectedDeposit by remember(selectedChallenge?.id) { mutableIntStateOf(-1) }
+    // 포인트 부족 → 충전 화면 왕복에도 유지되도록 rememberSaveable을 쓰되, 챌린지가 바뀌면
+    // (id가 바뀌면) 이전 선택을 초기화하는 기존 동작은 key로 그대로 유지한다.
+    var selectedPeriod by rememberSaveable(selectedChallenge?.id) { mutableIntStateOf(-1) }
+    var selectedDeposit by rememberSaveable(selectedChallenge?.id) { mutableIntStateOf(-1) }
     var showPointDialog by remember { mutableStateOf(false) }
     var isPartyNameError by remember { mutableStateOf(false) }
 
@@ -60,7 +64,7 @@ fun PartyCreateScreen(
         if (showPointShortageFromServer) showPointDialog = true
     }
     // 단어 사이 공백은 허용하고, 앞뒤 공백은 아래 정규화 과정에서 제거한다.
-    val partyNamePattern = remember { Regex("^[가-힣A-Za-z0-9 ]{2,20}$") }
+    val partyNamePattern = remember { Regex("^[가-힣A-Za-z0-9 ]{2,10}$") }
     val normalizedPartyName = remember(partyName) {
         // 한글 입력기에서 조합형 자모로 전달된 이름을 완성형 한글로 변환
         Normalizer.normalize(partyName.trim(), Normalizer.Form.NFC)
@@ -88,13 +92,14 @@ fun PartyCreateScreen(
                 value = partyName,
                 onValueChange = {
                     isPartyNameError = false
+                    onFormChange()
                     onPartyNameChange(it)
                 },
                 isError = isPartyNameError
             )
             if (isPartyNameError) {
                 Text(
-                    "한글, 영문, 숫자, 공백을 포함해 2~20자로 입력해주세요.",
+                    "한글, 영문, 숫자, 공백을 포함해 2~10자로 입력해주세요.",
                     // TODO 디자인 시스템에 4dp·6dp 토큰이 추가되면 LocalSpacing으로 교체
                     modifier = Modifier.padding(start = 4.dp, top = 6.dp),
                     color = Persimmon,
@@ -116,19 +121,28 @@ fun PartyCreateScreen(
                 SectionTitle("진행 기간", 14)
                 // TODO 디자인 시스템에 7dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(7.dp))
-                PartyOptionSelector(periods, selectedPeriod, onSelect = { selectedPeriod = it }, textSize = 14.sp)
+                PartyOptionSelector(periods, selectedPeriod, onSelect = {
+                    onFormChange()
+                    selectedPeriod = it
+                }, textSize = 14.sp)
                 // TODO 디자인 시스템에 23dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(23.dp))
                 SectionTitle("도전금", 14)
                 // TODO 디자인 시스템에 7dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(7.dp))
-                PartyOptionSelector(deposits.map { "%,dP".format(it) }, selectedDeposit, onSelect = { selectedDeposit = it }, textSize = 12.sp)
+                PartyOptionSelector(deposits.map { "%,dP".format(it) }, selectedDeposit, onSelect = {
+                    onFormChange()
+                    selectedDeposit = it
+                }, textSize = 12.sp)
             }
             // TODO 디자인 시스템에 22dp 토큰이 추가되면 LocalSpacing으로 교체
             Spacer(Modifier.height(if (selectedChallenge == null) spacing.spacing26 else 22.dp))
             SectionTitle("모집 인원 (2~5명)", 12)
             Spacer(Modifier.height(spacing.spacing8))
-            PartyCapacitySelector(capacity = capacity, onCapacityChange = onCapacityChange)
+            PartyCapacitySelector(capacity = capacity, onCapacityChange = {
+                onFormChange()
+                onCapacityChange(it)
+            })
             Spacer(Modifier.height(spacing.spacing16))
         }
         Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {

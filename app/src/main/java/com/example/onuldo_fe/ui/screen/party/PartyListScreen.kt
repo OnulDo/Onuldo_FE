@@ -60,7 +60,7 @@ import java.time.LocalTime
 @OptIn(ExperimentalMaterial3Api::class)
 fun PartyListScreen(
     parties: List<PartyCardUi>,
-    onVerifyClick: () -> Unit,
+    onVerifyClick: (PartyCardUi) -> Unit,
     onCreateClick: () -> Unit,
     onInviteCodeClick: () -> Unit,
     onPartyClick: (String) -> Unit,
@@ -73,7 +73,7 @@ fun PartyListScreen(
     partyCardContent: @Composable (PartyCardUi, () -> Unit) -> Unit = { party, onClick ->
         HomePartyCard(
             partyChallenge = party.toHomePartyChallenge(),
-            onVerifyClick = onVerifyClick,
+            onVerifyClick = { onVerifyClick(party) },
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
@@ -221,7 +221,7 @@ private fun PartyCardUi.toHomePartyChallenge() = HomePartyChallenge(
     totalMemberCount = totalMemberCount,
     status = verificationStatus,
     remainingMinutes = remainingText.toRemainingMinutes(),
-    canVerify = verificationStatus == ChallengeStatus.NeedCertification,
+    canVerify = verificationStatus == ChallengeStatus.NeedCertification && challengeId > 0L,
     members = members.map { member ->
         HomePartyMember(
             memberId = member.userId.toString(),
@@ -229,7 +229,8 @@ private fun PartyCardUi.toHomePartyChallenge() = HomePartyChallenge(
             defaultCharacterId = null,
             isVerifiedToday = member.isVerifiedToday
         )
-    }
+    },
+    challengeId = challengeId
 )
 
 private fun String.toLocalTimeOrNull(): LocalTime? {

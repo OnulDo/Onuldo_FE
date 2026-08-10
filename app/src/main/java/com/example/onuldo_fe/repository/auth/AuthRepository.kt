@@ -24,13 +24,13 @@ interface AuthRepository {
      * 이메일 회원가입. 서버가 이메일·비밀번호·닉네임·약관을 한 번에 받으므로
      * 회원가입 화면과 프로필 설정 화면 입력을 모두 모아 호출한다.
      *
-     * [profileImageUrl]은 `"default_asset:{n}"` 형식. null이면 서버가 랜덤 배정한다.
+     * [profileImageUrl]은 프리셋 9종 URL 중 하나. 필수값이다.
      */
     suspend fun signup(
         email: String,
         password: String,
         nickname: String,
-        profileImageUrl: String?,
+        profileImageUrl: String,
         termAgreements: List<TermAgreementRequest>,
     ): ApiResult<Unit>
 
@@ -43,7 +43,7 @@ interface AuthRepository {
         provider: SocialProvider,
         socialAccessToken: String,
         nickname: String,
-        profileImageUrl: String?,
+        profileImageUrl: String,
         termAgreements: List<TermAgreementRequest>,
     ): ApiResult<Unit>
 

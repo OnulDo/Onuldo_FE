@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -24,6 +25,7 @@ import com.example.onuldo_fe.ui.component.OnuldoBottomBar
 import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryRoute
 import com.example.onuldo_fe.ui.screen.home.HomeRoute
 import com.example.onuldo_fe.ui.screen.mypage.MyMainScreen
+import com.example.onuldo_fe.ui.screen.mypage.PointChargeScreen
 import com.example.onuldo_fe.ui.screen.party.PartyRoute
 import com.example.onuldo_fe.ui.screen.party.PartySettlementRoute
 import com.example.onuldo_fe.ui.screen.record.RecordRoute
@@ -41,13 +43,23 @@ fun MainScreen(
     onLoggedOut: () -> Unit = {},
 ) {
     val navController = rememberNavController()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
     var showBottomBar by remember { mutableStateOf(true) }
     var homeRefreshKey by rememberSaveable { mutableIntStateOf(0) }
+    var partyTabClickKey by rememberSaveable { mutableIntStateOf(0) }
+    val isFullScreenRoute = currentRoute == Routes.MYPAGE_CHARGE ||
+        currentRoute == Routes.PARTY_SETTLEMENT
 
     Scaffold(
         bottomBar = {
-            if (showBottomBar) {
-                OnuldoBottomBar(navController)
+            if (showBottomBar && !isFullScreenRoute) {
+                OnuldoBottomBar(
+                    navController = navController,
+                    onTabClick = { tab ->
+                        if (tab == BottomTab.Party) partyTabClickKey++
+                    }
+                )
             }
         },
     ) { innerPadding ->
@@ -74,6 +86,10 @@ fun MainScreen(
                     },
                     onSettlementResultClick = { partyId ->
                         navController.navigate(Routes.partySettlement(partyId))
+                    },
+                    // 알림 탭 → 챌린지 상세(루트 nav)
+                    onChallengeClick = { challengeId ->
+                        onNavigate(Routes.challengeDetail(challengeId))
                     }
                 )
             }
@@ -93,6 +109,11 @@ fun MainScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
+            composable(Routes.MYPAGE_CHARGE) {
+                LaunchedEffect(Unit) { showBottomBar = false }
+
+                PointChargeScreen(onBack = { navController.popBackStack() })
+            }
             composable(BottomTab.Challenge.route) {
                 GalleryRoute(
                     onChallengeClick = { challenge ->
@@ -102,9 +123,12 @@ fun MainScreen(
             }
             composable(BottomTab.Party.route) {
                 PartyRoute(
+                    tabClickKey = partyTabClickKey,
                     onBottomBarVisibilityChange = { showBottomBar = it },
-                    onCameraNavigate = { onNavigate(Routes.camera(2L)) },
-                    onChargePoint = { onNavigate(Routes.MYPAGE_CHARGE) },
+                    onCameraNavigate = { challengeId, title, deadline ->
+                        onNavigate(Routes.camera(challengeId, "", title, deadline))
+                    },
+                    onChargePoint = { navController.navigate(Routes.MYPAGE_CHARGE) },
                     onHomeNavigate = {
                         // 새로 시작한 파티 재조회와 홈 상단 이동을 한 번에 요청
                         homeRefreshKey++

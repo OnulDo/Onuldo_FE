@@ -17,17 +17,25 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import android.widget.Toast
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.auth.dto.TermType
+import com.example.onuldo_fe.ui.component.ConfirmDialog
 import com.example.onuldo_fe.viewmodel.mypage.MyMainViewModel
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.RefreshOnResume
+import com.example.onuldo_fe.ui.screen.login.ProfileCharacters
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageMenuRow
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
@@ -72,6 +81,19 @@ fun MyMainScreen(
     val email = state.email
     val point = state.pointText
 
+    // 로그아웃·회원 탈퇴는 팝업으로 검토
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    var showWithdrawDialog by remember { mutableStateOf(false) }
+
+    // 탈퇴 실패 시 무반응으로 보이지 않도록 안내 토스트를 한 번 띄운다.
+    val context = LocalContext.current
+    LaunchedEffect(state.deleteFailedMessage) {
+        state.deleteFailedMessage?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            viewModel.onDeleteFailedShown()
+        }
+    }
+
     // 충전·챌린지 참여 등으로 보유 포인트가 바뀐 뒤 이 탭으로 돌아올 수 있다. ViewModel은
     // 백스택에 살아 있어 한 번 조회한 값이 그대로 남으므로, 화면이 보일 때마다 새로 읽는다.
     RefreshOnResume { viewModel.load() }
@@ -86,7 +108,12 @@ fun MyMainScreen(
         Spacer(Modifier.height(20.dp))
 
         // 프로필 카드 → 프로필 설정
-        ProfileCard(nickname = nickname, email = email, onClick = onProfileClick)
+        // 서버가 배정한 캐릭터가 앱 목록에 있으면 그 캐릭터를, 없으면 기본 아바타.
+        // 프로필 RefreshOnResume 재조회로 변경 적용 완
+        val avatarRes = state.characterIndex
+            ?.let { ProfileCharacters.getOrNull(it) }
+            ?: R.drawable.img_avatar_running
+        ProfileCard(nickname = nickname, email = email, avatarRes = avatarRes, onClick = onProfileClick)
 
         Spacer(Modifier.height(16.dp))
 
@@ -129,7 +156,7 @@ fun MyMainScreen(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { viewModel.logout(onLoggedOut) },
+                .clickable { showLogoutDialog = true },
         )
         Spacer(Modifier.height(8.dp))
         Text(
@@ -142,14 +169,41 @@ fun MyMainScreen(
             textDecoration = TextDecoration.Underline,
             modifier = Modifier
                 .fillMaxWidth()
-                // 서버에 회원 탈퇴 API가 없어 아직 연결하지 못했다. API 추가 시 확인 다이얼로그와 함께 연결한다.
-                .clickable { /* TODO: 회원 탈퇴 API 추가 후 연결 */ },
+                .clickable { showWithdrawDialog = true },
+        )
+    }
+
+    // 로그아웃 확인 — 확정 시 토큰 폐기 후 진입 화면으로
+    if (showLogoutDialog) {
+        ConfirmDialog(
+            title = "로그아웃",
+            description = "정말로 로그아웃 할까요?",
+            confirmText = "로그아웃",
+            onDismiss = { showLogoutDialog = false },
+            onConfirm = {
+                showLogoutDialog = false
+                viewModel.logout(onLoggedOut)
+            },
+        )
+    }
+
+    // 회원 탈퇴 확인 — 확정 시 DELETE /api/users/me (서버가 보관 사진 등도 함께 파기)
+    if (showWithdrawDialog) {
+        ConfirmDialog(
+            title = "회원탈퇴",
+            description = "정말로 회원탈퇴 할까요?",
+            confirmText = "회원탈퇴",
+            onDismiss = { showWithdrawDialog = false },
+            onConfirm = {
+                showWithdrawDialog = false
+                viewModel.deleteAccount(onLoggedOut)
+            },
         )
     }
 }
 
 @Composable
-private fun ProfileCard(nickname: String, email: String, onClick: () -> Unit) {
+private fun ProfileCard(nickname: String, email: String, avatarRes: Int, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .padding(horizontal = 20.dp)
@@ -170,7 +224,7 @@ private fun ProfileCard(nickname: String, email: String, onClick: () -> Unit) {
             contentAlignment = Alignment.Center,
         ) {
             Image(
-                painter = painterResource(R.drawable.img_avatar_running),
+                painter = painterResource(avatarRes),
                 contentDescription = null,
                 modifier = Modifier.size(57.dp),
             )
@@ -197,7 +251,7 @@ private fun ProfileCard(nickname: String, email: String, onClick: () -> Unit) {
         Image(
             painter = painterResource(R.drawable.ic_chevron_right),
             contentDescription = null,
-            modifier = Modifier.size(width = 5.dp, height = 8.dp),
+            modifier = Modifier.size(width = 9.dp, height = 17.dp),
         )
     }
 }
@@ -218,23 +272,37 @@ private fun WalletSummary(
             .border(1.dp, Persimmon20, RoundedCornerShape(14.dp))
             .padding(20.dp),
     ) {
-        Column(modifier = Modifier.clickable(onClick = onWalletClick)) {
-            Text(
-                text = "내 포인트 지갑",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 11.sp,
-                letterSpacing = 0.44.sp,
-                color = BlackBrown.copy(alpha = 0.7f),
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = point,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 28.sp,
-                letterSpacing = (-0.56).sp,
-                color = Persimmon,
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onWalletClick),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "내 포인트 지갑",
+                    fontFamily = Pretendard,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    letterSpacing = 0.44.sp,
+                    color = BlackBrown.copy(alpha = 0.7f),
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = point,
+                    fontFamily = Pretendard,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 28.sp,
+                    letterSpacing = (-0.56).sp,
+                    color = Persimmon,
+                )
+            }
+            // 프로필 카드와 같은 화살표 에셋을 주황(Persimmon)으로 틴트.
+            Image(
+                painter = painterResource(R.drawable.ic_chevron_right),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(Persimmon),
+                modifier = Modifier.size(width = 9.dp, height = 17.dp),
             )
         }
         Spacer(Modifier.height(14.dp))

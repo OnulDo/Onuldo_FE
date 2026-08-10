@@ -58,7 +58,8 @@ class HomeRepositoryImpl(
             if (!response.isSuccessful) throw HttpException(response)
             val body = response.body() ?: throw IOException("오늘 챌린지 응답 본문이 비어 있습니다.")
 
-            val dailyItems = body.result.challenges
+            // Daily API의 result는 래퍼 객체가 아닌 개인 챌린지 배열이다.
+            val dailyItems = body.result
             val partyHome = partyHomeDeferred.await()
             val profile = profileDeferred.await()
 
@@ -130,22 +131,14 @@ internal fun List<RealHomeDailyChallengeDto>.toHomeData(
     partyHome: PartyHomeResultDto = PartyHomeResultDto(),
     completed: DailyCompletedResultDto = DailyCompletedResultDto()
 ): HomeData {
-    // 서버의 참여 유형으로 개인과 파티 카드를 나눈다.
-    val personalChallenges = filter { it.participationType == "PERSONAL" }
-        .map { it.toPersonalModel(now) }
-    // /daily의 partyId로 홈 파티를 찾아 인증에 필요한 challengeId와 category를 연결한다.
-    val partyDailyChallenges = filter { it.participationType == "PARTY" }
-        .mapNotNull { daily ->
-            daily.partyId?.let { partyId -> partyId to daily }
-        }
-        .toMap()
-    // 카드 표시 상태와 파티원 인증 현황은 /parties/home 응답을 기준으로 구성한다.
-    val partyChallenges = partyHome.parties.map {
-        it.toHomeModel(
-            now = now,
-            dailyChallenge = partyDailyChallenges[it.partyId]
-        )
-    }
+    // Daily API는 개인 챌린지만 반환하므로 result 배열 전체를 개인 카드로 변환한다.
+    val personalChallenges = map { it.toPersonalModel(now) }
+    // 카드 표시 상태와 파티원 인증 현황, 인증하기에 필요한 challengeId까지 모두
+    // /parties/home 응답 하나로 구성한다. (예전에는 challengeId가 이 응답에 없어서
+    // /daily에서 같은 partyId를 찾아 끼워 맞추는 우회 로직이 있었는데, 그 매칭이
+    // 실패하면 "인증하기"가 조용히 무반응이 되는 문제가 있어 제거했다. 백엔드가
+    // challengeId를 이 응답에 내려주기 전까지는 인증하기가 동작하지 않는다.)
+    val partyChallenges = partyHome.parties.map { it.toHomeModel(now = now) }
     // 히어로의 분모/분자는 /daily 원본 리스트 크기에 기대지 않는다.
     // /daily에 파티의 오늘 참여 기록이 아직 반영되지 않아도(생성/시작 직후 등)
     // 개인은 /daily, 파티는 /parties/home을 각각의 출처로 삼아 항상 정확히 집계한다.
@@ -181,7 +174,7 @@ private fun RealHomeDailyChallengeDto.toPersonalModel(now: LocalDateTime): HomeC
     return HomeChallenge(
         title = challengeName,
         // 값이 없거나 음수이면 0일로 처리한다.
-        streakDays = streakDays?.coerceAtLeast(0) ?: 0,
+        streakDays = streakDays.coerceAtLeast(0),
         remainingDays = endDate.remainingDaysFrom(now.toLocalDate()),
         deadlineAt = deadline,
         status = toChallengeStatus(now.toLocalTime()),
@@ -194,13 +187,15 @@ private fun RealHomeDailyChallengeDto.toPersonalModel(now: LocalDateTime): HomeC
 }
 
 private fun PartyHomeItemDto.toHomeModel(
-    now: LocalDateTime,
-    dailyChallenge: RealHomeDailyChallengeDto?
+    now: LocalDateTime
 ): HomePartyChallenge {
     val deadline = verificationDeadline.toLocalTimeOrNull()
     val isDeadlinePassed = deadline?.let(now.toLocalTime()::isAfter) == true
     // 시간으로 상태를 추정하지 않고 서버가 계산한 나의 오늘 인증 상태를 사용한다.
     val challengeStatus = status.toPartyChallengeStatus()
+    // 카메라 화면 이동에 필수인 값이라, 이게 없으면 canVerify도 true가 되면 안 된다
+    // (그렇지 않으면 버튼은 활성화된 것처럼 보이는데 눌러도 아무 반응이 없게 된다).
+    val verifiedChallengeId = challengeId?.takeIf { it > 0L }
     return HomePartyChallenge(
         title = name,
         subtitle = challengeTitle,
@@ -216,7 +211,10 @@ private fun PartyHomeItemDto.toHomeModel(
                 now = now.toLocalTime(),
                 verified = challengeStatus != ChallengeStatus.NeedCertification
             ),
-        canVerify = challengeStatus == ChallengeStatus.NeedCertification && !isDeadlinePassed,
+        canVerify = challengeStatus == ChallengeStatus.NeedCertification &&
+            dailyStatus == DAILY_STATUS_WAITING &&
+            !isDeadlinePassed &&
+            verifiedChallengeId != null,
         members = members.map {
             HomePartyMember(
                 memberId = it.userId.toString(),
@@ -225,8 +223,10 @@ private fun PartyHomeItemDto.toHomeModel(
                 isVerifiedToday = it.isVerifiedToday
             )
         },
-        challengeId = dailyChallenge?.challengeId?.takeIf { it > 0L },
-        category = dailyChallenge?.category.orEmpty()
+        // /parties/home 응답 자체의 값을 그대로 쓴다. 백엔드가 아직 안 내려주면 null/빈 문자열이라
+        // canVerify도 위에서 함께 false가 되어 "인증하기" 버튼 자체가 활성화되지 않는다.
+        challengeId = verifiedChallengeId,
+        category = category.orEmpty()
     )
 }
 
@@ -267,12 +267,14 @@ private fun String.toHomeTimeText(): String =
         .getOrElse { substringAfter('T', this).take(5) }
 
 private fun RealHomeDailyChallengeDto.canVerifyAt(now: LocalTime): Boolean {
-    // 인증 완료 또는 인증 가능 시간 밖이면 버튼을 숨긴다.
-    if (verifiedOnDate) return false
+    // 서버가 오늘 인증 대기 상태로 내려준 경우에만 시간 범위를 추가 확인한다.
+    if (verifiedOnDate || dailyStatus != DAILY_STATUS_WAITING) return false
     val start = timeStart.toLocalTimeOrNull()
     val end = timeEnd.toLocalTimeOrNull()
     return (start == null || !now.isBefore(start)) && (end == null || !now.isAfter(end))
 }
+
+private const val DAILY_STATUS_WAITING = "WAITING"
 
 /** 인증 완료 여부와 마감 시각으로 오늘 카드 상태를 정한다. */
 private fun RealHomeDailyChallengeDto.toChallengeStatus(now: LocalTime): ChallengeStatus {

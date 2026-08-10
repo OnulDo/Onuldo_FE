@@ -215,7 +215,6 @@ fun SettingScreen(
 
         Spacer(Modifier.height(2.dp))
 
-    // 정산 환급 완료
         SettingToggleRow(
             title = "정산·환급 완료",
             description = "포인트 지급 알림은 끌 수 없어요",
@@ -225,7 +224,6 @@ fun SettingScreen(
             trailingText = "항상 발송"
         )
     }
-
     // 알림 권한 안내 팝업(권한x) → "설정으로 이동"이면 시스템 알림설정으로
     if (showNotificationPermissionDialog) {
         PermissionSettingDialog(

@@ -20,6 +20,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -50,6 +51,32 @@ fun PermissionSettingDialog(
     onDismiss: () -> Unit,
     onMoveToSettings: () -> Unit
 ) {
+    // 권한 안내도 "취소 | 액션" 2버튼 다이얼로그의 한 종류라, 공통 [ConfirmDialog]에 위임한다.
+    ConfirmDialog(
+        title = type.title,
+        description = type.description,
+        confirmText = "설정으로 이동",
+        onDismiss = onDismiss,
+        onConfirm = onMoveToSettings,
+    )
+}
+
+/**
+ * "취소 | 확인" 2버튼 공통 다이얼로그. 권한 안내·로그아웃·회원 탈퇴 등이 재사용한다.
+ *
+ * @param confirmText 오른쪽(강조) 버튼 문구
+ * @param confirmColor 오른쪽 버튼 글자색 — 파괴적 동작이면 호출부에서 경고색으로 바꾼다
+ */
+@Composable
+fun ConfirmDialog(
+    title: String,
+    description: String,
+    confirmText: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    dismissText: String = "취소",
+    confirmColor: Color = Persimmon,
+) {
     val spacing = LocalSpacing.current
 
     Dialog(onDismissRequest = onDismiss) {
@@ -70,7 +97,7 @@ fun PermissionSettingDialog(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = type.title,
+                        text = title,
                         style = MaterialTheme.typography.bodyLarge,
                         color = BlackBrown
                     )
@@ -78,7 +105,7 @@ fun PermissionSettingDialog(
                     Spacer(Modifier.height(spacing.spacing12))
 
                     Text(
-                        text = type.description,
+                        text = description,
                         style = MaterialTheme.typography.labelLarge,
                         color = DarkBrown50,
                         textAlign = TextAlign.Center
@@ -100,7 +127,7 @@ fun PermissionSettingDialog(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "취소",
+                            text = dismissText,
                             style = MaterialTheme.typography.bodyMedium,
                             color = DarkBrown50
                         )
@@ -112,13 +139,13 @@ fun PermissionSettingDialog(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
-                            .clickable(onClick = onMoveToSettings),
+                            .clickable(onClick = onConfirm),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "설정으로 이동",
+                            text = confirmText,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Persimmon
+                            color = confirmColor
                         )
                     }
                 }

@@ -27,6 +27,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import retrofit2.HttpException
+import java.util.Locale
 
 // 생성·조회·준비·시작·이탈 중 진행 중인 요청을 표시해 중복 실행 방지
 enum class PartyAction {
@@ -210,24 +211,30 @@ class PartyViewModel(
                 }
             }
 
-            runCatching { repository.createParty(command) }
-                .onSuccess { created ->
-                    uiState = uiState.copy(
-                        waitingRoom = null,
-                        isReadySubmitted = false,
-                        action = PartyAction.Idle
-                    )
-                    onSuccess(created.partyId)
-                    loadWaitingRoom(created.partyId)
-                }
-                .onFailure { error ->
-                    val isPointInsufficient = error.isInsufficientPartyPoint()
-                    uiState = uiState.copy(
-                        action = PartyAction.Idle,
-                        isCreatePointInsufficient = isPointInsufficient,
-                        errorMessage = if (isPointInsufficient) null else "파티를 만들지 못했어요."
-                    )
-                }
+            try {
+                val created = repository.createParty(command)
+                uiState = uiState.copy(
+                    waitingRoom = null,
+                    isReadySubmitted = false,
+                    action = PartyAction.Idle
+                )
+                onSuccess(created.partyId)
+                loadWaitingRoom(created.partyId)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                val serverError = error.toPartyServerError()
+                val isPointInsufficient = serverError.isInsufficientPartyPoint()
+                uiState = uiState.copy(
+                    action = PartyAction.Idle,
+                    isCreatePointInsufficient = isPointInsufficient,
+                    errorMessage = when {
+                        isPointInsufficient -> null
+                        serverError.isAlreadyParticipatingChallenge() -> "이미 진행 중인 챌린지가 있습니다."
+                        else -> "파티를 만들지 못했어요."
+                    }
+                )
+            }
         }
     }
 
@@ -276,6 +283,17 @@ class PartyViewModel(
         waitingRoomPollingJob?.cancel()
         waitingRoomPollingJob = null
         pollingPartyId = null
+    }
+
+    /**
+     * 다른 사용자(방장)가 파티를 시작해 폴링으로 이를 감지하고 홈으로 이동할 때 호출한다.
+     * leaveParty와 달리 나는 여전히 파티원이므로 이탈 API는 보내지 않고, 더 이상 대기방이
+     * 아닌 로컬 캐시만 비운다. 비워두지 않으면 startParty()와 동일하게, 하단 탭 전환 뒤 파티
+     * 탭으로 돌아왔을 때 이미 시작된 파티의 낡은 대기방 화면·폴링이 되살아난다.
+     */
+    fun clearWaitingRoomAfterStart() {
+        stopWaitingRoomPolling()
+        uiState = uiState.copy(waitingRoom = null)
     }
 
     private suspend fun refreshWaitingRoomSilently(partyId: String) {
@@ -337,23 +355,25 @@ class PartyViewModel(
                 }
             }
 
-            runCatching { repository.readyParty(partyId) }
-                .onSuccess { room ->
-                    // 서버의 토글 결과에 맞춰 준비하기와 대기 상태를 전환한다.
-                    uiState = uiState.copy(
-                        waitingRoom = room.toUi(),
-                        isReadySubmitted = !uiState.isReadySubmitted,
-                        action = PartyAction.Idle
-                    )
-                }
-                .onFailure { error ->
-                    val isPointInsufficient = error.isInsufficientPartyPoint()
-                    uiState = uiState.copy(
-                        action = PartyAction.Idle,
-                        isReadyPointInsufficient = isPointInsufficient,
-                        errorMessage = if (isPointInsufficient) null else "준비완료 처리에 실패했어요."
-                    )
-                }
+            try {
+                val room = repository.readyParty(partyId)
+                // 서버의 토글 결과에 맞춰 준비하기와 대기 상태를 전환한다.
+                uiState = uiState.copy(
+                    waitingRoom = room.toUi(),
+                    isReadySubmitted = !uiState.isReadySubmitted,
+                    action = PartyAction.Idle
+                )
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                val serverError = error.toPartyServerError()
+                val isPointInsufficient = serverError.isInsufficientPartyPoint()
+                uiState = uiState.copy(
+                    action = PartyAction.Idle,
+                    isReadyPointInsufficient = isPointInsufficient,
+                    errorMessage = if (isPointInsufficient) null else "준비완료 처리에 실패했어요."
+                )
+            }
         }
     }
 
@@ -370,8 +390,7 @@ class PartyViewModel(
      * pendingAutoLeavePartyId에 의도를 남겨두고, 목록이 다시 보이는 시점(onPartyListVisible)에
      * 재시도한다 — 그렇지 않으면 사용자가 서버의 대기방 멤버로 남았는데도 되돌아갈 UI 경로가 없다.
      */
-    fun autoLeaveOnBackground() {
-        val partyId = uiState.waitingRoom?.partyId ?: return
+    fun autoLeaveOnBackground(partyId: String) {
         pendingAutoLeavePartyId = partyId
         attemptOrQueueLeave(partyId) {
             if (pendingAutoLeavePartyId == partyId) pendingAutoLeavePartyId = null
@@ -381,7 +400,7 @@ class PartyViewModel(
     /** 실패한 자동 이탈이 남아있고 여전히 같은 파티의 대기방이면 조용히 재시도한다. */
     private fun retryPendingAutoLeaveIfNeeded() {
         val partyId = pendingAutoLeavePartyId ?: return
-        if (uiState.waitingRoom?.partyId != partyId) {
+        if (uiState.waitingRoom?.partyId?.let { it != partyId } == true) {
             // 이미 다른 경로(수동 이탈, 파티 해체 등)로 해소됨
             pendingAutoLeavePartyId = null
             return
@@ -399,7 +418,7 @@ class PartyViewModel(
             // 그대로 남는 상태가 된다.
             viewModelScope.launch {
                 snapshotFlow { uiState.action }.first { it == PartyAction.Idle }
-                if (uiState.waitingRoom?.partyId == partyId) {
+                if (uiState.waitingRoom?.partyId?.let { it != partyId } != true) {
                     performLeaveParty(partyId, onSuccess)
                 }
             }
@@ -454,16 +473,36 @@ class PartyViewModel(
     }
 }
 
-/** 파티 생성 실패 응답에서 서버의 포인트 부족 코드를 확인한다. */
-private fun Throwable.isInsufficientPartyPoint(): Boolean {
-    if (this !is HttpException) return false
+private data class PartyServerError(
+    val code: String = "",
+    val message: String = ""
+)
+
+/** 서버 에러 응답 바디는 한 번만 읽을 수 있으므로 code/message를 함께 꺼내 재사용한다. */
+private fun Throwable.toPartyServerError(): PartyServerError {
+    if (this !is HttpException) return PartyServerError()
     val body = runCatching { response()?.errorBody()?.string() }.getOrNull().orEmpty()
     val errorBody = runCatching { JSONObject(body) }.getOrNull()
-    val code = errorBody?.optString("code").orEmpty()
-    val message = errorBody?.optString("message").orEmpty()
+    return PartyServerError(
+        code = errorBody?.optString("code").orEmpty(),
+        message = errorBody?.optString("message").orEmpty()
+    )
+}
+
+/** 파티 생성/준비 요청 실패 응답에서 서버의 포인트 부족 코드를 확인한다. */
+private fun PartyServerError.isInsufficientPartyPoint(): Boolean {
     return code.contains("INSUFFICIENT_POINT") ||
         code == "PAR-ERR-03" ||
         message.contains("포인트") && message.contains("부족")
+}
+
+/** 이미 개인 챌린지에 참여 중이면 파티 생성도 막히므로 전용 안내 문구를 보여준다. */
+private fun PartyServerError.isAlreadyParticipatingChallenge(): Boolean {
+    val codeText = code.uppercase(Locale.ROOT)
+    return codeText.contains("CHALLENGE") &&
+        (codeText.contains("ALREADY") || codeText.contains("ONGOING") || codeText.contains("IN_PROGRESS")) ||
+        message.contains("이미") && message.contains("챌린지") &&
+        (message.contains("진행") || message.contains("참여"))
 }
 
 // Repository가 전달한 도메인 대기방 모델을 Compose 화면 전용 모델로 변환
@@ -503,6 +542,7 @@ private fun PartyMember.toUi() = PartyMemberUi(
 // 진행 중 파티 요약 정보를 파티 홈 카드에 표시할 UI 모델로 변환
 private fun PartySummary.toUi() = PartyCardUi(
     id = partyId,
+    challengeId = challengeId,
     partyName = partyName,
     challengeName = challengeName,
     dDay = dDay,
