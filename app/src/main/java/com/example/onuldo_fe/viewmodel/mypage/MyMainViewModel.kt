@@ -10,6 +10,7 @@ import com.example.onuldo_fe.repository.auth.AuthRepository
 import com.example.onuldo_fe.repository.auth.AuthRepositoryProvider
 import com.example.onuldo_fe.repository.user.UserRepository
 import com.example.onuldo_fe.repository.user.UserRepositoryProvider
+import com.example.onuldo_fe.utils.ProfileAsset
 import com.example.onuldo_fe.utils.formatPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +31,12 @@ data class MyMainUiState(
     val nickname: String get() = summary?.nickname.orEmpty()
     val email: String get() = summary?.email.orEmpty()
     val pointText: String get() = formatPoint(summary?.currentPoint ?: 0L)
+
+    /**
+     * 서버 `profileImageUrl`에 대응하는 캐릭터 인덱스. 프리셋이 아니거나 조회 전이면 null이라
+     * 화면은 기본 아바타를 보여준다. (프로필 설정 화면과 동일한 규칙)
+     */
+    val characterIndex: Int? get() = ProfileAsset.toCharacterIndex(summary?.profileImageUrl)
 }
 
 /** 마이 메인. `GET /api/users/me`로 프로필·보유 포인트를 가져온다. */

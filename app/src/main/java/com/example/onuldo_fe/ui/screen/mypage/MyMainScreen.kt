@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.RefreshOnResume
+import com.example.onuldo_fe.ui.screen.login.ProfileCharacters
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageMenuRow
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
@@ -107,7 +108,12 @@ fun MyMainScreen(
         Spacer(Modifier.height(20.dp))
 
         // 프로필 카드 → 프로필 설정
-        ProfileCard(nickname = nickname, email = email, onClick = onProfileClick)
+        // 서버가 배정한 캐릭터가 앱 목록에 있으면 그 캐릭터를, 없으면 기본 아바타.
+        // 프로필 RefreshOnResume 재조회로 변경 적용 완
+        val avatarRes = state.characterIndex
+            ?.let { ProfileCharacters.getOrNull(it) }
+            ?: R.drawable.img_avatar_running
+        ProfileCard(nickname = nickname, email = email, avatarRes = avatarRes, onClick = onProfileClick)
 
         Spacer(Modifier.height(16.dp))
 
@@ -197,7 +203,7 @@ fun MyMainScreen(
 }
 
 @Composable
-private fun ProfileCard(nickname: String, email: String, onClick: () -> Unit) {
+private fun ProfileCard(nickname: String, email: String, avatarRes: Int, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .padding(horizontal = 20.dp)
@@ -218,7 +224,7 @@ private fun ProfileCard(nickname: String, email: String, onClick: () -> Unit) {
             contentAlignment = Alignment.Center,
         ) {
             Image(
-                painter = painterResource(R.drawable.img_avatar_running),
+                painter = painterResource(avatarRes),
                 contentDescription = null,
                 modifier = Modifier.size(57.dp),
             )

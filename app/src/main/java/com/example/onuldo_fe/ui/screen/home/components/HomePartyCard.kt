@@ -117,7 +117,11 @@ fun HomePartyCard(
                 fontWeight = FontWeight.Medium
             )
             partyChallenge.remainingMinutes
-                ?.takeIf { partyChallenge.canVerify && it >= 0 }
+                ?.takeIf {
+                    partyChallenge.status == ChallengeStatus.NeedCertification &&
+                        partyChallenge.canVerify &&
+                        it in 0..60
+                }
                 ?.let { remainingMinutes ->
                 Spacer(Modifier.width(spacing.spacing10))
                 HomeRemainingTimeChip(remainingMinutes = remainingMinutes)
