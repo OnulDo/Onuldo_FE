@@ -221,7 +221,9 @@ private fun PartyCardUi.toHomePartyChallenge() = HomePartyChallenge(
     totalMemberCount = totalMemberCount,
     status = verificationStatus,
     remainingMinutes = remainingText.toRemainingMinutes(),
-    canVerify = verificationStatus == ChallengeStatus.NeedCertification && challengeId > 0L,
+    canVerify = verificationStatus == ChallengeStatus.NeedCertification &&
+        myDailyStatus.equals("WAITING", ignoreCase = true) &&
+        challengeId > 0L,
     members = members.map { member ->
         HomePartyMember(
             memberId = member.userId.toString(),

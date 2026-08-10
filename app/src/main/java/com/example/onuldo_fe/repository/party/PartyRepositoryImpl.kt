@@ -24,6 +24,7 @@ import com.example.onuldo_fe.model.party.PartySettlementMember
 import com.example.onuldo_fe.model.party.PartySettlementMemberStatus
 import com.example.onuldo_fe.model.party.PartySettlementResult
 import com.example.onuldo_fe.model.party.PartySettlementStatus
+import com.google.gson.JsonElement
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.LocalTime
@@ -276,19 +277,20 @@ private fun RealPartySummaryDto.toModel() = PartySummary(
     goal = goal,
     // 서버의 정렬·종료일 정책과 동일한 계산 dDay를 그대로 사용한다.
     dDay = "D-$dDay",
-    deadline = verificationDeadline,
+    deadline = verificationDeadline.toLocalTimeTextOrNull().orEmpty(),
     // 인증 마감 시각과 현재 시각의 차이를 분 단위로 전달한다.
     // HomePartyCard에서 0~60분일 때만 "N분 남음" 배지를 표시한다.
-    remainingText = remainingTextUntil(verificationDeadline),
+    remainingText = remainingTextUntil(verificationDeadline.toLocalTimeTextOrNull()),
     completedMemberCount = verifiedMemberCount,
     totalMemberCount = totalMemberCount,
     status = status.toLifecycleStatus(),
-    verificationStatus = when (myStatus) {
-        "PENDING" -> PartyVerificationStatus.Pending
+    verificationStatus = when (myDailyStatus ?: myStatus) {
+        "REVIEW_PENDING", "PENDING" -> PartyVerificationStatus.Pending
         "SUCCESS" -> PartyVerificationStatus.Success
         "FAIL" -> PartyVerificationStatus.Fail
         else -> PartyVerificationStatus.NotVerified
     },
+    myDailyStatus = myDailyStatus ?: "WAITING",
     members = members.map { member ->
         PartySummaryMember(
             userId = member.userId,
@@ -299,8 +301,24 @@ private fun RealPartySummaryDto.toModel() = PartySummary(
     }
 )
 
-private fun remainingTextUntil(deadline: String): String? = runCatching {
+private fun remainingTextUntil(deadline: String?): String? = runCatching {
+    if (deadline.isNullOrBlank()) return@runCatching null
     ChronoUnit.MINUTES.between(LocalTime.now(), LocalTime.parse(deadline))
         .takeIf { it >= 0 }
         ?.let { "${it}분 남음" }
 }.getOrNull()
+
+private fun JsonElement?.toLocalTimeTextOrNull(): String? {
+    if (this == null || isJsonNull) return null
+    return runCatching {
+        if (isJsonPrimitive) {
+            asString
+        } else {
+            val time = asJsonObject
+            val hour = time.get("hour")?.asInt ?: 0
+            val minute = time.get("minute")?.asInt ?: 0
+            val second = time.get("second")?.asInt ?: 0
+            "%02d:%02d:%02d".format(hour, minute, second)
+        }
+    }.getOrNull()
+}

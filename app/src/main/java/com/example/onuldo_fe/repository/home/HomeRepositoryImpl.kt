@@ -21,6 +21,7 @@ import com.example.onuldo_fe.model.home.HomePartyChallenge
 import com.example.onuldo_fe.model.home.HomePartyMember
 import com.example.onuldo_fe.model.home.SettlementBanner
 import com.example.onuldo_fe.model.home.TodayChallenge
+import com.google.gson.JsonElement
 import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -289,6 +290,24 @@ private fun RealHomeDailyChallengeDto.toChallengeStatus(now: LocalTime): Challen
 
 private fun String?.toLocalTimeOrNull(): LocalTime? =
     this?.let { runCatching { LocalTime.parse(it) }.getOrNull() }
+
+private fun JsonElement?.toLocalTimeOrNull(): LocalTime? =
+    this.toLocalTimeTextOrNull()?.let { runCatching { LocalTime.parse(it) }.getOrNull() }
+
+private fun JsonElement?.toLocalTimeTextOrNull(): String? {
+    if (this == null || isJsonNull) return null
+    return runCatching {
+        if (isJsonPrimitive) {
+            asString
+        } else {
+            val time = asJsonObject
+            val hour = time.get("hour")?.asInt ?: 0
+            val minute = time.get("minute")?.asInt ?: 0
+            val second = time.get("second")?.asInt ?: 0
+            "%02d:%02d:%02d".format(hour, minute, second)
+        }
+    }.getOrNull()
+}
 
 private fun String.remainingDaysFrom(today: LocalDate): Int =
     runCatching {
