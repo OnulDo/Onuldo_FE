@@ -19,6 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.ui.theme.BlackBrown
@@ -83,9 +85,13 @@ fun ProgressRecordCard(
             Spacer(Modifier.height(spacing.spacing8))
             LinearProgressIndicator(
                 progress = { progress.coerceIn(0, 100) / 100f },
-                modifier = Modifier.fillMaxWidth().height(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(3.dp)),
                 color = statusColor,
                 trackColor = Persimmon10,
+                strokeCap = StrokeCap.Butt,
                 gapSize = 0.dp,
                 drawStopIndicator = {}
             )
