@@ -60,13 +60,20 @@ class HomeRepositoryImplTest {
     }
 
     @Test
-    fun `미인증 상태로 마감 시각이 지나면 실패로 표시한다`() {
-        val result = listOf(dailyItem(type = "PERSONAL", name = "아침 운동", verified = false))
+    fun `UNAVAILABLE 상태는 인증하기 버튼을 비활성화한다`() {
+        val result = listOf(
+            dailyItem(
+                type = "PERSONAL",
+                name = "아침 운동",
+                verified = false,
+                dailyStatus = "UNAVAILABLE"
+            )
+        )
             .toHomeData(LocalDateTime.of(2026, 8, 5, 23, 59, 1))
             .challenges
             .single()
 
-        assertEquals(ChallengeStatus.Failed, result.status)
+        assertEquals(ChallengeStatus.NeedCertification, result.status)
         assertEquals(false, result.canVerify)
         assertNull(result.remainingMinutes)
     }
@@ -139,12 +146,12 @@ class HomeRepositoryImplTest {
                 type = "PERSONAL",
                 name = "아침 운동",
                 verified = false,
-                dailyStatus = "COMPLETED"
+                dailyStatus = "UNAVAILABLE"
             )
         ).toHomeData(
             now = LocalDateTime.of(2026, 8, 5, 12, 0),
             partyHome = PartyHomeResultDto(
-                parties = listOf(partyHomeItem(dailyStatus = "COMPLETED"))
+                parties = listOf(partyHomeItem(dailyStatus = "UNAVAILABLE"))
             )
         )
 
@@ -155,10 +162,11 @@ class HomeRepositoryImplTest {
     @Test
     fun `개인 챌린지 dailyStatus를 홈 상태 칩으로 변환한다`() {
         val statuses = mapOf(
+            "UNAVAILABLE" to ChallengeStatus.NeedCertification,
             "WAITING" to ChallengeStatus.NeedCertification,
-            "PENDING" to ChallengeStatus.WaitingReview,
             "SUCCESS" to ChallengeStatus.Success,
-            "FAIL" to ChallengeStatus.Failed
+            "FAIL" to ChallengeStatus.Failed,
+            "REVIEW_PENDING" to ChallengeStatus.WaitingReview
         )
 
         statuses.forEach { (dailyStatus, expected) ->

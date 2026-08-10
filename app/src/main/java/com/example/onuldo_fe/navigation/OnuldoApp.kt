@@ -475,11 +475,7 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
                     navController.popBackStack(Routes.MAIN, inclusive = false)
                 },
                 onManualReviewClick = cameraViewModel::requestManualReview,
-                onManualReviewErrorConfirm = {
-                    cameraViewModel.clearManualReviewState()
-                    cameraViewModel.clearSubmitState()
-                    navController.popBackStack(Routes.MAIN, inclusive = false)
-                },
+                onManualReviewErrorConfirm = cameraViewModel::clearManualReviewState,
                 onRetryClick = {
                     cameraViewModel.activeChallengeId?.let { challengeId ->
                         val category = cameraViewModel.activeCategory
