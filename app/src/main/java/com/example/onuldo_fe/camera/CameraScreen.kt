@@ -214,6 +214,7 @@ fun CameraScreen(
                 buttonText = "재시도",
                 onButtonClick = {
                     showNoticeError = false
+                    openNoticeAfterLoading = true
                     onNoticeRetry()
                 },
                 onDismiss = { showNoticeError = false }
