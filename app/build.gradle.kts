@@ -76,6 +76,25 @@ android {
         manifestPlaceholders["kakaoNativeAppKey"] = kakaoNativeAppKey
     }
 
+    /**
+     * 디버그 서명을 팀 공용 키스토어로 고정한다(`keystore/debug.keystore`, 저장소에 포함).
+     *
+     * 기본값인 `~/.android/debug.keystore`는 PC마다 자동 생성돼 서명이 전부 달라진다.
+     * 그러면 카카오 콘솔에 팀원 수만큼 키 해시를 등록해야 하고, 새 팀원이 올 때마다
+     * 관리자가 콘솔을 다시 열어야 한다. 공용 키로 고정하면 키 해시는 하나면 된다.
+     *
+     * 비밀번호가 안드로이드 기본 관례값(`android`)인 **디버그 전용** 키다.
+     * 릴리스 키는 절대 저장소에 넣지 않는다.
+     */
+    signingConfigs {
+        getByName("debug") {
+            storeFile = rootProject.file("keystore/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
