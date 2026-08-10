@@ -41,7 +41,9 @@ class MainActivity : ComponentActivity() {
         // 콜드 스타트: 백그라운드 상태에서 푸시를 탭해 앱이 새로 뜬 경우, 그 인텐트의
         // data extras로 랜딩 목적지를 결정해 버스에 올린다. (실제 이동은 로그인 상태의
         // MainScreen이 소비 시점에 수행한다.) - 클로드
-        handleNotificationIntent(intent)
+        // 구성 변경(회전 등) 재생성 시엔 같은 인텐트가 다시 들어오므로, 최초 생성일 때만 처리해
+        // 이미 소비된 랜딩이 재게시되어 같은 목적지로 또 이동하는 것을 막는다.
+        if (savedInstanceState == null) handleNotificationIntent(intent)
 
         // 현재 FCM 토큰 로그 — Logcat에서 "FCM" 태그로 확인 (테스트 발송용으로 전달)
         FirebaseMessaging.getInstance().token

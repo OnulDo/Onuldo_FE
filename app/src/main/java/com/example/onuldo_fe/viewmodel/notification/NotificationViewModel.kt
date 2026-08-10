@@ -9,6 +9,7 @@ import com.example.onuldo_fe.data.network.onError
 import com.example.onuldo_fe.data.network.onSuccess
 import com.example.onuldo_fe.repository.notification.NotificationRepository
 import com.example.onuldo_fe.repository.notification.NotificationRepositoryProvider
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class NotificationViewModel(
@@ -19,8 +20,13 @@ class NotificationViewModel(
 
     // 다음 페이지 커서(무한 스크롤·다음 페이지 조회용).
     private var nextCursor: String? = null
+
+    // 진행 중인 첫 페이지 조회. 새로 시작할 때 이전 것을 취소해 늦게 온 옛 응답이 최신 목록을 덮지 않게 한다.
+    private var loadJob: Job? = null
+
     fun loadNotifications() {
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             uiState = uiState.copy(isLoading = true, errorMessage = null)
             repository.getNotifications()
                 .onSuccess { page ->

@@ -34,6 +34,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.BlackBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.viewmodel.mypage.TermViewModel
@@ -59,6 +60,7 @@ fun TermScreen(
     viewModel: TermViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val spacing = LocalSpacing.current
 
     LaunchedEffect(termType) { viewModel.load(termType) }
 
@@ -86,7 +88,7 @@ fun TermScreen(
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 20.dp, vertical = 24.dp),
                 ) {
-                    // 약관 제목 (Body1). lineHeight 40의 위·아래 여백을 트림해 시행일자와 붙게 한다.
+                    Spacer(Modifier.height(spacing.spacing20))
                     Text(
                         text = term.title?.takeIf { it.isNotBlank() } ?: fallbackTitle,
                         fontFamily = Pretendard,
@@ -102,6 +104,7 @@ fun TermScreen(
                             ),
                         ),
                     )
+                    Spacer(Modifier.height(spacing.spacing8))
                     term.effectiveDate?.takeIf { it.isNotBlank() }?.let { date ->
                         Text(
                             text = "시행일자 $date",
@@ -110,20 +113,20 @@ fun TermScreen(
                             fontSize = 12.sp,
                             color = DarkBrown50,
                         )
-                        Spacer(Modifier.height(47.dp))
+                        Spacer(Modifier.height(spacing.spacing48))
                     }
 
                     term.content.forEach { block ->
                         if (block.type == TYPE_LINEBREAK) {
                             // 문단 사이 여백 전용 블록.
-                            Spacer(Modifier.height(8.dp))
+                            Spacer(Modifier.height(spacing.spacing8))
                         } else {
                             TermBlock(block)
                             Spacer(Modifier.height(4.dp))
                         }
                     }
 
-                    Spacer(Modifier.height(24.dp))
+                    Spacer(Modifier.height(spacing.spacing24))
                 }
             }
         }

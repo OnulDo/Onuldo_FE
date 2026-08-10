@@ -18,7 +18,7 @@ sealed interface NotificationLanding {
 /**
  * 기기 푸시(FCM) 탭 → 랜딩 목적지 결정
  * - VERIFICATION_DEADLINE / CHALLENGE_START → 홈
- * - VERIFICATION_APPROVED / VERIFICATION_REJECTED (구버전 VERIFICATION_RESULT 포함)
+ * - VERIFICATION_APPROVED / VERIFICATION_REJECTED
  *   → challengeId 있으면 챌린지 상세, 없으면 홈
  * - CHALLENGE_END_REMINDER → 기록 진행중 탭
  * - REFUND_COMPLETE → 기록 완료 탭
@@ -32,8 +32,8 @@ fun pushLandingOf(
     partyId: Long?,
 ): NotificationLanding = when (notificationType) {
     "VERIFICATION_DEADLINE", "CHALLENGE_START" -> NotificationLanding.Home
-    // 승인/기각 모두 해당 챌린지 상세로. VERIFICATION_RESULT는 구버전 데이터 호환용.
-    "VERIFICATION_APPROVED", "VERIFICATION_REJECTED", "VERIFICATION_RESULT" ->
+    // 승인/기각 모두 해당 챌린지 상세로.
+    "VERIFICATION_APPROVED", "VERIFICATION_REJECTED" ->
         challengeId?.let(NotificationLanding::ChallengeDetail) ?: NotificationLanding.Home
     "CHALLENGE_END_REMINDER" -> NotificationLanding.RecordOngoing
     "REFUND_COMPLETE" -> NotificationLanding.RecordCompleted
@@ -45,26 +45,27 @@ fun pushLandingOf(
 }
 
 /**
- * 알림 한 건 → 이동 목적지 결정.
+ * 알림함 목록 클릭 → 이동 목적지 결정. **[pushLandingOf]와 같은 규칙**을 쓴다(리스트/푸시 통일).
  *
- * - 마감 리마인더/챌린지 시작·종료 리마인더 → 홈
- * - 인증 결과 → challengeId 있으면 챌린지 상세, 없으면 홈
- * - 환급 완료 → partyId 있으면 파티 정산 결과, 없으면 솔로 기록 완료
+ * - 마감 리마인더/챌린지 시작 → 홈
+ * - 종료일 리마인더 → 기록 진행중 탭
+ * - 인증 승인/기각 → challengeId 있으면 챌린지 상세, 없으면 홈
+ * - 개인 환급 완료 → 기록 완료 탭
  * - 파티 정산/일별 정산 → partyId 있으면 파티 정산 결과, 없으면 홈
  * - 파티원 인증 완료 → partyId 있으면 파티 피드, 없으면 홈
  */
 fun NotificationItem.toLanding(): NotificationLanding = when (type) {
     NotificationType.DeadlineReminder,
     NotificationType.DeadlineWarning,
-    NotificationType.ChallengeStart,
-    NotificationType.ChallengeEndReminder -> NotificationLanding.Home
+    NotificationType.ChallengeStart -> NotificationLanding.Home
+
+    NotificationType.ChallengeEndReminder -> NotificationLanding.RecordOngoing
 
     NotificationType.ReviewPassed,
     NotificationType.ReviewRejected ->
         challengeId?.let(NotificationLanding::ChallengeDetail) ?: NotificationLanding.Home
 
-    NotificationType.SoloRefund ->
-        if (partyId != null) NotificationLanding.PartySettlement(partyId) else NotificationLanding.SoloRecord
+    NotificationType.SoloRefund -> NotificationLanding.RecordCompleted
 
     NotificationType.PartySettlement,
     NotificationType.PartyDailySettlement ->

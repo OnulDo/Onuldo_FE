@@ -130,10 +130,6 @@ fun MainScreen(
                     },
                     onSettlementResultClick = { partyId ->
                         navController.navigate(Routes.partySettlement(partyId))
-                    },
-                    // 알림 탭 → 챌린지 상세(루트 nav)
-                    onChallengeClick = { challengeId ->
-                        onNavigate(Routes.challengeDetail(challengeId))
                     }
                 )
             }
