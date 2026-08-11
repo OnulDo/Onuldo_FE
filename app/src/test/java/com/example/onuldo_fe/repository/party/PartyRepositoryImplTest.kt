@@ -22,6 +22,7 @@ import com.example.onuldo_fe.model.party.PartyLifecycleStatus
 import com.example.onuldo_fe.model.party.PartySettlementMemberStatus
 import com.example.onuldo_fe.model.party.PartySettlementStatus
 import com.example.onuldo_fe.model.party.PartyVerificationStatus
+import com.google.gson.JsonPrimitive
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -227,7 +228,7 @@ class PartyRepositoryImplTest {
                             myStatus = "SUCCESS",
                             endDate = "2026-08-20",
                             dDay = 12,
-                            verificationDeadline = "21:00:00",
+                            verificationDeadline = JsonPrimitive("21:00:00"),
                             progressRate = 0.72,
                             verifiedMemberCount = 3,
                             totalMemberCount = 4,
