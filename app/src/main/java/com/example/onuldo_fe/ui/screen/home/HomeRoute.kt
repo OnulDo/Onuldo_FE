@@ -2,7 +2,10 @@ package com.example.onuldo_fe.ui.screen.home
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +43,24 @@ fun HomeRoute(
     var pendingCategory by rememberSaveable { mutableStateOf("") }
     var pendingTitle by rememberSaveable { mutableStateOf("") }
     var pendingDeadline by rememberSaveable { mutableStateOf("") }
+
+    // 시스템 푸시 수신 권한(POST_NOTIFICATIONS) 요청 런처. 종 클릭과 무관하게 홈 최초 진입 시에만 사용한다.
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { /* 허용/거부 결과는 시스템 푸시 수신 여부에만 영향 — 별도 처리 없음 */ }
+
+    // 회원가입 완료 → 홈 최초 진입 시 1회만 알림 권한을 요청한다(Android 13+). 12 이하는 런타임 권한이 없어 스킵.
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val granted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+            if (!granted) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
 
     LaunchedEffect(refreshKey) {
         if (refreshKey > 0) {
