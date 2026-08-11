@@ -345,7 +345,7 @@ class PartyViewModel(
         // 포인트 부족 여부는 화면에서 먼저 확인하고 실제 연동 후 서버에서도 최종 검증
         val partyId = uiState.waitingRoom?.partyId ?: return
         if (uiState.action != PartyAction.Idle) return
-        val requestedReady = !uiState.isReadySubmitted
+        val targetReady = !uiState.isReadySubmitted
         waitingRoomMutationGeneration++
         uiState = uiState.copy(
             action = PartyAction.ReadySubmitting,
@@ -354,7 +354,7 @@ class PartyViewModel(
         )
         viewModelScope.launch {
             // READY로 바꿀 때만 최신 잔액을 확인하고, WAITING 복귀는 포인트 검사 없이 요청한다.
-            if (requestedReady) {
+            if (targetReady) {
                 fetchAvailablePoint()?.let { point ->
                     val availablePoint = point.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
                     uiState = uiState.copy(availablePoint = availablePoint)
@@ -370,9 +370,9 @@ class PartyViewModel(
             }
 
             try {
-                val room = repository.readyParty(partyId, requestedReady)
-                val currentReady = readySubmittedForCurrentUser(room) ?: requestedReady
-                // 서버의 토글 결과에 맞춰 준비하기와 대기 상태를 전환한다.
+                val room = repository.readyParty(partyId, ready = targetReady)
+                val currentReady = readySubmittedForCurrentUser(room) ?: targetReady
+                // 요청할 때 정한 목표 상태를 그대로 반영한다.
                 uiState = uiState.copy(
                     waitingRoom = room.toUi(),
                     isReadySubmitted = currentReady,
@@ -603,7 +603,6 @@ private fun PartySummary.toUi() = PartyCardUi(
         PartyVerificationStatus.Fail -> ChallengeStatus.Failed
     },
     myDailyStatus = myDailyStatus,
-    verifiedAt = verifiedAt,
     members = members.map { member ->
         PartyCardMemberUi(
             userId = member.userId,

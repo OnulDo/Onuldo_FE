@@ -28,7 +28,7 @@ data class PartyJoinRequestDto(
 
 /** PATCH /api/parties/{partyId}/members/me/readiness 요청. */
 data class PartyReadinessRequestDto(
-    val ready: Boolean                         // true: 준비 완료, false: 준비 취소
+    val ready: Boolean
 )
 
 /** 대기방 응답에 포함되는 파티원. */

@@ -15,6 +15,7 @@ import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
 import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
 import com.example.onuldo_fe.data.party.dto.PartyLeaveResponseDto
+import com.example.onuldo_fe.data.party.dto.PartyReadinessRequestDto
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test

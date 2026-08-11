@@ -85,7 +85,10 @@ class PartyRepositoryImpl(
         // 준비 완료 API를 다른 파티 기능과 독립적으로 Real/Fake 전환한다.
         if (!useRealPartyReadyApi) return fakeApi.readyParty(partyId.toLong(), ready).toModel()
 
-        val response = realApi.readyParty(partyId.toLong(), PartyReadinessRequestDto(ready))
+        val response = realApi.readyParty(
+            partyId = partyId.toLong(),
+            request = PartyReadinessRequestDto(ready = ready)
+        )
         if (!response.isSuccessful) throw HttpException(response)
         val body = response.body() ?: throw IOException("준비 완료 응답 본문이 비어 있습니다.")
         return body.result.toModel()

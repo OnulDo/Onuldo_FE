@@ -11,11 +11,11 @@ import com.example.onuldo_fe.data.party.dto.PartyHomeResultDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
-import com.example.onuldo_fe.data.party.dto.PartyReadinessRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyListMemberDto
 import com.example.onuldo_fe.data.party.dto.PartyLeaveResponseDto
+import com.example.onuldo_fe.data.party.dto.PartyReadinessRequestDto
 import com.example.onuldo_fe.data.party.dto.PartySettlementMemberDto
 import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
 import com.example.onuldo_fe.model.party.CreatePartyCommand
@@ -112,7 +112,7 @@ class PartyRepositoryImplTest {
             useRealPartyReadyApi = true
         )
 
-        val room = repository.readyParty("101", true)
+        val room = repository.readyParty("101", ready = true)
 
         assertEquals("101", room.partyId)
         assertEquals("READY", room.members.last().readyStatus.name.uppercase())
