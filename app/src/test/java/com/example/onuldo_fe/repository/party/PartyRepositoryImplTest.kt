@@ -219,7 +219,7 @@ class PartyRepositoryImplTest {
                     timestamp = "2026-07-23T13:00:00",
                     code = "SUCCESS",
                     message = "요청에 성공하였습니다.",
-                    content = listOf(
+                    result = listOf(
                         RealPartySummaryDto(
                             partyId = 101,
                             name = "30일 헬스 챌린지 파티",

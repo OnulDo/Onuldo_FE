@@ -49,7 +49,7 @@ class PartyRepositoryImpl(
         val response = realApi.getParties(cursor = null, size = 10)
         if (!response.isSuccessful) throw HttpException(response)
         val body = response.body() ?: throw IOException("파티 목록 응답 본문이 비어 있습니다.")
-        body.content.map(RealPartySummaryDto::toModel)
+        body.result.map(RealPartySummaryDto::toModel)
     } else {
         fakeApi.getParties().map(PartySummaryDto::toModel)
     }
