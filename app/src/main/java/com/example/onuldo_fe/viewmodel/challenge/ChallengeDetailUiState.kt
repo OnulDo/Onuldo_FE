@@ -6,5 +6,6 @@ import com.example.onuldo_fe.model.challenge.ChallengeDetail
 data class ChallengeDetailUiState(
     val detail: ChallengeDetail? = null,
     val isLoading: Boolean = false,
-    val isError: Boolean = false
+    val isError: Boolean = false,
+    val errorMessage: String? = null
 )

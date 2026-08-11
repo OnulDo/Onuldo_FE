@@ -57,15 +57,19 @@ fun ParticipateRoute(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    // 참여 실패 시 토스트 안내 // TODO:  챌린지 토스트 추가예정
+    // 참여 실패 시 토스트 안내 (서버/네트워크 문구 그대로)
     LaunchedEffect(uiState.isError) {
         if (uiState.isError) {
-            Toast.makeText(context, "참여에 실패했어요. 다시 시도해주세요", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                uiState.errorMessage ?: "참여에 실패했어요. 다시 시도해주세요",
+                Toast.LENGTH_SHORT
+            ).show()
             viewModel.onErrorShown()
         }
     }
 
-    // 이미 참여중이면 오류가 아니라 안내 후 상세로 복귀 (참여 화면에 머물지 않음) // TODO:  챌린지 토스트 추가예정
+    // 이미 참여중이면 오류가 아니라 안내 후 상세로 복귀 (참여 화면에 머물지 않음)
     LaunchedEffect(uiState.isAlreadyParticipating) {
         if (uiState.isAlreadyParticipating) {
             Toast.makeText(context, "이미 참여중인 챌린지입니다", Toast.LENGTH_SHORT).show()
@@ -98,7 +102,7 @@ fun ParticipateRoute(
             // 서버가 포인트 부족(INSUFFICIENT_POINT)을 주면 충전 팝업 노출
             showInsufficientDialog = uiState.isInsufficientPoint,
             onDismissInsufficient = viewModel::onInsufficientDismissed,
-            // 지갑 잔액(현재 더미) — 포인트 부족 팝업의 "보유 포인트"로 사용 //TODO: 포인트 충전? UI 나오면 변경
+            // 지갑 잔액(getWalletSummary 실 API) — 포인트 부족 팝업의 "보유 포인트"로 사용
             ownedPoint = uiState.balance,
             onBackClick = onBackClick,
             onStartClick = { durationWeeks, depositAmount ->

@@ -168,8 +168,7 @@ fun GalleryScreen(
 
         Spacer(Modifier.height(spacing.spacing12))
 
-        // 카드 목록 — 로딩 중엔 기본 인디케이터만 표시(상세 로딩/빈 상태 UI는 추후)
-        Box(
+          Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)

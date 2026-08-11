@@ -7,6 +7,7 @@ data class ParticipateUiState(
     val isSubmitting: Boolean = false,
     val result: ParticipationResult? = null,
     val isError: Boolean = false,            // 일반 실패 → 토스트
+    val errorMessage: String? = null,
     val isInsufficientPoint: Boolean = false, // 포인트 부족 → 충전 팝업
     val isAlreadyParticipating: Boolean = false, // 이미 참여중 → "이미 참여중입니다" 토스트 + 복귀
     val balance: Long? = null
