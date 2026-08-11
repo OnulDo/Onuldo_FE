@@ -321,8 +321,8 @@ private fun JsonElement?.toLocalTimeTextOrNull(): String? {
 
 private fun String.remainingDaysFrom(today: LocalDate): Int =
     runCatching {
-        // 종료일과 오늘 날짜의 차이로 D-Day를 계산한다.
-        ChronoUnit.DAYS.between(today, LocalDate.parse(this)).coerceAtLeast(0).toInt()
+        // 종료일을 포함해 D-Day를 계산한다. 예: 오늘이 종료일이면 D-1로 표시한다.
+        (ChronoUnit.DAYS.between(today, LocalDate.parse(this)) + 1).coerceAtLeast(0).toInt()
     }.getOrDefault(0)
 
 private fun LocalTime.remainingMinutesFrom(now: LocalTime, verified: Boolean): Int? {
