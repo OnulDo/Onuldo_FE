@@ -23,7 +23,6 @@ import com.example.onuldo_fe.ui.component.OnuldoBottomBar
 import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryRoute
 import com.example.onuldo_fe.ui.screen.home.HomeRoute
 import com.example.onuldo_fe.ui.screen.mypage.MyMainScreen
-import com.example.onuldo_fe.ui.screen.mypage.PointChargeScreen
 import com.example.onuldo_fe.ui.screen.party.PartyRoute
 import com.example.onuldo_fe.ui.screen.party.PartySettlementRoute
 import com.example.onuldo_fe.ui.screen.record.RecordRoute
@@ -59,8 +58,7 @@ fun MainScreen(
      * 이 NavHost에 등록됐지만 내비바 위에 풀스크린으로 떠야 하는 목적지.
      * 현재 라우트만 보고 판단하므로 목적지를 벗어나면 자동으로 원래대로 돌아온다.
      */
-    val isFullScreenRoute = currentRoute == Routes.MYPAGE_CHARGE ||
-        currentRoute == Routes.PARTY_SETTLEMENT
+    val isFullScreenRoute = currentRoute == Routes.PARTY_SETTLEMENT
 
     Scaffold(
         bottomBar = {
@@ -116,10 +114,6 @@ fun MainScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
-            composable(Routes.MYPAGE_CHARGE) {
-                // 내비바는 isFullScreenRoute가 감춘다(showBottomBar를 건드리지 않는다).
-                PointChargeScreen(onBack = { navController.popBackStack() })
-            }
             composable(BottomTab.Challenge.route) {
                 GalleryRoute(
                     onChallengeClick = { challenge ->
@@ -134,7 +128,8 @@ fun MainScreen(
                     onCameraNavigate = { challengeId, title, deadline ->
                         onNavigate(Routes.camera(challengeId, "", title, deadline))
                     },
-                    onChargePoint = { navController.navigate(Routes.MYPAGE_CHARGE) },
+                    // 충전 화면은 루트 내비에만 등록돼 있다(마이·지갑·챌린지 참여와 동일 경로).
+                    onChargePoint = { onNavigate(Routes.MYPAGE_CHARGE) },
                     onHomeNavigate = {
                         // 새로 시작한 파티 재조회와 홈 상단 이동을 한 번에 요청
                         homeRefreshKey++
