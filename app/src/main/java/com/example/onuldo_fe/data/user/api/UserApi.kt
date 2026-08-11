@@ -53,13 +53,8 @@ interface UserApi {
         @Body request: ChargePointRequestDto,
     ): Response<BaseResponse<ChargePointResponseDto>>
 
-    /**
-     * 포인트 출금. 출금된 금액과 출금 후 잔액을 돌려준다.
-     *
-     * 경로가 `wallet/withdraw` → `wallet/withdrawals`로 바뀌었다(2026-08-12 백엔드 RESTful 정리).
-     * 옆의 `charges`·`signup-bonuses`와 같은 복수형 규칙으로 맞춘 것이고, 구 경로는 제거됐다.
-     */
-    @POST("api/users/me/wallet/withdrawals")
+    /** 포인트 출금. 출금된 금액과 출금 후 잔액을 돌려준다. */
+    @POST("api/users/me/wallet/withdraw")
     suspend fun withdrawPoint(
         @Body request: WithdrawPointRequestDto,
     ): Response<BaseResponse<WithdrawPointResponseDto>>
