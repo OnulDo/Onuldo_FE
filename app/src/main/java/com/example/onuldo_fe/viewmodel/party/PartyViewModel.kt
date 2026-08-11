@@ -563,6 +563,7 @@ private fun PartySummary.toUi() = PartyCardUi(
         PartyVerificationStatus.Fail -> ChallengeStatus.Failed
     },
     myDailyStatus = myDailyStatus,
+    verifiedAt = verifiedAt,
     members = members.map { member ->
         PartyCardMemberUi(
             userId = member.userId,

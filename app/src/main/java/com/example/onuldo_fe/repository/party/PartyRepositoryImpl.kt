@@ -292,6 +292,7 @@ private fun RealPartySummaryDto.toModel() = PartySummary(
         else -> PartyVerificationStatus.NotVerified
     },
     myDailyStatus = myDailyStatus ?: "WAITING",
+    verifiedAt = verifiedAt,
     members = members.map { member ->
         PartySummaryMember(
             userId = member.userId,

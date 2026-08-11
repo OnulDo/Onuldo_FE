@@ -180,7 +180,7 @@ private fun RealHomeDailyChallengeDto.toPersonalModel(now: LocalDateTime): HomeC
         remainingDays = endDate.remainingDaysFrom(now.toLocalDate()),
         deadlineAt = deadline,
         status = dailyStatus.toDailyChallengeStatus(),
-        verifiedAt = null,
+        verifiedAt = verifiedAt.toVerifiedTimeOrNull(),
         remainingMinutes = deadline.remainingMinutesFrom(
             now.toLocalTime(),
             dailyStatus != DAILY_STATUS_WAITING
