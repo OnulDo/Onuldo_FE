@@ -10,6 +10,7 @@ import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
 import com.example.onuldo_fe.data.party.dto.PartySummaryDto
 import com.example.onuldo_fe.data.party.dto.PartyWaitingRoomDto
 import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
+import com.example.onuldo_fe.data.party.dto.PartyReadinessRequestDto
 import com.example.onuldo_fe.model.party.CreatePartyCommand
 import com.example.onuldo_fe.model.party.CreatedParty
 import com.example.onuldo_fe.model.party.PartyLifecycleStatus
@@ -48,7 +49,7 @@ class PartyRepositoryImpl(
         val response = realApi.getParties(cursor = null, size = 10)
         if (!response.isSuccessful) throw HttpException(response)
         val body = response.body() ?: throw IOException("파티 목록 응답 본문이 비어 있습니다.")
-        body.content.map(RealPartySummaryDto::toModel)
+        body.result.map(RealPartySummaryDto::toModel)
     } else {
         fakeApi.getParties().map(PartySummaryDto::toModel)
     }
@@ -80,11 +81,14 @@ class PartyRepositoryImpl(
         return body.result.toModel()
     }
 
-    override suspend fun readyParty(partyId: String): PartyWaitingRoom {
+    override suspend fun readyParty(partyId: String, ready: Boolean): PartyWaitingRoom {
         // 준비 완료 API를 다른 파티 기능과 독립적으로 Real/Fake 전환한다.
         if (!useRealPartyReadyApi) return fakeApi.readyParty(partyId.toLong()).toModel()
 
-        val response = realApi.readyParty(partyId.toLong())
+        val response = realApi.readyParty(
+            partyId = partyId.toLong(),
+            request = PartyReadinessRequestDto(ready = ready)
+        )
         if (!response.isSuccessful) throw HttpException(response)
         val body = response.body() ?: throw IOException("준비 완료 응답 본문이 비어 있습니다.")
         return body.result.toModel()
