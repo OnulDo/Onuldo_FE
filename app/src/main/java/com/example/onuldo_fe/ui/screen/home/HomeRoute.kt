@@ -144,6 +144,7 @@ fun HomeRoute(
             onBrowseChallengesClick = onBrowseChallengesClick,
             onVerifyClick = ::handleVerifyClick,
             onRefresh = viewModel::refreshHome,
+            onRetry = viewModel::loadHome,
             scrollToTopKey = refreshKey
         )
     }
