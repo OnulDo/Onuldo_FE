@@ -4,13 +4,13 @@ import com.example.onuldo_fe.data.party.api.PartyApi
 import com.example.onuldo_fe.data.party.api.RealPartyApi
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyMemberDto
+import com.example.onuldo_fe.data.party.dto.PartyReadinessRequestDto
 import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
 import com.example.onuldo_fe.data.party.dto.RealPartyMemberDto
 import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
 import com.example.onuldo_fe.data.party.dto.PartySummaryDto
 import com.example.onuldo_fe.data.party.dto.PartyWaitingRoomDto
 import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
-import com.example.onuldo_fe.data.party.dto.PartyReadinessRequestDto
 import com.example.onuldo_fe.model.party.CreatePartyCommand
 import com.example.onuldo_fe.model.party.CreatedParty
 import com.example.onuldo_fe.model.party.PartyLifecycleStatus
@@ -83,7 +83,7 @@ class PartyRepositoryImpl(
 
     override suspend fun readyParty(partyId: String, ready: Boolean): PartyWaitingRoom {
         // 준비 완료 API를 다른 파티 기능과 독립적으로 Real/Fake 전환한다.
-        if (!useRealPartyReadyApi) return fakeApi.readyParty(partyId.toLong()).toModel()
+        if (!useRealPartyReadyApi) return fakeApi.readyParty(partyId.toLong(), ready).toModel()
 
         val response = realApi.readyParty(
             partyId = partyId.toLong(),
@@ -295,6 +295,7 @@ private fun RealPartySummaryDto.toModel() = PartySummary(
         else -> PartyVerificationStatus.NotVerified
     },
     myDailyStatus = myDailyStatus ?: "WAITING",
+    verifiedAt = verifiedAt,
     members = members.map { member ->
         PartySummaryMember(
             userId = member.userId,

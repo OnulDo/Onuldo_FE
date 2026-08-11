@@ -220,6 +220,7 @@ private fun PartyCardUi.toHomePartyChallenge() = HomePartyChallenge(
     completedMemberCount = completedMemberCount,
     totalMemberCount = totalMemberCount,
     status = verificationStatus,
+    verifiedAt = verifiedAt?.toLocalTimeOrNull(),
     remainingMinutes = remainingText.toRemainingMinutes(),
     canVerify = verificationStatus == ChallengeStatus.NeedCertification &&
         myDailyStatus.equals("WAITING", ignoreCase = true) &&

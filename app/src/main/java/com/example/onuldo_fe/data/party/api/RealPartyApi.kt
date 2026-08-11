@@ -1,24 +1,24 @@
 package com.example.onuldo_fe.data.party.api
 
 import com.example.onuldo_fe.data.common.ApiResponse
-import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
-import com.example.onuldo_fe.data.party.dto.PartyFeedDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
-import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
+import com.example.onuldo_fe.data.party.dto.PartyFeedDto
 import com.example.onuldo_fe.data.party.dto.PartyHomeResultDto
-import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
-import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
-import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
+import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyLeaveResponseDto
+import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyReadinessRequestDto
+import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
+import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
+import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
 import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Path
 import retrofit2.http.Body
 import retrofit2.http.DELETE
+import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface RealPartyApi {
@@ -46,7 +46,7 @@ interface RealPartyApi {
     @GET("api/parties/home")
     suspend fun getHomeParties(): Response<ApiResponse<PartyHomeResultDto>>
 
-    /** 로그인 사용자가 참여 중인 파티의 대기방 상태를 조회 */
+    /** 로그인 사용자가 참여 중인 파티의 대기방 상태를 조회한다. */
     @GET("api/parties/{partyId}/waiting-room")
     suspend fun getWaitingRoom(
         @Path("partyId") partyId: Long
@@ -65,7 +65,7 @@ interface RealPartyApi {
         @Path("partyId") partyId: Long
     ): Response<ApiResponse<PartyLeaveResponseDto>>
 
-    /** 방장이 파티를 시작해 상태 전환과 전원의 도전금 차감을 요청한다. */
+    /** 방장이 파티를 시작해 상태 전환과 전원 도전금 차감을 요청한다. */
     @PATCH("api/parties/{partyId}/status")
     suspend fun startParty(
         @Path("partyId") partyId: Long
