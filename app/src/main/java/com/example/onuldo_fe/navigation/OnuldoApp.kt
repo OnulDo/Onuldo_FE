@@ -18,6 +18,7 @@ import com.example.onuldo_fe.ui.screen.challenge.detail.DetailRoute
 import com.example.onuldo_fe.ui.screen.challenge.participate.ParticipateRoute
 import com.example.onuldo_fe.ui.screen.login.LandingScreen
 import com.example.onuldo_fe.ui.screen.login.LoginScreen
+import com.example.onuldo_fe.ui.screen.login.PermissionRequestScreen
 import com.example.onuldo_fe.ui.screen.login.ProfileSetupScreen
 import com.example.onuldo_fe.ui.screen.login.SignupScreen
 import com.example.onuldo_fe.ui.screen.login.TermsAgreementScreen
@@ -125,8 +126,16 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
         composable(Routes.TERMS_AGREEMENT) {
             TermsAgreementScreen(
                 onBack = { navController.popBackStack() },
-                onNext = { navController.navigate(Routes.PROFILE_SETUP) },
+                onNext = { navController.navigate(Routes.PERMISSION_REQUEST) },
                 onTermClick = { termType -> navController.navigate(Routes.mypageTerm(termType.name)) },
+            )
+        }
+        // 권한 요청(카메라·알림·사진). 허용 여부와 관계없이 프로필 설정으로 진행한다 —
+        // 거부한 권한은 해당 기능을 처음 쓰는 화면에서 다시 요청한다(설계서 A109).
+        composable(Routes.PERMISSION_REQUEST) {
+            PermissionRequestScreen(
+                onBack = { navController.popBackStack() },
+                onContinue = { navController.navigate(Routes.PROFILE_SETUP) },
             )
         }
         composable(Routes.SIGNUP) {
