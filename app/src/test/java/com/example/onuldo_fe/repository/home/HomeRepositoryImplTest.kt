@@ -80,6 +80,65 @@ class HomeRepositoryImplTest {
     }
 
     @Test
+    fun `WAITING 상태 인증 버튼은 인증 가능 시간 경계를 포함해서 활성화한다`() {
+        val cases = listOf(
+            LocalDateTime.of(2026, 8, 5, 5, 59) to false,
+            LocalDateTime.of(2026, 8, 5, 6, 0) to true,
+            LocalDateTime.of(2026, 8, 5, 12, 0) to true,
+            LocalDateTime.of(2026, 8, 5, 23, 59) to true,
+            LocalDateTime.of(2026, 8, 6, 0, 0) to false
+        )
+
+        cases.forEach { (now, expectedCanVerify) ->
+            val result = listOf(
+                dailyItem(type = "PERSONAL", name = "시간 인증", verified = false)
+            ).toHomeData(now).challenges.single()
+
+            assertEquals(expectedCanVerify, result.canVerify)
+        }
+    }
+
+    @Test
+    fun `WAITING 상태 인증 버튼은 시간 값이 없거나 파싱 실패하면 해당 경계를 제한하지 않는다`() {
+        val noTimeLimit = listOf(
+            dailyItem(
+                type = "PERSONAL",
+                name = "자율 인증",
+                verified = false,
+                timeStart = null,
+                timeEnd = null
+            )
+        ).toHomeData(LocalDateTime.of(2026, 8, 5, 1, 0)).challenges.single()
+
+        val invalidTimeLimit = listOf(
+            dailyItem(
+                type = "PERSONAL",
+                name = "잘못된 시간 인증",
+                verified = false,
+                timeStart = "invalid",
+                timeEnd = "invalid"
+            )
+        ).toHomeData(LocalDateTime.of(2026, 8, 5, 1, 0)).challenges.single()
+
+        assertEquals(true, noTimeLimit.canVerify)
+        assertEquals(true, invalidTimeLimit.canVerify)
+    }
+
+    @Test
+    fun `WAITING이 아니면 인증 가능 시간이어도 인증 버튼을 비활성화한다`() {
+        val result = listOf(
+            dailyItem(
+                type = "PERSONAL",
+                name = "검토 대기 인증",
+                verified = false,
+                dailyStatus = "REVIEW_PENDING"
+            )
+        ).toHomeData(LocalDateTime.of(2026, 8, 5, 12, 0)).challenges.single()
+
+        assertEquals(false, result.canVerify)
+    }
+
+    @Test
     fun `연속 성공 일수를 개인 챌린지 카드에 전달한다`() {
         val result = listOf(
             dailyItem(type = "PERSONAL", name = "매일 걷기", verified = false, streakDays = 12)
@@ -283,15 +342,17 @@ class HomeRepositoryImplTest {
         name: String,
         verified: Boolean,
         streakDays: Int = 0,
-        dailyStatus: String = "WAITING"
+        dailyStatus: String = "WAITING",
+        timeStart: String? = "06:00:00",
+        timeEnd: String? = "23:59:00"
     ) = RealHomeDailyChallengeDto(
         participationId = 1,
         participationStatus = "ONGOING",
         participationType = type,
         challengeId = 12,
         challengeName = name,
-        timeStart = "06:00:00",
-        timeEnd = "23:59:00",
+        timeStart = timeStart,
+        timeEnd = timeEnd,
         startDate = "2026-08-01",
         endDate = "2026-08-20",
         dailyStatus = dailyStatus,
