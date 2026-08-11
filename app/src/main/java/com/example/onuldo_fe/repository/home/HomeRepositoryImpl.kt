@@ -274,7 +274,7 @@ private const val DAILY_STATUS_WAITING = "WAITING"
 
 private fun RealHomeDailyChallengeDto.shouldShowOnHome(today: LocalDate): Boolean {
     if (!participationStatus.equals(PARTICIPATION_STATUS_ONGOING, ignoreCase = true)) return false
-    return endDate.toLocalDateOrNull()?.let { !today.isAfter(it) } ?: true
+    return endDate.toLocalDateOrNull()?.let { !today.isAfter(it) } ?: false
 }
 
 /** 서버의 오늘 인증 상태를 홈 카드의 인증 버튼/상태 칩으로 변환한다. */
