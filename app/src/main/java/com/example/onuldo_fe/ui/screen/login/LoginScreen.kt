@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.data.auth.dto.SocialProvider
+import com.example.onuldo_fe.ui.component.AuthErrorBanner
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.component.OnuldoTextField
 import com.example.onuldo_fe.ui.component.SocialLoginButton
@@ -82,6 +83,7 @@ fun LoginScreen(
             onNoticeShown()
         }
     }
+    // 이메일 로그인 오류만 입력칸에 반영한다. 소셜 오류는 아래 배너가 담당한다.
     val isError = state.errorMessage != null
     // 소셜 SDK는 로그인 창을 띄우기 위해 Activity 컨텍스트가 필요하다.
     val context = LocalContext.current
@@ -176,6 +178,13 @@ fun LoginScreen(
                 )
             },
         )
+        // 소셜 로그인 오류·안내. 입력칸과 무관한 문제이므로 소셜 버튼 아래에 둔다.
+        // "이미 가입된 계정" 안내처럼 두 줄 이상인 문구가 들어와 배너를 쓴다.
+        state.socialErrorMessage?.let { message ->
+            Spacer(Modifier.height(12.dp))
+            AuthErrorBanner(text = message, modifier = gutter)
+        }
+
         Spacer(Modifier.weight(1f))
 
         Row(
