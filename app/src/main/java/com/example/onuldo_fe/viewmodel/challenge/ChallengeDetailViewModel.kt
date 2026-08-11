@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.onuldo_fe.data.network.onError
+import com.example.onuldo_fe.data.network.onSuccess
 import com.example.onuldo_fe.repository.challenge.ChallengeRepository
 import com.example.onuldo_fe.repository.challenge.ChallengeRepositoryProvider
 import kotlinx.coroutines.launch
@@ -22,16 +24,21 @@ class ChallengeDetailViewModel(
 
     init { load() }
 
-    fun load() {
-        uiState = uiState.copy(isLoading = true, isError = false)
+    private fun load() {
+        uiState = uiState.copy(isLoading = true, isError = false, errorMessage = null)
         viewModelScope.launch {
-            runCatching { repository.getChallengeDetail(challengeId) }
+            val result = repository.getChallengeDetail(challengeId)
+            result
                 .onSuccess { detail ->
                     uiState = uiState.copy(detail = detail, isLoading = false)
                 }
-                .onFailure { e ->
-                    logChallengeError("ch_dt", e)
-                    uiState = uiState.copy(isLoading = false, isError = true)
+                .onError { code, message ->
+                    logChallengeError("ch_dt", code, message)   // 서버 code/message는 로그에만
+                    uiState = uiState.copy(
+                        isLoading = false,
+                        isError = true,
+                        errorMessage = result.toChallengeErrorMessage()
+                    )
                 }
         }
     }

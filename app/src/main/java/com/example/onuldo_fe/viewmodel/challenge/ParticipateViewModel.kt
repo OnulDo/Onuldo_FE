@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.onuldo_fe.data.network.onError
 import com.example.onuldo_fe.data.network.onSuccess
 import com.example.onuldo_fe.repository.challenge.ChallengeRepository
 import com.example.onuldo_fe.repository.challenge.ChallengeRepositoryProvider
@@ -53,11 +54,11 @@ class ParticipateViewModel(
             isInsufficientPoint = false, isAlreadyParticipating = false
         )
         viewModelScope.launch {
-            runCatching { repository.participate(challengeId, depositAmount, durationWeeks) }
+            val result = repository.participate(challengeId, depositAmount, durationWeeks)
+            result
                 .onSuccess { uiState = uiState.copy(isSubmitting = false, result = it) }
-                .onFailure { e ->
-                    val code = logChallengeError("ch_pd", e)
-                    // 이미 참여중은 오류가 아니라 안내(토스트+복귀), 포인트 부족은 충전 팝업, 그 외는 일반 실패(토스트)
+                .onError { code, message ->
+                    logChallengeError("ch_pd", code, message)   // 서버 code/message는 로그에만
                     uiState = when (code) {
                         CODE_ALREADY_PARTICIPATING ->
                             uiState.copy(isSubmitting = false, isAlreadyParticipating = true)
@@ -67,14 +68,18 @@ class ParticipateViewModel(
                             uiState.copy(isSubmitting = false, isInsufficientPoint = true)
                         }
                         else ->
-                            uiState.copy(isSubmitting = false, isError = true)
+                            uiState.copy(
+                                isSubmitting = false,
+                                isError = true,
+                                errorMessage = result.toChallengeErrorMessage()
+                            )
                     }
                 }
         }
     }
 
     // 각 상태 1회 노출 후 소비
-    fun onErrorShown() { uiState = uiState.copy(isError = false) }
+    fun onErrorShown() { uiState = uiState.copy(isError = false, errorMessage = null) }
     fun onInsufficientDismissed() { uiState = uiState.copy(isInsufficientPoint = false) }
     fun onAlreadyParticipatingShown() { uiState = uiState.copy(isAlreadyParticipating = false) }
 
