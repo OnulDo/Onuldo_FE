@@ -28,7 +28,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,16 +47,17 @@ import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.KakaoLabel
 import com.example.onuldo_fe.ui.theme.KakaoYellow
-import com.example.onuldo_fe.ui.theme.NaverGreen
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red3
 import com.example.onuldo_fe.viewmodel.LoginViewModel
 
 /**
- * 이메일 로그인 화면 — WF ver.2.2 (Figma node 4353:3162).
+ * 이메일 로그인 화면 — Figma Ready for Dev node `4771:384`.
  * 헤더(봉투 아이콘 + 타이틀) → 이메일/비밀번호 입력 → 로그인
- *  → "또는" 구분선 → 카카오/네이버 소셜 로그인 → 하단 회원가입 링크.
+ *  → "또는" 구분선 → 카카오 로그인 → 하단 회원가입 링크.
+ *
+ * 네이버 로그인은 제거됐다(2026-08-11). 자세한 경위는 [SocialAuthClient] 주석 참고.
  */
 @Composable
 fun LoginScreen(
@@ -182,27 +182,6 @@ fun LoginScreen(
                 )
             },
         )
-        Spacer(Modifier.height(12.dp))
-        SocialLoginButton(
-            text = if (state.socialInProgress == SocialProvider.NAVER) {
-                "네이버 로그인 중..."
-            } else {
-                "네이버 아이디로 로그인"
-            },
-            containerColor = NaverGreen,
-            contentColor = Color.White,
-            leadingIcon = R.drawable.ic_naver,
-            iconSize = 38.dp,
-            onClick = {
-                viewModel.loginWithSocial(
-                    context = context,
-                    provider = SocialProvider.NAVER,
-                    onLoggedIn = onLoginSuccess,
-                    onNeedSignup = onSocialSignupNeeded,
-                )
-            },
-        )
-
         Spacer(Modifier.weight(1f))
 
         Row(
