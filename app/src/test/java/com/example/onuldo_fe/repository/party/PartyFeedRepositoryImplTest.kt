@@ -10,6 +10,7 @@ import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
+import com.example.onuldo_fe.data.party.dto.PartyReadinessRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
 import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto

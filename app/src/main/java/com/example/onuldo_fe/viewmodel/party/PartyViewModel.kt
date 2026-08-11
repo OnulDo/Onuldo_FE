@@ -78,6 +78,7 @@ class PartyViewModel(
     private var partyListGeneration: Long = 0L
     private var hasLoadedPartyList: Boolean = false
     private var pointRequestGeneration: Long = 0L
+    private var currentUserReadyLookup: CurrentUserReadyLookup? = null
     // 백그라운드 전환으로 자동 이탈을 시도했지만 실패해 아직 해소되지 않은 파티 ID.
     // 화면은 이미 목록으로 돌아갔으므로, 다음에 목록이 다시 보일 때 조용히 재시도한다.
     private var pendingAutoLeavePartyId: String? = null
@@ -244,15 +245,16 @@ class PartyViewModel(
         // 방장과 파티원이 동일한 API 응답을 사용해 역할·준비 상태·정원 표시
         uiState = uiState.copy(
             waitingRoom = null,
-            isReadySubmitted = false,
             action = PartyAction.LoadingRoom,
             errorMessage = null
         )
         viewModelScope.launch {
             runCatching { repository.getWaitingRoom(partyId) }
                 .onSuccess { room ->
+                    val currentReady = readySubmittedForCurrentUser(room)
                     uiState = uiState.copy(
                         waitingRoom = room.toUi(),
+                        isReadySubmitted = currentReady ?: uiState.isReadySubmitted,
                         action = PartyAction.Idle
                     )
                     onSuccess()
@@ -309,7 +311,11 @@ class PartyViewModel(
                 uiState.action == PartyAction.Idle &&
                 requestGeneration == waitingRoomMutationGeneration
             ) {
-                uiState = uiState.copy(waitingRoom = room.toUi())
+                val currentReady = readySubmittedForCurrentUser(room)
+                uiState = uiState.copy(
+                    waitingRoom = room.toUi(),
+                    isReadySubmitted = currentReady ?: uiState.isReadySubmitted
+                )
             }
         } catch (error: CancellationException) {
             throw error
@@ -323,10 +329,15 @@ class PartyViewModel(
         waitingRoomMutationGeneration++
         uiState = uiState.copy(
             waitingRoom = room.toUi(),
-            isReadySubmitted = false,
             action = PartyAction.Idle,
             errorMessage = null
         )
+        viewModelScope.launch {
+            val currentReady = readySubmittedForCurrentUser(room) ?: return@launch
+            if (uiState.waitingRoom?.partyId == room.partyId) {
+                uiState = uiState.copy(isReadySubmitted = currentReady)
+            }
+        }
     }
 
     fun readyParty() {
@@ -360,10 +371,11 @@ class PartyViewModel(
 
             try {
                 val room = repository.readyParty(partyId, ready = targetReady)
+                val currentReady = readySubmittedForCurrentUser(room) ?: targetReady
                 // 요청할 때 정한 목표 상태를 그대로 반영한다.
                 uiState = uiState.copy(
                     waitingRoom = room.toUi(),
-                    isReadySubmitted = targetReady,
+                    isReadySubmitted = currentReady,
                     action = PartyAction.Idle
                 )
             } catch (error: CancellationException) {
@@ -448,6 +460,29 @@ class PartyViewModel(
         }
     }
 
+    private suspend fun readySubmittedForCurrentUser(room: PartyWaitingRoom): Boolean? {
+        if (room.isHost) return false
+
+        val currentUser = currentUserReadyLookup ?: userRepository.getProfile().getOrNull()?.let { profile ->
+            CurrentUserReadyLookup(
+                nickname = profile.nickname,
+                profileImageUrl = profile.profileImageUrl
+            )
+        }?.also { currentUserReadyLookup = it } ?: return null
+
+        val currentMember = room.members.firstOrNull { member ->
+            member.role == PartyRole.Member &&
+                member.nickname == currentUser.nickname &&
+                (
+                    currentUser.profileImageUrl == null ||
+                        member.profileImageUrl == null ||
+                        member.profileImageUrl == currentUser.profileImageUrl
+                    )
+        } ?: return null
+
+        return currentMember.readyStatus == PartyMemberReadyStatus.Ready
+    }
+
     fun startParty(onSuccess: (String) -> Unit) {
         // 시작 요청 중 중복 클릭 방지 및 성공 후 진행 중 파티 목록 재조회
         // 시작 가능 조건은 버튼 활성화에 사용하고 서버가 동일 조건을 다시 검증
@@ -475,6 +510,11 @@ class PartyViewModel(
         }
     }
 }
+
+private data class CurrentUserReadyLookup(
+    val nickname: String,
+    val profileImageUrl: String?
+)
 
 private data class PartyServerError(
     val code: String = "",
