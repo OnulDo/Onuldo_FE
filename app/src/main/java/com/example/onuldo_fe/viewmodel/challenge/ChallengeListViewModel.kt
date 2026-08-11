@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.viewmodel.challenge
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -108,7 +109,10 @@ class ChallengeListViewModel(
         if (generation != requestGeneration) return
 
         result.onSuccess { page ->
-
+            Log.d(
+                "ChallengeDebug",
+                "generation=$generation, mode=$mode, count=${page.challenges.size}, challenges=${page.challenges}"
+            )
             // 당겨서 새로고침일 때만, 응답이 너무 빨라 인디케이터가 안 보이지 않도록 최소 300ms 유지
             if (mode == LoadMode.REFRESH) {
                 val elapsed = System.currentTimeMillis() - refreshStartTime

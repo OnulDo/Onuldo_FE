@@ -1,10 +1,7 @@
 package com.example.onuldo_fe.ui.screen.home
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
-import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -38,7 +35,6 @@ fun HomeRoute(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showNotification by rememberSaveable { mutableStateOf(false) }
-    var showNotificationPermissionDialog by remember { mutableStateOf(false) }
     var showCameraPermissionDialog by rememberSaveable { mutableStateOf(false) }
     var pendingChallengeId by rememberSaveable { mutableStateOf<Long?>(null) }
     var pendingCategory by rememberSaveable { mutableStateOf("") }
@@ -53,22 +49,9 @@ fun HomeRoute(
     }
 
     fun handleNotificationClick() {
-        // 알림 권한 있으면 알림 화면, 없으면 권한 안내 팝업 (API 33 미만은 런타임 권한 없음 → 바로 진입)
-        val isNotificationPermissionGranted =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
-            } else {
-                true
-            }
-
-        if (isNotificationPermissionGranted) {
-            showNotification = true
-        } else {
-            showNotificationPermissionDialog = true
-        }
+        // 인앱 알림함은 목록 조회(REST)라 OS 알림 권한과 무관 — 회원가입 직후(권한 미허용)에도 항상 연다.
+        // (POST_NOTIFICATIONS는 시스템 푸시 수신용 권한이라 인앱 목록 열람을 막지 않는다.)
+        showNotification = true
     }
 
     fun handleVerifyClick(challengeId: Long, category: String, title: String, deadline: String) {
@@ -161,21 +144,6 @@ fun HomeRoute(
                 pendingDeadline = ""
             },
             onMoveToSettings = { moveToAppSettings(context) }
-        )
-    }
-
-    // 알림 권한 없을 때(최초) 안내 팝업 → "설정으로 이동"이면 시스템(폰) 알림설정으로
-    if (showNotificationPermissionDialog) {
-        PermissionSettingDialog(
-            type = PermissionDialogType.NOTIFICATION,
-            onDismiss = { showNotificationPermissionDialog = false },
-            onMoveToSettings = {
-                showNotificationPermissionDialog = false
-                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                }
-                context.startActivity(intent)
-            }
         )
     }
 }
