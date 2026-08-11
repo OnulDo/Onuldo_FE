@@ -55,7 +55,11 @@ class NotificationSettingsViewModel(
     /**
      * 가장 마지막 [apply] 호출 번호. 실패 후 서버 값을 다시 읽을 때, 그사이 사용자가 다른
      * 토글을 눌렀다면 재조회 결과가 그 변경을 덮어쓰지 않도록 이 번호로 걸러낸다.
+     *
+     * 증가는 [apply](UI 스레드)에서만 일어나므로 원자적 연산은 필요 없지만, 코루틴이 다른
+     * 디스패처에서 읽을 수 있어 가시성만 [Volatile]로 보장한다.
      */
+    @Volatile
     private var applyGeneration = 0
 
     init {
@@ -71,6 +75,23 @@ class NotificationSettingsViewModel(
         userRepository.getNotificationSettings()
             .onSuccess { settings -> _state.value = settings.toUiState() }
             .onError { _, message -> _errorMessage.value = message }
+    }
+
+    /**
+     * 저장 실패 후 서버 값으로 화면을 맞춘다.
+     *
+     * **조회 결과를 반영하는 시점에 [generation]을 다시 확인한다.** 조회를 시작할 때만 확인하면,
+     * 응답을 기다리는 사이 사용자가 누른 토글을 옛 서버 값이 덮어쓴다([apply]는 뮤텍스 밖에서
+     * 화면을 즉시 갱신하므로 조회 중에도 상태가 바뀔 수 있다).
+     *
+     * 조회가 실패하면 화면을 그대로 두고 [_errorMessage]도 건드리지 않는다.
+     * 사용자에게 중요한 건 조회 실패가 아니라 앞서 담아 둔 **저장 실패** 문구다.
+     */
+    private suspend fun reconcileWithServer(generation: Int) {
+        userRepository.getNotificationSettings()
+            .onSuccess { settings ->
+                if (generation == applyGeneration) _state.value = settings.toUiState()
+            }
     }
 
     /**
@@ -139,7 +160,9 @@ class NotificationSettingsViewModel(
                     //
                     // 단, 그사이 사용자가 다른 토글을 눌렀다면 그쪽이 최종 상태를 정해야 한다.
                     // 여기서 읽어온 값은 그 변경을 모르므로 덮어쓰면 방금 누른 것이 되돌아간다.
-                    if (generation == applyGeneration) refreshFromServer()
+                    // (조회 도중에 눌린 경우까지 막으려면 반영 시점에도 확인해야 한다 —
+                    //  그 확인은 reconcileWithServer 안에 있다. 여기 확인은 불필요한 조회를 아끼는 용도다.)
+                    if (generation == applyGeneration) reconcileWithServer(generation)
                 }
             }
         }

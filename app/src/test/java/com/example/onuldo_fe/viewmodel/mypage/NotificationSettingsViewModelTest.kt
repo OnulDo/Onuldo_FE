@@ -120,6 +120,34 @@ class NotificationSettingsViewModelTest {
         scope.cancel()
     }
 
+    @Test
+    fun `재조회 도중 누른 토글을 옛 서버 값이 덮어쓰지 않는다`() = runBlocking {
+        val holdRefresh = CompletableDeferred<Unit>()
+        val repository = FakeUserRepository(
+            failAtAttempt = Int.MAX_VALUE,
+            // 첫 PATCH만 실패시켜 재조회로 들어가게 한다.
+            failOnlyAtAttempt = 1,
+            holdRefresh = holdRefresh,
+        )
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        val viewModel = NotificationSettingsViewModel(repository, scope)
+
+        // 저장 실패 → 서버 재조회 시작(응답 대기 상태로 멈춘다).
+        viewModel.apply(ALL_OFF)
+
+        // 응답을 기다리는 사이 사용자가 다른 토글을 누른다.
+        val newest = ALL_OFF.copy(challengeStart = true)
+        viewModel.apply(newest)
+
+        // 이제 재조회 응답이 도착한다. 서버에는 첫 PATCH가 실패해 옛 값(전부 켜짐)이 남아 있다.
+        holdRefresh.complete(Unit)
+
+        // 반영 시점에 세대를 확인하지 않으면 옛 서버 값이 방금 누른 값을 덮어쓴다.
+        assertEquals(newest, viewModel.state.value)
+
+        scope.cancel()
+    }
+
     private companion object {
         /** 화면의 "전체 알림 수신"을 끈 상태 — 개별 6종도 함께 꺼진다. */
         val ALL_OFF = NotificationSettingsState(
@@ -142,6 +170,10 @@ private class FakeUserRepository(
     private val failAtAttempt: Int,
     /** 지정하면 첫 PATCH가 이 신호를 기다린다. 요청이 겹치는 상황을 만들 때 쓴다. */
     private val holdFirstPatch: CompletableDeferred<Unit>? = null,
+    /** 지정하면 [failAtAttempt] 대신 이 순번의 PATCH **하나만** 실패시킨다. */
+    private val failOnlyAtAttempt: Int? = null,
+    /** 지정하면 두 번째 GET(저장 실패 후 재조회)이 이 신호를 기다린다. */
+    private val holdRefresh: CompletableDeferred<Unit>? = null,
 ) : UserRepository {
 
     var serverSettings = NotificationSettings(
@@ -163,6 +195,8 @@ private class FakeUserRepository(
 
     override suspend fun getNotificationSettings(): ApiResult<NotificationSettings> {
         loadCount += 1
+        // 1번째는 init의 최초 로드, 2번째가 저장 실패 후 재조회다.
+        if (loadCount == 2) holdRefresh?.await()
         return ApiResult.Success(serverSettings)
     }
 
@@ -172,7 +206,10 @@ private class FakeUserRepository(
     ): ApiResult<Unit> {
         attempts += 1
         if (attempts == 1) holdFirstPatch?.await()
-        if (attempts >= failAtAttempt) {
+
+        val shouldFail =
+            if (failOnlyAtAttempt != null) attempts == failOnlyAtAttempt else attempts >= failAtAttempt
+        if (shouldFail) {
             return ApiResult.Failure(code = "INTERNAL_SERVER_ERROR", message = "서버 오류")
         }
         applied += type to enabled
