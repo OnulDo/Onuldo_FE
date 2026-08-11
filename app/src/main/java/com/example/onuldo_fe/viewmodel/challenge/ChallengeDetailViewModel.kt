@@ -24,16 +24,25 @@ class ChallengeDetailViewModel(
 
     init { load() }
 
-    private fun load() {
-        uiState = uiState.copy(isLoading = true, isError = false, errorMessage = null)
+    //카메라 호출로 기존 구조 유지
+    fun load() {
+        uiState = uiState.copy(
+            isLoading = true,
+            isError = false,
+            errorMessage = null
+        )
+
         viewModelScope.launch {
             val result = repository.getChallengeDetail(challengeId)
             result
                 .onSuccess { detail ->
-                    uiState = uiState.copy(detail = detail, isLoading = false)
+                    uiState = uiState.copy(
+                        detail = detail,
+                        isLoading = false
+                    )
                 }
                 .onError { code, message ->
-                    logChallengeError("ch_dt", code, message)   // 서버 code/message는 로그에만
+                    logChallengeError("ch_dt", code, message)
                     uiState = uiState.copy(
                         isLoading = false,
                         isError = true,
