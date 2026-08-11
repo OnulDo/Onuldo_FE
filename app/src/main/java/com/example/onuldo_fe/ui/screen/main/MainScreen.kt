@@ -3,8 +3,6 @@ package com.example.onuldo_fe.ui.screen.main
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,9 +43,22 @@ fun MainScreen(
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
+    /**
+     * 탭 **안에서** 내비바를 잠시 감춰야 하는 상태용(파티 탭의 하위 화면 등).
+     * 그 화면을 벗어날 때 반드시 다시 true로 되돌려야 한다.
+     *
+     * ⚠️ 아래 [isFullScreenRoute]에 해당하는 목적지에서는 이 값을 건드리지 말 것.
+     * 그쪽은 라우트만 보고 감추므로 여기까지 끄면 화면을 벗어난 뒤에도 false로 남아
+     * **모든 탭에서 내비바가 사라진다.**
+     */
     var showBottomBar by remember { mutableStateOf(true) }
     var homeRefreshKey by rememberSaveable { mutableIntStateOf(0) }
     var partyTabClickKey by rememberSaveable { mutableIntStateOf(0) }
+
+    /**
+     * 이 NavHost에 등록됐지만 내비바 위에 풀스크린으로 떠야 하는 목적지.
+     * 현재 라우트만 보고 판단하므로 목적지를 벗어나면 자동으로 원래대로 돌아온다.
+     */
     val isFullScreenRoute = currentRoute == Routes.MYPAGE_CHARGE ||
         currentRoute == Routes.PARTY_SETTLEMENT
 
@@ -99,19 +110,14 @@ fun MainScreen(
             ) { backStackEntry ->
                 val partyId = backStackEntry.arguments?.getLong("partyId") ?: return@composable
 
-                LaunchedEffect(Unit) { showBottomBar = false }
-                DisposableEffect(Unit) {
-                    onDispose { showBottomBar = true }
-                }
-
+                // 내비바는 isFullScreenRoute가 감춘다(showBottomBar를 건드리지 않는다).
                 PartySettlementRoute(
                     partyId = partyId,
                     onBack = { navController.popBackStack() }
                 )
             }
             composable(Routes.MYPAGE_CHARGE) {
-                LaunchedEffect(Unit) { showBottomBar = false }
-
+                // 내비바는 isFullScreenRoute가 감춘다(showBottomBar를 건드리지 않는다).
                 PointChargeScreen(onBack = { navController.popBackStack() })
             }
             composable(BottomTab.Challenge.route) {
