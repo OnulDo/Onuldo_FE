@@ -10,6 +10,7 @@ import com.example.onuldo_fe.data.party.dto.PartyHomeResultDto
 import com.example.onuldo_fe.data.party.dto.PartySettlementBannerDto
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomeCompletedChallenge
+import com.google.gson.JsonPrimitive
 import java.time.LocalDateTime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -310,7 +311,7 @@ class HomeRepositoryImplTest {
         name = "갓생팟",
         challengeTitle = "아침 운동",
         endDate = "2026-08-20",
-        verificationDeadline = "23:59:00",
+        verificationDeadline = JsonPrimitive("23:59:00"),
         showRemainingTime = showRemainingTime,
         status = status,
         dailyStatus = dailyStatus,

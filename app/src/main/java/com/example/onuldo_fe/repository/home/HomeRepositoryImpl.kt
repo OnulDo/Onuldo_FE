@@ -185,7 +185,7 @@ private fun RealHomeDailyChallengeDto.toPersonalModel(now: LocalDateTime): HomeC
             now.toLocalTime(),
             dailyStatus != DAILY_STATUS_WAITING
         ),
-        canVerify = dailyStatus == DAILY_STATUS_WAITING && challengeId > 0L,
+        canVerify = canVerifyAt(now.toLocalTime()) && challengeId > 0L,
         challengeId = challengeId.takeIf { it > 0L },
         category = category
     )
@@ -275,6 +275,13 @@ private const val DAILY_STATUS_WAITING = "WAITING"
 private fun RealHomeDailyChallengeDto.shouldShowOnHome(today: LocalDate): Boolean {
     if (!participationStatus.equals(PARTICIPATION_STATUS_ONGOING, ignoreCase = true)) return false
     return endDate.toLocalDateOrNull()?.let { !today.isAfter(it) } ?: false
+}
+
+private fun RealHomeDailyChallengeDto.canVerifyAt(now: LocalTime): Boolean {
+    if (!dailyStatus.equals(DAILY_STATUS_WAITING, ignoreCase = true)) return false
+    val start = timeStart.toLocalTimeOrNull()
+    val end = timeEnd.toLocalTimeOrNull()
+    return (start == null || !now.isBefore(start)) && (end == null || !now.isAfter(end))
 }
 
 /** 서버의 오늘 인증 상태를 홈 카드의 인증 버튼/상태 칩으로 변환한다. */
