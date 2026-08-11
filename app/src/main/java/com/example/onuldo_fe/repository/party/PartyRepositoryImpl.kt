@@ -83,7 +83,7 @@ class PartyRepositoryImpl(
 
     override suspend fun readyParty(partyId: String, ready: Boolean): PartyWaitingRoom {
         // 준비 완료 API를 다른 파티 기능과 독립적으로 Real/Fake 전환한다.
-        if (!useRealPartyReadyApi) return fakeApi.readyParty(partyId.toLong()).toModel()
+        if (!useRealPartyReadyApi) return fakeApi.readyParty(partyId.toLong(), ready).toModel()
 
         val response = realApi.readyParty(partyId.toLong(), PartyReadinessRequestDto(ready))
         if (!response.isSuccessful) throw HttpException(response)
