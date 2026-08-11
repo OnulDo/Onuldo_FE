@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.data.auth.dto.SocialProvider
-import com.example.onuldo_fe.ui.component.AuthErrorBanner
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.component.OnuldoTextField
 import com.example.onuldo_fe.ui.component.SocialLoginButton
@@ -48,8 +47,6 @@ import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.KakaoLabel
 import com.example.onuldo_fe.ui.theme.KakaoYellow
 import com.example.onuldo_fe.ui.theme.Persimmon
-import com.example.onuldo_fe.ui.theme.Red
-import com.example.onuldo_fe.ui.theme.Red3
 import com.example.onuldo_fe.viewmodel.LoginViewModel
 
 /**
@@ -118,35 +115,32 @@ fun LoginScreen(
 
         Spacer(Modifier.height(28.dp))
 
+        // 이메일 칸은 오류 시에도 기본 테두리를 유지한다(Figma `4771:563`).
+        // 설계서상 이메일·비밀번호 중 무엇이 틀렸는지 알려주지 않으므로 특정 칸을 지목하지 않는다.
         OnuldoTextField(
             value = state.email,
             onValueChange = viewModel::onEmailChange,
             label = "이메일",
             placeholder = "example@email.com",
-            isError = isError,
             keyboardType = KeyboardType.Email,
             imeAction = ImeAction.Next,
         )
 
         Spacer(Modifier.height(16.dp))
 
+        // 오류 문구는 비밀번호 칸 아래 헬퍼 텍스트로 붙는다(Figma `4771:563`).
+        // 서버 문구를 그대로 노출하므로 5회 실패 잠금 안내 등도 이 자리에 들어온다.
         OnuldoTextField(
             value = state.password,
             onValueChange = viewModel::onPasswordChange,
             label = "비밀번호",
             placeholder = "비밀번호를 입력해주세요",
             isPassword = true,
-            // 에러 문구는 아래 배너가 담당한다. 여기서도 보여주면 같은 문구가 두 번 노출된다.
             isError = isError,
+            supportingText = state.errorMessage,
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Done,
         )
-
-        // 서버가 준 문구를 그대로 노출한다(5회 실패 잠금 안내 등도 여기로 들어온다).
-        state.errorMessage?.let { message ->
-            Spacer(Modifier.height(10.dp))
-            AuthErrorBanner(text = message, modifier = gutter)
-        }
 
         Spacer(Modifier.height(24.dp))
 
@@ -167,7 +161,7 @@ fun LoginScreen(
             text = if (state.socialInProgress == SocialProvider.KAKAO) {
                 "카카오 로그인 중..."
             } else {
-                "카카오 아이디로 로그인"
+                "카카오 로그인"
             },
             containerColor = KakaoYellow,
             contentColor = KakaoLabel,
