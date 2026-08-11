@@ -132,8 +132,9 @@ internal fun List<RealHomeDailyChallengeDto>.toHomeData(
     partyHome: PartyHomeResultDto = PartyHomeResultDto(),
     completed: DailyCompletedResultDto = DailyCompletedResultDto()
 ): HomeData {
-    // Daily API는 개인 챌린지만 반환하므로 result 배열 전체를 개인 카드로 변환한다.
-    val personalChallenges = map { it.toPersonalModel(now) }
+    // Daily API에서 내려온 개인 챌린지 중 아직 진행 중인 항목만 홈 카드로 변환한다.
+    val personalChallenges = filter { it.shouldShowOnHome(now.toLocalDate()) }
+        .map { it.toPersonalModel(now) }
     // 카드 표시 상태와 파티원 인증 현황, 인증하기에 필요한 challengeId까지 모두
     // /parties/home 응답 하나로 구성한다. (예전에는 challengeId가 이 응답에 없어서
     // /daily에서 같은 partyId를 찾아 끼워 맞추는 우회 로직이 있었는데, 그 매칭이
@@ -268,7 +269,13 @@ private fun String.toHomeTimeText(): String =
     runCatching { LocalDateTime.parse(this).toLocalTime().toString().take(5) }
         .getOrElse { substringAfter('T', this).take(5) }
 
+private const val PARTICIPATION_STATUS_ONGOING = "ONGOING"
 private const val DAILY_STATUS_WAITING = "WAITING"
+
+private fun RealHomeDailyChallengeDto.shouldShowOnHome(today: LocalDate): Boolean {
+    if (!participationStatus.equals(PARTICIPATION_STATUS_ONGOING, ignoreCase = true)) return false
+    return endDate.toLocalDateOrNull()?.let { !today.isAfter(it) } ?: true
+}
 
 /** 서버의 오늘 인증 상태를 홈 카드의 인증 버튼/상태 칩으로 변환한다. */
 private fun String.toDailyChallengeStatus(): ChallengeStatus = when (uppercase()) {
@@ -282,6 +289,9 @@ private fun String.toDailyChallengeStatus(): ChallengeStatus = when (uppercase()
 
 private fun String?.toLocalTimeOrNull(): LocalTime? =
     this?.let { runCatching { LocalTime.parse(it) }.getOrNull() }
+
+private fun String.toLocalDateOrNull(): LocalDate? =
+    runCatching { LocalDate.parse(this) }.getOrNull()
 
 private fun JsonElement?.toLocalTimeOrNull(): LocalTime? =
     this.toLocalTimeTextOrNull()?.let { runCatching { LocalTime.parse(it) }.getOrNull() }
