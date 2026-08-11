@@ -7,14 +7,17 @@ import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyHomeResultDto
+import com.example.onuldo_fe.data.party.dto.PartyReadinessRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
 import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
 import com.example.onuldo_fe.data.party.dto.PartyLeaveResponseDto
 import retrofit2.Response
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Body
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Query
 
@@ -27,7 +30,7 @@ interface RealPartyApi {
     ): Response<ApiResponse<CreatePartyResponseDto>>
 
     /** 초대코드를 JSON Body로 전송해 파티에 참여하고 최신 대기방을 반환한다. */
-    @POST("api/parties/join")
+    @POST("api/parties/members")
     suspend fun joinParty(
         @Body request: PartyJoinRequestDto
     ): Response<ApiResponse<RealPartyWaitingRoomDto>>
@@ -50,19 +53,20 @@ interface RealPartyApi {
     ): Response<ApiResponse<RealPartyWaitingRoomDto>>
 
     /** 로그인 파티원을 준비 완료로 전환하고 최신 대기방 상태를 반환한다. */
-    @POST("api/parties/{partyId}/ready")
+    @PATCH("api/parties/{partyId}/members/me/readiness")
     suspend fun readyParty(
-        @Path("partyId") partyId: Long
+        @Path("partyId") partyId: Long,
+        @Body request: PartyReadinessRequestDto
     ): Response<ApiResponse<RealPartyWaitingRoomDto>>
 
     /** 대기 중인 파티에서 이탈하고 해체·방장 승계 결과를 받는다. */
-    @POST("api/parties/{partyId}/leave")
+    @DELETE("api/parties/{partyId}/members/me")
     suspend fun leaveParty(
         @Path("partyId") partyId: Long
     ): Response<ApiResponse<PartyLeaveResponseDto>>
 
     /** 방장이 파티를 시작해 상태 전환과 전원의 도전금 차감을 요청한다. */
-    @POST("api/parties/{partyId}/start")
+    @PATCH("api/parties/{partyId}/status")
     suspend fun startParty(
         @Path("partyId") partyId: Long
     ): Response<ApiResponse<PartyStartResponseDto>>

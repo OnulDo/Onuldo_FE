@@ -10,6 +10,7 @@ import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.CreatePartyResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyJoinRequestDto
+import com.example.onuldo_fe.data.party.dto.PartyReadinessRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyStartResponseDto
 import com.example.onuldo_fe.data.party.dto.PartyListPageResponseDto
 import com.example.onuldo_fe.data.party.dto.PartySettlementResultDto
@@ -59,7 +60,7 @@ class PartyFeedRepositoryImplTest {
         override suspend fun getWaitingRoom(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("피드 테스트에서 대기방 API가 호출되면 안 됩니다.")
 
-        override suspend fun readyParty(partyId: Long): Response<ApiResponse<RealPartyWaitingRoomDto>> =
+        override suspend fun readyParty(partyId: Long, request: PartyReadinessRequestDto): Response<ApiResponse<RealPartyWaitingRoomDto>> =
             error("피드 테스트에서 준비 API가 호출되면 안 됩니다.")
 
         override suspend fun leaveParty(partyId: Long): Response<ApiResponse<PartyLeaveResponseDto>> =
