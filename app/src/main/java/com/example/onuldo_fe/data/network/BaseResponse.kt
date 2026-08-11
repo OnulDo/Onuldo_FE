@@ -1,7 +1,5 @@
 package com.example.onuldo_fe.data.network
 
-import com.google.gson.annotations.SerializedName
-
 /**
  * 서버 공통 응답 래퍼.
  *
@@ -32,7 +30,6 @@ data class CursorPageResponse<T>(
     val timestamp: String? = null,
     val code: String? = null,
     val message: String? = null,
-    @SerializedName(value = "result", alternate = ["content"])
     val result: List<T>? = null,
     val nextCursor: String? = null,
     val hasNext: Boolean = false,
