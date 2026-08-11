@@ -94,20 +94,23 @@ private fun BoxScope.CompletedChallengeResult(completedChallenge: HomeCompletedC
             )
         }
 
-        is HomeCompletedChallenge.Personal -> Text(
-            text = stringResource(
-                R.string.home_completed_personal_streak,
-                completedChallenge.streakDays
-            ),
-            color = Green,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = spacing.spacing20, end = 27.dp),
-            fontFamily = Pretendard,
-            fontSize = 12.sp,
-            lineHeight = 14.sp,
-            fontWeight = FontWeight.Medium
-        )
+        is HomeCompletedChallenge.Personal -> {
+            if (completedChallenge.streakDays <= 0) return
+            Text(
+                text = stringResource(
+                    R.string.home_completed_personal_streak,
+                    completedChallenge.streakDays
+                ),
+                color = Green,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = spacing.spacing20, end = 27.dp),
+                fontFamily = Pretendard,
+                fontSize = 12.sp,
+                lineHeight = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }
 
