@@ -26,6 +26,11 @@ data class PartyJoinRequestDto(
     val inviteCode: String
 )
 
+/** PATCH /api/parties/{partyId}/members/me/readiness 요청. */
+data class PartyReadinessRequestDto(
+    val ready: Boolean
+)
+
 /** 대기방 응답에 포함되는 파티원. */
 data class PartyMemberDto(
     val userId: Long,

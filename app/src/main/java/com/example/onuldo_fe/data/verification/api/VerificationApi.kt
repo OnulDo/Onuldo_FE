@@ -14,16 +14,16 @@ import retrofit2.http.Path
 
 interface VerificationApi {
     @Multipart
-    @POST("api/file/images")
+    @POST("api/files/images")
     suspend fun uploadImage(@Part file: MultipartBody.Part): ApiResponse<ImageUploadResultDto>
 
-    @POST("api/challenges/{challengeId}/verification")
+    @POST("api/challenges/{challengeId}/verifications")
     suspend fun verifyChallenge(
         @Path("challengeId") challengeId: Long,
         @Body request: ChallengeVerificationRequestDto
     ): ApiResponse<ChallengeVerificationResultDto>
 
-    @POST("api/challenges/{challengeId}/verification/manual-review")
+    @POST("api/challenges/{challengeId}/verification-review-requests")
     suspend fun requestManualReview(
         @Path("challengeId") challengeId: Long
     ): ApiResponse<ManualReviewResultDto>

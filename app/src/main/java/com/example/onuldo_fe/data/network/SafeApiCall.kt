@@ -69,7 +69,7 @@ suspend fun <T> safeCursorApiCall(
     if (response.isSuccessful && body != null && body.isSuccess) {
         ApiResult.Success(
             CursorPage(
-                items = body.content.orEmpty(),
+                items = body.result.orEmpty(),
                 nextCursor = body.nextCursor,
                 hasNext = body.hasNext,
             )
