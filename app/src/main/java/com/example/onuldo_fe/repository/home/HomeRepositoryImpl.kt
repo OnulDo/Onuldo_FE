@@ -21,6 +21,7 @@ import com.example.onuldo_fe.model.home.HomePartyChallenge
 import com.example.onuldo_fe.model.home.HomePartyMember
 import com.example.onuldo_fe.model.home.SettlementBanner
 import com.example.onuldo_fe.model.home.TodayChallenge
+import com.google.gson.JsonElement
 import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -58,6 +59,7 @@ class HomeRepositoryImpl(
             if (!response.isSuccessful) throw HttpException(response)
             val body = response.body() ?: throw IOException("오늘 챌린지 응답 본문이 비어 있습니다.")
 
+            // Daily API의 result는 래퍼 객체가 아닌 개인 챌린지 배열이다.
             val dailyItems = body.result
             val partyHome = partyHomeDeferred.await()
             val profile = profileDeferred.await()
@@ -130,8 +132,8 @@ internal fun List<RealHomeDailyChallengeDto>.toHomeData(
     partyHome: PartyHomeResultDto = PartyHomeResultDto(),
     completed: DailyCompletedResultDto = DailyCompletedResultDto()
 ): HomeData {
-    // 서버의 참여 유형으로 개인과 파티 카드를 나눈다.
-    val personalChallenges = filter { it.participationType == "PERSONAL" }
+    // Daily API에서 내려온 개인 챌린지 중 아직 진행 중인 항목만 홈 카드로 변환한다.
+    val personalChallenges = filter { it.shouldShowOnHome(now.toLocalDate()) }
         .map { it.toPersonalModel(now) }
     // 카드 표시 상태와 파티원 인증 현황, 인증하기에 필요한 challengeId까지 모두
     // /parties/home 응답 하나로 구성한다. (예전에는 challengeId가 이 응답에 없어서
@@ -174,13 +176,16 @@ private fun RealHomeDailyChallengeDto.toPersonalModel(now: LocalDateTime): HomeC
     return HomeChallenge(
         title = challengeName,
         // 값이 없거나 음수이면 0일로 처리한다.
-        streakDays = streakDays?.coerceAtLeast(0) ?: 0,
+        streakDays = streakDays.coerceAtLeast(0),
         remainingDays = endDate.remainingDaysFrom(now.toLocalDate()),
         deadlineAt = deadline,
-        status = toChallengeStatus(now.toLocalTime()),
+        status = dailyStatus.toDailyChallengeStatus(),
         verifiedAt = null,
-        remainingMinutes = deadline.remainingMinutesFrom(now.toLocalTime(), verifiedOnDate),
-        canVerify = canVerifyAt(now.toLocalTime()),
+        remainingMinutes = deadline.remainingMinutesFrom(
+            now.toLocalTime(),
+            dailyStatus != DAILY_STATUS_WAITING
+        ),
+        canVerify = dailyStatus == DAILY_STATUS_WAITING && challengeId > 0L,
         challengeId = challengeId.takeIf { it > 0L },
         category = category
     )
@@ -190,7 +195,6 @@ private fun PartyHomeItemDto.toHomeModel(
     now: LocalDateTime
 ): HomePartyChallenge {
     val deadline = verificationDeadline.toLocalTimeOrNull()
-    val isDeadlinePassed = deadline?.let(now.toLocalTime()::isAfter) == true
     // 시간으로 상태를 추정하지 않고 서버가 계산한 나의 오늘 인증 상태를 사용한다.
     val challengeStatus = status.toPartyChallengeStatus()
     // 카메라 화면 이동에 필수인 값이라, 이게 없으면 canVerify도 true가 되면 안 된다
@@ -212,7 +216,7 @@ private fun PartyHomeItemDto.toHomeModel(
                 verified = challengeStatus != ChallengeStatus.NeedCertification
             ),
         canVerify = challengeStatus == ChallengeStatus.NeedCertification &&
-            !isDeadlinePassed &&
+            dailyStatus == DAILY_STATUS_WAITING &&
             verifiedChallengeId != null,
         members = members.map {
             HomePartyMember(
@@ -265,27 +269,48 @@ private fun String.toHomeTimeText(): String =
     runCatching { LocalDateTime.parse(this).toLocalTime().toString().take(5) }
         .getOrElse { substringAfter('T', this).take(5) }
 
-private fun RealHomeDailyChallengeDto.canVerifyAt(now: LocalTime): Boolean {
-    // 인증 완료 또는 인증 가능 시간 밖이면 버튼을 숨긴다.
-    if (verifiedOnDate) return false
-    val start = timeStart.toLocalTimeOrNull()
-    val end = timeEnd.toLocalTimeOrNull()
-    return (start == null || !now.isBefore(start)) && (end == null || !now.isAfter(end))
+private const val PARTICIPATION_STATUS_ONGOING = "ONGOING"
+private const val DAILY_STATUS_WAITING = "WAITING"
+
+private fun RealHomeDailyChallengeDto.shouldShowOnHome(today: LocalDate): Boolean {
+    if (!participationStatus.equals(PARTICIPATION_STATUS_ONGOING, ignoreCase = true)) return false
+    return endDate.toLocalDateOrNull()?.let { !today.isAfter(it) } ?: false
 }
 
-/** 인증 완료 여부와 마감 시각으로 오늘 카드 상태를 정한다. */
-private fun RealHomeDailyChallengeDto.toChallengeStatus(now: LocalTime): ChallengeStatus {
-    if (verifiedOnDate) return ChallengeStatus.Success
-    val deadline = timeEnd.toLocalTimeOrNull()
-    return if (deadline != null && now.isAfter(deadline)) {
-        ChallengeStatus.Failed
-    } else {
-        ChallengeStatus.NeedCertification
-    }
+/** 서버의 오늘 인증 상태를 홈 카드의 인증 버튼/상태 칩으로 변환한다. */
+private fun String.toDailyChallengeStatus(): ChallengeStatus = when (uppercase()) {
+    "SUCCESS" -> ChallengeStatus.Success
+    "FAIL" -> ChallengeStatus.Failed
+    "REVIEW_PENDING" -> ChallengeStatus.WaitingReview
+    // UNAVAILABLE은 인증하기 버튼을 유지하되 canVerify=false로 비활성 표시한다.
+    "WAITING", "UNAVAILABLE" -> ChallengeStatus.NeedCertification
+    else -> ChallengeStatus.NeedCertification
 }
 
 private fun String?.toLocalTimeOrNull(): LocalTime? =
     this?.let { runCatching { LocalTime.parse(it) }.getOrNull() }
+
+private fun String.toLocalDateOrNull(): LocalDate? =
+    runCatching { LocalDate.parse(this) }.getOrNull()
+
+private fun JsonElement?.toLocalTimeOrNull(): LocalTime? =
+    this.toLocalTimeTextOrNull()?.let { runCatching { LocalTime.parse(it) }.getOrNull() }
+
+private fun JsonElement?.toLocalTimeTextOrNull(): String? {
+    if (this == null || isJsonNull) return null
+    return runCatching {
+        if (isJsonPrimitive) {
+            asString
+        } else {
+            val time = asJsonObject
+            val hour = time.get("hour")?.takeIf { it.isJsonPrimitive }?.asInt ?: return@runCatching null
+            val minute = time.get("minute")?.takeIf { it.isJsonPrimitive }?.asInt ?: return@runCatching null
+            val second = time.get("second")?.takeIf { it.isJsonPrimitive }?.asInt ?: return@runCatching null
+            if (hour !in 0..23 || minute !in 0..59 || second !in 0..59) return@runCatching null
+            "%02d:%02d:%02d".format(hour, minute, second)
+        }
+    }.getOrNull()
+}
 
 private fun String.remainingDaysFrom(today: LocalDate): Int =
     runCatching {

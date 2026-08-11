@@ -2,11 +2,9 @@ package com.example.onuldo_fe.data.home.dto
 
 /** 오늘 수행할 챌린지 한 건의 서버 DTO. */
 data class RealHomeDailyChallengeDto(
-    val partyName: String? = null,                  // PARTY 항목의 파티 이름
     val participationId: Long = 0,                  // 챌린지 참여 기록 ID
     val participationStatus: String = "",          // ONGOING
-    val participationType: String = "",            // PERSONAL 또는 PARTY
-    val partyId: Long? = null,                      // PARTY 항목의 파티 ID (백앤드랑 확인 필요함)
+    val participationType: String = "",            // PERSONAL
     val challengeId: Long = 0,                      // 챌린지 ID
     val challengeName: String = "",                // 챌린지 이름
     val challengeExplainContent: String? = null,    // 챌린지 한 줄 설명
@@ -20,7 +18,7 @@ data class RealHomeDailyChallengeDto(
     val durationWeeks: Int = 0,                     // 진행 기간(주)
     val startDate: String = "",                    // 챌린지 시작일
     val endDate: String = "",                      // 챌린지 종료일
-    val dailyStatus: String? = null,                // 오늘 인증 상태(WAITING 등) — 서버 신규 필드
-    val verifiedOnDate: Boolean = false,            // 오늘 인증 완료 여부 (백앤드에서 성공, 실패로 내려준다고 함)
-    val streakDays: Int? = null                     // 연속 인증 성공 일수 (백앤드랑 확인 필요함)
+    val dailyStatus: String = "WAITING",           // 오늘 데일리 인증 상태
+    val verifiedOnDate: Boolean = false,            // 오늘 인증 기록 존재 여부
+    val streakDays: Int = 0                         // 연속 인증 성공 일수
 )

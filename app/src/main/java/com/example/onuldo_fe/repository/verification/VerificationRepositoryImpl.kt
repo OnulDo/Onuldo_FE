@@ -9,6 +9,7 @@ import com.example.onuldo_fe.data.verification.dto.ChallengeVerificationResultDt
 import com.example.onuldo_fe.data.verification.dto.ImageUploadResultDto
 import com.example.onuldo_fe.model.verification.ChallengeVerificationResult
 import com.example.onuldo_fe.model.verification.ImageUploadResult
+import com.example.onuldo_fe.model.verification.ManualReviewResult
 import com.example.onuldo_fe.model.verification.VerificationReview
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,7 @@ class VerificationRepositoryImpl(
         val (file, temporaryCopy) = imageUri.toLocalFile()
         try {
             require(file.length() in 1..MAX_IMAGE_BYTES) {
-                "사진은 비어 있지 않고 5MB 이하여야 합니다."
+                "사진은 비어 있지 않고 20MB 이하여야 합니다."
             }
             validateImage(file)
             val body = file.asRequestBody(JPEG_MEDIA_TYPE)
@@ -52,6 +53,17 @@ class VerificationRepositoryImpl(
             request = ChallengeVerificationRequestDto(fileId)
         ).result.toModel()
     }
+
+    override suspend fun requestManualReview(challengeId: Long): ManualReviewResult =
+        withContext(Dispatchers.IO) {
+            require(challengeId > 0L) { "챌린지 정보가 올바르지 않습니다." }
+            val requestedAt = api.requestManualReview(challengeId)
+                .result
+                .manualReviewRequestedAt
+                .orEmpty()
+            require(requestedAt.isNotBlank()) { "서버가 재검토 요청 시각을 반환하지 않았습니다." }
+            ManualReviewResult(requestedAt = requestedAt)
+        }
     private fun validateImage(file: File) {
         val exif = ExifInterface(file)
         val width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
@@ -84,7 +96,7 @@ class VerificationRepositoryImpl(
 
                         copiedBytes += readBytes
                         require(copiedBytes <= MAX_IMAGE_BYTES) {
-                            "사진은 비어 있지 않고 5MB 이하여야 합니다."
+                            "사진은 비어 있지 않고 20MB 이하여야 합니다."
                         }
                         output.write(buffer, 0, readBytes)
                     }
@@ -116,7 +128,7 @@ class VerificationRepositoryImpl(
     )
 
     private companion object {
-        const val MAX_IMAGE_BYTES = 5L * 1024 * 1024
+        const val MAX_IMAGE_BYTES = 20L * 1024 * 1024
         val JPEG_MEDIA_TYPE = "image/jpeg".toMediaType()
     }
 }

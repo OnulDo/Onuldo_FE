@@ -1,12 +1,15 @@
 package com.example.onuldo_fe.repository.auth
 
 import com.example.onuldo_fe.data.auth.api.AuthApi
+import com.example.onuldo_fe.data.auth.DeviceInfoSource
+import com.example.onuldo_fe.data.auth.dto.DeviceRequest
 import com.example.onuldo_fe.data.auth.dto.EmailLoginRequest
 import com.example.onuldo_fe.data.auth.dto.EmailSignupRequest
 import com.example.onuldo_fe.data.auth.dto.OAuthLoginRequest
 import com.example.onuldo_fe.data.auth.dto.OAuthSignupRequest
 import com.example.onuldo_fe.data.auth.dto.SocialProvider
 import com.example.onuldo_fe.data.auth.dto.TermAgreementRequest
+import com.example.onuldo_fe.data.social.SocialAccountLink
 import com.example.onuldo_fe.data.network.ApiErrorCode
 import com.example.onuldo_fe.data.network.ApiResult
 import com.example.onuldo_fe.data.network.AuthTokenResponse
@@ -26,19 +29,25 @@ class AuthRepositoryImpl(
     private val authApi: AuthApi,
     private val tokenStore: TokenStore,
     private val tokenRefreshApi: TokenRefreshApi,
+    private val deviceInfoProvider: DeviceInfoSource = DeviceInfoSource {
+        DeviceRequest(deviceId = "", fcmToken = "")
+    },
+    private val socialAccountLink: SocialAccountLink = SocialAccountLink.NoOp,
 ) : AuthRepository {
 
     override val isLoggedIn: Boolean get() = tokenStore.isLoggedIn
 
     override suspend fun login(email: String, password: String): ApiResult<Unit> =
-        safeApiCall { authApi.login(EmailLoginRequest(email.trim(), password)) }
-            .storeTokens()
+        safeApiCall {
+            authApi.login(EmailLoginRequest(email.trim(), password, deviceInfoProvider.getDevice()))
+        }
+            .storeTokens(SocialProvider.EMAIL)
 
     override suspend fun signup(
         email: String,
         password: String,
         nickname: String,
-        profileImageUrl: String?,
+        profileImageUrl: String,
         termAgreements: List<TermAgreementRequest>,
     ): ApiResult<Unit> = safeApiCall {
         authApi.signup(
@@ -48,15 +57,18 @@ class AuthRepositoryImpl(
                 nickname = nickname.trim(),
                 profileImageUrl = profileImageUrl,
                 termAgreements = termAgreements,
+                device = deviceInfoProvider.getDevice(),
             )
         )
-    }.storeTokens()
+    }.storeTokens(SocialProvider.EMAIL)
 
     override suspend fun oauthLogin(
         provider: SocialProvider,
         socialAccessToken: String,
     ): ApiResult<OAuthLoginOutcome> {
-        val result = safeApiCall { authApi.oauthLogin(OAuthLoginRequest(provider, socialAccessToken)) }
+        val result = safeApiCall {
+            authApi.oauthLogin(OAuthLoginRequest(provider, socialAccessToken, deviceInfoProvider.getDevice()))
+        }
 
         return when (result) {
             is ApiResult.Success -> {
@@ -65,7 +77,10 @@ class AuthRepositoryImpl(
                     refreshToken = result.data.refreshToken,
                 ).toTokensOrNull()
 
-                if (tokens != null) tokenStore.update(tokens)
+                if (tokens != null) {
+                    tokenStore.update(tokens)
+                    socialAccountLink.record(provider)
+                }
                 ApiResult.Success(
                     OAuthLoginOutcome(
                         isNewUser = result.data.isNewUser,
@@ -83,7 +98,7 @@ class AuthRepositoryImpl(
         provider: SocialProvider,
         socialAccessToken: String,
         nickname: String,
-        profileImageUrl: String?,
+        profileImageUrl: String,
         termAgreements: List<TermAgreementRequest>,
     ): ApiResult<Unit> = safeApiCall {
         authApi.oauthSignup(
@@ -93,12 +108,19 @@ class AuthRepositoryImpl(
                 nickname = nickname.trim(),
                 profileImageUrl = profileImageUrl,
                 termAgreements = termAgreements,
+                device = deviceInfoProvider.getDevice(),
             )
         )
-    }.storeTokens()
+    }.storeTokens(provider)
 
     override fun logout() {
+        // 소셜 연동(동의)은 유지하고 로컬 세션만 정리한다. 연동 해제는 탈퇴 전용이다.
+        socialAccountLink.logout()
         tokenStore.clear()
+    }
+
+    override suspend fun unlinkSocialAccount() {
+        socialAccountLink.unlink()
     }
 
     override suspend fun restoreSession(): Boolean {
@@ -160,12 +182,16 @@ class AuthRepositoryImpl(
     /**
      * 토큰 응답을 저장소에 반영하고 결과를 [Unit]으로 바꾼다.
      * 성공 응답인데 토큰이 비어 있으면 로그인된 것으로 볼 수 없으므로 실패로 처리한다.
+     *
+     * [provider]는 이번 세션의 로그인 경로다. 탈퇴 때 어떤 소셜 연동을 끊을지 판단하는 근거라
+     * 토큰 저장에 성공한 시점에만 함께 남긴다.
      */
-    private fun ApiResult<AuthTokenResponse>.storeTokens(): ApiResult<Unit> = when (this) {
+    private fun ApiResult<AuthTokenResponse>.storeTokens(provider: SocialProvider): ApiResult<Unit> = when (this) {
         is ApiResult.Success -> {
             val tokens: AuthTokens? = data.toTokensOrNull()
             if (tokens != null) {
                 tokenStore.update(tokens)
+                socialAccountLink.record(provider)
                 ApiResult.Success(Unit)
             } else {
                 ApiResult.Failure(

@@ -7,10 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.onuldo_fe.repository.home.HomeRepository
 import com.example.onuldo_fe.repository.home.HomeRepositoryProvider
+import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class HomeViewModel(
     private val repository: HomeRepository = HomeRepositoryProvider.provide(),
@@ -61,9 +63,21 @@ class HomeViewModel(
                     isLoading = false,
                     isRefreshing = false,
                     // 기존 데이터가 있으면 새로고침 실패로 화면 전체를 가리지 않는다.
-                    errorMessage = "홈 정보를 불러오지 못했어요.".takeUnless { uiState.hasLoadedHome }
+                    errorMessage = error.toHomeErrorMessage().takeUnless { uiState.hasLoadedHome }
                 )
             }
         }
     }
+}
+
+internal fun Throwable.toHomeErrorMessage(): String = when (this) {
+    is IOException -> "네트워크 연결을 확인해 주세요."
+    is HttpException -> when (code()) {
+        400 -> "요청을 처리할 수 없어요."
+        401, 403 -> "로그인이 만료되었어요. 다시 로그인해 주세요."
+        404 -> "홈 정보를 찾을 수 없어요."
+        in 500..599 -> "서버에 잠시 문제가 생겼어요. 잠시 후 다시 시도해 주세요."
+        else -> "홈 정보를 불러오지 못했어요."
+    }
+    else -> "홈 정보를 불러오지 못했어요."
 }

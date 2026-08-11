@@ -3,6 +3,7 @@ package com.example.onuldo_fe.ui.screen.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +21,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,7 +42,6 @@ import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.model.home.notification.NotificationItem
 import com.example.onuldo_fe.model.home.notification.NotificationType
-import com.example.onuldo_fe.repository.notification.NotificationRepositoryImpl
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
@@ -44,12 +50,12 @@ import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.viewmodel.notification.NotificationUiState
-import com.example.onuldo_fe.viewmodel.notification.toUiState
 
 // 알림 종류별 아이콘 매핑 — API 연동 후에도 UI에서만 관리
 private fun NotificationType.iconRes(): Int = when (this) {
@@ -66,20 +72,39 @@ private fun NotificationType.iconRes(): Int = when (this) {
 }
 
 // 알림 화면 — 알림 목록
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(
     uiState: NotificationUiState,
     modifier: Modifier = Modifier,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onItemClick: (NotificationItem) -> Unit = {},
+    onRetry: () -> Unit = {},
+    onRefresh: () -> Unit = {},
+    onLoadMore: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
     val notifications = uiState.notifications
-    Column(
+    val pullState = rememberPullToRefreshState()
+    // 당겨서 새로고침 — 목록이 있을 때만 인디케이터 표시
+    val isRefreshing = uiState.isLoading && notifications.isNotEmpty()
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        state = pullState,
         modifier = modifier
             .fillMaxSize()
-            .background(SourCream)
-        // .statusBarsPadding()        ← 제거 (Scaffold가 이미 처리)
+            .background(SourCream),
+        indicator = {
+            PullToRefreshDefaults.Indicator(
+                state = pullState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+                color = Persimmon,
+            )
+        }
     ) {
+      Column(modifier = Modifier.fillMaxSize()) {
         // 상단 바 (뒤로가기 + 알림)
         Box(
             modifier = Modifier
@@ -103,26 +128,79 @@ fun NotificationScreen(
             )
         }
 
-        if (notifications.isEmpty()) {
-            // 알림 없을 때 — 빈 화면
-            NotificationEmpty()
-        } else {
-            // 알림 리스트
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = spacing.spacing20,
-                    end = spacing.spacing20,
-                    top = spacing.spacing8,
-                    bottom = spacing.spacing20
-                ),
-                verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
-            ) {
-                items(notifications) { item ->
-                    NotificationItemCard(item)
+        val error = uiState.errorMessage
+        when {
+            // 첫 페이지 로딩 중 — 빈 상태·에러와 구분
+            uiState.isLoading && notifications.isEmpty() -> {
+                Box(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    contentAlignment = Alignment.Center
+                ) { CircularProgressIndicator(color = Persimmon20) }
+            }
+            // 첫 로딩 실패 — 에러 문구 + 다시 시도
+            error != null && notifications.isEmpty() -> {
+                NotificationError(message = error, onRetry = onRetry)
+            }
+            // 로딩 끝 + 진짜 비었을 때만 빈 화면
+            uiState.isEmpty -> NotificationEmpty()
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = spacing.spacing20,
+                        end = spacing.spacing20,
+                        top = spacing.spacing8,
+                        bottom = spacing.spacing20
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
+                ) {
+                    items(notifications) { item ->
+                        NotificationItemCard(item, onClick = { onItemClick(item) })
+                    }
+                    // 목록 끝 도달 → 다음 페이지(커서 페이징)
+                    if (uiState.hasNext) {
+                        item {
+                            LaunchedEffect(notifications.size) { onLoadMore() }
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                                contentAlignment = Alignment.Center
+                            ) { CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Persimmon20) }
+                        }
+                    }
                 }
             }
         }
+      }
+    }
+}
+
+// 첫 로딩 실패 시 에러 + 다시 시도
+@Composable
+private fun ColumnScope.NotificationError(message: String, onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = message,
+            fontFamily = Pretendard,
+            fontWeight = FontWeight.Normal,
+            fontSize = 14.sp,
+            color = BlackBrown,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = "다시 시도",
+            fontFamily = Pretendard,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            color = Persimmon20,
+            modifier = Modifier.clickable(onClick = onRetry)
+        )
     }
 }
 
@@ -154,7 +232,7 @@ private fun ColumnScope.NotificationEmpty() {
 
 // 알림 카드 — 내용(사유 등)에 따라 높이가 늘어남 (기본 76dp, 2줄이면 커짐)
 @Composable
-private fun NotificationItemCard(item: NotificationItem) {
+private fun NotificationItemCard(item: NotificationItem, onClick: () -> Unit = {}) {
     val spacing = LocalSpacing.current
     Row(
         modifier = Modifier
@@ -163,6 +241,7 @@ private fun NotificationItemCard(item: NotificationItem) {
             .clip(RoundedCornerShape(14.dp))
             .background(White)
             .border(1.dp, DarkBrown40, RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
             .padding(horizontal = spacing.spacing16, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -219,7 +298,15 @@ private fun NotificationItemCard(item: NotificationItem) {
 @Composable
 private fun NotificationScreenPreview() {
     OnulDo_FETheme {
-        NotificationScreen(uiState = NotificationRepositoryImpl().getNotifications().toUiState())
+        NotificationScreen(
+            uiState = NotificationUiState(
+                notifications = listOf(
+                    NotificationItem(1, "지금 인증할 시간이에요", "새벽 6시 기상 인증이 시작됐어요.", "3분 전", "", NotificationType.DeadlineReminder),
+                    NotificationItem(2, "인증이 승인됐어요", "30분 러닝 인증이 통과했어요.", "1시간 전", "", NotificationType.ReviewPassed),
+                    NotificationItem(3, "동동님이 인증을 완료했어요", "파티 피드에서 확인해보세요", "어제", "", NotificationType.PartyMemberVerified),
+                )
+            )
+        )
     }
 }
 

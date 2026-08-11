@@ -25,36 +25,6 @@ data class UpdateProfileRequestDto(
     val profileImageUrl: String? = null,
 )
 
-/** 알림 설정 항목. 서버 `UpdateNotificationReqDto.type` enum과 이름이 일치해야 한다. */
-enum class NotificationSettingType {
-    VERIFICATION_DEADLINE,
-    VERIFICATION_RESULT,
-    CHALLENGE_START,
-    REFUND_COMPLETE,
-    DEDUCTION_ALERT,
-}
-
-/** `GET /api/users/me/notification-settings` */
-data class NotificationSettingsResponseDto(
-    val allEnabled: Boolean = false,
-    val verificationDeadline: Boolean = false,
-    val verificationResult: Boolean = false,
-    val challengeStart: Boolean = false,
-    val refundComplete: Boolean = false,
-    val deductionAlert: Boolean = false,
-)
-
-/** `PATCH /api/users/me/notification-settings` — 항목 하나씩 토글한다. */
-data class UpdateNotificationRequestDto(
-    val type: NotificationSettingType,
-    val enabled: Boolean,
-)
-
-data class UpdateNotificationResponseDto(
-    val type: NotificationSettingType? = null,
-    val enabled: Boolean = false,
-)
-
 /** `GET /api/users/me/wallet/summary` */
 data class WalletSummaryResponseDto(
     val balance: Long = 0L,

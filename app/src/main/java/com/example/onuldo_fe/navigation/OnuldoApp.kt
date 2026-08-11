@@ -44,6 +44,10 @@ import kotlinx.coroutines.delay
 
 private const val MINIMUM_REVIEWING_DURATION_MILLIS = 2_000L
 private const val FINAL_REVIEW_STEP_DISPLAY_MILLIS = 300L
+private const val DUPLICATE_EMAIL_MESSAGE_KEY = "duplicate_email_message"
+
+/** 소셜 가입이 기존 이메일 계정과 충돌해 로그인 화면으로 되돌아올 때 실어 보내는 안내. */
+private const val EXISTING_ACCOUNT_MESSAGE_KEY = "existing_account_message"
 
 /** 마이 메뉴 이름. 서버가 약관 제목을 주기 전까지 상단바에 쓴다. */
 private fun termTitleOf(termType: TermType): String = when (termType) {
@@ -91,7 +95,19 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
             )
         }
         composable(Routes.LOGIN) {
+            // 소셜 가입이 기존 이메일 계정과 충돌해 되돌아온 경우의 안내 문구.
+            val existingAccountMessage by navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.getStateFlow<String?>(EXISTING_ACCOUNT_MESSAGE_KEY, null)
+                ?.collectAsState()
+                ?: remember { mutableStateOf(null) }
             LoginScreen(
+                existingAccountNotice = existingAccountMessage,
+                onNoticeShown = {
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set<String?>(EXISTING_ACCOUNT_MESSAGE_KEY, null)
+                },
                 onLoginSuccess = {
                     navController.navigate(Routes.MAIN) {
                         // 일반 진입(LANDING → LOGIN)과 세션 만료(LOGIN이 루트) 모두에서
@@ -114,10 +130,21 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
             )
         }
         composable(Routes.SIGNUP) {
+            val duplicateEmailMessage by navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.getStateFlow<String?>(DUPLICATE_EMAIL_MESSAGE_KEY, null)
+                ?.collectAsState()
+                ?: remember { mutableStateOf(null) }
             SignupScreen(
                 onBack = { navController.popBackStack() },
                 // 회원가입 입력 → 약관 동의 → 프로필 설정 순으로 진행한다.
                 onNext = { navController.navigate(Routes.TERMS_AGREEMENT) },
+                serverEmailError = duplicateEmailMessage,
+                onEmailEdited = {
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set<String?>(DUPLICATE_EMAIL_MESSAGE_KEY, null)
+                },
             )
         }
         composable(Routes.PROFILE_SETUP) {
@@ -125,6 +152,24 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
                 onBack = { navController.popBackStack() },
                 // 프로필 완료 → 가입 완료(환영) 화면.
                 onDone = { navController.navigate(Routes.WELCOME) },
+                onEmailChangeRequired = { message ->
+                    navController.getBackStackEntry(Routes.SIGNUP)
+                        .savedStateHandle[DUPLICATE_EMAIL_MESSAGE_KEY] = message
+                    navController.popBackStack(Routes.SIGNUP, inclusive = false)
+                },
+                // 소셜 가입이 기존 이메일 계정과 충돌 — 이 화면에서 고칠 수 없으므로
+                // 안내를 실어 로그인 화면으로 되돌린다.
+                onExistingAccount = { message ->
+                    val loginEntry =
+                        runCatching { navController.getBackStackEntry(Routes.LOGIN) }.getOrNull()
+                    if (loginEntry != null) {
+                        loginEntry.savedStateHandle[EXISTING_ACCOUNT_MESSAGE_KEY] = message
+                        navController.popBackStack(Routes.LOGIN, inclusive = false)
+                    } else {
+                        // 로그인 화면을 거치지 않은 비정상 경로. 최소한 온보딩 밖으로는 내보낸다.
+                        navController.popBackStack(Routes.LANDING, inclusive = false)
+                    }
+                },
             )
         }
         composable(Routes.WELCOME) {
@@ -240,24 +285,25 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
             val deadline = backStackEntry.arguments
                 ?.getString(Routes.CAMERA_DEADLINE_ARG)
                 .orEmpty()
-            // 파티 목록 응답에는 category가 없으므로 challengeId로 상세를 조회해 보완한다.
-            // 카메라에서는 개인·파티 모두 한글 카테고리명으로 통일한다.
-            val challengeDetailViewModel: ChallengeDetailViewModel? = if (category.isBlank()) {
-                viewModel(
-                    key = "camera-challenge-detail-$challengeId",
-                    factory = ChallengeDetailViewModel.factory(challengeId)
-                )
-            } else {
-                null
-            }
+            // 카테고리 보완과 챌린지별 인증 유의사항을 위해 상세 API를 함께 조회한다.
+            val challengeDetailViewModel: ChallengeDetailViewModel = viewModel(
+                key = "camera-challenge-detail-$challengeId",
+                factory = ChallengeDetailViewModel.factory(challengeId)
+            )
+            val challengeDetailState = challengeDetailViewModel.uiState
             val resolvedCategory = if (category.isBlank()) {
-                challengeDetailViewModel?.uiState?.detail?.category?.displayName.orEmpty()
+                challengeDetailState.detail?.category?.displayName.orEmpty()
             } else {
                 category.toCategoryDisplayName()
             }
             CameraScreen(
                 category = resolvedCategory,
                 title = title,
+                successConditions = challengeDetailState.detail?.successConditions.orEmpty(),
+                failureConditions = challengeDetailState.detail?.failureConditions.orEmpty(),
+                isNoticeLoading = challengeDetailState.isLoading,
+                isNoticeError = challengeDetailState.isError,
+                onNoticeRetry = challengeDetailViewModel::load,
                 onPhotoCaptured = { uri ->
                     cameraViewModel.setImageUri(uri)
                     navController.navigate(
@@ -405,13 +451,34 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
 
         composable(Routes.VERIFICATION_FAIL) {
             val state by cameraViewModel.submitState.collectAsState()
+            val manualReviewState by cameraViewModel.manualReviewState.collectAsState()
+
+            LaunchedEffect(manualReviewState) {
+                if (manualReviewState is com.example.onuldo_fe.camera.ManualReviewRequestState.Success) {
+                    cameraViewModel.clearManualReviewState()
+                    navController.navigate(Routes.VERIFICATION_WAITING) {
+                        popUpTo(Routes.VERIFICATION_FAIL) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            }
+
             ChallengeVerificationScreen(
                 status = VerificationStatus.FAILURE,
                 failureReason = (state as? com.example.onuldo_fe.camera.VerificationSubmitState.Failure)?.message.orEmpty(),
                 verificationDeadline = cameraViewModel.activeDeadline,
-                onManualReviewClick = {
-                    navController.navigate(Routes.VERIFICATION_WAITING)
+                isManualReviewLoading =
+                    manualReviewState == com.example.onuldo_fe.camera.ManualReviewRequestState.Loading,
+                manualReviewErrorMessage =
+                    (manualReviewState as? com.example.onuldo_fe.camera.ManualReviewRequestState.Error)
+                        ?.message,
+                onBackClick = {
+                    cameraViewModel.clearManualReviewState()
+                    cameraViewModel.clearSubmitState()
+                    navController.popBackStack(Routes.MAIN, inclusive = false)
                 },
+                onManualReviewClick = cameraViewModel::requestManualReview,
+                onManualReviewErrorConfirm = cameraViewModel::clearManualReviewState,
                 onRetryClick = {
                     cameraViewModel.activeChallengeId?.let { challengeId ->
                         val category = cameraViewModel.activeCategory

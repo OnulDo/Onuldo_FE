@@ -36,12 +36,18 @@ import com.example.onuldo_fe.camera.component.CameraBottomBar
 import com.example.onuldo_fe.camera.component.CameraPreview
 import com.example.onuldo_fe.camera.component.CameraTopBar
 import com.example.onuldo_fe.ui.screen.challenge.detail.component.VerificationNoticeBottomSheet
+import com.example.onuldo_fe.ui.component.OnulDoErrorDialog
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 
 @Composable
 fun CameraScreen(
     category: String,
     title: String,
+    successConditions: List<String> = emptyList(),
+    failureConditions: List<String> = emptyList(),
+    isNoticeLoading: Boolean = false,
+    isNoticeError: Boolean = false,
+    onNoticeRetry: () -> Unit = {},
     onPhotoCaptured: (Uri?) -> Unit,
     onCloseClick: () -> Unit
 ){
@@ -62,6 +68,8 @@ fun CameraScreen(
             .build()
     }
     var showVerificationNotice by remember { mutableStateOf(false) }
+    var showNoticeError by remember { mutableStateOf(false) }
+    var openNoticeAfterLoading by remember { mutableStateOf(false) }
 
     var lensFacing by rememberSaveable {
         mutableStateOf(CameraSelector.LENS_FACING_BACK)
@@ -73,6 +81,13 @@ fun CameraScreen(
 
     LaunchedEffect(imageCapture, flashMode) {
         imageCapture.flashMode = flashMode
+    }
+
+    LaunchedEffect(isNoticeLoading, isNoticeError) {
+        if (openNoticeAfterLoading && !isNoticeLoading) {
+            openNoticeAfterLoading = false
+            if (isNoticeError) showNoticeError = true else showVerificationNotice = true
+        }
     }
 
     BoxWithConstraints(
@@ -137,7 +152,11 @@ fun CameraScreen(
             val context = LocalContext.current
             CameraBottomBar(
                 onNoteClick = {
-                    showVerificationNotice = true
+                    when {
+                        isNoticeLoading -> openNoticeAfterLoading = true
+                        isNoticeError -> showNoticeError = true
+                        else -> showVerificationNotice = true
+                    }
                 },
                 onCaptureClick = {
                     val photoDirectory = File(context.cacheDir, "verification_photos").apply { mkdirs() }
@@ -182,7 +201,23 @@ fun CameraScreen(
         if (showVerificationNotice) {
             VerificationNoticeBottomSheet(
                 challengeTitle = title,
+                successConditions = successConditions,
+                failureConditions = failureConditions,
                 onDismiss = { showVerificationNotice = false }
+            )
+        }
+
+        if (showNoticeError) {
+            OnulDoErrorDialog(
+                title = "유의사항을 불러오지 못했어요",
+                description = "인터넷 연결을 확인한 후 다시 시도해 주세요.",
+                buttonText = "재시도",
+                onButtonClick = {
+                    showNoticeError = false
+                    openNoticeAfterLoading = true
+                    onNoticeRetry()
+                },
+                onDismiss = { showNoticeError = false }
             )
         }
     }

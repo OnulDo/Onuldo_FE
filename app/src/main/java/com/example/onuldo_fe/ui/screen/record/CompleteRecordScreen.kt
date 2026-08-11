@@ -64,6 +64,7 @@ fun CompleteRecordScreen(
                     title = record.title,
                     progress = record.progress,
                     completeDate = record.completeDate,
+                    depositAmount = record.depositAmount,
                     point = record.point
                 )
             }
@@ -79,7 +80,7 @@ private fun CompleteRecordScreenPreview() {
             completeList = listOf(
                 CompleteRecord(participationId = 1, challengeId = 12, isSuccess = true,
                     title = "매일 6시 기상", progress = 92,
-                    completeDate = "2026-08-10", point = 30000)
+                    completeDate = "2026-08-10", depositAmount = 30_000, point = 2_500)
             ),
             totalCompletedCount = 8,
             successRate = 75,

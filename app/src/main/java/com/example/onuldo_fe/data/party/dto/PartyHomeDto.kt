@@ -1,5 +1,7 @@
 package com.example.onuldo_fe.data.party.dto
 
+import com.google.gson.JsonElement
+
 /** GET /api/parties/home 응답의 result. */
 data class PartyHomeResultDto(
     val settlementBanners: List<PartySettlementBannerDto> = emptyList(), // 아직 확인하지 않은 정산 완료 파티 목록
@@ -14,10 +16,12 @@ data class PartyHomeItemDto(
     val challengeId: Long = 0,                              // 인증 API에 전달할 챌린지 ID
     val startDate: String = "",                            // 파티 시작일(yyyy-MM-dd)
     val endDate: String = "",                               // 파티 종료일(yyyy-MM-dd)
-    val verificationDeadline: String? = null,                // 오늘 인증 마감 시각(HH:mm 또는 HH:mm:ss)
+    val verificationDeadline: JsonElement? = null,           // 오늘 인증 마감 시각(HH:mm/HH:mm:ss 또는 LocalTime 객체)
     val showRemainingTime: Boolean = false,                  // 마감까지 남은 시간 표시 여부
     val status: String = "NOT_VERIFIED",                    // 나의 오늘 인증 상태
+    val dailyStatus: String = "WAITING",                    // 챌린지 데일리 상태
     val verifiedAt: String? = null,                          // 오늘 인증 제출 또는 완료 시각
+    val streakDays: Int = 0,                                // 연속 인증 성공 일수
     val members: List<PartyHomeMemberDto> = emptyList(),     // 파티원별 오늘 인증 현황
     // HOME-09 응답에는 category가 없으므로 카메라 상단 표시는 빈 값으로 유지한다.
     val category: String? = null

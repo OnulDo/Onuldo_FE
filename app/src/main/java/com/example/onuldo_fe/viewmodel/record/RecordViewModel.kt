@@ -9,6 +9,7 @@ import com.example.onuldo_fe.repository.record.RecordRepositoryProvider
 import com.example.onuldo_fe.ui.screen.record.data.CompleteRecord
 import com.example.onuldo_fe.ui.screen.record.data.ProgressRecord
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,12 +33,26 @@ class RecordViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(RecordUiState(isLoading = true))
     val uiState = _uiState.asStateFlow()
+    private var loadJob: Job? = null
 
-    init { loadRecords() }
+    init {
+        loadRecords()
+    }
 
-    fun loadRecords() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+    fun loadRecords() = fetchRecords(showLoading = true)
+
+    fun refreshRecords() {
+        if (_uiState.value.isLoading) return
+        fetchRecords(showLoading = false)
+    }
+
+    private fun fetchRecords(showLoading: Boolean) {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoading = showLoading || _uiState.value.isLoading,
+                errorMessage = null
+            )
             try {
                 val (ongoing, completed) = supervisorScope {
                     val ongoingRequest = async { repository.getOngoingChallenges() }
@@ -70,7 +85,8 @@ class RecordViewModel(
                             title = item.title,
                             progress = item.achievementRate,
                             completeDate = item.endedDate,
-                            point = item.netAmount
+                            depositAmount = item.depositAmount,
+                            point = item.adjustmentAmount
                         )
                     },
                     totalCompletedCount = completed.totalCompletedCount,

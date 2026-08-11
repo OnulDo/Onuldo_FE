@@ -24,6 +24,7 @@ import com.example.onuldo_fe.model.party.PartySettlementMember
 import com.example.onuldo_fe.model.party.PartySettlementMemberStatus
 import com.example.onuldo_fe.model.party.PartySettlementResult
 import com.example.onuldo_fe.model.party.PartySettlementStatus
+import com.google.gson.JsonElement
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.LocalTime
@@ -227,8 +228,7 @@ private fun PartyMemberDto.toModel(index: Int) = PartyMember(
     id = userId.toString(),
     nickname = nickname,
     profileImageUrl = profileImageUrl,
-    // TODO: 서버가 기본 캐릭터 정보를 제공하면 userId 기반 임시 배정을 제거한다.
-    defaultCharacterId = ((userId % 9) + 1).toInt(),
+    defaultCharacterId = null,
     role = if (role == "HOST") PartyRole.Leader else PartyRole.Member,
     readyStatus = when (status) {
         "READY" -> PartyMemberReadyStatus.Ready
@@ -258,7 +258,7 @@ private fun RealPartyMemberDto.toModel(index: Int) = PartyMember(
     id = userId.toString(),
     nickname = nickname,
     profileImageUrl = profileImageUrl,
-    defaultCharacterId = ((userId % 9) + 1).toInt(),
+    defaultCharacterId = null,
     role = if (role == "HOST") PartyRole.Leader else PartyRole.Member,
     readyStatus = when (status) {
         "READY" -> PartyMemberReadyStatus.Ready
@@ -277,19 +277,20 @@ private fun RealPartySummaryDto.toModel() = PartySummary(
     goal = goal,
     // 서버의 정렬·종료일 정책과 동일한 계산 dDay를 그대로 사용한다.
     dDay = "D-$dDay",
-    deadline = verificationDeadline,
+    deadline = verificationDeadline.toLocalTimeTextOrNull().orEmpty(),
     // 인증 마감 시각과 현재 시각의 차이를 분 단위로 전달한다.
     // HomePartyCard에서 0~60분일 때만 "N분 남음" 배지를 표시한다.
-    remainingText = remainingTextUntil(verificationDeadline),
+    remainingText = remainingTextUntil(verificationDeadline.toLocalTimeTextOrNull()),
     completedMemberCount = verifiedMemberCount,
     totalMemberCount = totalMemberCount,
     status = status.toLifecycleStatus(),
-    verificationStatus = when (myStatus) {
-        "PENDING" -> PartyVerificationStatus.Pending
+    verificationStatus = when (myDailyStatus ?: myStatus) {
+        "REVIEW_PENDING", "PENDING" -> PartyVerificationStatus.Pending
         "SUCCESS" -> PartyVerificationStatus.Success
         "FAIL" -> PartyVerificationStatus.Fail
         else -> PartyVerificationStatus.NotVerified
     },
+    myDailyStatus = myDailyStatus ?: "WAITING",
     members = members.map { member ->
         PartySummaryMember(
             userId = member.userId,
@@ -300,8 +301,25 @@ private fun RealPartySummaryDto.toModel() = PartySummary(
     }
 )
 
-private fun remainingTextUntil(deadline: String): String? = runCatching {
+private fun remainingTextUntil(deadline: String?): String? = runCatching {
+    if (deadline.isNullOrBlank()) return@runCatching null
     ChronoUnit.MINUTES.between(LocalTime.now(), LocalTime.parse(deadline))
         .takeIf { it >= 0 }
         ?.let { "${it}분 남음" }
 }.getOrNull()
+
+private fun JsonElement?.toLocalTimeTextOrNull(): String? {
+    if (this == null || isJsonNull) return null
+    return runCatching {
+        if (isJsonPrimitive) {
+            asString
+        } else {
+            val time = asJsonObject
+            val hour = time.get("hour")?.takeIf { it.isJsonPrimitive }?.asInt ?: return@runCatching null
+            val minute = time.get("minute")?.takeIf { it.isJsonPrimitive }?.asInt ?: return@runCatching null
+            val second = time.get("second")?.takeIf { it.isJsonPrimitive }?.asInt ?: return@runCatching null
+            if (hour !in 0..23 || minute !in 0..59 || second !in 0..59) return@runCatching null
+            "%02d:%02d:%02d".format(hour, minute, second)
+        }
+    }.getOrNull()
+}

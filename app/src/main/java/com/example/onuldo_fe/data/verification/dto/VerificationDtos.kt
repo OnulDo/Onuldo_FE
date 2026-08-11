@@ -21,3 +21,7 @@ data class ChallengeVerificationResultDto(
     val verifiedAt: String,
     val review: String
 )
+
+data class ManualReviewResultDto(
+    val manualReviewRequestedAt: String? = null
+)

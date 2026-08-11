@@ -20,6 +20,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.model.home.notification.NotificationLandingBus
+import com.example.onuldo_fe.model.home.notification.toLanding
 import com.example.onuldo_fe.ui.component.PermissionDialogType
 import com.example.onuldo_fe.ui.component.PermissionSettingDialog
 import com.example.onuldo_fe.util.moveToAppSettings
@@ -123,7 +125,16 @@ fun HomeRoute(
 
     if (showNotification) {
         BackHandler { showNotification = false }
-        NotificationRoute(onBackClick = { showNotification = false })
+        NotificationRoute(
+            onBackClick = { showNotification = false },
+            onItemClick = { item ->
+                // 리스트 클릭도 푸시 탭과 동일하게 랜딩 버스에 태운다. 실제 이동(챌린지 상세·파티
+                // 정산·파티 피드·기록 진행중/완료·홈)은 MainScreen의 소비자가 한 곳에서 수행한다
+                // → 리스트/푸시 랜딩 규칙이 갈라지지 않는다(NOTI-04 통일).
+                showNotification = false
+                NotificationLandingBus.post(item.toLanding())
+            }
+        )
     } else {
         HomeScreen(
             uiState = viewModel.uiState,
@@ -133,6 +144,7 @@ fun HomeRoute(
             onBrowseChallengesClick = onBrowseChallengesClick,
             onVerifyClick = ::handleVerifyClick,
             onRefresh = viewModel::refreshHome,
+            onRetry = viewModel::loadHome,
             scrollToTopKey = refreshKey
         )
     }

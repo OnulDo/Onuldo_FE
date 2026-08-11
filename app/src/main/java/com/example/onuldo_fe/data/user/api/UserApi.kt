@@ -5,11 +5,8 @@ import com.example.onuldo_fe.data.network.CursorPageResponse
 import com.example.onuldo_fe.data.user.dto.ChargePointRequestDto
 import com.example.onuldo_fe.data.user.dto.ChargePointResponseDto
 import com.example.onuldo_fe.data.user.dto.MyPageResponseDto
-import com.example.onuldo_fe.data.user.dto.NotificationSettingsResponseDto
 import com.example.onuldo_fe.data.user.dto.PointTransactionResponseDto
 import com.example.onuldo_fe.data.user.dto.ProfileResponseDto
-import com.example.onuldo_fe.data.user.dto.UpdateNotificationRequestDto
-import com.example.onuldo_fe.data.user.dto.UpdateNotificationResponseDto
 import com.example.onuldo_fe.data.user.dto.UpdateProfileRequestDto
 import com.example.onuldo_fe.data.user.dto.WalletSummaryResponseDto
 import com.example.onuldo_fe.data.user.dto.WithdrawPointRequestDto
@@ -40,15 +37,6 @@ interface UserApi {
     suspend fun updateProfile(
         @Body request: UpdateProfileRequestDto,
     ): Response<BaseResponse<ProfileResponseDto>>
-
-    @GET("api/users/me/notification-settings")
-    suspend fun getNotificationSettings(): Response<BaseResponse<NotificationSettingsResponseDto>>
-
-    @PATCH("api/users/me/notification-settings")
-    suspend fun updateNotificationSetting(
-        @Body request: UpdateNotificationRequestDto,
-    ): Response<BaseResponse<UpdateNotificationResponseDto>>
-
     @GET("api/users/me/wallet/summary")
     suspend fun getWalletSummary(): Response<BaseResponse<WalletSummaryResponseDto>>
 

@@ -21,6 +21,9 @@ local.properties
 *.p12
 *.jks
 *.keystore
+# 예외: 팀 공용 디버그 키스토어만 커밋한다(비밀번호가 공개 관례값인 디버그 전용 키).
+# 카카오 키 해시를 하나로 통일하기 위함. 릴리스 키는 위 규칙대로 계속 제외된다.
+!keystore/debug.keystore
 .env
 .env.*
 secrets.properties
