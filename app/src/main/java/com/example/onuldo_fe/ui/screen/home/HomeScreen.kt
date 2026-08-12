@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -84,7 +83,6 @@ fun HomeScreen(
         modifier = modifier
             .fillMaxSize()
             .background(SourCream)
-            .statusBarsPadding()
     ) {
         // 홈 API 상태에 따라 기본 홈과 빈 홈 분기
         if (uiState.isLoading) {
@@ -289,10 +287,7 @@ private fun HomeContent(
 
         // 완료 상태일 때 완료 챌린지 목록 노출
         ChallengeSection(
-            title = stringResource(
-                R.string.home_completed_challenge_count,
-                uiState.completedChallenges.size
-            ),
+            title = stringResource(R.string.home_completed_challenge_title),
             visible = isAllCompleted,
             topSpacing = spacing.spacing26,
             itemSpacing = spacing.spacing8

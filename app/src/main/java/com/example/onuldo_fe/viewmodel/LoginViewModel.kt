@@ -22,7 +22,15 @@ data class LoginUiState(
     val email: String = "",
     val password: String = "",
     val isLoading: Boolean = false,
+    /**
+     * 이메일 로그인 오류. 화면이 **비밀번호 입력칸 아래 헬퍼 텍스트**로 노출한다.
+     *
+     * 소셜 로그인 오류를 여기 담으면 안 된다 — 카카오 SDK 실패가 비밀번호가 틀린 것처럼 보인다.
+     * 그쪽은 [socialErrorMessage]를 쓴다.
+     */
     val errorMessage: String? = null,
+    /** 소셜 로그인 오류. 입력칸과 무관하므로 소셜 버튼 아래 배너로 노출한다. */
+    val socialErrorMessage: String? = null,
     /** 소셜 로그인 진행 중인 제공자. 버튼 중복 탭을 막고 로딩 표시에 쓴다. */
     val socialInProgress: SocialProvider? = null,
     /**
@@ -48,12 +56,15 @@ class LoginViewModel(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
+    // 입력을 고치기 시작하면 이전 안내는 지운다. 소셜 안내도 함께 지우는 이유는,
+    // "이메일로 로그인하거나…" 안내를 따라 입력을 시작한 상황이기 때문이다.
+    // 다음 소셜 로그인에서 계정 선택을 강제하는 표시([forceSocialAccountSelection])는 남긴다.
     fun onEmailChange(value: String) {
-        _uiState.update { it.copy(email = value, errorMessage = null) }
+        _uiState.update { it.copy(email = value, errorMessage = null, socialErrorMessage = null) }
     }
 
     fun onPasswordChange(value: String) {
-        _uiState.update { it.copy(password = value, errorMessage = null) }
+        _uiState.update { it.copy(password = value, errorMessage = null, socialErrorMessage = null) }
     }
 
     /**
@@ -68,13 +79,17 @@ class LoginViewModel(
         if (state.isBusy) return
 
         if (!Validators.isValidEmail(state.email)) {
-            _uiState.update { it.copy(errorMessage = INVALID_CREDENTIAL_MESSAGE) }
+            // 여기서 바로 반환하므로 아래의 일괄 초기화를 타지 않는다.
+            // 소셜 오류를 남겨 두면 배너와 입력칸 오류가 동시에 뜬다(둘은 따로 렌더된다).
+            _uiState.update {
+                it.copy(errorMessage = INVALID_CREDENTIAL_MESSAGE, socialErrorMessage = null)
+            }
             return
         }
 
         // 로딩 표시는 launch 밖에서 동기적으로 세운다. launch 안에서 세우면 코루틴이 실행되기
         // 전에 버튼을 다시 눌러 요청이 두 번 나갈 수 있다.
-        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        _uiState.update { it.copy(isLoading = true, errorMessage = null, socialErrorMessage = null) }
 
         viewModelScope.launch {
             authRepository.login(state.email, state.password)
@@ -118,7 +133,9 @@ class LoginViewModel(
         if (_uiState.value.isBusy) return
 
         // 로그인 시작 표시도 launch 밖에서 세워 중복 실행을 막는다.
-        _uiState.update { it.copy(socialInProgress = provider, errorMessage = null) }
+        _uiState.update {
+            it.copy(socialInProgress = provider, errorMessage = null, socialErrorMessage = null)
+        }
 
         // 직전 시도가 기존 계정과 충돌했다면 이번에는 계정을 다시 고르게 한다.
         val forceAccountSelection = _uiState.value.forceSocialAccountSelection
@@ -129,7 +146,9 @@ class LoginViewModel(
                     _uiState.update { it.copy(socialInProgress = null) }
 
                 is SocialAuthResult.Failure ->
-                    _uiState.update { it.copy(socialInProgress = null, errorMessage = social.message) }
+                    _uiState.update {
+                        it.copy(socialInProgress = null, socialErrorMessage = social.message)
+                    }
 
                 is SocialAuthResult.Success -> {
                     authRepository.oauthLogin(provider, social.accessToken)
@@ -149,7 +168,7 @@ class LoginViewModel(
                         }
                         .onError { _, message ->
                             _uiState.update {
-                                it.copy(socialInProgress = null, errorMessage = message)
+                                it.copy(socialInProgress = null, socialErrorMessage = message)
                             }
                         }
                 }
@@ -165,7 +184,9 @@ class LoginViewModel(
      */
     fun showExistingAccountNotice(message: String) {
         if (message.isBlank()) return
-        _uiState.update { it.copy(errorMessage = message, forceSocialAccountSelection = true) }
+        _uiState.update {
+            it.copy(socialErrorMessage = message, forceSocialAccountSelection = true)
+        }
     }
 
     private companion object {

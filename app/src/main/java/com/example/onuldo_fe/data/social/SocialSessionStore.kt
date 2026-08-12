@@ -7,12 +7,12 @@ import com.example.onuldo_fe.data.auth.dto.SocialProvider
 /**
  * 현재 세션이 **어떤 경로로 로그인했는지** 기억한다.
  *
- * 회원 탈퇴 시 소셜 연동까지 끊으려면 카카오인지 네이버인지 알아야 하는데,
+ * 회원 탈퇴 시 소셜 연동까지 끊어야 하는 계정인지 알아야 하는데,
  * 서버 `GET /api/users/me`는 가입 경로를 내려주지 않는다. 그래서 로그인·가입에 성공한 시점에
  * 앱이 직접 남겨 둔다.
  *
  * 자동 로그인으로 세션이 앱 재시작을 넘어 이어지므로 저장은 디스크에 한다.
- * 값이 "KAKAO/NAVER/EMAIL" 중 하나일 뿐이라 토큰([com.example.onuldo_fe.data.network.PersistentTokenStore])과
+ * 값이 "KAKAO/EMAIL" 중 하나일 뿐이라 토큰([com.example.onuldo_fe.data.network.PersistentTokenStore])과
  * 달리 암호화하지 않는다.
  */
 internal object SocialSessionStore {

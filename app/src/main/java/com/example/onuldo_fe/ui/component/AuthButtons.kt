@@ -60,7 +60,7 @@ fun SecondaryButton(
 }
 
 /**
- * 소셜 로그인 버튼 (카카오/네이버). 아이콘은 좌측 정렬, 텍스트는 중앙 정렬.
+ * 소셜 로그인 버튼 (카카오). 아이콘은 좌측 정렬, 텍스트는 중앙 정렬.
  */
 @Composable
 fun SocialLoginButton(
