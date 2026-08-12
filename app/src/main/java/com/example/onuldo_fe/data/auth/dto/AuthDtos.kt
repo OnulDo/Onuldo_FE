@@ -17,11 +17,16 @@ enum class TermType {
     }
 }
 
-/** 소셜 로그인 제공자. 서버 `SocialProvider` enum과 일치. */
+/**
+ * 소셜 로그인 제공자. 서버 `SocialProvider` enum과 이름이 일치해야 한다.
+ *
+ * 서버에는 `NAVER`도 있지만 앱은 네이버 로그인을 제공하지 않으므로 여기서는 뺐다(2026-08-11).
+ * 이 값은 앱이 서버로 **보내기만** 하고 응답으로 받지는 않으므로(`OAuthLoginResponse`에
+ * provider 필드가 없다) 값이 빠져 있어도 역직렬화가 깨지지 않는다.
+ */
 enum class SocialProvider {
     EMAIL,
     KAKAO,
-    NAVER,
 }
 
 data class TermAgreementRequest(

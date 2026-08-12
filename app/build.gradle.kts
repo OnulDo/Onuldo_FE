@@ -70,8 +70,6 @@ android {
         buildConfigField("String", "PROFILE_BASE_URL", quotedBuildConfig(env("PROFILE_BASE_URL")))
         val kakaoNativeAppKey = secret("KAKAO_NATIVE_APP_KEY")
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", quotedBuildConfig(kakaoNativeAppKey))
-        buildConfigField("String", "NAVER_CLIENT_ID", quotedBuildConfig(secret("NAVER_CLIENT_ID")))
-        buildConfigField("String", "NAVER_CLIENT_SECRET", quotedBuildConfig(secret("NAVER_CLIENT_SECRET")))
 
         // 카카오톡 앱 로그인 결과를 돌려받는 커스텀 스킴(kakao{네이티브앱키}).
         manifestPlaceholders["kakaoNativeAppKey"] = kakaoNativeAppKey
@@ -103,7 +101,7 @@ android {
             // 릴리스 서명은 의도적으로 비워 둔다. 위 공용 키스토어는 디버그 전용이므로
             // 여기에 signingConfig를 연결하면 안 된다. 출시용 키는 저장소 밖에서
             // 따로 관리하고(로컬 keystore.properties 또는 CI 시크릿),
-            // 그때 카카오·네이버 콘솔에서 디버그 키 해시를 제거한다.
+            // 그때 카카오 콘솔에서 디버그 키 해시를 제거한다.
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -158,7 +156,6 @@ dependencies {
     implementation("androidx.exifinterface:exifinterface:1.4.1")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation(libs.kakao.user)
-    implementation(libs.naver.oauth)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

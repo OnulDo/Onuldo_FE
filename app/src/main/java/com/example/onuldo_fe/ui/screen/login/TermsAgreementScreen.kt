@@ -196,7 +196,9 @@ private fun AgreeAllCard(
                 color = Black,
             )
             Text(
-                text = "필수 항목에 모두 동의합니다",
+                // Figma `5580:3404` 문구. 현재 화면의 4개 항목은 모두 필수이고 선택 항목은
+                // 마케팅 수신 동의(V2)라 아직 없다 — 항목이 추가되면 이 문구와 맞아떨어진다.
+                text = "필수 및 선택 항목에 모두 동의합니다",
                 style = MaterialTheme.typography.labelLarge,
                 color = DarkBrown70,
             )
