@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -72,7 +71,6 @@ fun HomeScreen(
         modifier = modifier
             .fillMaxSize()
             .background(SourCream)
-            .statusBarsPadding()
     ) {
         // 홈 API 상태에 따라 기본 홈과 빈 홈 분기
         if (uiState.isLoading) {

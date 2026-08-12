@@ -87,6 +87,7 @@ fun EmptyChallengeContent(
             onClick = onBrowseChallengesClick,
             height = 52.dp,
             fontSize = 14.sp,
+            lineHeight = 22.sp,
             horizontalPadding = 0.dp,
             pressedContainerColor = DarkBrown,
             // 제목·설명은 350dp를 사용하고 CTA만 Figma 기준 278dp로 제한
