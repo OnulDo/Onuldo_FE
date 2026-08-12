@@ -35,6 +35,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.viewmodel.mypage.TermViewModel
@@ -91,26 +92,14 @@ fun TermScreen(
                     Spacer(Modifier.height(spacing.spacing20))
                     Text(
                         text = term.title?.takeIf { it.isNotBlank() } ?: fallbackTitle,
-                        fontFamily = Pretendard,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp,
-                        lineHeight = 40.sp,
+                        style = OnulDoTypography.title1Bold,
                         color = BlackBrown,
-                        style = TextStyle(
-                            platformStyle = PlatformTextStyle(includeFontPadding = false),
-                            lineHeightStyle = LineHeightStyle(
-                                alignment = LineHeightStyle.Alignment.Proportional,
-                                trim = LineHeightStyle.Trim.Both,
-                            ),
-                        ),
-                    )
+                        )
                     Spacer(Modifier.height(spacing.spacing8))
                     term.effectiveDate?.takeIf { it.isNotBlank() }?.let { date ->
                         Text(
                             text = "시행일자 $date",
-                            fontFamily = Pretendard,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 12.sp,
+                            style = OnulDoTypography.caption2Medium,
                             color = DarkBrown50,
                         )
                         Spacer(Modifier.height(spacing.spacing48))
@@ -140,19 +129,13 @@ private fun TermBlock(block: TermContentBlock) {
     if (block.type in HEADING_TYPES) {
         Text(
             text = block.content,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
-            lineHeight = 22.sp,
+            style = OnulDoTypography.body4Bold,
             color = BlackBrown,
         )
     } else {
         Text(
             text = block.content,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 13.sp,
-            lineHeight = 20.sp,
+            style = OnulDoTypography.caption1Medium,
             color = BlackBrown50,
         )
     }
@@ -178,8 +161,7 @@ private fun MessageBox(message: String) {
     ) {
         Text(
             text = message,
-            fontFamily = Pretendard,
-            fontSize = 13.sp,
+            style = OnulDoTypography.caption1Regular,
             color = DarkBrown70,
         )
     }

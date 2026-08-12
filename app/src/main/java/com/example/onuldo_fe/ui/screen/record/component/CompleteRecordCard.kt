@@ -28,6 +28,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
@@ -58,7 +59,7 @@ fun CompleteRecordCard(
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         text = if (isSuccess) "성공" else "실패",
-                        style = MaterialTheme.typography.titleSmall,
+                        style = OnulDoTypography.caption3Bold,
                         color = statusColor
                     )
                 }
@@ -68,16 +69,16 @@ fun CompleteRecordCard(
                 Text(title, style = MaterialTheme.typography.bodyMedium, color = BlackBrown)
                 Text(
                     text = if (isSuccess) "보너스" else "차감",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = OnulDoTypography.caption2Bold,
                     color = Black
                 )
             }
             Spacer(Modifier.height(3.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("달성률 $progress%", style = MaterialTheme.typography.labelMedium, color = DarkBrown)
+                Text("달성률 $progress%", style = OnulDoTypography.caption3Regular, color = DarkBrown)
                 Text(
                     text = "${if (point > 0) "+" else ""}${"%,d".format(point)}P",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = OnulDoTypography.caption3Regular,
                     color = statusColor
                 )
             }
@@ -85,12 +86,12 @@ fun CompleteRecordCard(
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                 Text(
                     "$completeDate ${if (isSuccess) "완료" else "실패"}",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = OnulDoTypography.caption3Regular,
                     color = DarkBrown70
                 )
                 Text(
                     text = "예치금 ${"%,d".format(depositAmount)}P",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = OnulDoTypography.caption3Regular,
                     color = DarkBrown70
                 )
             }

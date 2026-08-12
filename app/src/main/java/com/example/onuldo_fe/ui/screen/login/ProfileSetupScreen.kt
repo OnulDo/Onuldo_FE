@@ -42,22 +42,19 @@ import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.component.OnuldoTextField
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.viewmodel.ProfileSetupViewModel
 
-/**
- * 프로필 설정 — 온보딩 4/4 (Ready for Dev node `5154:4417`).
- * 점선 빈 원 + "+"(미선택) → 탭 시 캐릭터 선택 바텀시트 → 닉네임 입력 → "계속".
- */
+
 @Composable
 fun ProfileSetupScreen(
     onBack: () -> Unit,
     onDone: () -> Unit,
     onEmailChangeRequired: (String) -> Unit = {},
-    /** 소셜 가입이 "이미 가입된 계정"으로 막혔을 때 — 로그인 화면으로 되돌린다. */
     onExistingAccount: (String) -> Unit = {},
     viewModel: ProfileSetupViewModel = viewModel(),
 ) {
@@ -76,18 +73,14 @@ fun ProfileSetupScreen(
         Spacer(Modifier.height(24.dp))
         Text(
             text = "프로필을 설정해주세요",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 28.sp,
+            style = OnulDoTypography.headline1ExtraBold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 20.dp),
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = "프로필과 닉네임을 정해주세요",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Normal,
-            fontSize = 14.sp,
+            style = OnulDoTypography.body4Regular,
             color = DarkBrown70,
             modifier = Modifier.padding(horizontal = 20.dp),
         )
@@ -95,9 +88,7 @@ fun ProfileSetupScreen(
         Spacer(Modifier.height(24.dp))
         Text(
             text = "프로필",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
+            style = OnulDoTypography.caption2Bold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 20.dp),
         )

@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.SourCream70
 import com.example.onuldo_fe.ui.theme.White
 
@@ -57,13 +58,13 @@ fun CameraTopBar(
         ) {
             Text(
                 text = category,
-                style = MaterialTheme.typography.labelSmall,
+                style = OnulDoTypography.caption3Medium,
                 color = SourCream70
             )
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
+                style = OnulDoTypography.body2Bold,
                 color = White
             )
         }

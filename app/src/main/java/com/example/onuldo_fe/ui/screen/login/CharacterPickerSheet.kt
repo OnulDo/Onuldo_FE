@@ -29,6 +29,7 @@ import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -64,9 +65,7 @@ fun CharacterPickerSheet(
     ) {
         Text(
             text = "프로필 사진 선택",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
+            style = OnulDoTypography.body2Bold,
             color = BlackBrown,
             modifier = Modifier.padding(start = 24.dp),
         )

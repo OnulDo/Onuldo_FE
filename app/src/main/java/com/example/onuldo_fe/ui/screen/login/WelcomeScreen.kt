@@ -23,13 +23,10 @@ import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
-/**
- * 가입 완료(환영) 화면 — 온보딩 마지막, Figma node `4310:1375`.
- * 히어로 카드(파티 캐릭터 + 색종이) + "환영해요!" + 축하 문구 + "오늘두 시작하기".
- * 온보딩 종료 화면이라 진행 헤더·뒤로가기 없음.
- */
+
 @Composable
 fun WelcomeScreen(
     onStart: () -> Unit,
@@ -51,7 +48,7 @@ fun WelcomeScreen(
 
         Text(
             text = "환영해요!",
-            style = MaterialTheme.typography.headlineLarge,
+            style = OnulDoTypography.headline1ExtraBold,
             color = BlackBrown,
             textAlign = TextAlign.Center,
         )
@@ -60,7 +57,7 @@ fun WelcomeScreen(
 
         Text(
             text = "오늘DO 가족이 되신 걸 축하드려요\n이제 첫 챌린지를 등록해볼까요?",
-            style = MaterialTheme.typography.labelLarge,
+            style = OnulDoTypography.caption1Regular,
             color = DarkBrown70,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 20.dp),
@@ -70,7 +67,7 @@ fun WelcomeScreen(
 
         Text(
             text = "가입 시 환영 보너스 100,000P가 함께 시작돼요",
-            style = MaterialTheme.typography.bodyMedium,
+            style = OnulDoTypography.caption1Bold,
             color = Persimmon
             )
 
@@ -79,6 +76,7 @@ fun WelcomeScreen(
         OnulDoButton(
             text = "오늘DO 시작하기",
             onClick = onStart,
+            textStyle = OnulDoTypography.startButton,
         )
 
         Spacer(Modifier.height(48.dp))

@@ -28,6 +28,7 @@ import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.screen.mypage.MySubText
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
@@ -80,16 +81,12 @@ fun AmountInputBox(
         ) {
             Text(
                 text = amount,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 32.sp,
+                style = OnulDoTypography.displayBold,
                 color = BlackBrown,
             )
             Text(
                 text = unit,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
+                style = OnulDoTypography.title1Bold,
                 color = MySubText,
                 modifier = Modifier.padding(start = 8.dp),
             )
@@ -124,9 +121,7 @@ fun AmountChip(
     ) {
         Text(
             text = text,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp,
+            style = OnulDoTypography.caption2Bold,
             color = if (selected) White else BlackBrown,
         )
     }

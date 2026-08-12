@@ -74,7 +74,7 @@ fun SignupScreen(
         // Figma(RFD) 타이틀 = Pretendard ExtraBold 28px (headlineLarge 토큰과 동일).
         Text(
             text = "계정 만들기",
-            style = OnulDoTypography.header1ExtraBold,
+            style = OnulDoTypography.headline1ExtraBold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = gutter,
         )

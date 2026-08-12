@@ -47,6 +47,7 @@ import com.example.onuldo_fe.ui.component.PermissionSettingDialog
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Persimmon20
@@ -110,10 +111,7 @@ fun SettingScreen(
             )
             Text(
                 text = "알림 설정",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                lineHeight = 16.sp,
+                style = OnulDoTypography.body2Bold,
                 color = BlackBrown
             )
         }
@@ -291,10 +289,7 @@ private fun SettingToggleRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                lineHeight = 14.sp,
+                style = OnulDoTypography.body4Bold,
                 color = BlackBrown
             )
 
@@ -302,10 +297,7 @@ private fun SettingToggleRow(
 
             Text(
                 text = description,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Normal,
-                fontSize = 11.sp,
-                lineHeight = 11.sp,
+                style = OnulDoTypography.caption3Regular,
                 color = DarkBrown50
             )
         }
@@ -316,10 +308,7 @@ private fun SettingToggleRow(
         when {
             trailingText != null -> Text(
                 text = trailingText,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 11.sp,
-                lineHeight = 11.sp,
+                style = OnulDoTypography.caption3Bold,
                 color = DarkBrown50
             )
 

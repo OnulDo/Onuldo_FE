@@ -37,6 +37,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown20
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
@@ -87,10 +88,7 @@ fun VerificationNoticeBottomSheet(
 
         Text(
             text = "인증 유의사항",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            lineHeight = 18.sp,
+            style = OnulDoTypography.body1Bold,
             color = BlackBrown,
             modifier = Modifier.padding(start = 24.dp)
         )
@@ -103,10 +101,7 @@ fun VerificationNoticeBottomSheet(
 
         Text(
             text = challengeTitle,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Normal,
-            fontSize = 11.sp,
-            lineHeight = 11.sp,
+            style = OnulDoTypography.caption3Medium,
             color = DarkBrown,
             modifier = Modifier.padding(start = 24.dp)
         )
@@ -188,22 +183,19 @@ private fun ConditionBox(
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyMedium,  // Body3
+                style = OnulDoTypography.body4Regular,
                 color = accent
             )
         }
 
         Spacer(Modifier.height(12.dp))   // 헤더 ↔ 목록
 
-        // 항목 사이 간격은 패딩 4dp로 배분(첫 항목 제외) — TODO: 추후 4추가할 예정
+        // 항목 사이 간격은 패딩 4dp로 배분(첫 항목 제외)
         Column(modifier = Modifier.fillMaxWidth()) {
             items.forEachIndexed { index, item ->
                 Text(
                     text = item,
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Normal,  // Caption3: 12sp / 400 / lineHeight 20
-                    fontSize = 12.sp,
-                    lineHeight = 20.sp,
+                    style = OnulDoTypography.caption2Regular,
                     color = BlackBrown,
                     modifier = if (index == 0) Modifier else Modifier.padding(top = 4.dp)
                 )

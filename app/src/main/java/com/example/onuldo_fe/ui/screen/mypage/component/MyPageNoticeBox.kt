@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown30
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Pretendard
 
@@ -64,10 +65,7 @@ fun MyPageNoticeBox(
         Spacer(Modifier.height(textTopGap))
         Text(
             text = text,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
-            lineHeight = 22.sp,
+            style = OnulDoTypography.body4Bold,
             color = DarkBrown,
             textAlign = TextAlign.Center,
         )

@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
@@ -45,7 +46,7 @@ fun PreviewBottomBar(
         ) {
             Text(
                 text = "재촬영",
-                style = MaterialTheme.typography.bodyLarge,
+                style = OnulDoTypography.body4Bold,
                 color = SourCream
             )
         }
@@ -63,7 +64,7 @@ fun PreviewBottomBar(
         ) {
             Text(
                 text = "인증 제출",
-                style = MaterialTheme.typography.bodyLarge,
+                style = OnulDoTypography.body4Bold,
                 color = SourCream
             )
         }

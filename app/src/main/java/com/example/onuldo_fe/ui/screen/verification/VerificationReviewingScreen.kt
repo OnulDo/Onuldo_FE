@@ -29,6 +29,7 @@ import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.screen.verification.VerificationStepCard.component.VerificationStepCard
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import kotlinx.coroutines.delay
 
@@ -69,9 +70,9 @@ fun VerificationReviewingScreen(
                 modifier = Modifier.fillMaxWidth().padding(top = 27.dp).height(48.dp)
             ) {
                 Text(
-                    text = "인증 결과",
+                    text = "인증 검토중",
                     color = BlackBrown,
-                    fontSize = 16.sp,
+                    style = OnulDoTypography.body2Bold,
                     modifier = Modifier.align(Alignment.Center),
                     textAlign = TextAlign.Center
                 )
@@ -85,14 +86,14 @@ fun VerificationReviewingScreen(
             Text(
                 text = "AI가 인증 사진을 확인하고 있어요",
                 color = BlackBrown,
-                style = MaterialTheme.typography.titleLarge,
+                style = OnulDoTypography.body1Bold,
                 modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "잠시만 기다려주세요! (예상 소요 시간 약 5초)",
                 color = DarkBrown70,
-                fontSize = 13.sp,
+                style = OnulDoTypography.caption1Regular,
                 modifier = Modifier.padding(top = 8.dp),
                 textAlign = TextAlign.Center
             )
