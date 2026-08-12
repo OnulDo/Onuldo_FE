@@ -32,9 +32,12 @@ sealed interface TokenRefreshOutcome {
  * 판정 기준은 **HTTP 상태와 에러 코드**다. 응답 본문이 없다는 이유만으로 거부로 보면
  * 5xx가 곧 로그아웃이 된다.
  */
-fun TokenRefreshApi.executeRefresh(refreshToken: String): TokenRefreshOutcome =
+fun TokenRefreshApi.executeRefresh(
+    refreshToken: String,
+    device: com.example.onuldo_fe.data.auth.dto.DeviceRequest,
+): TokenRefreshOutcome =
     try {
-        val response = refresh(RefreshTokenRequest(refreshToken)).execute()
+        val response = refresh(RefreshTokenRequest(refreshToken, device)).execute()
         val body = response.body()
         val tokens = if (body?.isSuccess == true) body.result?.toTokensOrNull() else null
 
