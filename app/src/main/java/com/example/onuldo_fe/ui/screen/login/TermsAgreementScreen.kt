@@ -41,19 +41,14 @@ import com.example.onuldo_fe.ui.theme.Black
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown30
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.viewmodel.OnboardingDraft
 
-/**
- * 화면에 노출하는 약관 항목. [detail]이 있으면 본문 화면으로 이동한다.
- * "만 14세 이상"은 별도 문서가 없어 이동 없이 체크만 한다.
- *
- * [required]는 화면설계서 회원가입(`3766:6295`) 항목 4 기준 —
- * 화면에 노출되는 약관은 모두 필수이며 하나라도 미동의하면 완료 버튼을 비활성화한다.
- */
+
 private enum class AgreeItem(
     val label: String,
     val detail: TermType?,
@@ -65,23 +60,13 @@ private enum class AgreeItem(
     REFUND("환급 정책 동의", TermType.REFUND, required = true),
 }
 
-/**
- * 약관 상세로 이동했다가 뒤로 돌아와도 체크 상태를 유지하기 위한 Saver
- */
+
 private val AgreeCheckedSaver = listSaver<Set<AgreeItem>, Int>(
     save = { checked -> checked.map(AgreeItem::ordinal) },
     restore = { ordinals -> ordinals.map { AgreeItem.entries[it] }.toSet() },
 )
 
-/**
- * 약관 동의 화면 — Figma node `5580:3391`.
- *
- * 이메일 회원가입과 소셜 신규 가입이 **공통으로** 거치는 단계다.
- * 서버 `POST /api/auth/signup`·`oauth/signup`이 `termAgreements`를 필수로 요구하므로
- * 여기서 동의를 받아 [OnboardingDraft]에 기록하고 프로필 설정으로 넘어간다.
- *
- * 회원가입 화면에 있던 "전체 약관에 동의합니다" 카드는 이 화면으로 대체됐다.
- */
+
 @Composable
 fun TermsAgreementScreen(
     onBack: () -> Unit,
@@ -121,7 +106,7 @@ fun TermsAgreementScreen(
 
         Text(
             text = "약관에 동의해주세요",
-            style = MaterialTheme.typography.headlineLarge,
+            style = OnulDoTypography.header1ExtraBold,
             color = BlackBrown,
             modifier = gutter,
         )
@@ -130,7 +115,7 @@ fun TermsAgreementScreen(
 
         Text(
             text = "서비스 이용을 위해 아래 약관에 동의해주세요",
-            style = MaterialTheme.typography.bodyMedium,
+            style = OnulDoTypography.body5Medium,
             color = DarkBrown70,
             modifier = gutter,
         )
@@ -165,7 +150,6 @@ fun TermsAgreementScreen(
                 onNext()
             },
             enabled = requiredChecked,
-            fontSize = 17.sp,
         )
         Spacer(Modifier.height(24.dp))
     }
@@ -192,14 +176,14 @@ private fun AgreeAllCard(
         Column {
             Text(
                 text = "전체 동의",
-                style = MaterialTheme.typography.bodyLarge,
+                style = OnulDoTypography.body3Bold,
                 color = Black,
             )
             Text(
                 // Figma `5580:3404` 문구. 현재 화면의 4개 항목은 모두 필수이고 선택 항목은
                 // 마케팅 수신 동의(V2)라 아직 없다 — 항목이 추가되면 이 문구와 맞아떨어진다.
                 text = "필수 및 선택 항목에 모두 동의합니다",
-                style = MaterialTheme.typography.labelLarge,
+                style = OnulDoTypography.caption1Medium,
                 color = DarkBrown70,
             )
         }
@@ -227,13 +211,13 @@ private fun AgreeItemRow(
         // 필수는 Persimmon으로 강조, 선택은 본문과 같은 톤으로 낮춘다.
         Text(
             text = if (item.required) "[필수]" else "[선택]",
-            style = MaterialTheme.typography.bodyMedium,
+            style = OnulDoTypography.body5Bold,
             color = if (item.required) Persimmon else DarkBrown70,
         )
         Spacer(Modifier.width(6.dp))
         Text(
             text = item.label,
-            style = MaterialTheme.typography.bodyMedium,
+            style = OnulDoTypography.body4Medium,
             color = BlackBrown,
             modifier = Modifier.weight(1f),
         )
