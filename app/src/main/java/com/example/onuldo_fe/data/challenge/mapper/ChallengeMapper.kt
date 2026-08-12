@@ -1,12 +1,10 @@
 package com.example.onuldo_fe.data.challenge.mapper
 
 import com.example.onuldo_fe.data.challenge.dto.ChallengeItemDto
-import com.example.onuldo_fe.data.challenge.dto.ChallengeListResultDto
 import com.example.onuldo_fe.data.challenge.dto.ParticipationResultDto
 import com.example.onuldo_fe.model.challenge.BlockType
 import com.example.onuldo_fe.model.challenge.ChallengeCategory
 import com.example.onuldo_fe.model.challenge.ChallengeDetail
-import com.example.onuldo_fe.model.challenge.ChallengePage
 import com.example.onuldo_fe.model.challenge.ContentBlock
 import com.example.onuldo_fe.model.challenge.ParticipationResult
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
@@ -26,14 +24,6 @@ fun ChallengeItemDto.toModel(): Challenge = Challenge(
     participantCount = participantCount,
     category = category.toChallengeCategory(),
     imageUrl = captionImgUrl
-)
-
-// 목록 응답 → 도메인 페이지 (커서 기반: page는 미사용이라 0)
-//TODO: 무한 스크롤 구현시 page 사용 (2순위)
-fun ChallengeListResultDto.toModel(): ChallengePage = ChallengePage(
-    challenges = content.map { it.toModel() },
-    page = 0,
-    hasNext = hasNext
 )
 
 // 상세 응답 DTO → 상세 도메인 모델

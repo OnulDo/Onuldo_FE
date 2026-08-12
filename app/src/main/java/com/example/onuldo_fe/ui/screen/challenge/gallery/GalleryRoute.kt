@@ -39,10 +39,14 @@ fun GalleryRoute(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    // 목록 조회 실패는 토스트로만 //TODO: 토스트 추가 예정
+    // 최초 조회 실패는 토스트로 안내 (서버/네트워크 문구 그대로, 목록은 빈 상태 유지)
     LaunchedEffect(uiState.isError) {
         if (uiState.isError) {
-            Toast.makeText(context, "챌린지 목록을 불러오지 못했어요", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                uiState.errorMessage ?: "챌린지 목록을 불러오지 못했어요",
+                Toast.LENGTH_SHORT
+            ).show()
             viewModel.onErrorShown()
         }
     }

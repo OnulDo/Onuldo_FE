@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.viewmodel.party
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -77,6 +78,7 @@ class PartyViewModel(
     private var partyListGeneration: Long = 0L
     private var hasLoadedPartyList: Boolean = false
     private var pointRequestGeneration: Long = 0L
+    private var currentUserReadyLookup: CurrentUserReadyLookup? = null
     // 백그라운드 전환으로 자동 이탈을 시도했지만 실패해 아직 해소되지 않은 파티 ID.
     // 화면은 이미 목록으로 돌아갔으므로, 다음에 목록이 다시 보일 때 조용히 재시도한다.
     private var pendingAutoLeavePartyId: String? = null
@@ -175,7 +177,8 @@ class PartyViewModel(
                 )
             } catch (error: CancellationException) {
                 throw error
-            } catch (_: Exception) {
+            } catch (error: Exception) {
+                Log.w(PARTY_VIEW_MODEL_TAG, "파티 목록 조회 실패", error)
                 if (generation != partyListGeneration) return@launch
                 uiState = uiState.copy(
                     isListLoading = false,
@@ -242,15 +245,16 @@ class PartyViewModel(
         // 방장과 파티원이 동일한 API 응답을 사용해 역할·준비 상태·정원 표시
         uiState = uiState.copy(
             waitingRoom = null,
-            isReadySubmitted = false,
             action = PartyAction.LoadingRoom,
             errorMessage = null
         )
         viewModelScope.launch {
             runCatching { repository.getWaitingRoom(partyId) }
                 .onSuccess { room ->
+                    val currentReady = readySubmittedForCurrentUser(room)
                     uiState = uiState.copy(
                         waitingRoom = room.toUi(),
+                        isReadySubmitted = currentReady ?: uiState.isReadySubmitted,
                         action = PartyAction.Idle
                     )
                     onSuccess()
@@ -307,7 +311,11 @@ class PartyViewModel(
                 uiState.action == PartyAction.Idle &&
                 requestGeneration == waitingRoomMutationGeneration
             ) {
-                uiState = uiState.copy(waitingRoom = room.toUi())
+                val currentReady = readySubmittedForCurrentUser(room)
+                uiState = uiState.copy(
+                    waitingRoom = room.toUi(),
+                    isReadySubmitted = currentReady ?: uiState.isReadySubmitted
+                )
             }
         } catch (error: CancellationException) {
             throw error
@@ -321,10 +329,15 @@ class PartyViewModel(
         waitingRoomMutationGeneration++
         uiState = uiState.copy(
             waitingRoom = room.toUi(),
-            isReadySubmitted = false,
             action = PartyAction.Idle,
             errorMessage = null
         )
+        viewModelScope.launch {
+            val currentReady = readySubmittedForCurrentUser(room) ?: return@launch
+            if (uiState.waitingRoom?.partyId == room.partyId) {
+                uiState = uiState.copy(isReadySubmitted = currentReady)
+            }
+        }
     }
 
     fun readyParty() {
@@ -332,6 +345,7 @@ class PartyViewModel(
         // 포인트 부족 여부는 화면에서 먼저 확인하고 실제 연동 후 서버에서도 최종 검증
         val partyId = uiState.waitingRoom?.partyId ?: return
         if (uiState.action != PartyAction.Idle) return
+        val targetReady = !uiState.isReadySubmitted
         waitingRoomMutationGeneration++
         uiState = uiState.copy(
             action = PartyAction.ReadySubmitting,
@@ -340,7 +354,7 @@ class PartyViewModel(
         )
         viewModelScope.launch {
             // READY로 바꿀 때만 최신 잔액을 확인하고, WAITING 복귀는 포인트 검사 없이 요청한다.
-            if (!uiState.isReadySubmitted) {
+            if (targetReady) {
                 fetchAvailablePoint()?.let { point ->
                     val availablePoint = point.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
                     uiState = uiState.copy(availablePoint = availablePoint)
@@ -356,11 +370,12 @@ class PartyViewModel(
             }
 
             try {
-                val room = repository.readyParty(partyId)
-                // 서버의 토글 결과에 맞춰 준비하기와 대기 상태를 전환한다.
+                val room = repository.readyParty(partyId, ready = targetReady)
+                val currentReady = readySubmittedForCurrentUser(room) ?: targetReady
+                // 요청할 때 정한 목표 상태를 그대로 반영한다.
                 uiState = uiState.copy(
                     waitingRoom = room.toUi(),
-                    isReadySubmitted = !uiState.isReadySubmitted,
+                    isReadySubmitted = currentReady,
                     action = PartyAction.Idle
                 )
             } catch (error: CancellationException) {
@@ -445,6 +460,29 @@ class PartyViewModel(
         }
     }
 
+    private suspend fun readySubmittedForCurrentUser(room: PartyWaitingRoom): Boolean? {
+        if (room.isHost) return false
+
+        val currentUser = currentUserReadyLookup ?: userRepository.getProfile().getOrNull()?.let { profile ->
+            CurrentUserReadyLookup(
+                nickname = profile.nickname,
+                profileImageUrl = profile.profileImageUrl
+            )
+        }?.also { currentUserReadyLookup = it } ?: return null
+
+        val currentMember = room.members.firstOrNull { member ->
+            member.role == PartyRole.Member &&
+                member.nickname == currentUser.nickname &&
+                (
+                    currentUser.profileImageUrl == null ||
+                        member.profileImageUrl == null ||
+                        member.profileImageUrl == currentUser.profileImageUrl
+                    )
+        } ?: return null
+
+        return currentMember.readyStatus == PartyMemberReadyStatus.Ready
+    }
+
     fun startParty(onSuccess: (String) -> Unit) {
         // 시작 요청 중 중복 클릭 방지 및 성공 후 진행 중 파티 목록 재조회
         // 시작 가능 조건은 버튼 활성화에 사용하고 서버가 동일 조건을 다시 검증
@@ -472,6 +510,11 @@ class PartyViewModel(
         }
     }
 }
+
+private data class CurrentUserReadyLookup(
+    val nickname: String,
+    val profileImageUrl: String?
+)
 
 private data class PartyServerError(
     val code: String = "",
@@ -524,6 +567,8 @@ private fun PartyWaitingRoom.toUi() = PartyWaitingRoomUi(
     }
 )
 
+private const val PARTY_VIEW_MODEL_TAG = "PartyViewModel"
+
 // 서버 문자열 상태가 변환된 도메인 enum을 화면에서 사용하는 enum으로 매핑
 private fun PartyMember.toUi() = PartyMemberUi(
     name = nickname,
@@ -557,6 +602,7 @@ private fun PartySummary.toUi() = PartyCardUi(
         PartyVerificationStatus.Success -> ChallengeStatus.Success
         PartyVerificationStatus.Fail -> ChallengeStatus.Failed
     },
+    myDailyStatus = myDailyStatus,
     members = members.map { member ->
         PartyCardMemberUi(
             userId = member.userId,

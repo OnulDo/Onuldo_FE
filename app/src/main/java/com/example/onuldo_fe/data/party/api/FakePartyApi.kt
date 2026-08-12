@@ -22,7 +22,8 @@ class FakePartyApi : PartyApi {
     override suspend fun getWaitingRoom(partyId: Long): PartyWaitingRoomDto = FakePartyStore.getRoom(partyId)
 
     // 현재 파티원을 준비완료로 변경하고 갱신된 멤버 목록 반환
-    override suspend fun readyParty(partyId: Long): PartyWaitingRoomDto = FakePartyStore.ready(partyId)
+    override suspend fun readyParty(partyId: Long, ready: Boolean): PartyWaitingRoomDto =
+        FakePartyStore.ready(partyId, ready)
 
     // 현재 사용자 이탈 및 필요한 경우 방장 승계 또는 파티 해체 처리
     override suspend fun leaveParty(partyId: Long) = FakePartyStore.leave(partyId)

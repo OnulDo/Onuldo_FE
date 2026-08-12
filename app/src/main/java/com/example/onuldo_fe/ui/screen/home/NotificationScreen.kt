@@ -22,7 +22,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,6 +50,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
@@ -67,6 +72,7 @@ private fun NotificationType.iconRes(): Int = when (this) {
 }
 
 // 알림 화면 — 알림 목록
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(
     uiState: NotificationUiState,
@@ -74,16 +80,31 @@ fun NotificationScreen(
     onBackClick: () -> Unit = {},
     onItemClick: (NotificationItem) -> Unit = {},
     onRetry: () -> Unit = {},
+    onRefresh: () -> Unit = {},
     onLoadMore: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
     val notifications = uiState.notifications
-    Column(
+    val pullState = rememberPullToRefreshState()
+    // 당겨서 새로고침 — 목록이 있을 때만 인디케이터 표시
+    val isRefreshing = uiState.isLoading && notifications.isNotEmpty()
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        state = pullState,
         modifier = modifier
             .fillMaxSize()
-            .background(SourCream)
-        // .statusBarsPadding()        ← 제거 (Scaffold가 이미 처리)
+            .background(SourCream),
+        indicator = {
+            PullToRefreshDefaults.Indicator(
+                state = pullState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+                color = Persimmon,
+            )
+        }
     ) {
+      Column(modifier = Modifier.fillMaxSize()) {
         // 상단 바 (뒤로가기 + 알림)
         Box(
             modifier = Modifier
@@ -149,6 +170,7 @@ fun NotificationScreen(
                 }
             }
         }
+      }
     }
 }
 

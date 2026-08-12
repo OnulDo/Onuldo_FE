@@ -11,7 +11,7 @@ interface PartyApi {
     suspend fun getParties(): List<PartySummaryDto>
     suspend fun createParty(request: CreatePartyRequestDto): CreatePartyResponseDto
     suspend fun getWaitingRoom(partyId: Long): PartyWaitingRoomDto
-    suspend fun readyParty(partyId: Long): PartyWaitingRoomDto
+    suspend fun readyParty(partyId: Long, ready: Boolean): PartyWaitingRoomDto
     suspend fun leaveParty(partyId: Long)
     suspend fun startParty(partyId: Long): PartyStartResponseDto
     suspend fun getSettlementResult(partyId: Long): PartySettlementResultDto

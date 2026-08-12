@@ -1,13 +1,7 @@
 package com.example.onuldo_fe.data.challenge.dto
 
-// GET /api/challenges 목록 응답 (커서 페이지네이션)
-data class ChallengeListResultDto(
-    val content: List<ChallengeItemDto> = emptyList(),
-    val nextCursor: String? = null,
-    val hasNext: Boolean = false
-)
-
 // 목록/상세 공통 아이템 — 명세의 모든 필드를 받아두고, 화면별로 필요한 것만 매핑한다.
+// 목록(GET /api/challenges)은 CursorPageResponse<ChallengeItemDto>로 받는다(커서 페이지네이션).
 // description은 블록 배열, timeStart/timeEnd는 "HH:mm:ss" 문자열로 내려온다.
 data class ChallengeItemDto(
     val challengeId: Long = 0, //챌린지 아이디 추가

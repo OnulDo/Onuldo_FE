@@ -30,7 +30,7 @@ data class CursorPageResponse<T>(
     val timestamp: String? = null,
     val code: String? = null,
     val message: String? = null,
-    val content: List<T>? = null,
+    val result: List<T>? = null,
     val nextCursor: String? = null,
     val hasNext: Boolean = false,
 ) {

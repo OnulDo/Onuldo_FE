@@ -13,6 +13,8 @@ data class ChallengeListUiState(
     // 기존 목록을 유지한 채 재조회할 때 표시하는 상단 새로고침 인디케이터
     val isRefreshing: Boolean = false,
     val isError: Boolean = false,
+    // 실패 시 화면에 띄울 문구 — 서버 메시지 그대로 / 네트워크 끊김이면 클라 기본 문구 (isError와 함께 세팅)
+    val errorMessage: String? = null,
     // 최초 조회가 한 번이라도 성공했는지 — 화면 복귀 시 새로고침 트리거 조건
     val hasLoaded: Boolean = false
 )

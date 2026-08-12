@@ -221,7 +221,8 @@ private fun HomeChallenge.subtitleTextOrNull(): String? = when (status) {
     ChallengeStatus.Success -> streakDays.takeIf { it > 0 }
         ?.let { stringResource(R.string.home_challenge_streak, it) }
     ChallengeStatus.WaitingReview -> stringResource(R.string.home_challenge_waiting)
-    ChallengeStatus.Failed -> stringResource(R.string.home_challenge_streak_broken)
+    ChallengeStatus.Failed -> streakDays.takeIf { it > 0 }
+        ?.let { stringResource(R.string.home_challenge_streak_broken) }
 }
 
 private val homeTimeFormatter = DateTimeFormatter.ofPattern("H:mm")

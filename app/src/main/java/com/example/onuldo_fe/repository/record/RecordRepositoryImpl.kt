@@ -62,14 +62,13 @@ class RecordRepositoryImpl(private val api: RecordApi) : RecordRepository {
             "FAIL", "FAILURE" -> CompletedResultStatus.FAILURE
             else -> error("알 수 없는 완료 결과 상태입니다: $resultStatus")
         }
-        val amount = refundAmount ?: 0
-
         return CompletedChallenge(
             participationId = validParticipationId,
             challengeId = validChallengeId,
             title = validTitle,
             resultStatus = status,
-            netAmount = amount,
+            depositAmount = depositAmount?.coerceAtLeast(0) ?: 0,
+            adjustmentAmount = adjustmentAmount ?: 0,
             endedDate = endDate.requireText("endDate"),
             achievementRate = achievementRate?.coerceIn(0, 100) ?: 0
         )

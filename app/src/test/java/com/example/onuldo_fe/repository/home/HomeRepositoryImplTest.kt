@@ -10,6 +10,7 @@ import com.example.onuldo_fe.data.party.dto.PartyHomeResultDto
 import com.example.onuldo_fe.data.party.dto.PartySettlementBannerDto
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomeCompletedChallenge
+import com.google.gson.JsonPrimitive
 import java.time.LocalDateTime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -60,15 +61,81 @@ class HomeRepositoryImplTest {
     }
 
     @Test
-    fun `미인증 상태로 마감 시각이 지나면 실패로 표시한다`() {
-        val result = listOf(dailyItem(type = "PERSONAL", name = "아침 운동", verified = false))
+    fun `UNAVAILABLE 상태는 인증하기 버튼을 비활성화한다`() {
+        val result = listOf(
+            dailyItem(
+                type = "PERSONAL",
+                name = "아침 운동",
+                verified = false,
+                dailyStatus = "UNAVAILABLE"
+            )
+        )
             .toHomeData(LocalDateTime.of(2026, 8, 5, 23, 59, 1))
             .challenges
             .single()
 
-        assertEquals(ChallengeStatus.Failed, result.status)
+        assertEquals(ChallengeStatus.NeedCertification, result.status)
         assertEquals(false, result.canVerify)
         assertNull(result.remainingMinutes)
+    }
+
+    @Test
+    fun `WAITING 상태 인증 버튼은 인증 가능 시간 경계를 포함해서 활성화한다`() {
+        val cases = listOf(
+            LocalDateTime.of(2026, 8, 5, 5, 59) to false,
+            LocalDateTime.of(2026, 8, 5, 6, 0) to true,
+            LocalDateTime.of(2026, 8, 5, 12, 0) to true,
+            LocalDateTime.of(2026, 8, 5, 23, 59) to true,
+            LocalDateTime.of(2026, 8, 6, 0, 0) to false
+        )
+
+        cases.forEach { (now, expectedCanVerify) ->
+            val result = listOf(
+                dailyItem(type = "PERSONAL", name = "시간 인증", verified = false)
+            ).toHomeData(now).challenges.single()
+
+            assertEquals(expectedCanVerify, result.canVerify)
+        }
+    }
+
+    @Test
+    fun `WAITING 상태 인증 버튼은 시간 값이 없거나 파싱 실패하면 해당 경계를 제한하지 않는다`() {
+        val noTimeLimit = listOf(
+            dailyItem(
+                type = "PERSONAL",
+                name = "자율 인증",
+                verified = false,
+                timeStart = null,
+                timeEnd = null
+            )
+        ).toHomeData(LocalDateTime.of(2026, 8, 5, 1, 0)).challenges.single()
+
+        val invalidTimeLimit = listOf(
+            dailyItem(
+                type = "PERSONAL",
+                name = "잘못된 시간 인증",
+                verified = false,
+                timeStart = "invalid",
+                timeEnd = "invalid"
+            )
+        ).toHomeData(LocalDateTime.of(2026, 8, 5, 1, 0)).challenges.single()
+
+        assertEquals(true, noTimeLimit.canVerify)
+        assertEquals(true, invalidTimeLimit.canVerify)
+    }
+
+    @Test
+    fun `WAITING이 아니면 인증 가능 시간이어도 인증 버튼을 비활성화한다`() {
+        val result = listOf(
+            dailyItem(
+                type = "PERSONAL",
+                name = "검토 대기 인증",
+                verified = false,
+                dailyStatus = "REVIEW_PENDING"
+            )
+        ).toHomeData(LocalDateTime.of(2026, 8, 5, 12, 0)).challenges.single()
+
+        assertEquals(false, result.canVerify)
     }
 
     @Test
@@ -139,17 +206,43 @@ class HomeRepositoryImplTest {
                 type = "PERSONAL",
                 name = "아침 운동",
                 verified = false,
-                dailyStatus = "COMPLETED"
+                dailyStatus = "UNAVAILABLE"
             )
         ).toHomeData(
             now = LocalDateTime.of(2026, 8, 5, 12, 0),
             partyHome = PartyHomeResultDto(
-                parties = listOf(partyHomeItem(dailyStatus = "COMPLETED"))
+                parties = listOf(partyHomeItem(dailyStatus = "UNAVAILABLE"))
             )
         )
 
         assertFalse(result.challenges.single().canVerify)
         assertFalse(result.partyChallenges.single().canVerify)
+    }
+
+    @Test
+    fun `개인 챌린지 dailyStatus를 홈 상태 칩으로 변환한다`() {
+        val statuses = mapOf(
+            "UNAVAILABLE" to ChallengeStatus.NeedCertification,
+            "WAITING" to ChallengeStatus.NeedCertification,
+            "SUCCESS" to ChallengeStatus.Success,
+            "FAIL" to ChallengeStatus.Failed,
+            "REVIEW_PENDING" to ChallengeStatus.WaitingReview
+        )
+
+        statuses.forEach { (dailyStatus, expected) ->
+            val challenge = listOf(
+                dailyItem(
+                    type = "PERSONAL",
+                    name = dailyStatus,
+                    verified = false,
+                    dailyStatus = dailyStatus
+                )
+            ).toHomeData(LocalDateTime.of(2026, 8, 5, 12, 0))
+                .challenges
+                .single()
+
+            assertEquals(expected, challenge.status)
+        }
     }
 
     @Test
@@ -249,15 +342,17 @@ class HomeRepositoryImplTest {
         name: String,
         verified: Boolean,
         streakDays: Int = 0,
-        dailyStatus: String = "WAITING"
+        dailyStatus: String = "WAITING",
+        timeStart: String? = "06:00:00",
+        timeEnd: String? = "23:59:00"
     ) = RealHomeDailyChallengeDto(
         participationId = 1,
         participationStatus = "ONGOING",
         participationType = type,
         challengeId = 12,
         challengeName = name,
-        timeStart = "06:00:00",
-        timeEnd = "23:59:00",
+        timeStart = timeStart,
+        timeEnd = timeEnd,
         startDate = "2026-08-01",
         endDate = "2026-08-20",
         dailyStatus = dailyStatus,
@@ -277,7 +372,7 @@ class HomeRepositoryImplTest {
         name = "갓생팟",
         challengeTitle = "아침 운동",
         endDate = "2026-08-20",
-        verificationDeadline = "23:59:00",
+        verificationDeadline = JsonPrimitive("23:59:00"),
         showRemainingTime = showRemainingTime,
         status = status,
         dailyStatus = dailyStatus,

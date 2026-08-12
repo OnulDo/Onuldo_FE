@@ -46,7 +46,7 @@ fun DetailRoute(
         if (uiState.isError) {
             Toast.makeText(
                 context,
-                "상세 정보를 불러오지 못했어요. 다시 시도해주세요",
+                uiState.errorMessage ?: "상세 정보를 불러오지 못했어요. 다시 시도해주세요",
                 Toast.LENGTH_SHORT
             ).show()
             onBackClick()
