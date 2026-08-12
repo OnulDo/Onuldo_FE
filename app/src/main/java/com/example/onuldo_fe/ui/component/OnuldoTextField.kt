@@ -60,7 +60,7 @@ fun OnuldoTextField(
     ) {
         Text(
             text = label,
-           style = OnulDoTypography.body6Bold,
+           style = OnulDoTypography.caption2Bold,
             color = MaterialTheme.colorScheme.onBackground,
         )
         OutlinedTextField(
@@ -69,12 +69,12 @@ fun OnuldoTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
-            textStyle = OnulDoTypography.body5Regular,
+            textStyle = OnulDoTypography.body4Regular,
             placeholder = {
                 Text(
                     placeholder,
                     color = DarkBrown40,
-                    style = OnulDoTypography.body5Regular,
+                    style = OnulDoTypography.body4Regular,
                 )
             },
             singleLine = true,

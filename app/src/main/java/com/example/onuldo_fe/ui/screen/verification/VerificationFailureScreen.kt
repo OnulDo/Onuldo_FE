@@ -81,7 +81,7 @@ fun VerificationFailureScreen(
                 Text(
                     text = "인증 결과",
                     color = BlackBrown,
-                    style = OnulDoTypography.body3Bold,
+                    style = OnulDoTypography.body2Bold,
                     modifier = Modifier.align(Alignment.Center),
                     textAlign = TextAlign.Center
                 )
@@ -100,7 +100,7 @@ fun VerificationFailureScreen(
             Text(
                 text = "인증에 실패했어요",
                 color = BlackBrown,
-                style = OnulDoTypography.body1Bold,
+                style = OnulDoTypography.title1Bold,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 24.dp),
@@ -130,7 +130,7 @@ fun VerificationFailureScreen(
                         Text(
                             text = "실패 사유",
                             color = Red,
-                            style = OnulDoTypography.body5Bold,
+                            style = OnulDoTypography.body4Bold,
                         )
                     }
                     Spacer(modifier = Modifier.height(11.dp))
@@ -163,7 +163,7 @@ fun VerificationFailureScreen(
                         Text(
                             text = "남은 인증 시간",
                             color = Persimmon,
-                            style = OnulDoTypography.body5Bold
+                            style = OnulDoTypography.body4Bold
                         )
                     }
                     Spacer(modifier = Modifier.height(9.dp))
@@ -185,7 +185,7 @@ fun VerificationFailureScreen(
             Text(
                 text = if (isManualReviewLoading) "재검토 요청 중..." else "직접검토 요청하기",
                 color = Persimmon,
-                style = OnulDoTypography.body6Bold,
+                style = OnulDoTypography.caption2Bold,
                 modifier = Modifier
                     .padding(top = 7.dp)
                     .clickable(

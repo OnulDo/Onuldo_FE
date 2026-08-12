@@ -48,7 +48,7 @@ fun WelcomeScreen(
 
         Text(
             text = "환영해요!",
-            style = OnulDoTypography.header1ExtraBold,
+            style = OnulDoTypography.headline1ExtraBold,
             color = BlackBrown,
             textAlign = TextAlign.Center,
         )

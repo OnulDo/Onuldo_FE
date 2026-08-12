@@ -64,7 +64,7 @@ fun CameraTopBar(
 
             Text(
                 text = title,
-                style = OnulDoTypography.body3Bold,
+                style = OnulDoTypography.body2Bold,
                 color = White
             )
         }

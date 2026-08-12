@@ -94,7 +94,7 @@ fun ConfirmDialog(
                 ) {
                     Text(
                         text = title,
-                        style = OnulDoTypography.body3Bold,
+                        style = OnulDoTypography.body2Bold,
                         color = BlackBrown
                     )
 
@@ -124,7 +124,7 @@ fun ConfirmDialog(
                     ) {
                         Text(
                             text = dismissText,
-                            style = OnulDoTypography.body5Bold,
+                            style = OnulDoTypography.body4Bold,
                             color = DarkBrown50
                         )
                     }
@@ -140,7 +140,7 @@ fun ConfirmDialog(
                     ) {
                         Text(
                             text = confirmText,
-                            style = OnulDoTypography.body5Bold,
+                            style = OnulDoTypography.body4Bold,
                             color = confirmColor
                         )
                     }

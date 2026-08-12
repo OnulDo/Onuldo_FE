@@ -72,7 +72,7 @@ fun VerificationReviewingScreen(
                 Text(
                     text = "인증 검토중",
                     color = BlackBrown,
-                    style = OnulDoTypography.body3Bold,
+                    style = OnulDoTypography.body2Bold,
                     modifier = Modifier.align(Alignment.Center),
                     textAlign = TextAlign.Center
                 )
@@ -86,7 +86,7 @@ fun VerificationReviewingScreen(
             Text(
                 text = "AI가 인증 사진을 확인하고 있어요",
                 color = BlackBrown,
-                style = OnulDoTypography.body2Bold,
+                style = OnulDoTypography.body1Bold,
                 modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
                 textAlign = TextAlign.Center
             )

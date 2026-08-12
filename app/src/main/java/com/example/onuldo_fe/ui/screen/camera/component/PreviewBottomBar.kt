@@ -46,7 +46,7 @@ fun PreviewBottomBar(
         ) {
             Text(
                 text = "재촬영",
-                style = OnulDoTypography.body5Bold,
+                style = OnulDoTypography.body4Bold,
                 color = SourCream
             )
         }
@@ -64,7 +64,7 @@ fun PreviewBottomBar(
         ) {
             Text(
                 text = "인증 제출",
-                style = OnulDoTypography.body5Bold,
+                style = OnulDoTypography.body4Bold,
                 color = SourCream
             )
         }

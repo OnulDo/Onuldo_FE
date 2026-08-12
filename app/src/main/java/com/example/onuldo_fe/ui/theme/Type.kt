@@ -69,102 +69,102 @@ object OnulDoTypography {
         fontWeight = FontWeight.SemiBold,
         fontSize = 12.sp,
     )
-    // Title
-    val titleBold = TextStyle(
+    // Headline 3
+    val headline3Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 24.sp,
         lineHeight = 32.sp,
     )
 
-    // Subtitle
-    val subtitle1Bold = TextStyle(
+    // Headline 2
+    val headline2Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 26.sp,
         lineHeight = 30.sp,
     )
 
-    // Header
-    val header1ExtraBold = TextStyle(
+    // Headline 1
+    val headline1ExtraBold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.ExtraBold,
         fontSize = 28.sp,
         lineHeight = 40.sp,
     )
 
-    val header1Bold = TextStyle(
+    val headline1Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 28.sp,
         lineHeight = 40.sp,
     )
 
-    // Body
-    val body1Bold = TextStyle(
+    // Title / Body
+    val title1Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 22.sp,
         lineHeight = 40.sp,
     )
 
-    val body2Bold = TextStyle(
+    val body1Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 18.sp,
         lineHeight = 26.sp,
     )
 
-    val body2ExtraBold = TextStyle(
+    val body1ExtraBold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.ExtraBold,
         fontSize = 18.sp,
         lineHeight = 26.sp,
     )
 
-    val body3Bold = TextStyle(
+    val body2Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 17.sp,
         lineHeight = 20.sp,
     )
 
-    val body3ExtraBold = TextStyle(
+    val title2ExtraBold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.ExtraBold,
         fontSize = 20.sp,
         lineHeight = 20.sp,
     )
 
-    val body4Medium = TextStyle(
+    val body3Medium = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Medium,
         fontSize = 15.sp,
         lineHeight = 22.sp,
     )
 
-    val body5Bold = TextStyle(
+    val body4Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 14.sp,
         lineHeight = 22.sp,
     )
 
-    val body5Medium = TextStyle(
+    val body4Medium = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 22.sp,
     )
 
-    val body5Regular = TextStyle(
+    val body4Regular = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 22.sp,
     )
 
-    val body6Bold = TextStyle(
+    val caption2Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 12.sp,

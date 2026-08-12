@@ -50,7 +50,7 @@ fun SecondaryButton(
     ) {
         Text(
             text = text,
-            style = OnulDoTypography.body3Bold
+            style = OnulDoTypography.body2Bold
         )
     }
 }
@@ -89,7 +89,7 @@ fun SocialLoginButton(
             }
             Text(
                 text = text,
-                style = OnulDoTypography.body4Medium,
+                style = OnulDoTypography.body3Medium,
                 modifier = Modifier.align(Alignment.Center),
             )
         }

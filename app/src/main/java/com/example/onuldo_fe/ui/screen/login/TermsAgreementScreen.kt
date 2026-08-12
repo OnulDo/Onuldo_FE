@@ -106,7 +106,7 @@ fun TermsAgreementScreen(
 
         Text(
             text = "약관에 동의해주세요",
-            style = OnulDoTypography.header1ExtraBold,
+            style = OnulDoTypography.headline1ExtraBold,
             color = BlackBrown,
             modifier = gutter,
         )
@@ -115,7 +115,7 @@ fun TermsAgreementScreen(
 
         Text(
             text = "서비스 이용을 위해 아래 약관에 동의해주세요",
-            style = OnulDoTypography.body5Medium,
+            style = OnulDoTypography.body4Medium,
             color = DarkBrown70,
             modifier = gutter,
         )
@@ -176,7 +176,7 @@ private fun AgreeAllCard(
         Column {
             Text(
                 text = "전체 동의",
-                style = OnulDoTypography.body3Bold,
+                style = OnulDoTypography.body2Bold,
                 color = Black,
             )
             Text(
@@ -211,13 +211,13 @@ private fun AgreeItemRow(
         // 필수는 Persimmon으로 강조, 선택은 본문과 같은 톤으로 낮춘다.
         Text(
             text = if (item.required) "[필수]" else "[선택]",
-            style = OnulDoTypography.body5Bold,
+            style = OnulDoTypography.body4Bold,
             color = if (item.required) Persimmon else DarkBrown70,
         )
         Spacer(Modifier.width(6.dp))
         Text(
             text = item.label,
-            style = OnulDoTypography.body4Medium,
+            style = OnulDoTypography.body3Medium,
             color = BlackBrown,
             modifier = Modifier.weight(1f),
         )

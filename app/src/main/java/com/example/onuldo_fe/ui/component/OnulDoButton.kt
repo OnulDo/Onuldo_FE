@@ -30,7 +30,7 @@ fun OnulDoButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    textStyle: TextStyle = OnulDoTypography.body3Bold,
+    textStyle: TextStyle = OnulDoTypography.body2Bold,
     enabled: Boolean = true,
     height: Dp = 56.dp,
     horizontalPadding: Dp = 20.dp,

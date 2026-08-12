@@ -73,14 +73,14 @@ fun ProfileSetupScreen(
         Spacer(Modifier.height(24.dp))
         Text(
             text = "프로필을 설정해주세요",
-            style = OnulDoTypography.header1ExtraBold,
+            style = OnulDoTypography.headline1ExtraBold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 20.dp),
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = "프로필과 닉네임을 정해주세요",
-            style = OnulDoTypography.body5Regular,
+            style = OnulDoTypography.body4Regular,
             color = DarkBrown70,
             modifier = Modifier.padding(horizontal = 20.dp),
         )
@@ -88,7 +88,7 @@ fun ProfileSetupScreen(
         Spacer(Modifier.height(24.dp))
         Text(
             text = "프로필",
-            style = OnulDoTypography.body6Bold,
+            style = OnulDoTypography.caption2Bold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 20.dp),
         )

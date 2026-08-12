@@ -58,6 +58,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown70
 import com.example.onuldo_fe.ui.theme.DarkBrown10
 import com.example.onuldo_fe.ui.theme.DarkBrown20
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
@@ -123,13 +124,13 @@ fun GalleryScreen(
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             Text(
                 text = "챌린지",
-                style = MaterialTheme.typography.headlineLarge,
+                style = OnulDoTypography.headline3Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(Modifier.height(2.dp))
             Text(
                 text = "나에게 맞는 챌린지를 찾아보세요",
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+                style = OnulDoTypography.caption1Medium,
                 color = BlackBrown70
             )
             Spacer(Modifier.height(spacing.spacing12))
@@ -240,7 +241,7 @@ private fun ChallengeCard(
         ) {
             Text(
                 text = challenge.title,
-                style = MaterialTheme.typography.bodySmall,  // Body4 (12sp Bold)
+                style = OnulDoTypography.caption2Bold,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -256,10 +257,7 @@ private fun ChallengeCard(
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
                     text = "%,d명".format(challenge.participantCount),
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 10.sp
-                    ),
+                    style = OnulDoTypography.caption4Medium,
                     color = BlackBrown70,
                     maxLines = 1
                 )

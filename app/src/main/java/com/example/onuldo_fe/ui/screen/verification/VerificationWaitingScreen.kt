@@ -69,7 +69,7 @@ fun VerificationWaitingScreen(
                 Text(
                     text = "인증 결과",
                     color = BlackBrown,
-                    style = OnulDoTypography.body3Bold,
+                    style = OnulDoTypography.body2Bold,
                     modifier = Modifier.align(Alignment.Center),
                     textAlign = TextAlign.Center
                 )
@@ -87,7 +87,7 @@ fun VerificationWaitingScreen(
             Text(
                 text = "인증 검토 중이에요",
                 color = BlackBrown,
-                style = OnulDoTypography.body1Bold,
+                style = OnulDoTypography.title1Bold,
                 modifier = Modifier
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center
@@ -121,7 +121,7 @@ fun VerificationWaitingScreen(
                         Text(
                             text = "검토 안내",
                             color = BlackBrown,
-                            style = OnulDoTypography.body6Bold,
+                            style = OnulDoTypography.caption2Bold,
                         )
                     }
                     Spacer(modifier = Modifier.height(11.dp))
@@ -185,7 +185,7 @@ fun VerificationWaitingScreen(
                         Text(
                             text = submittedAtText,
                             color = BlackBrown,
-                            style = OnulDoTypography.body6Bold,
+                            style = OnulDoTypography.caption2Bold,
                         )
                     }
                 }

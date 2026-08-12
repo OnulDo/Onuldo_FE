@@ -44,7 +44,7 @@ fun VerificationSuccessScreen(onConfirmClick: () -> Unit = {}) {
                 Text(
                     text = "인증 결과",
                     color = BlackBrown,
-                    style = OnulDoTypography.body3Bold,
+                    style = OnulDoTypography.body2Bold,
                     modifier = Modifier.align(Alignment.Center),
                     textAlign = TextAlign.Center
                 )
@@ -63,7 +63,7 @@ fun VerificationSuccessScreen(onConfirmClick: () -> Unit = {}) {
             Text(
                 text = "인증 성공!",
                 color = BlackBrown,
-                style = OnulDoTypography.body1Bold,
+                style = OnulDoTypography.title1Bold,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 14.dp),
@@ -73,7 +73,7 @@ fun VerificationSuccessScreen(onConfirmClick: () -> Unit = {}) {
             Text(
                 text = "AI 검증을 모두 통과했어요",
                 color = DarkBrown70,
-                style = OnulDoTypography.body5Regular,
+                style = OnulDoTypography.body4Regular,
                 modifier = Modifier.padding(top = 11.dp),
                 textAlign = TextAlign.Center
             )

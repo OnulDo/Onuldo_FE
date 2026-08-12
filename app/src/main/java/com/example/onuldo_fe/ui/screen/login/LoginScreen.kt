@@ -96,7 +96,7 @@ fun LoginScreen(
         Spacer(Modifier.height(16.dp))
         Text(
             text = "로그인",
-            style = OnulDoTypography.header1ExtraBold,
+            style = OnulDoTypography.headline1ExtraBold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = gutter,
         )
@@ -186,7 +186,7 @@ fun LoginScreen(
             )
             Text(
                 text = "회원가입",
-                style = OnulDoTypography.body6Bold,
+                style = OnulDoTypography.caption2Bold,
                 color = Persimmon,
                 textDecoration = TextDecoration.Underline,
                 modifier = Modifier.clickable(onClick = onSignupClick),
