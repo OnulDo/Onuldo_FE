@@ -2,6 +2,7 @@ package com.example.onuldo_fe.data.network
 
 import android.content.Context
 import com.example.onuldo_fe.BuildConfig
+import com.example.onuldo_fe.data.auth.DeviceInfoProvider
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -102,7 +103,13 @@ object NetworkModule {
             .applyTimeouts()
             .addInterceptor(AuthInterceptor(tokenStore))
             .addInterceptor(loggingInterceptor)
-            .authenticator(TokenAuthenticator(tokenStore) { refreshApi })
+            .authenticator(
+                TokenAuthenticator(
+                    tokenStore = tokenStore,
+                    refreshApiProvider = { refreshApi },
+                    deviceProvider = { DeviceInfoProvider.get().getCachedDevice() },
+                )
+            )
             .build()
     }
 

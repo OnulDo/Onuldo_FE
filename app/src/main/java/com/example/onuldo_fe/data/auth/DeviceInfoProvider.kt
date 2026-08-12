@@ -45,6 +45,12 @@ class DeviceInfoProvider private constructor(context: Context) : DeviceInfoSourc
         )
     }
 
+    /** OkHttp Authenticator처럼 suspend 호출이 불가능한 경로에서 저장된 기기 정보를 반환한다. */
+    fun getCachedDevice(): DeviceRequest = DeviceRequest(
+        deviceId = deviceId,
+        fcmToken = preferences.getString(KEY_FCM_TOKEN, "").orEmpty(),
+    )
+
     fun saveFcmToken(token: String) {
         if (token.isNotBlank()) preferences.edit().putString(KEY_FCM_TOKEN, token).apply()
     }

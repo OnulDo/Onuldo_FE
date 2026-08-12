@@ -133,7 +133,12 @@ class AuthRepositoryImpl(
         // TokenRefreshApi는 Authenticator가 붙지 않은 클라이언트를 쓰는 동기 Call이라 IO로 옮겨 호출한다.
         return withContext(Dispatchers.IO) {
             try {
-                when (val outcome = tokenRefreshApi.executeRefresh(refreshToken)) {
+                when (
+                    val outcome = tokenRefreshApi.executeRefresh(
+                        refreshToken,
+                        deviceInfoProvider.getDevice(),
+                    )
+                ) {
                     is TokenRefreshOutcome.Success -> {
                         tokenStore.update(outcome.tokens)
                         true
