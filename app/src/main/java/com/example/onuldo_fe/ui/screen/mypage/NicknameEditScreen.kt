@@ -28,6 +28,7 @@ import com.example.onuldo_fe.ui.component.OnuldoTextField
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.utils.Validators
@@ -67,18 +68,14 @@ fun NicknameEditScreen(
         Spacer(Modifier.height(28.dp))
         Text(
             text = "새 닉네임을 입력해주세요",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
+            style = OnulDoTypography.title1Bold,
             color = BlackBrown,
             modifier = Modifier.padding(horizontal = 20.dp),
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = "다른 사람에게 보여지는 이름이에요",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
+            style = OnulDoTypography.body4Medium,
             color = DarkBrown70,
             modifier = Modifier.padding(horizontal = 20.dp),
         )

@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.camera
+package com.example.onuldo_fe.viewmodel.verification
 
 import android.app.Application
 import android.net.Uri

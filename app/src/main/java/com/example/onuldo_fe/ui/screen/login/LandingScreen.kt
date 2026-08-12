@@ -21,13 +21,9 @@ import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.component.SecondaryButton
 import com.example.onuldo_fe.ui.theme.DarkBrown
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Pretendard
 
-/**
- * 랜딩(로그인 첫 화면) — WF ver.2.2 (Figma node 4353:3291).
- * 달리기 캐릭터 → 로고 "오늘DO" → 서브카피 → 하단 로그인/회원가입 버튼.
- * - 로그인 = 외곽선(보조) 버튼, 회원가입 = 채움(주요) 버튼 (Figma 기준).
- */
 @Composable
 fun LandingScreen(
     onLoginClick: () -> Unit,
@@ -51,18 +47,13 @@ fun LandingScreen(
         Spacer(Modifier.height(12.dp))
         Text(
             text = "오늘DO",
-            color = MaterialTheme.colorScheme.primary,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 32.sp,
+            style = OnulDoTypography.brandLogo
         )
         Spacer(Modifier.height(12.dp))
         Text(
             text = "혼자는 어렵잖아, 오늘두 함께!",
             color = DarkBrown,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
+            style = OnulDoTypography.brandSloganSemiBold
         )
 
         Spacer(Modifier.weight(1.4f))

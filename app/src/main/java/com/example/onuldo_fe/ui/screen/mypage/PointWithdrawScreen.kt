@@ -47,6 +47,7 @@ import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.ui.screen.mypage.component.PointCtaButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -117,9 +118,7 @@ fun PointWithdrawScreen(
             Spacer(Modifier.height(30.dp))
             Text(
                 text = "얼마 출금할까요?",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
+                style = OnulDoTypography.headline3Bold,
                 color = BlackBrown,
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
@@ -139,9 +138,7 @@ fun PointWithdrawScreen(
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = "출금 가능 금액 ${"%,d".format(withdrawable)}P를 초과했어요",
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 12.sp,
+                    style = OnulDoTypography.caption2Medium,
                     color = Red,
                     textAlign = TextAlign.End,
                     modifier = Modifier
@@ -224,23 +221,17 @@ private fun AvailableCard(withdrawable: Long, balance: Long, pending: Long) {
     ) {
         Text(
             text = "출금할 수 있는 금액",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 12.sp,
+            style = OnulDoTypography.caption2Medium,
             color = Persimmon,
         )
         Text(
             text = "${"%,d".format(withdrawable)}원",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 28.sp,
+            style = OnulDoTypography.headline1Bold,
             color = BlackBrown,
         )
         Text(
             text = "보유 ${"%,d".format(balance)}P · 진행 중 ${"%,d".format(pending)}P",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 11.sp,
+            style = OnulDoTypography.caption3Medium,
             color = DarkBrown50,
         )
     }

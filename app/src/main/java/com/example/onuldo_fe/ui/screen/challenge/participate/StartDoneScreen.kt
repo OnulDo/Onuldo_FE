@@ -41,6 +41,7 @@ import com.example.onuldo_fe.ui.theme.Green3
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 
@@ -96,10 +97,7 @@ fun StartDoneScreen(
 
         Text(
             text = "챌린지가 시작되었어요!",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            lineHeight = 22.sp,
+            style = OnulDoTypography.title1Bold,
             color = BlackBrown,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -109,10 +107,7 @@ fun StartDoneScreen(
 
         Text(
             text = subtitle,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Normal,
-            fontSize = 13.sp,
-            lineHeight = 13.sp,
+            style = OnulDoTypography.caption1Regular,
             color = DarkBrown70,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -129,11 +124,7 @@ fun StartDoneScreen(
 
                 Text(
                     text = title,
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
-                    lineHeight = 17.sp,
-                    letterSpacing = (-0.02).em,
+                    style = OnulDoTypography.body2Bold,
                     color = BlackBrown,
                     modifier = Modifier.padding(start = 20.dp)
                 )
@@ -142,11 +133,7 @@ fun StartDoneScreen(
 
                 Text(
                     text = category,
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 10.sp,
-                    lineHeight = 10.sp,
-                    letterSpacing = 0.04.em,
+                    style = OnulDoTypography.caption4Bold,
                     color = DarkBrown,
                     modifier = Modifier.padding(start = 20.dp)
                 )
@@ -179,11 +166,7 @@ fun StartDoneScreen(
             Column(modifier = Modifier.padding(start = 20.dp, top = 18.dp)) {
                 Text(
                     text = "첫 인증",
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 11.sp,
-                    lineHeight = 11.sp,
-                    letterSpacing = 0.04.em,
+                    style = OnulDoTypography.caption3Bold,
                     color = Persimmon
                 )
 
@@ -191,11 +174,7 @@ fun StartDoneScreen(
 
                 Text(
                     text = firstVerifyTime,
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
-                    lineHeight = 13.sp,
-                    letterSpacing = (-0.01).em,
+                    style = OnulDoTypography.caption2Bold,
                     color = BlackBrown
                 )
 
@@ -203,10 +182,7 @@ fun StartDoneScreen(
 
                 Text(
                     text = "알림으로 알려드릴게요",
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 10.sp,
-                    lineHeight = 10.sp,
+                    style = OnulDoTypography.caption4Medium,
                     color = DarkBrown
                 )
             }

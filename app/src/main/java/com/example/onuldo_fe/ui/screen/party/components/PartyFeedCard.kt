@@ -69,8 +69,9 @@ fun PartyFeedCard(
                 characterHeight = 25.dp
             )
             Column(Modifier.padding(start = LocalSpacing.current.spacing8)) {
-                Text(item.name, color = BlackBrown, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
-                Text(item.time, color = DarkBrown50, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Medium)
+                Text(item.name, color = BlackBrown, style = OnulDoTypography.caption2Bold)
+                // Caption3/Medium
+                Text(item.time, color = DarkBrown50, style = OnulDoTypography.caption3Medium)
             }
         }
     }

@@ -20,17 +20,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown80
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
-import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
 
 @Composable
@@ -59,25 +57,21 @@ fun SettlementCompleteCard(
                 .offset(x = 17.dp, y = 20.dp)
                 .size(width = 22.dp, height = 21.17.dp)
         )
+        // Body4/Bold
         Text(
             text = stringResource(R.string.home_settlement_complete_title),
             color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 14.sp,
-            lineHeight = 18.sp,
-            fontWeight = FontWeight.Bold,
+            style = OnulDoTypography.body4Bold,
             modifier = Modifier
                 .offset(x = 47.dp, y = 23.dp)
-                .size(width = 112.dp, height = 18.dp)
+                .width(112.dp)
         )
         // API에서 긴 챌린지명이 들어오면 최대 69dp 안에서 한 줄 말줄임 처리
+        // Caption2/Medium
         Text(
             text = partyName,
             color = DarkBrown80,
-            fontFamily = Pretendard,
-            fontSize = 12.sp,
-            lineHeight = 14.sp,
-            fontWeight = FontWeight.Medium,
+            style = OnulDoTypography.caption2Medium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier

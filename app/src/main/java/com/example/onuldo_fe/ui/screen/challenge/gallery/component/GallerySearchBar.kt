@@ -37,6 +37,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown20
 import com.example.onuldo_fe.ui.theme.DarkBrown40
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.SourCream
@@ -56,7 +57,7 @@ fun GallerySearchBar(
     val borderColor = if (isFocused) DarkBrown  else DarkBrown40
 
     // Caption1
-    val textStyle = MaterialTheme.typography.labelLarge
+    val textStyle = OnulDoTypography.caption1Medium
 
     Row(
         modifier = modifier

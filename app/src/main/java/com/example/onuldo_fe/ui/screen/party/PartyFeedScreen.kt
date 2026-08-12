@@ -53,18 +53,14 @@ fun PartyFeedScreen(
                 // TODO 디자인 시스템에 47dp 토큰이 추가되면 LocalSpacing으로 교체
                 modifier = Modifier.offset(x = spacing.spacing20, y = 47.dp),
                 color = BlackBrown,
-                fontFamily = Pretendard,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
+                style = OnulDoTypography.headline3Bold
             )
             Text(
                 text = challengeName,
                 // TODO 디자인 시스템에 79dp 토큰이 추가되면 LocalSpacing으로 교체
                 modifier = Modifier.offset(x = spacing.spacing20, y = 79.dp),
                 color = DarkBrown70,
-                fontFamily = Pretendard,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Medium
+                style = OnulDoTypography.caption4Medium
             )
         }
         TeamProgressCard(
@@ -86,7 +82,7 @@ fun PartyFeedScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(errorMessage, color = DarkBrown, fontFamily = Pretendard, fontSize = 13.sp)
+                Text(errorMessage, color = DarkBrown, style = OnulDoTypography.caption1Regular)
                 TextButton(onClick = onRetry) { Text("다시 시도", color = Persimmon) }
             }
             else -> LazyVerticalGrid(
@@ -126,26 +122,21 @@ private fun TeamProgressCard(
             Text(
                 "팀 진행률",
                 color = Persimmon,
-                fontFamily = Pretendard,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
+                style = OnulDoTypography.caption3Bold,
                 letterSpacing = 0.44.sp
             )
+            // Caption4/Regular
             Text(
                 "${totalMemberCount}명 중 ${completedMemberCount}명 오늘 인증 완료",
                 modifier = Modifier.padding(start = 8.dp),
                 color = DarkBrown50,
-                fontFamily = Pretendard,
-                fontSize = 8.sp
+                style = OnulDoTypography.caption4Regular
             )
         }
         Text(
             "$progressPercent%",
             color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 24.sp,
-            lineHeight = 28.sp,
-            fontWeight = FontWeight.Bold,
+            style = OnulDoTypography.headline3Bold,
             letterSpacing = (-0.48).sp
         )
         Spacer(Modifier.height(10.dp))

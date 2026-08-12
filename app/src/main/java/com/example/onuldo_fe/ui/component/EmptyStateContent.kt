@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 
 // 홈과 파티에서 공통으로 사용하는 빈 상태의 아이콘·제목·설명 영역
@@ -58,8 +58,7 @@ fun EmptyStateContent(
             text = title,
             modifier = Modifier.fillMaxWidth(),
             color = BlackBrown,
-            style = MaterialTheme.typography.titleLarge,
-            lineHeight = 26.sp,
+            style = OnulDoTypography.title1Bold,
             textAlign = TextAlign.Center,
             maxLines = 1
         )
@@ -68,8 +67,7 @@ fun EmptyStateContent(
             text = description,
             modifier = Modifier.fillMaxWidth(),
             color = DarkBrown,
-            style = MaterialTheme.typography.labelLarge,
-            lineHeight = 18.sp,
+            style = OnulDoTypography.caption1Regular,
             textAlign = TextAlign.Center,
             maxLines = 2
         )

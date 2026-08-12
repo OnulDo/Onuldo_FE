@@ -43,6 +43,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 
@@ -99,10 +100,7 @@ fun ParticipateScreen(
             )
             Text(
                 text = "챌린지 참여",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                lineHeight = 16.sp,
+                style = OnulDoTypography.body2Bold,
                 color = BlackBrown,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -121,29 +119,19 @@ fun ParticipateScreen(
             Column(modifier = Modifier.padding(start = 16.dp, top = 20.dp)) {
                 Text(
                     text = category,
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 11.sp,
-                    lineHeight = 11.sp,
-                    letterSpacing = 0.04.em,
+                    style = OnulDoTypography.caption2Bold,
                     color = DarkBrown
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
                     text = challenge.title,
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    lineHeight = 18.sp,
+                    style = OnulDoTypography.body1Bold,
                     color = BlackBrown
                 )
                 Spacer(Modifier.height(14.dp))
                 Text(
                     text = description,
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 12.sp,
-                    lineHeight = 12.sp,
+                    style = OnulDoTypography.caption2Regular,
                     color = DarkBrown70
                 )
             }
@@ -194,20 +182,13 @@ fun ParticipateScreen(
         ) {
             Text(
                 text = "도전금 설정",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp,
-                lineHeight = 13.sp,
-                letterSpacing = (-0.01).em,
+                style = OnulDoTypography.caption2Bold,
                 color = BlackBrown
             )
             Spacer(Modifier.width(9.dp))
             Text(
                 text = "1만~2만P 권장",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 11.sp,
-                lineHeight = 11.sp,
+                style = OnulDoTypography.caption3Bold,
                 color = Persimmon
             )
         }
@@ -302,11 +283,7 @@ private fun SectionLabel(
 ) {
     Text(
         text = text,
-        fontFamily = Pretendard,
-        fontWeight = FontWeight.Bold,
-        fontSize = 13.sp,
-        lineHeight = 13.sp,
-        letterSpacing = (-0.01).em,
+        style = OnulDoTypography.caption2Bold,
         color = BlackBrown,
         modifier = modifier.padding(start = 24.dp)
     )
@@ -328,21 +305,14 @@ private fun NoticeBox(
         Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = topPadding)) {
             Text(
                 text = title,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp,
-                lineHeight = 13.sp,
-                letterSpacing = (-0.01).em,
+                style = OnulDoTypography.body4Bold,
                 color = Persimmon
             )
             lines.forEachIndexed { index, line ->
                 Spacer(Modifier.height(if (index == 0) 7.dp else 8.dp))
                 Text(
                     text = line,
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 11.sp,
-                    lineHeight = 11.sp,
+                    style = OnulDoTypography.caption3Medium,
                     color = DarkBrown
                 )
             }

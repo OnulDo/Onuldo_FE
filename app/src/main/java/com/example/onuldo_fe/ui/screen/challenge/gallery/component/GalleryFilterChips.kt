@@ -32,6 +32,7 @@ import com.example.onuldo_fe.ui.theme.Persimmon
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 
 //카테고리 칩
 @Composable
@@ -94,10 +95,7 @@ private fun CategoryChip(
 
             Text(
                 text = text,
-                fontFamily = Pretendard,
-                fontSize = 10.sp,                 // CSS: 10px
-                fontWeight = FontWeight.Medium,   // CSS: 500
-                // line-height: normal → 고정값 안 줌(기본)
+                style = OnulDoTypography.caption4Medium,
                 color = if (selected) White else BlackBrown,   // #1B130C / 선택 시 흰색
                 textAlign = TextAlign.Center
             )

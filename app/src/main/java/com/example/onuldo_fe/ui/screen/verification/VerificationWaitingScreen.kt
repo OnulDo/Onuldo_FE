@@ -32,6 +32,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Persimmon20
@@ -68,7 +69,7 @@ fun VerificationWaitingScreen(
                 Text(
                     text = "인증 결과",
                     color = BlackBrown,
-                    fontSize = 16.sp,
+                    style = OnulDoTypography.body2Bold,
                     modifier = Modifier.align(Alignment.Center),
                     textAlign = TextAlign.Center
                 )
@@ -86,7 +87,7 @@ fun VerificationWaitingScreen(
             Text(
                 text = "인증 검토 중이에요",
                 color = BlackBrown,
-                style = MaterialTheme.typography.titleLarge,
+                style = OnulDoTypography.title1Bold,
                 modifier = Modifier
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center
@@ -96,7 +97,7 @@ fun VerificationWaitingScreen(
             Text(
                 text = "AI가 판단하기 어려운 사진이라\n운영팀에서 직접 확인하고 있어요.",
                 color = DarkBrown70,
-                style = MaterialTheme.typography.labelLarge,
+                style = OnulDoTypography.caption1Regular,
                 textAlign = TextAlign.Center
             )
 
@@ -120,7 +121,7 @@ fun VerificationWaitingScreen(
                         Text(
                             text = "검토 안내",
                             color = BlackBrown,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = OnulDoTypography.caption2Bold,
                         )
                     }
                     Spacer(modifier = Modifier.height(11.dp))
@@ -128,28 +129,28 @@ fun VerificationWaitingScreen(
                     Text(
                         text = "검토는 최대 24시간 이내 완료됩니다.",
                         color = DarkBrown,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = OnulDoTypography.caption3Regular,
                         modifier = Modifier.padding(bottom = 9.dp)
                     )
 
                     Text(
                         text = "검토 중에도 챌린지는 계속 진행됩니다.",
                         color = DarkBrown,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = OnulDoTypography.caption3Regular,
                         modifier = Modifier.padding(bottom = 9.dp)
                     )
 
                     Text(
                         text = "결과는 알림으로 즉시 안내드려요.",
                         color = DarkBrown,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = OnulDoTypography.caption3Regular,
                         modifier = Modifier.padding(bottom = 9.dp)
                     )
 
                     Text(
                         text = "검토 통과 시 인증 완료 처리됩니다.",
                         color = DarkBrown,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = OnulDoTypography.caption3Regular,
                     )
                 }
             }
@@ -176,7 +177,7 @@ fun VerificationWaitingScreen(
                         Text(
                             text = "제출 시각",
                             color = DarkBrown,
-                            style = MaterialTheme.typography.titleSmall
+                            style = OnulDoTypography.caption3Bold,
                         )
 
                         Spacer(modifier = Modifier.weight(1f))
@@ -184,7 +185,7 @@ fun VerificationWaitingScreen(
                         Text(
                             text = submittedAtText,
                             color = BlackBrown,
-                            style = MaterialTheme.typography.bodySmall,
+                            style = OnulDoTypography.caption2Bold,
                         )
                     }
                 }

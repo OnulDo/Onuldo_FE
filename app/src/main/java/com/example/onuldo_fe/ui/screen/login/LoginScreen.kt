@@ -47,31 +47,18 @@ import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.KakaoLabel
 import com.example.onuldo_fe.ui.theme.KakaoYellow
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.viewmodel.LoginViewModel
 
-/**
- * 이메일 로그인 화면 — Figma Ready for Dev node `4771:384`.
- * 헤더(봉투 아이콘 + 타이틀) → 이메일/비밀번호 입력 → 로그인
- *  → "또는" 구분선 → 카카오 로그인 → 하단 회원가입 링크.
- *
- * 네이버 로그인은 제거됐다(2026-08-11). 자세한 경위는 [SocialAuthClient] 주석 참고.
- */
+
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onSignupClick: () -> Unit,
     // 소셜 로그인 결과 신규 회원이면 약관 동의 화면으로 보낸다.
     onSocialSignupNeeded: () -> Unit = {},
-    /**
-     * 소셜 가입이 "이미 가입된 계정"으로 막혀 이 화면으로 되돌아오며 전달된 안내 문구.
-     * 이 값이 들어오면 다음 소셜 로그인은 계정 선택 화면을 거친다.
-     */
     existingAccountNotice: String? = null,
-    /**
-     * [existingAccountNotice]를 배너에 반영한 뒤 호출된다. 호출부는 여기서 값을 비워야 한다 —
-     * 남겨 두면 같은 문구가 다시 전달될 때 값이 변하지 않아 배너가 뜨지 않는다.
-     */
     onNoticeShown: () -> Unit = {},
     viewModel: LoginViewModel = viewModel(),
 ) {
@@ -107,10 +94,9 @@ fun LoginScreen(
         )
 
         Spacer(Modifier.height(16.dp))
-        // Figma(RFD) 타이틀 = Pretendard ExtraBold 28px (headlineLarge 토큰과 동일).
         Text(
             text = "로그인",
-            style = MaterialTheme.typography.headlineLarge,
+            style = OnulDoTypography.headline1ExtraBold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = gutter,
         )
@@ -195,14 +181,13 @@ fun LoginScreen(
         ) {
             Text(
                 text = "아직 계정이 없으신가요? ",
-                style = MaterialTheme.typography.labelLarge,
+                style = OnulDoTypography.caption1Regular,
                 color = DarkBrown70,
             )
             Text(
                 text = "회원가입",
-                style = MaterialTheme.typography.labelLarge,
+                style = OnulDoTypography.caption2Bold,
                 color = Persimmon,
-                fontWeight = FontWeight.Bold,
                 textDecoration = TextDecoration.Underline,
                 modifier = Modifier.clickable(onClick = onSignupClick),
             )

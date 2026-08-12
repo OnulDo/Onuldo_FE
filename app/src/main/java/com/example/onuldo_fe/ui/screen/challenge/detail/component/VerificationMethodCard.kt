@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Persimmon20
@@ -56,14 +57,14 @@ fun VerificationMethodCard(
     ) {
         Text(
             text = "인증 방법",
-            style = MaterialTheme.typography.bodyMedium,  // Body3
+            style = OnulDoTypography.body4Bold,
             color = BlackBrown
         )
 
         Text(
             text = title,
             modifier = Modifier.padding(top = 8.dp),
-            style = MaterialTheme.typography.bodyMedium,  // Body3
+            style = OnulDoTypography.body4Bold,
             color = Persimmon
         )
 
@@ -72,7 +73,7 @@ fun VerificationMethodCard(
             Text(
                 text = description,
                 modifier = Modifier.padding(top = 2.dp),
-                style = MaterialTheme.typography.labelLarge,  // Caption1
+                style = OnulDoTypography.caption1Regular,
                 color = BlackBrown
             )
         }
@@ -120,10 +121,7 @@ fun VerificationMethodCard(
                     Spacer(Modifier.width(7.dp))
                     Text(
                         text = "인증 유의사항 보기",
-                        fontFamily = Pretendard,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                        lineHeight = 13.sp,
+                        style = OnulDoTypography.caption2Bold,
                         color = BlackBrown
                     )
                 }

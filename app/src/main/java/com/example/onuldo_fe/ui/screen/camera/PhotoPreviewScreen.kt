@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.camera
+package com.example.onuldo_fe.ui.screen.camera
 
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -19,10 +19,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.AsyncImage
-import com.example.onuldo_fe.camera.component.CameraTopBar
-import com.example.onuldo_fe.camera.component.PreviewBottomBar
+import com.example.onuldo_fe.ui.screen.camera.component.CameraTopBar
+import com.example.onuldo_fe.ui.screen.camera.component.PreviewBottomBar
 import com.example.onuldo_fe.ui.component.OnulDoErrorDialog
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.viewmodel.verification.VerificationSubmitState
 
 @Composable
 fun PhotoPreviewScreen(

@@ -21,6 +21,7 @@ import com.example.onuldo_fe.model.challenge.BlockType
 import com.example.onuldo_fe.model.challenge.ContentBlock
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 
@@ -58,20 +59,14 @@ fun ChallengeContent(
                 BlockType.H2 -> Text(
                     text = block.content,
                     modifier = Modifier.padding(top = topPadding),
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp,
-                    lineHeight = 40.sp,
+                    style = OnulDoTypography.title1Bold,
                     color = BlackBrown
                 )
 
                 BlockType.H3 -> Text(
                     text = block.content,
                     modifier = Modifier.padding(top = topPadding),
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    lineHeight = 30.sp,
+                    style = OnulDoTypography.body4Bold,
                     color = BlackBrown
                 )
 
@@ -90,10 +85,7 @@ fun ChallengeContent(
                             Text(
                                 text = block.content,
                                 modifier = Modifier.padding(start = 5.dp),
-                                fontFamily = Pretendard,
-                                fontWeight = FontWeight.Normal,  // 볼드 아님(주변 스타일 상속 방지)
-                                fontSize = 13.sp,
-                                lineHeight = 24.sp,
+                                style = OnulDoTypography.caption1Regular,
                                 color = BlackBrown
                             )
                         }
@@ -101,11 +93,7 @@ fun ChallengeContent(
                         // 일반 문단 — 기존 benefit 설명 스타일 (13/400/19)
                         Text(
                             text = block.content,
-                            modifier = Modifier.padding(top = topPadding),
-                            fontFamily = Pretendard,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 13.sp,
-                            lineHeight = 19.sp,
+                            style = OnulDoTypography.caption1Regular,
                             color = BlackBrown
                         )
                     }
@@ -119,17 +107,13 @@ fun ChallengeContent(
                         Text(
                             text = block.content,
                             modifier = Modifier.padding(top = topPadding),
-                            style = MaterialTheme.typography.bodyMedium,  // Body3 14/700/22
+                            style = OnulDoTypography.title1Bold,
                             color = DarkBrown
                         )
                     } else {
                         Text(
                             text = block.content,
-                            modifier = Modifier.padding(top = topPadding),
-                            fontFamily = Pretendard,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 14.sp,
-                            lineHeight = 20.sp,
+                            style = OnulDoTypography.body4Regular,
                             color = DarkBrown
                         )
                     }
