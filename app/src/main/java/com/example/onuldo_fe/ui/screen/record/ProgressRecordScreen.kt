@@ -29,7 +29,7 @@ fun ProgressRecordScreen(
                 dDay = record.dDay,
                 progress = record.progress,
                 depositAmount = record.depositAmount,
-                isTodayVerified = record.isTodayVerified
+                dailyStatus = record.dailyStatus
             )
         }
     }
@@ -49,7 +49,7 @@ private fun ProgressRecordScreenPreview() {
                     dDay = 7,
                     progress = 65,
                     depositAmount = 2000,
-                    isTodayVerified = true
+                    dailyStatus = com.example.onuldo_fe.model.record.OngoingDailyStatus.SUCCESS
                 ),
                 ProgressRecord(
                     participationId = 2,
@@ -59,7 +59,7 @@ private fun ProgressRecordScreenPreview() {
                     dDay = 3,
                     progress = 40,
                     depositAmount = 1000,
-                    isTodayVerified = false
+                    dailyStatus = com.example.onuldo_fe.model.record.OngoingDailyStatus.NEED_CERTIFICATION
                 )
             )
         )

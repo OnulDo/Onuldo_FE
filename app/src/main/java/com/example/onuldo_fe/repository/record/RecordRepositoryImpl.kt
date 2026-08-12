@@ -8,6 +8,7 @@ import com.example.onuldo_fe.model.record.CompletedChallenge
 import com.example.onuldo_fe.model.record.CompletedRecordSummary
 import com.example.onuldo_fe.model.record.CompletedResultStatus
 import com.example.onuldo_fe.model.record.OngoingChallenge
+import com.example.onuldo_fe.model.record.OngoingDailyStatus
 
 class RecordRepositoryImpl(private val api: RecordApi) : RecordRepository {
     override suspend fun getOngoingChallenges(): List<OngoingChallenge> {
@@ -49,6 +50,12 @@ class RecordRepositoryImpl(private val api: RecordApi) : RecordRepository {
                 "PERSONAL" -> ChallengeRecordType.PERSONAL
                 "PARTY" -> ChallengeRecordType.PARTY
                 else -> ChallengeRecordType.UNKNOWN
+            },
+            dailyStatus = when (dailyStatus?.uppercase()) {
+                "SUCCESS" -> OngoingDailyStatus.SUCCESS
+                "FAIL", "FAILURE" -> OngoingDailyStatus.FAILURE
+                "REVIEW_PENDING", "WAITING_REVIEW", "PENDING" -> OngoingDailyStatus.REVIEW_PENDING
+                else -> OngoingDailyStatus.NEED_CERTIFICATION
             }
         )
     }
