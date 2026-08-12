@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -50,6 +49,7 @@ import com.example.onuldo_fe.viewmodel.home.toUiState
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.SourCream
 
@@ -334,8 +334,7 @@ private fun SectionTitle(text: String, modifier: Modifier = Modifier) {
         Text(
             text = text,
             color = BlackBrown,
-            style = MaterialTheme.typography.bodyLarge,
-            lineHeight = 20.sp
+            style = OnulDoTypography.body2Bold
         )
     }
 }

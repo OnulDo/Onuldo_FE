@@ -47,6 +47,7 @@ import com.example.onuldo_fe.ui.screen.home.components.HomePartyCard
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -99,8 +100,15 @@ fun PartyListScreen(
         }
     ) {
     Column(Modifier.fillMaxSize().background(SourCream)) {
-        Text("파티", modifier = Modifier.padding(start = spacing.spacing24, top = spacing.spacing16), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        // TODO 디자인 시스템에 21dp 토큰이 추가되면 LocalSpacing으로 교체
+        Text(
+            text = "파티",
+            modifier = Modifier.padding(
+                start = spacing.spacing24,
+                top = spacing.spacing16
+            ),
+            color = BlackBrown,
+            style = OnulDoTypography.headline3Bold
+        )        // TODO 디자인 시스템에 21dp 토큰이 추가되면 LocalSpacing으로 교체
         Spacer(Modifier.height(21.dp))
         Row(Modifier.padding(horizontal = spacing.spacing20), horizontalArrangement = Arrangement.spacedBy(spacing.spacing10)) {
             Button(
@@ -120,7 +128,7 @@ fun PartyListScreen(
                 )
                 // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.width(3.dp))
-                Text("파티 만들기", fontFamily = Pretendard, fontSize = 14.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
+                Text("파티 만들기", style = OnulDoTypography.body4Bold)
             }
             OutlinedButton(
                 onClick = onInviteCodeClick,
@@ -129,13 +137,13 @@ fun PartyListScreen(
                 border = BorderStroke(1.5.dp, Persimmon),
                 colors = ButtonDefaults.outlinedButtonColors(containerColor = White),
                 contentPadding = PaddingValues(0.dp)
-            ) { Text("초대코드 입력", color = Persimmon, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold) }
+            ) { Text("초대코드 입력", color = Persimmon, style = OnulDoTypography.caption2Bold) }
         }
         Spacer(Modifier.height(spacing.spacing24))
         Row(Modifier.padding(horizontal = spacing.spacing20), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(width = 4.dp, height = 19.dp).background(Persimmon, RoundedCornerShape(4.dp)))
             Spacer(Modifier.width(5.dp))
-            Text("나의 파티", color = BlackBrown, fontFamily = Pretendard, fontSize = 17.sp, lineHeight = 20.sp, fontWeight = FontWeight.Bold)
+            Text("나의 파티", color = BlackBrown, style = OnulDoTypography.body2Bold)
         }
         // TODO 디자인 시스템에 14dp 토큰이 추가되면 LocalSpacing으로 교체
         Spacer(Modifier.height(14.dp))
@@ -149,7 +157,7 @@ fun PartyListScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(errorMessage, color = DarkBrown50, fontFamily = Pretendard, fontSize = 13.sp)
+                Text(errorMessage, color = DarkBrown50, style = OnulDoTypography.caption1Regular)
                 TextButton(onClick = onRetry) { Text("다시 시도", color = Persimmon) }
             }
         } else if (parties.isEmpty()) {
@@ -194,18 +202,12 @@ private fun PartyListEmptyContent(modifier: Modifier = Modifier) {
         Text(
             text = "아직 시작한 파티가 없어요",
             color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 22.sp,
-            lineHeight = 40.sp,
-            fontWeight = FontWeight.Bold
+            style = OnulDoTypography.title1Bold
         )
         Text(
             text = "친구들과 함께 도전하여 더욱 즐겁게\n인증하세요!",
             color = com.example.onuldo_fe.ui.theme.DarkBrown,
-            fontFamily = Pretendard,
-            fontSize = 13.sp,
-            lineHeight = 18.sp,
-            fontWeight = FontWeight.Normal,
+            style = OnulDoTypography.caption1Regular,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
     }

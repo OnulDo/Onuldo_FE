@@ -39,6 +39,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.SourCream
 import kotlinx.coroutines.delay
@@ -68,10 +69,7 @@ fun PartyCapacitySelector(
             "$capacity 명",
             Modifier.weight(1f),
             color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 17.sp,
-            lineHeight = 20.sp,
-            fontWeight = FontWeight.Bold,
+            style = OnulDoTypography.body2Bold,
             textAlign = TextAlign.Center
         )
         CapacityControlIcon(

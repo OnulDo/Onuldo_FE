@@ -54,9 +54,7 @@ fun PartyWaitingEmptySlotCard(modifier: Modifier = Modifier) {
             text = "파티원 모집 중",
             modifier = Modifier.padding(start = LocalSpacing.current.spacing12),
             color = DarkBrown50,
-            fontFamily = Pretendard,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium
+            style = OnulDoTypography.caption1Medium
         )
     }
 }
@@ -64,7 +62,7 @@ fun PartyWaitingEmptySlotCard(modifier: Modifier = Modifier) {
 @Composable
 private fun PartyWaitingStatusChip(text: String, background: Color, foreground: Color) {
     Box(Modifier.width(56.dp).height(22.dp).background(background, RoundedCornerShape(11.dp)), contentAlignment = Alignment.Center) {
-        Text(text, color = foreground, fontFamily = Pretendard, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+        Text(text, color = foreground, style = OnulDoTypography.caption4Bold)
     }
 }
 
