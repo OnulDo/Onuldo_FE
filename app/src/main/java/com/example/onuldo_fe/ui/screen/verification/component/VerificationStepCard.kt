@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.White
 
 @Composable
@@ -67,7 +68,7 @@ fun VerificationStepCard(
             Text(
                 text = title,
                 color = BlackBrown,
-                style = MaterialTheme.typography.labelMedium
+                style = OnulDoTypography.caption1Medium,
             )
         }
     }

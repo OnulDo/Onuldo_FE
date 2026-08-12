@@ -22,6 +22,7 @@ import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 
 
@@ -43,7 +44,7 @@ fun VerificationSuccessScreen(onConfirmClick: () -> Unit = {}) {
                 Text(
                     text = "인증 결과",
                     color = BlackBrown,
-                    fontSize = 16.sp,
+                    style = OnulDoTypography.body3Bold,
                     modifier = Modifier.align(Alignment.Center),
                     textAlign = TextAlign.Center
                 )
@@ -62,7 +63,7 @@ fun VerificationSuccessScreen(onConfirmClick: () -> Unit = {}) {
             Text(
                 text = "인증 성공!",
                 color = BlackBrown,
-                fontSize = 22.sp,
+                style = OnulDoTypography.body1Bold,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 14.dp),
@@ -72,7 +73,7 @@ fun VerificationSuccessScreen(onConfirmClick: () -> Unit = {}) {
             Text(
                 text = "AI 검증을 모두 통과했어요",
                 color = DarkBrown70,
-                fontSize = 14.sp,
+                style = OnulDoTypography.body5Regular,
                 modifier = Modifier.padding(top = 11.dp),
                 textAlign = TextAlign.Center
             )
