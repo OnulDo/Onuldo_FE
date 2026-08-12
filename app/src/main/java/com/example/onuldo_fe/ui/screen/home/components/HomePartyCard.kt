@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -67,7 +66,11 @@ fun HomePartyCard(
             .border(BorderStroke(1.dp, DarkBrown40), RoundedCornerShape(14.dp))
             .padding(start = 14.dp, top = 14.dp, end = spacing.spacing10, bottom = 17.dp)
     ) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = partyChallenge.title,
@@ -91,9 +94,7 @@ fun HomePartyCard(
             Text(
                 text = stringResource(R.string.home_challenge_d_day, partyChallenge.remainingDays),
                 color = DarkBrown80,
-                modifier = Modifier
-                    .padding(end = 6.dp)
-                    .offset(y = (-3).dp),
+                modifier = Modifier.padding(end = 6.dp),
                 fontFamily = Pretendard,
                 fontSize = 11.sp,
                 lineHeight = 13.sp,
@@ -101,7 +102,7 @@ fun HomePartyCard(
             )
         }
 
-        Spacer(Modifier.height(spacing.spacing10))
+        Spacer(Modifier.height(spacing.spacing12))
         Row(verticalAlignment = Alignment.CenterVertically) {
             val deadlineText = partyChallenge.verifiedAt?.let {
                 stringResource(R.string.home_challenge_verified_at, it.toDisplayText())
@@ -148,8 +149,8 @@ fun HomePartyCard(
                         defaultCharacterId = member.defaultCharacterId,
                         contentDescription = null,
                         containerSize = 33.dp,
-                        characterWidth = 28.dp,
-                        characterHeight = 33.dp,
+                        characterWidth = 22.dp,
+                        characterHeight = 25.dp,
                         showBorder = member.isVerifiedToday,
                         dimmed = !member.isVerifiedToday
                     )

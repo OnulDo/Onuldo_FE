@@ -10,15 +10,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -33,7 +35,6 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,6 +44,7 @@ import com.example.onuldo_fe.R
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomePartyChallenge
 import com.example.onuldo_fe.model.home.HomePartyMember
+import com.example.onuldo_fe.ui.component.EmptyStateContent
 import com.example.onuldo_fe.ui.screen.home.components.HomePartyCard
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown50
@@ -82,6 +84,10 @@ fun PartyListScreen(
 ) {
     val spacing = LocalSpacing.current
     val pullToRefreshState = rememberPullToRefreshState()
+    // Scaffold가 상태바 인셋을 이미 소비했는지 여부와 무관하게, 그 시점에 남아있는 실제
+    // 인셋 값을 읽어 화면 맨 위 기준 60dp(Figma 실측)가 되도록 나머지 여백만 채운다.
+    val statusBarInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val partyTitleTopPadding = (60.dp - statusBarInset).coerceAtLeast(0.dp)
     // 챌린지 목록과 동일하게 당길 때 상단에 실제 인디케이터를 보여준다.
     // 탭 재진입 시의 조용한 재조회(SILENT)는 isRefreshing을 건드리지 않으므로 노출되지 않는다.
     PullToRefreshBox(
@@ -99,7 +105,7 @@ fun PartyListScreen(
         }
     ) {
     Column(Modifier.fillMaxSize().background(SourCream)) {
-        Text("파티", modifier = Modifier.padding(start = spacing.spacing24, top = spacing.spacing16), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Text("파티", modifier = Modifier.padding(start = spacing.spacing24, top = partyTitleTopPadding), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         // TODO 디자인 시스템에 21dp 토큰이 추가되면 LocalSpacing으로 교체
         Spacer(Modifier.height(21.dp))
         Row(Modifier.padding(horizontal = spacing.spacing20), horizontalArrangement = Arrangement.spacedBy(spacing.spacing10)) {
@@ -171,44 +177,13 @@ fun PartyListScreen(
 
 @Composable
 private fun PartyListEmptyContent(modifier: Modifier = Modifier) {
-    val spacing = LocalSpacing.current
-    Column(
+    EmptyStateContent(
+        iconRes = R.drawable.party_empty_character,
+        title = "아직 시작한 파티가 없어요",
+        description = "친구들과 함께 도전하여 더욱 즐겁게\n인증하세요!",
         // TODO 디자인 시스템에 96dp 토큰이 추가되면 LocalSpacing으로 교체
-        modifier = modifier.padding(top = 96.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .size(120.dp)
-                .background(Persimmon.copy(alpha = 0.15f), CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(R.drawable.party_empty_character),
-                contentDescription = null,
-                modifier = Modifier.size(width = 82.dp, height = 95.dp),
-                contentScale = ContentScale.Fit
-            )
-        }
-        Spacer(Modifier.height(spacing.spacing8))
-        Text(
-            text = "아직 시작한 파티가 없어요",
-            color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 22.sp,
-            lineHeight = 40.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "친구들과 함께 도전하여 더욱 즐겁게\n인증하세요!",
-            color = com.example.onuldo_fe.ui.theme.DarkBrown,
-            fontFamily = Pretendard,
-            fontSize = 13.sp,
-            lineHeight = 18.sp,
-            fontWeight = FontWeight.Normal,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
-    }
+        modifier = modifier.padding(top = 96.dp)
+    )
 }
 
 // API에서 남은 일수와 시간을 숫자 타입으로 제공하면 문자열 파싱 대신 응답 값을 직접 전달
