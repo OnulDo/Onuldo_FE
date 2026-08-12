@@ -13,11 +13,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,7 +30,6 @@ import com.example.onuldo_fe.model.home.TodayChallenge
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
-import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Persimmon20
@@ -63,7 +65,8 @@ fun TodayChallengeCard(
             // 서버의 yyyy-MM-dd 날짜를 화면 표시 형식으로 바꾼다.
             text = todayChallenge.date.toHomeDateText(),
             color = BlackBrown,
-            style = OnulDoTypography.title2ExtraBold,
+            style = MaterialTheme.typography.titleMedium,
+            lineHeight = 20.sp,
         )
 
         Spacer(modifier = Modifier.height(42.dp))
@@ -76,20 +79,20 @@ fun TodayChallengeCard(
             Text(
                 text = stringResource(R.string.home_today_challenge_title),
                 color = BlackBrown,
-                style = OnulDoTypography.body2Bold,
+                style = MaterialTheme.typography.bodyLarge,
+                lineHeight = 20.sp,
             )
             Text(
                 text = buildAnnotatedString {
-                    // Caption2/Bold
-                    withStyle(OnulDoTypography.caption2Bold.toSpanStyle().copy(color = Persimmon)) {
+                    withStyle(SpanStyle(color = Persimmon, fontWeight = FontWeight.Black)) {
                         append(todayChallenge.completedCount.toString())
                     }
-                    // Caption2/Medium
-                    withStyle(OnulDoTypography.caption2Medium.toSpanStyle().copy(color = BlackBrown)) {
+                    withStyle(SpanStyle(color = BlackBrown, fontWeight = FontWeight.Medium)) {
                         append("/${todayChallenge.totalCount} 완료")
                     }
                 },
-                style = OnulDoTypography.caption2Medium,
+                style = MaterialTheme.typography.labelMedium,
+                lineHeight = 14.sp,
             )
         }
 

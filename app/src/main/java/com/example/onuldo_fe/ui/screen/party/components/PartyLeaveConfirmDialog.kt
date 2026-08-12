@@ -29,7 +29,6 @@ import com.example.onuldo_fe.ui.theme.DarkBrown20
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.LocalSpacing
-import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -69,7 +68,10 @@ fun PartyLeaveConfirmDialog(
                         text = "파티를 나가시겠습니까?",
                         modifier = Modifier.fillMaxWidth(),
                         color = BlackBrown,
-                        style = OnulDoTypography.body2Bold,
+                        fontFamily = Pretendard,
+                        fontSize = 17.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
                     Spacer(Modifier.height(spacing.spacing12))
@@ -77,7 +79,10 @@ fun PartyLeaveConfirmDialog(
                         text = "파티를 나가게 되면 파티원 중\n1명이 방장을 이어받아요",
                         modifier = Modifier.fillMaxWidth(),
                         color = DarkBrown70,
-                        style = OnulDoTypography.caption1Medium,
+                        fontFamily = Pretendard,
+                        fontSize = 13.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -92,6 +97,9 @@ fun PartyLeaveConfirmDialog(
                     PartyLeaveDialogButton(
                         text = "취소",
                         color = DarkBrown50,
+                        fontSize = 15,
+                        lineHeight = 18,
+                        fontWeight = FontWeight.Medium,
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     )
@@ -99,6 +107,9 @@ fun PartyLeaveConfirmDialog(
                     PartyLeaveDialogButton(
                         text = "나가기",
                         color = Persimmon,
+                        fontSize = 14,
+                        lineHeight = 22,
+                        fontWeight = FontWeight.Bold,
                         onClick = onConfirm,
                         modifier = Modifier.weight(1f)
                     )
@@ -112,6 +123,9 @@ fun PartyLeaveConfirmDialog(
 private fun PartyLeaveDialogButton(
     text: String,
     color: androidx.compose.ui.graphics.Color,
+    fontSize: Int,
+    lineHeight: Int,
+    fontWeight: FontWeight,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -124,7 +138,10 @@ private fun PartyLeaveDialogButton(
         Text(
             text = text,
             color = color,
-            style = OnulDoTypography.body4Bold,
+            fontFamily = Pretendard,
+            fontSize = fontSize.sp,
+            lineHeight = lineHeight.sp,
+            fontWeight = fontWeight,
             textAlign = TextAlign.Center
         )
     }

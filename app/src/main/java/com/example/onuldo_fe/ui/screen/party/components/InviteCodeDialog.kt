@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,9 +39,9 @@ import com.example.onuldo_fe.ui.theme.DarkBrown10
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.LocalSpacing
-import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.SourCream
@@ -75,14 +76,18 @@ fun InviteCodeDialog(
             Text(
                 text = "초대코드 입력",
                 color = BlackBrown,
-                style = OnulDoTypography.body1Bold,
+                fontFamily = Pretendard,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
                 letterSpacing = (-0.36).sp
             )
             Spacer(Modifier.height(LocalSpacing.current.spacing10))
             Text(
                 text = error?.message ?: networkErrorMessage ?: "파티장에게 받은 6자리 코드를 입력하세요",
                 color = if (isError || networkErrorMessage != null) Red else DarkBrown,
-                style = if (isError) OnulDoTypography.caption2Bold else OnulDoTypography.caption2Regular,
+                fontFamily = Pretendard,
+                fontSize = 12.sp,
+                fontWeight = if (isError) FontWeight.Bold else FontWeight.Normal,
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(LocalSpacing.current.spacing30))
@@ -125,7 +130,9 @@ fun InviteCodeDialog(
                                     Text(
                                         text = character,
                                         color = if (isError) Red else BlackBrown,
-                                        style = OnulDoTypography.body1Bold,
+                                        fontFamily = Pretendard,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
                                         textAlign = TextAlign.Center
                                     )
                                 }
@@ -155,23 +162,19 @@ fun InviteCodeDialog(
                     disabledContentColor = DarkBrown
                 )
             ) {
-                // Body4/Bold
                 Text(
                     text = when {
                         isSubmitting -> "확인 중..."
                         isError || networkErrorMessage != null -> "다시 입력"
                         else -> "참가하기"
                     },
-                    style = OnulDoTypography.body4Bold
+                    fontFamily = Pretendard,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
             TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-                // Body4/Bold
-                Text(
-                    "취소",
-                    color = DarkBrown,
-                    style = OnulDoTypography.body4Bold
-                )
+                Text("취소", color = DarkBrown, fontFamily = Pretendard, fontSize = 15.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

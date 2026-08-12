@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.LocalSpacing
-import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
 
@@ -67,7 +66,10 @@ fun PartyMemberCard(
                 text = name,
                 modifier = nameWidth?.let { Modifier.width(it) } ?: Modifier,
                 color = BlackBrown,
-                style = OnulDoTypography.caption2Bold,
+                fontFamily = Pretendard,
+                fontSize = 12.sp,
+                lineHeight = 22.sp,
+                fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Clip
             )

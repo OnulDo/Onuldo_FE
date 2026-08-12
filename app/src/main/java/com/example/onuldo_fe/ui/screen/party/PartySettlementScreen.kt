@@ -48,7 +48,6 @@ import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.LocalSpacing
-import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
@@ -100,14 +99,20 @@ fun PartySettlementScreen(
                     text = content.title,
                     modifier = Modifier.fillMaxWidth(),
                     color = BlackBrown,
-                    style = OnulDoTypography.title1Bold,
+                    fontFamily = Pretendard,
+                    fontSize = 22.sp,
+                    lineHeight = 40.sp,
+                    fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = content.description,
                     modifier = Modifier.fillMaxWidth(),
                     color = DarkBrown,
-                    style = OnulDoTypography.caption1Regular,
+                    fontFamily = Pretendard,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp,
+                    fontWeight = FontWeight.Normal,
                     textAlign = TextAlign.Center
                 )
                 Spacer(Modifier.height(spacing.spacing50))
@@ -146,7 +151,9 @@ fun PartySettlementScreen(
                 modifier = Modifier
                     // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
                     .padding(top = 40.dp),
-                height = 52.dp
+                height = 52.dp,
+                fontSize = 17.sp,
+                lineHeight = 20.sp
             )
         }
     }
@@ -158,7 +165,10 @@ private fun SettlementSectionTitle(text: String) {
         text = text,
         modifier = Modifier.padding(start = LocalSpacing.current.spacing24),
         color = BlackBrown,
-        style = OnulDoTypography.caption2Bold
+        fontFamily = Pretendard,
+        fontSize = 12.sp,
+        lineHeight = 22.sp,
+        fontWeight = FontWeight.Bold
     )
 }
 
@@ -210,14 +220,19 @@ private fun SettlementAmount(
         Text(
             text = label,
             color = labelColor,
-            style = OnulDoTypography.caption3Bold
+            fontFamily = Pretendard,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold
         )
         Text(
             text = amount,
             // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
             modifier = Modifier.padding(top = 3.dp),
             color = amountColor,
-            style = OnulDoTypography.body2Bold
+            fontFamily = Pretendard,
+            fontSize = 17.sp,
+            lineHeight = 20.sp,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -244,7 +259,10 @@ private fun PartySettlementMemberCard(
                 Text(
                     text = member.status.label(),
                     color = member.status.color(),
-                    style = OnulDoTypography.caption3Bold
+                    fontFamily = Pretendard,
+                    fontSize = 11.sp,
+                    lineHeight = 22.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -253,7 +271,10 @@ private fun PartySettlementMemberCard(
             text = member.displayAmount.toSignedPointText(),
             modifier = Modifier.width(130.dp),
             color = resultColor,
-            style = OnulDoTypography.caption2Bold,
+            fontFamily = Pretendard,
+            fontSize = 12.sp,
+            lineHeight = 22.sp,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.End
         )
     }

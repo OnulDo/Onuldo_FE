@@ -23,14 +23,16 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.LocalSpacing
-import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.SourCream
@@ -51,12 +53,7 @@ fun PartyChallengeSelector(
                 .clickable(onClick = onClick),
             contentAlignment = Alignment.Center
         ) {
-            // Body4/Bold
-            Text(
-                "＋ 챌린지 선택하기",
-                color = Persimmon,
-                style = OnulDoTypography.body4Bold
-            )
+            Text("＋ 챌린지 선택하기", color = Persimmon, fontFamily = Pretendard, fontSize = 15.sp, fontWeight = FontWeight.Bold)
         }
         return
     }
@@ -84,8 +81,9 @@ fun PartyChallengeSelector(
                 Text(
                     text = label,
                     color = Persimmon,
-                    // Caption4/Bold
-                    style = OnulDoTypography.caption4Bold
+                    fontFamily = Pretendard,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
             Spacer(Modifier.width(LocalSpacing.current.spacing8))
@@ -94,13 +92,19 @@ fun PartyChallengeSelector(
             challenge.title,
             Modifier.weight(1f),
             color = Persimmon,
-            style = OnulDoTypography.body4Bold
+            fontFamily = Pretendard,
+            fontSize = 14.sp,
+            lineHeight = 22.sp,
+            fontWeight = FontWeight.Bold
         )
         Row(Modifier.clickable(onClick = onClick), verticalAlignment = Alignment.CenterVertically) {
             Text(
                 "변경",
                 color = DarkBrown50,
-                style = OnulDoTypography.caption1Medium
+                fontFamily = Pretendard,
+                fontSize = 13.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.Medium
             )
             Image(
                 painter = painterResource(R.drawable.party_create_arrow_right),

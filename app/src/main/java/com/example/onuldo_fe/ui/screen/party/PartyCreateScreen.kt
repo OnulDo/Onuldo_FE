@@ -15,7 +15,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -85,7 +85,7 @@ fun PartyCreateScreen(
         ) {
             // TODO 디자인 시스템에 53dp 토큰이 추가되면 LocalSpacing으로 교체
             Spacer(Modifier.height(53.dp))
-            SectionTitle("파티 이름", OnulDoTypography.caption2Bold)
+            SectionTitle("파티 이름", 12)
             // TODO 디자인 시스템에 7dp 토큰이 추가되면 LocalSpacing으로 교체
             Spacer(Modifier.height(7.dp))
             PartyNameTextField(
@@ -103,11 +103,12 @@ fun PartyCreateScreen(
                     // TODO 디자인 시스템에 4dp·6dp 토큰이 추가되면 LocalSpacing으로 교체
                     modifier = Modifier.padding(start = 4.dp, top = 6.dp),
                     color = Persimmon,
-                    style = OnulDoTypography.caption3Regular
+                    fontFamily = Pretendard,
+                    fontSize = 11.sp
                 )
             }
             Spacer(Modifier.height(spacing.spacing26))
-            SectionTitle("함께할 챌린지", OnulDoTypography.caption2Bold)
+            SectionTitle("함께할 챌린지", 12)
             Spacer(Modifier.height(spacing.spacing8))
             PartyChallengeSelector(
                 challenge = selectedChallenge,
@@ -117,26 +118,26 @@ fun PartyCreateScreen(
             if (selectedChallenge != null) {
                 // TODO 디자인 시스템에 22dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(22.dp))
-                SectionTitle("진행 기간", OnulDoTypography.body4Bold)
+                SectionTitle("진행 기간", 14)
                 // TODO 디자인 시스템에 7dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(7.dp))
                 PartyOptionSelector(periods, selectedPeriod, onSelect = {
                     onFormChange()
                     selectedPeriod = it
-                }, textStyle = OnulDoTypography.body4Bold)
+                }, textSize = 14.sp)
                 // TODO 디자인 시스템에 23dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(23.dp))
-                SectionTitle("도전금", OnulDoTypography.body4Bold)
+                SectionTitle("도전금", 14)
                 // TODO 디자인 시스템에 7dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(7.dp))
                 PartyOptionSelector(deposits.map { "%,dP".format(it) }, selectedDeposit, onSelect = {
                     onFormChange()
                     selectedDeposit = it
-                }, textStyle = OnulDoTypography.caption2Bold)
+                }, textSize = 12.sp)
             }
             // TODO 디자인 시스템에 22dp 토큰이 추가되면 LocalSpacing으로 교체
             Spacer(Modifier.height(if (selectedChallenge == null) spacing.spacing26 else 22.dp))
-            SectionTitle("모집 인원 (2~5명)", OnulDoTypography.caption2Bold)
+            SectionTitle("모집 인원 (2~5명)", 12)
             Spacer(Modifier.height(spacing.spacing8))
             PartyCapacitySelector(capacity = capacity, onCapacityChange = {
                 onFormChange()
@@ -151,7 +152,8 @@ fun PartyCreateScreen(
                     // TODO 디자인 시스템에 14dp 토큰이 추가되면 LocalSpacing으로 교체
                     modifier = Modifier.padding(top = 14.dp),
                     color = Persimmon,
-                    style = OnulDoTypography.caption3Regular
+                    fontFamily = Pretendard,
+                    fontSize = 11.sp
                 )
             }
             OnulDoButton(
@@ -174,7 +176,9 @@ fun PartyCreateScreen(
                 enabled = enabled && !isSubmitting,
                 // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
                 modifier = Modifier.padding(top = 40.dp),
-                height = 52.dp
+                height = 52.dp,
+                fontSize = 17.sp,
+                lineHeight = 20.sp
             )
         }
     }
@@ -197,12 +201,15 @@ fun PartyCreateScreen(
 }
 
 @Composable
-private fun SectionTitle(text: String, style: TextStyle) = Text(
+private fun SectionTitle(text: String, size: Int) = Text(
     text = text,
     // TODO 디자인 시스템에 4dp 토큰이 추가되면 LocalSpacing으로 교체
     modifier = Modifier.padding(start = 4.dp),
     color = BlackBrown,
-    style = style
+    fontFamily = Pretendard,
+    fontSize = size.sp,
+    lineHeight = 22.sp,
+    fontWeight = FontWeight.Bold
 )
 
 @Preview(name = "파티 생성 - 챌린지 미선택", showBackground = true, widthDp = 390, heightDp = 844)

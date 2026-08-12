@@ -13,17 +13,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.padding
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
-import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 
 @Composable
@@ -32,7 +34,7 @@ fun PartyOptionSelector(
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    textStyle: TextStyle = OnulDoTypography.body4Bold
+    textSize: TextUnit = 14.sp
 ) {
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(LocalSpacing.current.spacing8)) {
         options.forEachIndexed { index, text ->
@@ -49,7 +51,10 @@ fun PartyOptionSelector(
                 Text(
                     text,
                     color = if (selected) SourCream else BlackBrown,
-                    style = textStyle
+                    fontFamily = Pretendard,
+                    fontSize = textSize,
+                    lineHeight = 22.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }

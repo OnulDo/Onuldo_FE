@@ -30,8 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.BlackBrown70
@@ -40,10 +42,10 @@ import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon20
+import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.ui.screen.party.components.PartyNetworkImage
-import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -82,16 +84,21 @@ fun HomeHeader(
 
         Spacer(modifier = Modifier.width(spacing.spacing10))
         Column(modifier = Modifier.weight(1f)) {
-            // Caption4/Bold
             Text(
                 text = "오늘두 함께 도전!",
                 color = BlackBrown70,
-                style = OnulDoTypography.caption4Bold
+                fontFamily = Pretendard,
+                fontSize = 8.sp,
+                lineHeight = 8.sp,
+                fontWeight = FontWeight.SemiBold
             )
             Text(
                 text = userName,
                 color = BlackBrown,
-                style = OnulDoTypography.body1ExtraBold
+                fontFamily = Pretendard,
+                fontSize = 18.sp,
+                lineHeight = 21.sp,
+                fontWeight = FontWeight.ExtraBold
             )
         }
 

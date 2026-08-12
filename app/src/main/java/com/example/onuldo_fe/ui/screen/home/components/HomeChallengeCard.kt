@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,7 +29,6 @@ import com.example.onuldo_fe.R
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomeChallenge
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
-import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown10
@@ -39,6 +40,7 @@ import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon80
+import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.SourCream
@@ -75,18 +77,20 @@ fun HomeChallengeCard(
                 modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Body1/Bold
                 Text(
                     text = challenge.title,
                     color = BlackBrown,
-                    style = OnulDoTypography.body1Bold
+                    fontFamily = Pretendard,
+                    fontSize = 18.sp,
+                    lineHeight = 21.sp,
+                    fontWeight = FontWeight.Bold
                 )
                 challenge.subtitleTextOrNull()?.let { subtitle ->
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = subtitle,
                         color = DarkBrown50,
-                        style = OnulDoTypography.caption2Medium,
+                        style = MaterialTheme.typography.labelLarge,
                         maxLines = 1
                     )
                 }
@@ -95,9 +99,11 @@ fun HomeChallengeCard(
             Text(
                 text = stringResource(R.string.home_challenge_d_day, challenge.remainingDays),
                 // Figma의 D-day 텍스트 규격(12sp Bold, 행간 22sp, 오른쪽 정렬)
-                color = DarkBrown80,
-                style = OnulDoTypography.caption2Bold,
-                textAlign = TextAlign.End
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = DarkBrown80,
+                    lineHeight = 22.sp,
+                    textAlign = TextAlign.End
+                )
             )
         }
 
@@ -109,13 +115,15 @@ fun HomeChallengeCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Caption1/Medium
                 Text(
                     text = challenge.verifiedAt?.let {
                         stringResource(R.string.home_challenge_verified_at, it.toDisplayText())
                     } ?: stringResource(R.string.home_challenge_deadline, challenge.deadlineAt.toDisplayText()),
                     color = challenge.deadlineColor(),
-                    style = OnulDoTypography.caption1Medium
+                    fontFamily = Pretendard,
+                    fontSize = 13.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Medium
                 )
                 //인증 마감 1시간 전부터 표시
                 challenge.remainingMinutes
@@ -148,11 +156,13 @@ fun HomeChallengeCard(
                         .height(26.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Caption4/Bold
                     Text(
                         text = stringResource(challenge.status.actionTextRes()),
                         color = actionColors.text,
-                        style = OnulDoTypography.caption4Bold,
+                        fontFamily = Pretendard,
+                        fontSize = 10.sp,
+                        lineHeight = 12.sp,
+                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
                 }

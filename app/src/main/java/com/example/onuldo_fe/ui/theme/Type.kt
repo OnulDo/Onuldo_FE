@@ -57,114 +57,101 @@ object OnulDoTypography {
         color = Persimmon,
     )
 
-    val startButton = TextStyle(
-        fontFamily = Jalnan,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-    )
-
     //slogan
     val brandSloganSemiBold = TextStyle(
         fontFamily = Fredoka,
         fontWeight = FontWeight.SemiBold,
         fontSize = 12.sp,
     )
-    // Headline 3
-    val headline3Bold = TextStyle(
+    // Title
+    val titleBold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 24.sp,
         lineHeight = 32.sp,
     )
 
-    // Headline 2
-    val headline2Bold = TextStyle(
+    // Subtitle
+    val subtitle1Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 26.sp,
         lineHeight = 30.sp,
     )
 
-    // Headline 1
-    val headline1ExtraBold = TextStyle(
+    // Header
+    val header1ExtraBold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.ExtraBold,
         fontSize = 28.sp,
         lineHeight = 40.sp,
     )
 
-    val headline1Bold = TextStyle(
+    val header1Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 28.sp,
         lineHeight = 40.sp,
     )
 
-    // Title / Body
-    val title1Bold = TextStyle(
+    // Body
+    val body1Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 22.sp,
         lineHeight = 40.sp,
     )
 
-    val body1Bold = TextStyle(
+    val body2Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 18.sp,
         lineHeight = 26.sp,
     )
 
-    val body1ExtraBold = TextStyle(
-        fontFamily = Pretendard,
-        fontWeight = FontWeight.ExtraBold,
-        fontSize = 18.sp,
-        lineHeight = 26.sp,
-    )
-
-    val body2Bold = TextStyle(
+    val body3Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 17.sp,
         lineHeight = 20.sp,
     )
 
-    val title2ExtraBold = TextStyle(
+    val body3ExtraBold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.ExtraBold,
         fontSize = 20.sp,
         lineHeight = 20.sp,
     )
 
-    val body3Medium = TextStyle(
+    val body4Medium = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Medium,
         fontSize = 15.sp,
         lineHeight = 22.sp,
     )
 
-    val body4Bold = TextStyle(
+    val body5Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 14.sp,
         lineHeight = 22.sp,
     )
 
-    val body4Medium = TextStyle(
+    val body5Medium = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 22.sp,
     )
 
-    val body4Regular = TextStyle(
+    val body5Regular = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 22.sp,
     )
 
-    val caption2Bold = TextStyle(
+    val body6Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
         fontSize = 12.sp,
@@ -186,12 +173,6 @@ object OnulDoTypography {
         lineHeight = 20.sp,
     )
 
-    val caption1Bold = TextStyle(
-        fontFamily = Pretendard,
-        fontWeight = FontWeight.Bold,
-        fontSize = 13.sp,
-        lineHeight = 20.sp,
-    )
     // Caption 2
     val caption2Medium = TextStyle(
         fontFamily = Pretendard,
@@ -250,12 +231,4 @@ object OnulDoTypography {
         fontSize = 10.sp,
         lineHeight = 16.sp,
     )
-
-    // 기존 화면이 이전 디자인 시스템 이름을 참조할 수 있도록 동일 규격 별칭 유지
-    val header1ExtraBold get() = headline1ExtraBold
-    val body3Bold get() = body2Bold
-    val body5Bold get() = body4Bold
-    val body5Medium get() = body4Medium
-    val body5Regular get() = body4Regular
-    val body6Bold get() = caption2Bold
 }
