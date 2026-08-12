@@ -1,7 +1,10 @@
 package com.example.onuldo_fe.ui.screen.home
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -17,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.data.notification.NotificationPermissionPrefs
 import com.example.onuldo_fe.model.home.notification.NotificationLandingBus
 import com.example.onuldo_fe.model.home.notification.toLanding
 import com.example.onuldo_fe.ui.component.PermissionDialogType
@@ -36,6 +40,24 @@ fun HomeRoute(
     val lifecycleOwner = LocalLifecycleOwner.current
     var showNotification by rememberSaveable { mutableStateOf(false) }
     var showCameraPermissionDialog by rememberSaveable { mutableStateOf(false) }
+    var showNotificationPermissionDialog by rememberSaveable { mutableStateOf(false) }
+
+    // 홈 최초 진입 시(기기별 1회) 알림 권한이 없으면 커스텀 안내 팝업
+    // 종 클릭과는 무관
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !NotificationPermissionPrefs.isRequested(context)
+        ) {
+            val granted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+            if (!granted) {
+                NotificationPermissionPrefs.markRequested(context)
+                showNotificationPermissionDialog = true
+            }
+        }
+    }
     var pendingChallengeId by rememberSaveable { mutableStateOf<Long?>(null) }
     var pendingCategory by rememberSaveable { mutableStateOf("") }
     var pendingTitle by rememberSaveable { mutableStateOf("") }
@@ -48,9 +70,8 @@ fun HomeRoute(
         }
     }
 
+        //권한x -> 알림 페이지는 열람 가능
     fun handleNotificationClick() {
-        // 인앱 알림함은 목록 조회(REST)라 OS 알림 권한과 무관 — 회원가입 직후(권한 미허용)에도 항상 연다.
-        // (POST_NOTIFICATIONS는 시스템 푸시 수신용 권한이라 인앱 목록 열람을 막지 않는다.)
         showNotification = true
     }
 
@@ -141,6 +162,21 @@ fun HomeRoute(
                 pendingDeadline = ""
             },
             onMoveToSettings = { moveToAppSettings(context) }
+        )
+    }
+
+    // 홈 진입 시 알림 권한 안내 팝업 → "설정으로 이동" 시 시스템 앱 알림설정으로
+    if (showNotificationPermissionDialog) {
+        PermissionSettingDialog(
+            type = PermissionDialogType.NOTIFICATION,
+            onDismiss = { showNotificationPermissionDialog = false },
+            onMoveToSettings = {
+                showNotificationPermissionDialog = false
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+                context.startActivity(intent)
+            }
         )
     }
 }

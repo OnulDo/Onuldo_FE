@@ -228,7 +228,11 @@ fun SettingScreen(
     if (showNotificationPermissionDialog) {
         PermissionSettingDialog(
             type = PermissionDialogType.NOTIFICATION,
-            onDismiss = { showNotificationPermissionDialog = false },
+            // 취소 시: 팝업 닫고 전 화면
+            onDismiss = {
+                showNotificationPermissionDialog = false
+                onBackClick()
+            },
             onMoveToSettings = {
                 showNotificationPermissionDialog = false
                 val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
