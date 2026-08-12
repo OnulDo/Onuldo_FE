@@ -102,8 +102,7 @@ fun HomePartyCard(
             )
         }
 
-        // TODO 디자인 시스템에 12dp 토큰이 추가되면 LocalSpacing으로 교체
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(spacing.spacing12))
         Row(verticalAlignment = Alignment.CenterVertically) {
             val deadlineText = partyChallenge.verifiedAt?.let {
                 stringResource(R.string.home_challenge_verified_at, it.toDisplayText())
