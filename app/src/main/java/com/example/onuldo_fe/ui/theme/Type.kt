@@ -57,6 +57,12 @@ object OnulDoTypography {
         color = Persimmon,
     )
 
+    val startButton = TextStyle(
+        fontFamily = Jalnan,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+    )
+
     //slogan
     val brandSloganSemiBold = TextStyle(
         fontFamily = Fredoka,
@@ -105,6 +111,13 @@ object OnulDoTypography {
     val body2Bold = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.Bold,
+        fontSize = 18.sp,
+        lineHeight = 26.sp,
+    )
+
+    val body2ExtraBold = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.ExtraBold,
         fontSize = 18.sp,
         lineHeight = 26.sp,
     )
@@ -173,6 +186,12 @@ object OnulDoTypography {
         lineHeight = 20.sp,
     )
 
+    val caption1Bold = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.Bold,
+        fontSize = 13.sp,
+        lineHeight = 20.sp,
+    )
     // Caption 2
     val caption2Medium = TextStyle(
         fontFamily = Pretendard,

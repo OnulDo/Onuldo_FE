@@ -16,6 +16,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
@@ -29,6 +30,7 @@ fun OnulDoButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    textStyle: TextStyle = OnulDoTypography.body3Bold,
     enabled: Boolean = true,
     height: Dp = 56.dp,
     horizontalPadding: Dp = 20.dp,
@@ -63,7 +65,7 @@ fun OnulDoButton(
     ) {
         Text(
             text = text,
-            style = OnulDoTypography.body3Bold,
+            style = textStyle,
         )
     }
 }
