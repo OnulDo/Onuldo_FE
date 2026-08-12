@@ -58,7 +58,7 @@ fun HomeCompletedChallengeCard(
         Text(
             text = completedChallenge.title,
             color = BlackBrown,
-            modifier = Modifier.padding(start = 15.dp, top = spacing.spacing26),
+            modifier = Modifier.padding(start = 15.dp, top = 31.dp),
             style = MaterialTheme.typography.bodyMedium
         )
 
