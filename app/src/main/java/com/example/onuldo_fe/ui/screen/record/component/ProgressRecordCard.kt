@@ -30,6 +30,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
@@ -55,15 +56,15 @@ fun ProgressRecordCard(
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(category, style = MaterialTheme.typography.titleSmall, color = DarkBrown)
-                Text(if (dDay == 0) "D-Day" else "D-$dDay", style = MaterialTheme.typography.titleSmall, color = DarkBrown)
+                Text(category, style = OnulDoTypography.caption3Bold, color = DarkBrown)
+                Text(if (dDay == 0) "D-Day" else "D-$dDay", style =OnulDoTypography.caption3Bold, color = DarkBrown)
             }
             Spacer(Modifier.height(spacing.spacing8))
-            Text(title, style = MaterialTheme.typography.bodyLarge, color = BlackBrown)
+            Text(title, style = OnulDoTypography.body2Bold, color = BlackBrown)
             Spacer(Modifier.height(spacing.spacing8))
             Text(
                 if (isTodayVerified) "오늘 인증 완료" else "오늘 인증 필요",
-                style = MaterialTheme.typography.titleSmall,
+                style = OnulDoTypography.caption3Bold,
                 color = statusColor
             )
             Spacer(Modifier.height(spacing.spacing12))
@@ -76,7 +77,7 @@ fun ProgressRecordCard(
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             "달성률 $progress%",
-                            style = MaterialTheme.typography.titleSmall,
+                            style = OnulDoTypography.caption3Bold,
                             color = statusColor
                         )
                     }
@@ -98,7 +99,7 @@ fun ProgressRecordCard(
             Spacer(Modifier.height(spacing.spacing10))
             Text(
                 "예치 ${"%,d".format(depositAmount)}P",
-                style = MaterialTheme.typography.labelSmall,
+                style = OnulDoTypography.caption3Regular,
                 color = DarkBrown50
             )
         }
