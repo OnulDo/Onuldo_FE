@@ -95,7 +95,7 @@ fun OnuldoTextField(
         if (supportingText != null) {
             Text(
                 text = supportingText,
-                style = OnulDoTypography.caption2Regular,
+                style = OnulDoTypography.caption3Regular,
                 color = supportingColor,
                 modifier = Modifier.padding(PaddingValues(start = 4.dp, top = 4.dp)),
             )
