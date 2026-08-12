@@ -22,6 +22,8 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.runBlocking
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.data.user.CurrentProfileImageStore
 import com.example.onuldo_fe.data.home.api.FakeHomeApi
 import com.example.onuldo_fe.data.home.dummy.FakeHomeScenario
 import com.example.onuldo_fe.repository.home.HomeRepositoryImpl
@@ -63,6 +66,15 @@ fun HomeScreen(
     scrollToTopKey: Int = 0,
     modifier: Modifier = Modifier
 ) {
+    // 프로필 편집(PATCH) 직후 공유된 최신 이미지가 있으면 헤더 아바타에 우선 반영한다.
+    // (공유값이 없으면 홈 조회값을 그대로 사용 — 편집 전 기존 동작 유지)
+    val sharedProfileUrl by CurrentProfileImageStore.profileImageUrl.collectAsState()
+    val effectiveUiState = if (sharedProfileUrl != null) {
+        uiState.copy(userProfileImageUrl = sharedProfileUrl)
+    } else {
+        uiState
+    }
+
     PullToRefreshBox(
         isRefreshing = uiState.isRefreshing,
         onRefresh = onRefresh,
@@ -88,7 +100,7 @@ fun HomeScreen(
             )
         } else if (uiState.hasHomeContent) {
             HomeContent(
-                uiState = uiState,
+                uiState = effectiveUiState,
                 onNotificationClick = onNotificationClick,
                 onSettlementResultClick = onSettlementResultClick,
                 onVerifyClick = onVerifyClick,
@@ -97,7 +109,7 @@ fun HomeScreen(
         } else {
             EmptyHomeContent(
                 userName = uiState.userName,
-                profileImageUrl = uiState.userProfileImageUrl,
+                profileImageUrl = effectiveUiState.userProfileImageUrl,
                 onNotificationClick = onNotificationClick,
                 onBrowseChallengesClick = onBrowseChallengesClick,
                 modifier = Modifier.fillMaxSize()
