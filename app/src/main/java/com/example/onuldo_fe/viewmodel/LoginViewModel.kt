@@ -79,7 +79,11 @@ class LoginViewModel(
         if (state.isBusy) return
 
         if (!Validators.isValidEmail(state.email)) {
-            _uiState.update { it.copy(errorMessage = INVALID_CREDENTIAL_MESSAGE) }
+            // 여기서 바로 반환하므로 아래의 일괄 초기화를 타지 않는다.
+            // 소셜 오류를 남겨 두면 배너와 입력칸 오류가 동시에 뜬다(둘은 따로 렌더된다).
+            _uiState.update {
+                it.copy(errorMessage = INVALID_CREDENTIAL_MESSAGE, socialErrorMessage = null)
+            }
             return
         }
 
