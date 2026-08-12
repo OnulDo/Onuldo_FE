@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.text.font.FontWeight
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
@@ -62,8 +63,11 @@ fun PartyNameTextField(
                 contentAlignment = Alignment.CenterStart
             ) {
                 if (value.isEmpty()) {
-                    Text("예: 갓생팟", color = DarkBrown40, fontFamily = Pretendard, fontSize = 13.sp)
-                }
+                    Text(
+                        text = "예: 갓생팟",
+                        color = DarkBrown40,
+                        style = OnulDoTypography.body4Regular
+                    )                }
                 innerTextField()
             }
         }

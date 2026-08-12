@@ -141,6 +141,5 @@ fun PointCtaButton(
         enabled = enabled,
         // 버튼은 바닥에서 42dp 띄운다.
         modifier = modifier.padding(top = 12.dp, bottom = 42.dp),
-        fontSize = 17.sp,
     )
 }

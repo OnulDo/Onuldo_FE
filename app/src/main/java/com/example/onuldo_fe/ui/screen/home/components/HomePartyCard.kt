@@ -41,6 +41,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown80
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon80
@@ -69,11 +70,11 @@ fun HomePartyCard(
     ) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                // Body2/Bold
                 Text(
                     text = partyChallenge.title,
                     color = BlackBrown,
-                    style = MaterialTheme.typography.bodyLarge,
-                    lineHeight = 20.sp,
+                    style = OnulDoTypography.body2Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -81,10 +82,7 @@ fun HomePartyCard(
                 Text(
                     text = partyChallenge.subtitle,
                     color = DarkBrown50,
-                    fontFamily = Pretendard,
-                    fontSize = 13.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.Medium,
+                    style = OnulDoTypography.caption1Medium,
                     maxLines = 1
                 )
             }
@@ -94,10 +92,7 @@ fun HomePartyCard(
                 modifier = Modifier
                     .padding(end = 6.dp)
                     .offset(y = (-3).dp),
-                fontFamily = Pretendard,
-                fontSize = 11.sp,
-                lineHeight = 13.sp,
-                fontWeight = FontWeight.Bold
+                style = OnulDoTypography.caption2Bold
             )
         }
 
@@ -111,10 +106,7 @@ fun HomePartyCard(
             Text(
                 text = deadlineText,
                 color = partyChallenge.status.statusColor(),
-                fontFamily = Pretendard,
-                fontSize = 13.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.Medium
+                style = OnulDoTypography.caption1Medium
             )
             partyChallenge.remainingMinutes
                 ?.takeIf {
@@ -192,10 +184,7 @@ private fun PartyAction(
             Text(
                 text = stringResource(party.status.actionTextRes()),
                 color = textColor,
-                fontFamily = Pretendard,
-                fontSize = 10.sp,
-                lineHeight = 12.sp,
-                fontWeight = FontWeight.Bold
+                style = OnulDoTypography.caption4Bold
             )
         }
     }

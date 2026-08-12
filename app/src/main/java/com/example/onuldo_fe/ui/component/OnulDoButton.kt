@@ -16,6 +16,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
@@ -38,6 +39,7 @@ fun OnulDoButton(
     disabledContainerColor: Color = BlackBrown.copy(alpha = 0.1f),
     disabledContentColor: Color = BlackBrown.copy(alpha = 0.2f),
     pressedContainerColor: Color = DarkBrown,
+    textStyle: TextStyle = OnulDoTypography.body2Bold,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -64,7 +66,7 @@ fun OnulDoButton(
     ) {
         Text(
             text = text,
-            style = OnulDoTypography.body3Bold,
+            style = textStyle,
         )
     }
 }

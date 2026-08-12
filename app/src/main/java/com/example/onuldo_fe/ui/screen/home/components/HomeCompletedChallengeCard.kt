@@ -11,15 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.model.home.HomeCompletedChallenge
 import com.example.onuldo_fe.ui.theme.BlackBrown
@@ -29,7 +26,7 @@ import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
-import com.example.onuldo_fe.ui.theme.Pretendard
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.White
 
 @Composable
@@ -46,20 +43,18 @@ fun HomeCompletedChallengeCard(
             .background(White, RoundedCornerShape(14.dp))
             .border(BorderStroke(1.dp, DarkBrown40), RoundedCornerShape(14.dp))
     ) {
+        // Caption3/Regular
         Text(
             text = completedChallenge.time,
             color = DarkBrown50,
             modifier = Modifier.padding(start = 15.dp, top = spacing.spacing12),
-            fontFamily = Pretendard,
-            fontSize = 10.sp,
-            lineHeight = 20.sp,
-            fontWeight = FontWeight.Normal
+            style = OnulDoTypography.caption3Regular
         )
         Text(
             text = completedChallenge.title,
             color = BlackBrown,
             modifier = Modifier.padding(start = 15.dp, top = 31.dp),
-            style = MaterialTheme.typography.bodyMedium
+            style = OnulDoTypography.body4Bold
         )
 
         CompletedChallengeResult(completedChallenge)
@@ -80,6 +75,7 @@ private fun BoxScope.CompletedChallengeResult(completedChallenge: HomeCompletedC
                 .background(Green2, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
+            // Caption3/Bold
             Text(
                 text = stringResource(
                     R.string.home_completed_party_result,
@@ -87,15 +83,13 @@ private fun BoxScope.CompletedChallengeResult(completedChallenge: HomeCompletedC
                     completedChallenge.totalMemberCount
                 ),
                 color = Green,
-                fontFamily = Pretendard,
-                fontSize = 11.sp,
-                lineHeight = 13.sp,
-                fontWeight = FontWeight.Bold
+                style = OnulDoTypography.caption3Bold
             )
         }
 
         is HomeCompletedChallenge.Personal -> {
             if (completedChallenge.streakDays <= 0) return
+            // Caption2/Medium
             Text(
                 text = stringResource(
                     R.string.home_completed_personal_streak,
@@ -105,10 +99,7 @@ private fun BoxScope.CompletedChallengeResult(completedChallenge: HomeCompletedC
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(top = spacing.spacing20, end = 27.dp),
-                fontFamily = Pretendard,
-                fontSize = 12.sp,
-                lineHeight = 14.sp,
-                fontWeight = FontWeight.Medium
+                style = OnulDoTypography.caption2Medium
             )
         }
     }
