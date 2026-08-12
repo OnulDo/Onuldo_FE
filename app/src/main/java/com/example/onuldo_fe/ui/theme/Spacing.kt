@@ -7,6 +7,7 @@ data class Spacing(
     val spacing8: androidx.compose.ui.unit.Dp = 8.dp,
     val spacing10: androidx.compose.ui.unit.Dp = 10.dp,
     val spacing12: androidx.compose.ui.unit.Dp = 12.dp,
+    val spacing14: androidx.compose.ui.unit.Dp = 14.dp,
     val spacing16: androidx.compose.ui.unit.Dp = 16.dp,
     val spacing18: androidx.compose.ui.unit.Dp = 18.dp,
     val spacing20: androidx.compose.ui.unit.Dp = 20.dp,
