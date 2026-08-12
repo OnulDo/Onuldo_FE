@@ -21,6 +21,7 @@ import com.example.onuldo_fe.data.network.TokenStore
 import com.example.onuldo_fe.data.network.executeRefresh
 import com.example.onuldo_fe.data.network.jwtExpiryEpochSeconds
 import com.example.onuldo_fe.data.network.safeApiCall
+import com.example.onuldo_fe.data.network.map
 import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +38,9 @@ class AuthRepositoryImpl(
 ) : AuthRepository {
 
     override val isLoggedIn: Boolean get() = tokenStore.isLoggedIn
+
+    override suspend fun emailExists(email: String): ApiResult<Boolean> =
+        safeApiCall { authApi.emailExists(email.trim()) }.map { it.exists }
 
     override suspend fun login(email: String, password: String): ApiResult<Unit> =
         safeApiCall {
@@ -133,7 +137,12 @@ class AuthRepositoryImpl(
         // TokenRefreshApi는 Authenticator가 붙지 않은 클라이언트를 쓰는 동기 Call이라 IO로 옮겨 호출한다.
         return withContext(Dispatchers.IO) {
             try {
-                when (val outcome = tokenRefreshApi.executeRefresh(refreshToken)) {
+                when (
+                    val outcome = tokenRefreshApi.executeRefresh(
+                        refreshToken,
+                        deviceInfoProvider.getDevice(),
+                    )
+                ) {
                     is TokenRefreshOutcome.Success -> {
                         tokenStore.update(outcome.tokens)
                         true

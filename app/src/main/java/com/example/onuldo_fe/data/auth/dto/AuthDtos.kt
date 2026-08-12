@@ -39,6 +39,8 @@ data class DeviceRequest(
     val fcmToken: String,
 )
 
+data class EmailExistsResponse(val exists: Boolean)
+
 data class EmailLoginRequest(
     val email: String,
     val password: String,

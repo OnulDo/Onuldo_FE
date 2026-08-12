@@ -18,6 +18,8 @@ data class OAuthLoginOutcome(
  */
 interface AuthRepository {
 
+    suspend fun emailExists(email: String): ApiResult<Boolean>
+
     suspend fun login(email: String, password: String): ApiResult<Unit>
 
     /**

@@ -260,6 +260,7 @@ class AuthRepositoryImplRestoreSessionTest {
 
     /** 세션 복구는 인증 API를 쓰지 않는다. 불리면 테스트가 잘못된 것이므로 즉시 실패시킨다. */
     private object UnusedAuthApi : AuthApi {
+        override suspend fun emailExists(email: String) = error("호출되면 안 된다")
         override suspend fun login(request: EmailLoginRequest) = error("호출되면 안 된다")
         override suspend fun signup(request: EmailSignupRequest) = error("호출되면 안 된다")
         override suspend fun oauthLogin(request: OAuthLoginRequest): Response<BaseResponse<OAuthLoginResponse>> =
