@@ -20,7 +20,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,7 +31,10 @@ import com.example.onuldo_fe.data.auth.dto.TermType
 import com.example.onuldo_fe.model.term.TermContentBlock
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.BlackBrown50
+import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.viewmodel.mypage.TermViewModel
@@ -54,6 +60,7 @@ fun TermScreen(
     viewModel: TermViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val spacing = LocalSpacing.current
 
     LaunchedEffect(termType) { viewModel.load(termType) }
 
@@ -81,28 +88,45 @@ fun TermScreen(
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 20.dp, vertical = 24.dp),
                 ) {
+                    Spacer(Modifier.height(spacing.spacing20))
+                    Text(
+                        text = term.title?.takeIf { it.isNotBlank() } ?: fallbackTitle,
+                        fontFamily = Pretendard,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp,
+                        lineHeight = 40.sp,
+                        color = BlackBrown,
+                        style = TextStyle(
+                            platformStyle = PlatformTextStyle(includeFontPadding = false),
+                            lineHeightStyle = LineHeightStyle(
+                                alignment = LineHeightStyle.Alignment.Proportional,
+                                trim = LineHeightStyle.Trim.Both,
+                            ),
+                        ),
+                    )
+                    Spacer(Modifier.height(spacing.spacing8))
                     term.effectiveDate?.takeIf { it.isNotBlank() }?.let { date ->
                         Text(
-                            text = "시행일 $date",
+                            text = "시행일자 $date",
                             fontFamily = Pretendard,
                             fontWeight = FontWeight.Medium,
                             fontSize = 12.sp,
-                            color = Persimmon,
+                            color = DarkBrown50,
                         )
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(spacing.spacing48))
                     }
 
                     term.content.forEach { block ->
                         if (block.type == TYPE_LINEBREAK) {
                             // 문단 사이 여백 전용 블록.
-                            Spacer(Modifier.height(10.dp))
+                            Spacer(Modifier.height(spacing.spacing8))
                         } else {
                             TermBlock(block)
-                            Spacer(Modifier.height(8.dp))
+                            Spacer(Modifier.height(4.dp))
                         }
                     }
 
-                    Spacer(Modifier.height(24.dp))
+                    Spacer(Modifier.height(spacing.spacing24))
                 }
             }
         }
@@ -118,17 +142,18 @@ private fun TermBlock(block: TermContentBlock) {
             text = block.content,
             fontFamily = Pretendard,
             fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
+            fontSize = 14.sp,
+            lineHeight = 22.sp,
             color = BlackBrown,
         )
     } else {
         Text(
             text = block.content,
             fontFamily = Pretendard,
-            fontWeight = FontWeight.Normal,
+            fontWeight = FontWeight.Medium,
             fontSize = 13.sp,
-            lineHeight = 21.sp,
-            color = DarkBrown70,
+            lineHeight = 20.sp,
+            color = BlackBrown50,
         )
     }
 }

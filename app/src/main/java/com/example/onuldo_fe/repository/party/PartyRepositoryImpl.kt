@@ -4,6 +4,7 @@ import com.example.onuldo_fe.data.party.api.PartyApi
 import com.example.onuldo_fe.data.party.api.RealPartyApi
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyMemberDto
+import com.example.onuldo_fe.data.party.dto.PartyReadinessRequestDto
 import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
 import com.example.onuldo_fe.data.party.dto.RealPartyMemberDto
 import com.example.onuldo_fe.data.party.dto.RealPartyWaitingRoomDto
@@ -24,6 +25,7 @@ import com.example.onuldo_fe.model.party.PartySettlementMember
 import com.example.onuldo_fe.model.party.PartySettlementMemberStatus
 import com.example.onuldo_fe.model.party.PartySettlementResult
 import com.example.onuldo_fe.model.party.PartySettlementStatus
+import com.google.gson.JsonElement
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.LocalTime
@@ -47,7 +49,7 @@ class PartyRepositoryImpl(
         val response = realApi.getParties(cursor = null, size = 10)
         if (!response.isSuccessful) throw HttpException(response)
         val body = response.body() ?: throw IOException("파티 목록 응답 본문이 비어 있습니다.")
-        body.content.map(RealPartySummaryDto::toModel)
+        body.result.map(RealPartySummaryDto::toModel)
     } else {
         fakeApi.getParties().map(PartySummaryDto::toModel)
     }
@@ -79,11 +81,14 @@ class PartyRepositoryImpl(
         return body.result.toModel()
     }
 
-    override suspend fun readyParty(partyId: String): PartyWaitingRoom {
+    override suspend fun readyParty(partyId: String, ready: Boolean): PartyWaitingRoom {
         // 준비 완료 API를 다른 파티 기능과 독립적으로 Real/Fake 전환한다.
-        if (!useRealPartyReadyApi) return fakeApi.readyParty(partyId.toLong()).toModel()
+        if (!useRealPartyReadyApi) return fakeApi.readyParty(partyId.toLong(), ready).toModel()
 
-        val response = realApi.readyParty(partyId.toLong())
+        val response = realApi.readyParty(
+            partyId = partyId.toLong(),
+            request = PartyReadinessRequestDto(ready = ready)
+        )
         if (!response.isSuccessful) throw HttpException(response)
         val body = response.body() ?: throw IOException("준비 완료 응답 본문이 비어 있습니다.")
         return body.result.toModel()
@@ -276,19 +281,21 @@ private fun RealPartySummaryDto.toModel() = PartySummary(
     goal = goal,
     // 서버의 정렬·종료일 정책과 동일한 계산 dDay를 그대로 사용한다.
     dDay = "D-$dDay",
-    deadline = verificationDeadline,
+    deadline = verificationDeadline.toLocalTimeTextOrNull().orEmpty(),
     // 인증 마감 시각과 현재 시각의 차이를 분 단위로 전달한다.
     // HomePartyCard에서 0~60분일 때만 "N분 남음" 배지를 표시한다.
-    remainingText = remainingTextUntil(verificationDeadline),
+    remainingText = remainingTextUntil(verificationDeadline.toLocalTimeTextOrNull()),
     completedMemberCount = verifiedMemberCount,
     totalMemberCount = totalMemberCount,
     status = status.toLifecycleStatus(),
-    verificationStatus = when (myStatus) {
-        "PENDING" -> PartyVerificationStatus.Pending
+    verificationStatus = when (myDailyStatus ?: myStatus) {
+        "REVIEW_PENDING", "PENDING" -> PartyVerificationStatus.Pending
         "SUCCESS" -> PartyVerificationStatus.Success
         "FAIL" -> PartyVerificationStatus.Fail
         else -> PartyVerificationStatus.NotVerified
     },
+    myDailyStatus = myDailyStatus ?: "WAITING",
+    verifiedAt = verifiedAt,
     members = members.map { member ->
         PartySummaryMember(
             userId = member.userId,
@@ -299,8 +306,25 @@ private fun RealPartySummaryDto.toModel() = PartySummary(
     }
 )
 
-private fun remainingTextUntil(deadline: String): String? = runCatching {
+private fun remainingTextUntil(deadline: String?): String? = runCatching {
+    if (deadline.isNullOrBlank()) return@runCatching null
     ChronoUnit.MINUTES.between(LocalTime.now(), LocalTime.parse(deadline))
         .takeIf { it >= 0 }
         ?.let { "${it}분 남음" }
 }.getOrNull()
+
+private fun JsonElement?.toLocalTimeTextOrNull(): String? {
+    if (this == null || isJsonNull) return null
+    return runCatching {
+        if (isJsonPrimitive) {
+            asString
+        } else {
+            val time = asJsonObject
+            val hour = time.get("hour")?.takeIf { it.isJsonPrimitive }?.asInt ?: return@runCatching null
+            val minute = time.get("minute")?.takeIf { it.isJsonPrimitive }?.asInt ?: return@runCatching null
+            val second = time.get("second")?.takeIf { it.isJsonPrimitive }?.asInt ?: return@runCatching null
+            if (hour !in 0..23 || minute !in 0..59 || second !in 0..59) return@runCatching null
+            "%02d:%02d:%02d".format(hour, minute, second)
+        }
+    }.getOrNull()
+}

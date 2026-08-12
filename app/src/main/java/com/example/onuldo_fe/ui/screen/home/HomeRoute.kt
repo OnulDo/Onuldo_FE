@@ -20,7 +20,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.onuldo_fe.model.home.notification.NotificationLanding
+import com.example.onuldo_fe.data.notification.NotificationPermissionPrefs
+import com.example.onuldo_fe.model.home.notification.NotificationLandingBus
 import com.example.onuldo_fe.model.home.notification.toLanding
 import com.example.onuldo_fe.ui.component.PermissionDialogType
 import com.example.onuldo_fe.ui.component.PermissionSettingDialog
@@ -33,14 +34,30 @@ fun HomeRoute(
     onSettlementResultClick: (Long) -> Unit = {},
     onBrowseChallengesClick: () -> Unit = {},
     onCameraNavigate: (Long, String, String, String) -> Unit = { _, _, _, _ -> },
-    onChallengeClick: (Long) -> Unit = {},
     refreshKey: Int = 0
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showNotification by rememberSaveable { mutableStateOf(false) }
-    var showNotificationPermissionDialog by remember { mutableStateOf(false) }
     var showCameraPermissionDialog by rememberSaveable { mutableStateOf(false) }
+    var showNotificationPermissionDialog by rememberSaveable { mutableStateOf(false) }
+
+    // 홈 최초 진입 시(기기별 1회) 알림 권한이 없으면 커스텀 안내 팝업
+    // 종 클릭과는 무관
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !NotificationPermissionPrefs.isRequested(context)
+        ) {
+            val granted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+            if (!granted) {
+                NotificationPermissionPrefs.markRequested(context)
+                showNotificationPermissionDialog = true
+            }
+        }
+    }
     var pendingChallengeId by rememberSaveable { mutableStateOf<Long?>(null) }
     var pendingCategory by rememberSaveable { mutableStateOf("") }
     var pendingTitle by rememberSaveable { mutableStateOf("") }
@@ -53,23 +70,9 @@ fun HomeRoute(
         }
     }
 
+        //권한x -> 알림 페이지는 열람 가능
     fun handleNotificationClick() {
-        // 알림 권한 있으면 알림 화면, 없으면 권한 안내 팝업 (API 33 미만은 런타임 권한 없음 → 바로 진입)
-        val isNotificationPermissionGranted =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
-            } else {
-                true
-            }
-
-        if (isNotificationPermissionGranted) {
-            showNotification = true
-        } else {
-            showNotificationPermissionDialog = true
-        }
+        showNotification = true
     }
 
     fun handleVerifyClick(challengeId: Long, category: String, title: String, deadline: String) {
@@ -129,17 +132,8 @@ fun HomeRoute(
         NotificationRoute(
             onBackClick = { showNotification = false },
             onItemClick = { item ->
-                // NOTI-04 공용 랜딩 규칙으로 목적지를 결정한다(B104 알림 페이지도 동일 규칙).
-                // 아직 라우트가 없는 목적지(파티 피드·솔로 기록)는 홈으로 폴백한다.
                 showNotification = false
-                when (val landing = item.toLanding()) {
-                    is NotificationLanding.ChallengeDetail -> onChallengeClick(landing.challengeId)
-                    is NotificationLanding.PartySettlement -> onSettlementResultClick(landing.partyId)
-                    // 아래는 아직 라우트가 없거나 홈이 목적지 → 홈 유지(오버레이 닫힘)
-                    is NotificationLanding.PartyFeed,
-                    NotificationLanding.SoloRecord,
-                    NotificationLanding.Home -> Unit
-                }
+                NotificationLandingBus.post(item.toLanding())
             }
         )
     } else {
@@ -151,6 +145,7 @@ fun HomeRoute(
             onBrowseChallengesClick = onBrowseChallengesClick,
             onVerifyClick = ::handleVerifyClick,
             onRefresh = viewModel::refreshHome,
+            onRetry = viewModel::loadHome,
             scrollToTopKey = refreshKey
         )
     }
@@ -170,7 +165,7 @@ fun HomeRoute(
         )
     }
 
-    // 알림 권한 없을 때(최초) 안내 팝업 → "설정으로 이동"이면 시스템(폰) 알림설정으로
+    // 홈 진입 시 알림 권한 안내 팝업 → "설정으로 이동" 시 시스템 앱 알림설정으로
     if (showNotificationPermissionDialog) {
         PermissionSettingDialog(
             type = PermissionDialogType.NOTIFICATION,

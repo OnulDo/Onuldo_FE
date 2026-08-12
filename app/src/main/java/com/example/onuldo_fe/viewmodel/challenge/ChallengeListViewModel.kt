@@ -1,14 +1,17 @@
 package com.example.onuldo_fe.viewmodel.challenge
 
+import android.util.Log
+import com.example.onuldo_fe.BuildConfig
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.onuldo_fe.data.network.onError
+import com.example.onuldo_fe.data.network.onSuccess
 import com.example.onuldo_fe.model.challenge.ChallengeCategory
 import com.example.onuldo_fe.repository.challenge.ChallengeRepository
 import com.example.onuldo_fe.repository.challenge.ChallengeRepositoryProvider
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -49,7 +52,7 @@ class ChallengeListViewModel(
 
     // 에러 토스트 1회 노출 후 소비 (화면은 빈 상태로 유지)
     fun onErrorShown() {
-        uiState = uiState.copy(isError = false)
+        uiState = uiState.copy(isError = false, errorMessage = null)
     }
 
     // 조회 표시 방식 — FULL: 전체 화면 로딩, REFRESH: 상단 인디케이터, SILENT: 표시 없이 데이터만 갱신
@@ -90,22 +93,30 @@ class ChallengeListViewModel(
         // 표시 상태 설정: FULL=전체 로딩, REFRESH=상단 인디케이터, SILENT=아무 표시 없음(기존 목록 유지)
         // FULL은 진행 중이던 새로고침 인디케이터를 함께 해제해 두 인디케이터가 겹쳐 보이지 않게 한다.
         uiState = when (mode) {
-            LoadMode.FULL -> uiState.copy(isLoading = true, isRefreshing = false, isError = false)
-            LoadMode.REFRESH -> uiState.copy(isRefreshing = true, isError = false)
-            LoadMode.SILENT -> uiState.copy(isError = false)
+            LoadMode.FULL -> uiState.copy(isLoading = true, isRefreshing = false, isError = false, errorMessage = null)
+            LoadMode.REFRESH -> uiState.copy(isRefreshing = true, isError = false, errorMessage = null)
+            LoadMode.SILENT -> uiState.copy(isError = false, errorMessage = null)
         }
 
-        runCatching {
-            repository.getChallenges(
-                page = 0,
-                size = pageSize,
-                category = category,
-                search = query
-            )
-        }.onSuccess { page ->
+        // 코루틴 취소는 safeApiCall이 그대로 전파하므로(=조회 자체가 취소됨) 여기서 따로 다룰 필요가 없다.
+        val result = repository.getChallenges(
+            page = 0,
+            size = pageSize,
+            category = category,
+            search = query
+        )
 
-            if (generation != requestGeneration) return@onSuccess
+        // 취소를 못 받고 지연 도착한 이전 세대 응답이 최신을 덮지 않도록 방어
+        if (generation != requestGeneration) return
 
+        result.onSuccess { page ->
+            // 챌린지 전체 목록은 toString에 imageUrl 등 메타가 다 찍히므로 디버그 빌드에서만 남긴다.
+            if (BuildConfig.DEBUG) {
+                Log.d(
+                    "ChallengeDebug",
+                    "generation=$generation, mode=$mode, count=${page.challenges.size}, challenges=${page.challenges}"
+                )
+            }
             // 당겨서 새로고침일 때만, 응답이 너무 빨라 인디케이터가 안 보이지 않도록 최소 300ms 유지
             if (mode == LoadMode.REFRESH) {
                 val elapsed = System.currentTimeMillis() - refreshStartTime
@@ -121,18 +132,17 @@ class ChallengeListViewModel(
                 hasLoaded = true
             )
 
-        }.onFailure { e ->
+        }.onError { code, message ->
 
-            if (e is CancellationException) throw e
-            if (generation != requestGeneration) return@onFailure
+            logChallengeError("ch_ls", code, message)   // 서버 code/message는 로그에만
 
-            logChallengeError("ch_ls", e)
-
-            // 실패 시 기존 목록 유지. 최초(FULL) 조회 실패만 에러 토스트, 새로고침/조용한 재조회 실패는 조용히 무시
+            // 실패 시 기존 목록 유지. 최초(FULL) 조회 실패만 에러 토스트(HTTP status/네트워크 구분 문구),
+            // 새로고침/조용한 재조회 실패는 조용히 무시
             uiState = uiState.copy(
                 isLoading = false,
                 isRefreshing = false,
-                isError = mode == LoadMode.FULL
+                isError = mode == LoadMode.FULL,
+                errorMessage = if (mode == LoadMode.FULL) result.toChallengeErrorMessage() else null
             )
         }
     }

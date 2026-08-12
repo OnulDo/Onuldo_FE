@@ -285,24 +285,25 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
             val deadline = backStackEntry.arguments
                 ?.getString(Routes.CAMERA_DEADLINE_ARG)
                 .orEmpty()
-            // 파티 목록 응답에는 category가 없으므로 challengeId로 상세를 조회해 보완한다.
-            // 카메라에서는 개인·파티 모두 한글 카테고리명으로 통일한다.
-            val challengeDetailViewModel: ChallengeDetailViewModel? = if (category.isBlank()) {
-                viewModel(
-                    key = "camera-challenge-detail-$challengeId",
-                    factory = ChallengeDetailViewModel.factory(challengeId)
-                )
-            } else {
-                null
-            }
+            // 카테고리 보완과 챌린지별 인증 유의사항을 위해 상세 API를 함께 조회한다.
+            val challengeDetailViewModel: ChallengeDetailViewModel = viewModel(
+                key = "camera-challenge-detail-$challengeId",
+                factory = ChallengeDetailViewModel.factory(challengeId)
+            )
+            val challengeDetailState = challengeDetailViewModel.uiState
             val resolvedCategory = if (category.isBlank()) {
-                challengeDetailViewModel?.uiState?.detail?.category?.displayName.orEmpty()
+                challengeDetailState.detail?.category?.displayName.orEmpty()
             } else {
                 category.toCategoryDisplayName()
             }
             CameraScreen(
                 category = resolvedCategory,
                 title = title,
+                successConditions = challengeDetailState.detail?.successConditions.orEmpty(),
+                failureConditions = challengeDetailState.detail?.failureConditions.orEmpty(),
+                isNoticeLoading = challengeDetailState.isLoading,
+                isNoticeError = challengeDetailState.isError,
+                onNoticeRetry = challengeDetailViewModel::load,
                 onPhotoCaptured = { uri ->
                     cameraViewModel.setImageUri(uri)
                     navController.navigate(
@@ -450,13 +451,34 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
 
         composable(Routes.VERIFICATION_FAIL) {
             val state by cameraViewModel.submitState.collectAsState()
+            val manualReviewState by cameraViewModel.manualReviewState.collectAsState()
+
+            LaunchedEffect(manualReviewState) {
+                if (manualReviewState is com.example.onuldo_fe.camera.ManualReviewRequestState.Success) {
+                    cameraViewModel.clearManualReviewState()
+                    navController.navigate(Routes.VERIFICATION_WAITING) {
+                        popUpTo(Routes.VERIFICATION_FAIL) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            }
+
             ChallengeVerificationScreen(
                 status = VerificationStatus.FAILURE,
                 failureReason = (state as? com.example.onuldo_fe.camera.VerificationSubmitState.Failure)?.message.orEmpty(),
                 verificationDeadline = cameraViewModel.activeDeadline,
-                onManualReviewClick = {
-                    navController.navigate(Routes.VERIFICATION_WAITING)
+                isManualReviewLoading =
+                    manualReviewState == com.example.onuldo_fe.camera.ManualReviewRequestState.Loading,
+                manualReviewErrorMessage =
+                    (manualReviewState as? com.example.onuldo_fe.camera.ManualReviewRequestState.Error)
+                        ?.message,
+                onBackClick = {
+                    cameraViewModel.clearManualReviewState()
+                    cameraViewModel.clearSubmitState()
+                    navController.popBackStack(Routes.MAIN, inclusive = false)
                 },
+                onManualReviewClick = cameraViewModel::requestManualReview,
+                onManualReviewErrorConfirm = cameraViewModel::clearManualReviewState,
                 onRetryClick = {
                     cameraViewModel.activeChallengeId?.let { challengeId ->
                         val category = cameraViewModel.activeCategory

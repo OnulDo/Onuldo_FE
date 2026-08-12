@@ -56,15 +56,17 @@ data class PartyCardUi(
     val status: PartyStatus = PartyStatus.InProgress, // 파티 모집·진행·해체 상태
     val goal: String = challengeName,              // 카드에 노출할 파티 목표
     val verificationStatus: ChallengeStatus = ChallengeStatus.NeedCertification,
+    val myDailyStatus: String = "WAITING",
     val members: List<PartyCardMemberUi> = emptyList(),
-    val challengeId: Long = 0
+    val challengeId: Long = 0,
+    val verifiedAt: String? = null
 )
 
 // 파티 목록 카드의 프로필·오늘 인증 표시에 사용할 파티원
 data class PartyCardMemberUi(
     val userId: Long,
     val nickname: String,
-    val profileImageUrl: String,
+    val profileImageUrl: String?,
     val isVerifiedToday: Boolean
 )
 

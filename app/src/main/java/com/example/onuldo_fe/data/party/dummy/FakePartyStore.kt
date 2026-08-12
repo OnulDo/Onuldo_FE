@@ -194,11 +194,11 @@ object FakePartyStore {
     }
 
     @Synchronized
-    fun ready(partyId: Long): PartyWaitingRoomDto {
+    fun ready(partyId: Long, ready: Boolean): PartyWaitingRoomDto {
         val stored = parties[partyId] ?: error("존재하지 않는 파티입니다.")
         val members = stored.room.members.map { member ->
             if (member.userId == CURRENT_USER_ID && member.role != "HOST") {
-                member.copy(status = if (member.status == "READY") "WAITING" else "READY")
+                member.copy(status = if (ready) "READY" else "WAITING")
             } else member
         }
         val room = stored.room.withMembers(members)

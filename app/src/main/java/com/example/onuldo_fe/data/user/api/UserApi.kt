@@ -54,7 +54,7 @@ interface UserApi {
     ): Response<BaseResponse<ChargePointResponseDto>>
 
     /** 포인트 출금. 출금된 금액과 출금 후 잔액을 돌려준다. */
-    @POST("api/users/me/wallet/withdraw")
+    @POST("api/users/me/wallet/withdrawals")
     suspend fun withdrawPoint(
         @Body request: WithdrawPointRequestDto,
     ): Response<BaseResponse<WithdrawPointResponseDto>>

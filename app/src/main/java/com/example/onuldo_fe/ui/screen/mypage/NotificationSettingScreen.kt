@@ -73,8 +73,7 @@ fun SettingScreen(
         viewModel.apply(state.update())
     }
 
-    // 진입 시 알림 권한이 없으면 안내 팝업을 띄운다(권한 없을 때 진입할 때마다).
-    //TODO: API 33 미만은 런타임 알림 권한이 없어 항상 허용된 것으로 봄( 예외를 어떻게 할것?)
+    // 진입 시 알림 권한이 없으면 안내 팝업을 띄운다(권한 없을 때 진입할 때마다)
     var showNotificationPermissionDialog by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         val granted =
@@ -228,7 +227,11 @@ fun SettingScreen(
     if (showNotificationPermissionDialog) {
         PermissionSettingDialog(
             type = PermissionDialogType.NOTIFICATION,
-            onDismiss = { showNotificationPermissionDialog = false },
+            // 취소 시: 팝업 닫고 전 화면
+            onDismiss = {
+                showNotificationPermissionDialog = false
+                onBackClick()
+            },
             onMoveToSettings = {
                 showNotificationPermissionDialog = false
                 val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {

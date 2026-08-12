@@ -1,6 +1,6 @@
 package com.example.onuldo_fe.data.home.dto
 
-/** 오늘 수행할 챌린지 한 건의 서버 DTO. */
+/** 오늘 수행할 챌린지 카드의 서버 DTO. */
 data class RealHomeDailyChallengeDto(
     val participationId: Long = 0,                  // 챌린지 참여 기록 ID
     val participationStatus: String = "",          // ONGOING
@@ -20,5 +20,6 @@ data class RealHomeDailyChallengeDto(
     val endDate: String = "",                      // 챌린지 종료일
     val dailyStatus: String = "WAITING",           // 오늘 데일리 인증 상태
     val verifiedOnDate: Boolean = false,            // 오늘 인증 기록 존재 여부
+    val verifiedAt: String? = null,                 // 오늘 최신 인증 시각
     val streakDays: Int = 0                         // 연속 인증 성공 일수
 )

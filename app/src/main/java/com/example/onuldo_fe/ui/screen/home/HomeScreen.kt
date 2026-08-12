@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,6 +38,7 @@ import com.example.onuldo_fe.data.user.CurrentProfileImageStore
 import com.example.onuldo_fe.data.home.api.FakeHomeApi
 import com.example.onuldo_fe.data.home.dummy.FakeHomeScenario
 import com.example.onuldo_fe.repository.home.HomeRepositoryImpl
+import com.example.onuldo_fe.ui.component.OnulDoMediumButton
 import com.example.onuldo_fe.ui.screen.home.components.EmptyChallengeContent
 import com.example.onuldo_fe.ui.screen.home.components.HomeChallengeCard
 import com.example.onuldo_fe.ui.screen.home.components.HomeCompletedChallengeCard
@@ -61,6 +63,7 @@ fun HomeScreen(
     onSettlementResultClick: (Long) -> Unit = {},
     onVerifyClick: (Long, String, String, String) -> Unit = { _, _, _, _ -> },
     onRefresh: () -> Unit = {},
+    onRetry: () -> Unit = {},
     scrollToTopKey: Int = 0,
     modifier: Modifier = Modifier
 ) {
@@ -90,10 +93,12 @@ fun HomeScreen(
                 color = Persimmon
             )
         } else if (uiState.errorMessage != null) {
-            Text(
-                text = uiState.errorMessage,
-                modifier = Modifier.align(Alignment.Center),
-                color = BlackBrown
+            HomeErrorContent(
+                message = uiState.errorMessage,
+                onRetry = onRetry,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .fillMaxWidth()
             )
         } else if (uiState.hasHomeContent) {
             HomeContent(
@@ -112,6 +117,29 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize()
             )
         }
+    }
+}
+
+@Composable
+private fun HomeErrorContent(
+    message: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(LocalSpacing.current.spacing18)
+    ) {
+        Text(
+            text = message,
+            color = BlackBrown,
+            textAlign = TextAlign.Center
+        )
+        OnulDoMediumButton(
+            text = "다시 시도",
+            onClick = onRetry
+        )
     }
 }
 
