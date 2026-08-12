@@ -150,8 +150,9 @@ fun MainScreen(
                 )
             }
             composable(Routes.MYPAGE_CHARGE) {
-                LaunchedEffect(Unit) { showBottomBar = false }
-
+                // 내비바는 isFullScreenRoute가 라우트만 보고 감춘다.
+                // 여기서 showBottomBar까지 끄면 화면을 벗어난 뒤에도 false로 남아
+                // 모든 탭에서 내비바가 사라진다(복구할 DisposableEffect가 없다).
                 PointChargeScreen(onBack = { navController.popBackStack() })
             }
             composable(BottomTab.Challenge.route) {
