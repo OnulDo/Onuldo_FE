@@ -30,9 +30,6 @@ import com.example.onuldo_fe.ui.theme.Pretendard
 private val AuthButtonShape = RoundedCornerShape(14.dp)
 private const val AuthButtonHeight = 56
 
-/**
- * 외곽선 보조 버튼 (회원가입 등). primary 채움 버튼은 [OnulDoButton] 사용.
- */
 @Composable
 fun SecondaryButton(
     text: String,
@@ -90,12 +87,9 @@ fun SocialLoginButton(
                         .align(Alignment.CenterStart),
                 )
             }
-            // Figma(RFD) 소셜 버튼 텍스트 = Pretendard Bold 15px.
             Text(
                 text = text,
-                fontSize = 15.sp,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
+                style = OnulDoTypography.body4Medium,
                 modifier = Modifier.align(Alignment.Center),
             )
         }
