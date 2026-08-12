@@ -9,8 +9,6 @@ object Routes {
     const val SIGNUP = "signup"
     /** 약관 동의. 이메일 회원가입과 소셜 신규 가입이 공통으로 거친다. */
     const val TERMS_AGREEMENT = "terms_agreement"
-    /** 권한 요청(카메라·알림·사진). 약관 동의와 프로필 설정 사이 단계. */
-    const val PERMISSION_REQUEST = "permission_request"
     const val PROFILE_SETUP = "profile_setup"
     const val WELCOME = "welcome"
     const val MAIN = "main"

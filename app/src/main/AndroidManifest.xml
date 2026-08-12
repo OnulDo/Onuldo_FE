@@ -6,16 +6,6 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!--
-      인증·프로필 사진 접근 (온보딩 권한 요청 화면 — 선택 권한).
-      API 33부터 저장소 권한이 미디어 종류별로 나뉘어 READ_MEDIA_IMAGES를 쓰고,
-      그 아래에서는 READ_EXTERNAL_STORAGE를 쓴다(33 이상에서는 무시되도록 maxSdkVersion 지정).
-    -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-
     <!-- 카카오톡 앱이 설치돼 있는지 확인하기 위한 패키지 가시성 선언 (Android 11+) -->
     <queries>
         <package android:name="com.kakao.talk" />
