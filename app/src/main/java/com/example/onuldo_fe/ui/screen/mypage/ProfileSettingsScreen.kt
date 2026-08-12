@@ -39,6 +39,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.R
+import com.example.onuldo_fe.data.user.CurrentProfileImageStore
+import com.example.onuldo_fe.utils.ProfileAsset
 import com.example.onuldo_fe.ui.component.AuthErrorBanner
 import com.example.onuldo_fe.ui.component.RefreshOnResume
 import com.example.onuldo_fe.ui.screen.login.CharacterPickerSheet
@@ -79,8 +81,10 @@ fun ProfileSettingsScreen(
     var showCharacterPicker by remember { mutableStateOf(false) }
     // 닉네임 변경 후 이 화면으로 돌아오면 최신 값이 반영되도록 - 새로
     RefreshOnResume { viewModel.load() }
-    // 서버가 배정한 캐릭터가 앱 목록에 있으면 그 캐릭터를, 없으면 기본 아바타
-    val avatarRes = state.characterIndex
+    // 공유 프로필 이미지(편집 직후·조회로 데워진 캐시)를 우선 사용하고, 없으면 조회값으로 폴백
+    val sharedProfileUrl by CurrentProfileImageStore.profileImageUrl.collectAsState()
+    val characterIndex = ProfileAsset.toCharacterIndex(sharedProfileUrl) ?: state.characterIndex
+    val avatarRes = characterIndex
         ?.let { ProfileCharacters.getOrNull(it) }
         ?: R.drawable.img_avatar_running
 

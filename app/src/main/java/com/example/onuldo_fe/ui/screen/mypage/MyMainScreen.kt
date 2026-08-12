@@ -28,6 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.auth.dto.TermType
+import com.example.onuldo_fe.data.user.CurrentProfileImageStore
+import com.example.onuldo_fe.utils.ProfileAsset
 import com.example.onuldo_fe.ui.component.ConfirmDialog
 import com.example.onuldo_fe.viewmodel.mypage.MyMainViewModel
 import androidx.compose.material3.Text
@@ -80,6 +82,8 @@ fun MyMainScreen(
     val nickname = state.nickname
     val email = state.email
     val point = state.pointText
+    // 프로필 편집(PATCH) 직후 공유된 최신 이미지가 있으면 우선 사용하고, 없으면 조회값
+    val sharedProfileUrl by CurrentProfileImageStore.profileImageUrl.collectAsState()
 
     // 로그아웃·회원 탈퇴는 팝업으로 검토
     var showLogoutDialog by remember { mutableStateOf(false) }
@@ -109,8 +113,8 @@ fun MyMainScreen(
 
         // 프로필 카드 → 프로필 설정
         // 서버가 배정한 캐릭터가 앱 목록에 있으면 그 캐릭터를, 없으면 기본 아바타.
-        // 프로필 RefreshOnResume 재조회로 변경 적용 완
-        val avatarRes = state.characterIndex
+        val characterIndex = ProfileAsset.toCharacterIndex(sharedProfileUrl) ?: state.characterIndex
+        val avatarRes = characterIndex
             ?.let { ProfileCharacters.getOrNull(it) }
             ?: R.drawable.img_avatar_running
         ProfileCard(nickname = nickname, email = email, avatarRes = avatarRes, onClick = onProfileClick)
