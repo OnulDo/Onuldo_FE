@@ -41,6 +41,7 @@ import com.example.onuldo_fe.ui.screen.mypage.component.MyPageNoticeBox
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.ui.screen.mypage.component.PointCtaButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.utils.formatPoint
@@ -55,13 +56,6 @@ private val chargePresets = listOf(
     AmountPreset("+100,000", 100_000),
 )
 
-/**
- * 포인트 충전 (v2) — Figma node `4019:4241`.
- * 제목 + 보유 포인트 + 금액 입력 박스 + 프리셋 칩 + 결제 안내.
- *
- * 충전은 `POST /wallet/charges`로 처리한다.
- * 결제 수단(PG) 연동 전이라 '결제할 방법'은 안내 박스로 대체한다.
- */
 @Composable
 fun PointChargeScreen(
     onBack: () -> Unit,
@@ -90,18 +84,14 @@ fun PointChargeScreen(
             Spacer(Modifier.height(56.dp))
             Text(
                 text = "얼마 충전할까요?",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
+                style = OnulDoTypography.headline3Bold,
                 color = BlackBrown,
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 text = "보유 ${formatPoint(state.balance)}",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Medium,
-                fontSize = 13.sp,
+                style = OnulDoTypography.caption1Medium,
                 color = MySubText,
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
@@ -134,9 +124,7 @@ fun PointChargeScreen(
             Spacer(Modifier.height(20.dp))
             Text(
                 text = "결제할 방법",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
+                style = OnulDoTypography.body2Bold,
                 color = BlackBrown,
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
