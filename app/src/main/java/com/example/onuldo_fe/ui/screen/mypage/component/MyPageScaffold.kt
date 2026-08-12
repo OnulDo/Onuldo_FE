@@ -45,10 +45,7 @@ fun MyPageTopBar(
     ) {
         Text(
             text = title,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 17.sp,
-            lineHeight = 20.sp,
+            style = OnulDoTypography.body2Bold,
             color = BlackBrown,
         )
         OnulDoBackButton(
