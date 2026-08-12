@@ -27,8 +27,7 @@ fun OnulDo_FETheme(
         LocalSpacing provides Spacing()
     ) {
         MaterialTheme(
-            colorScheme = LightColorScheme,
-            typography = Typography
+            colorScheme = LightColorScheme
         ) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
