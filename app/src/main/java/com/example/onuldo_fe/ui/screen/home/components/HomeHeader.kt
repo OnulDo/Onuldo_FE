@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -68,13 +70,15 @@ fun HomeHeader(
                 .background(Persimmon20, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            // 홈 프로필은 프리셋 캐릭터만 사용하므로 Figma 규격으로 통일
+            // 프리셋 캐릭터는 Figma 규격(28x33 Fit)을 쓰고, 커스텀 업로드 사진은 원형을 꽉 채워 크롭한다.
             PartyNetworkImage(
                 imageUrl = profileImageUrl,
                 fallbackImageRes = R.drawable.home_run_light_icon,
                 contentDescription = "$userName 프로필",
                 modifier = Modifier.size(width = 28.dp, height = 33.dp),
-                contentScale = ContentScale.Fit
+                contentScale = ContentScale.Fit,
+                networkModifier = Modifier.fillMaxSize().clip(CircleShape),
+                networkContentScale = ContentScale.Crop
             )
         }
 

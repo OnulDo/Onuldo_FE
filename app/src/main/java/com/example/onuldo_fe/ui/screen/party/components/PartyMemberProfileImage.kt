@@ -3,12 +3,14 @@ package com.example.onuldo_fe.ui.screen.party.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
@@ -56,7 +58,10 @@ fun PartyMemberProfileImage(
             fallbackImageRes = partyCharacterDrawable(defaultCharacterId),
             contentDescription = contentDescription,
             modifier = Modifier.size(width = characterWidth, height = characterHeight),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Fit,
+            // 프리셋은 Fit 일러스트 크기를 쓰고, 실제 업로드 사진은 원형 컨테이너를 꽉 채워 크롭한다.
+            networkModifier = Modifier.fillMaxSize().clip(CircleShape),
+            networkContentScale = ContentScale.Crop
         )
     }
 }
