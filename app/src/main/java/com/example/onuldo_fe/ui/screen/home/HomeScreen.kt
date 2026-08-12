@@ -275,10 +275,7 @@ private fun HomeContent(
 
         // 완료 상태일 때 완료 챌린지 목록 노출
         ChallengeSection(
-            title = stringResource(
-                R.string.home_completed_challenge_count,
-                uiState.completedChallenges.size
-            ),
+            title = stringResource(R.string.home_completed_challenge_title),
             visible = isAllCompleted,
             topSpacing = spacing.spacing26,
             itemSpacing = spacing.spacing8
