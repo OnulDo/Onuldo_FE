@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.camera
+package com.example.onuldo_fe.ui.screen.camera
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp

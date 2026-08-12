@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.camera.component
+package com.example.onuldo_fe.ui.screen.camera.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

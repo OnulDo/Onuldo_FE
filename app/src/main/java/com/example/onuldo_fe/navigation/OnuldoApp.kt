@@ -12,8 +12,10 @@ import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.onuldo_fe.camera.CameraScreen
-import com.example.onuldo_fe.camera.CameraViewModel
+import com.example.onuldo_fe.ui.screen.camera.CameraScreen
+import com.example.onuldo_fe.viewmodel.verification.CameraViewModel
+import com.example.onuldo_fe.viewmodel.verification.ManualReviewRequestState
+import com.example.onuldo_fe.viewmodel.verification.VerificationSubmitState
 import com.example.onuldo_fe.ui.screen.challenge.detail.DetailRoute
 import com.example.onuldo_fe.ui.screen.challenge.participate.ParticipateRoute
 import com.example.onuldo_fe.ui.screen.login.LandingScreen
@@ -37,7 +39,7 @@ import com.example.onuldo_fe.viewmodel.OnboardingDraft
 import com.example.onuldo_fe.viewmodel.challenge.ChallengeDetailViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.example.onuldo_fe.camera.PhotoPreviewScreen
+import com.example.onuldo_fe.ui.screen.camera.PhotoPreviewScreen
 import com.example.onuldo_fe.ui.screen.verification.ChallengeVerificationScreen
 import com.example.onuldo_fe.ui.screen.verification.VerificationStatus
 import kotlinx.coroutines.delay
@@ -354,10 +356,10 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
 
             LaunchedEffect(submitState) {
                 val shouldShowReviewing = when (submitState) {
-                    com.example.onuldo_fe.camera.VerificationSubmitState.Reviewing,
-                    is com.example.onuldo_fe.camera.VerificationSubmitState.Success,
-                    is com.example.onuldo_fe.camera.VerificationSubmitState.Failure,
-                    is com.example.onuldo_fe.camera.VerificationSubmitState.Waiting -> true
+                    VerificationSubmitState.Reviewing,
+                    is VerificationSubmitState.Success,
+                    is VerificationSubmitState.Failure,
+                    is VerificationSubmitState.Waiting -> true
                     else -> false
                 }
 
@@ -366,8 +368,8 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
                     navController.navigate(Routes.VERIFICATION_REVIEWING) {
                         launchSingleTop = true
                     }
-                } else if (submitState == com.example.onuldo_fe.camera.VerificationSubmitState.Idle ||
-                    submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Error
+                } else if (submitState == VerificationSubmitState.Idle ||
+                    submitState is VerificationSubmitState.Error
                 ) {
                     hasStartedReviewNavigation = false
                 }
@@ -400,9 +402,9 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
             val submitState by cameraViewModel.submitState.collectAsState()
             val reviewingStartedAt = remember { SystemClock.elapsedRealtime() }
             val isReviewResultReady =
-                submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Success ||
-                    submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Failure ||
-                    submitState is com.example.onuldo_fe.camera.VerificationSubmitState.Waiting
+                submitState is VerificationSubmitState.Success ||
+                    submitState is VerificationSubmitState.Failure ||
+                    submitState is VerificationSubmitState.Waiting
 
             LaunchedEffect(submitState) {
                 if (isReviewResultReady) {
@@ -413,19 +415,19 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
                 }
 
                 when (submitState) {
-                    is com.example.onuldo_fe.camera.VerificationSubmitState.Success ->
+                    is VerificationSubmitState.Success ->
                         navController.navigate(Routes.VERIFICATION_SUCCESS) {
                             popUpTo(Routes.VERIFICATION_REVIEWING) { inclusive = true }
                         }
-                    is com.example.onuldo_fe.camera.VerificationSubmitState.Failure ->
+                    is VerificationSubmitState.Failure ->
                         navController.navigate(Routes.VERIFICATION_FAIL) {
                             popUpTo(Routes.VERIFICATION_REVIEWING) { inclusive = true }
                         }
-                    is com.example.onuldo_fe.camera.VerificationSubmitState.Waiting ->
+                    is VerificationSubmitState.Waiting ->
                         navController.navigate(Routes.VERIFICATION_WAITING) {
                             popUpTo(Routes.VERIFICATION_REVIEWING) { inclusive = true }
                         }
-                    is com.example.onuldo_fe.camera.VerificationSubmitState.Error ->
+                    is VerificationSubmitState.Error ->
                         navController.popBackStack()
                     else -> Unit
                 }
@@ -454,7 +456,7 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
             val manualReviewState by cameraViewModel.manualReviewState.collectAsState()
 
             LaunchedEffect(manualReviewState) {
-                if (manualReviewState is com.example.onuldo_fe.camera.ManualReviewRequestState.Success) {
+                if (manualReviewState is ManualReviewRequestState.Success) {
                     cameraViewModel.clearManualReviewState()
                     navController.navigate(Routes.VERIFICATION_WAITING) {
                         popUpTo(Routes.VERIFICATION_FAIL) { inclusive = true }
@@ -465,12 +467,12 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
 
             ChallengeVerificationScreen(
                 status = VerificationStatus.FAILURE,
-                failureReason = (state as? com.example.onuldo_fe.camera.VerificationSubmitState.Failure)?.message.orEmpty(),
+                failureReason = (state as? VerificationSubmitState.Failure)?.message.orEmpty(),
                 verificationDeadline = cameraViewModel.activeDeadline,
                 isManualReviewLoading =
-                    manualReviewState == com.example.onuldo_fe.camera.ManualReviewRequestState.Loading,
+                    manualReviewState == ManualReviewRequestState.Loading,
                 manualReviewErrorMessage =
-                    (manualReviewState as? com.example.onuldo_fe.camera.ManualReviewRequestState.Error)
+                    (manualReviewState as? ManualReviewRequestState.Error)
                         ?.message,
                 onBackClick = {
                     cameraViewModel.clearManualReviewState()
@@ -499,7 +501,7 @@ fun OnuldoApp(startDestination: String = Routes.LANDING) {
         composable(Routes.VERIFICATION_WAITING) {
             val state by cameraViewModel.submitState.collectAsState()
             val submittedAt =
-                (state as? com.example.onuldo_fe.camera.VerificationSubmitState.Waiting)
+                (state as? VerificationSubmitState.Waiting)
                     ?.result
                     ?.verifiedAt
                     ?: cameraViewModel.activeVerifiedAt
