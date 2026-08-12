@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
@@ -64,13 +65,25 @@ class SignupViewModel(
     private val _uiState = MutableStateFlow(SignupUiState())
     val uiState: StateFlow<SignupUiState> = _uiState.asStateFlow()
 
-    fun onEmailChange(value: String) = _uiState.update {
-        it.copy(email = value, emailExists = false, emailCheckError = null)
+    private var emailCheckJob: Job? = null
+    private var emailCheckRequestId: Long = 0L
+
+    fun onEmailChange(value: String) {
+        cancelEmailCheck()
+        _uiState.update {
+            it.copy(email = value, emailExists = false, emailCheckError = null)
+        }
     }
 
-    fun onPasswordChange(value: String) = _uiState.update { it.copy(password = value) }
+    fun onPasswordChange(value: String) {
+        cancelEmailCheck()
+        _uiState.update { it.copy(password = value) }
+    }
 
-    fun onPasswordConfirmChange(value: String) = _uiState.update { it.copy(passwordConfirm = value) }
+    fun onPasswordConfirmChange(value: String) {
+        cancelEmailCheck()
+        _uiState.update { it.copy(passwordConfirm = value) }
+    }
 
 
     /**
@@ -83,25 +96,44 @@ class SignupViewModel(
         val state = _uiState.value
         if (!state.isContinueEnabled) return
 
+        emailCheckJob?.cancel()
+        val requestId = ++emailCheckRequestId
+        val requestEmail = state.email
+
         _uiState.update { it.copy(isCheckingEmail = true, emailCheckError = null) }
-        viewModelScope.launch {
-            authRepository.emailExists(state.email)
+        emailCheckJob = viewModelScope.launch {
+            authRepository.emailExists(requestEmail)
                 .onSuccess { exists ->
+                    val currentState = _uiState.value
+                    if (requestId != emailCheckRequestId || currentState.email != requestEmail) {
+                        return@onSuccess
+                    }
+
                     _uiState.update { it.copy(isCheckingEmail = false, emailExists = exists) }
                     if (!exists) {
                         OnboardingDraft.saveCredentials(
-                            email = state.email,
-                            password = state.password,
+                            email = currentState.email,
+                            password = currentState.password,
                             agreedRequiredTerms = false,
                         )
                         onNext()
                     }
                 }
                 .onError { _, message ->
+                    if (requestId != emailCheckRequestId || _uiState.value.email != requestEmail) {
+                        return@onError
+                    }
                     _uiState.update {
                         it.copy(isCheckingEmail = false, emailCheckError = message)
                     }
                 }
         }
+    }
+
+    private fun cancelEmailCheck() {
+        emailCheckRequestId++
+        emailCheckJob?.cancel()
+        emailCheckJob = null
+        _uiState.update { it.copy(isCheckingEmail = false) }
     }
 }
