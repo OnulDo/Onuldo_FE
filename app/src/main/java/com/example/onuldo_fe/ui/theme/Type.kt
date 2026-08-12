@@ -24,7 +24,20 @@ val Pretendard = FontFamily(
         weight = FontWeight.ExtraBold
     )
 )
+val Jalnan = FontFamily(
+    Font(
+        resId = R.font.jalnan2,
+        weight = FontWeight.Normal
+    )
+)
 
+
+val Fredoka = FontFamily(
+    Font(
+        resId = R.font.fredoka_semibold,
+        weight = FontWeight.SemiBold
+    )
+)
 object OnulDoTypography {
 
     // Display
@@ -35,6 +48,21 @@ object OnulDoTypography {
         lineHeight = 40.sp,
     )
 
+    //Logo
+    val brandLogo = TextStyle(
+        fontFamily = Jalnan,
+        fontWeight = FontWeight.Normal,
+        fontSize = 32.sp,
+        letterSpacing = 0.64.sp,
+        color = Persimmon,
+    )
+
+    //slogan
+    val brandSloganSemiBold = TextStyle(
+        fontFamily = Fredoka,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 12.sp,
+    )
     // Title
     val titleBold = TextStyle(
         fontFamily = Pretendard,

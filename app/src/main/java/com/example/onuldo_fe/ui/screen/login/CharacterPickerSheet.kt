@@ -35,7 +35,6 @@ import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
 
-/** 프로필에서 선택 가능한 기본 캐릭터 목록 (Figma 캐릭터 그리드 순서). */
 val ProfileCharacters = listOf(
     R.drawable.ic_char_01,
     R.drawable.ic_char_02,
@@ -48,10 +47,7 @@ val ProfileCharacters = listOf(
     R.drawable.ic_char_09,
 )
 
-/**
- * 프로필 사진(캐릭터) 선택 바텀시트 — Ready for Dev node `5154:4894`.
- * 3×3 원형 캐릭터 그리드, 선택 항목은 오렌지 링으로 강조. 하단 "닫기"로 확정/닫기.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterPickerSheet(

@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 
@@ -52,16 +53,11 @@ fun SecondaryButton(
     ) {
         Text(
             text = text,
-            fontSize = 16.sp,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.ExtraBold,
+            style = OnulDoTypography.body3Bold
         )
     }
 }
 
-/**
- * 소셜 로그인 버튼 (카카오). 아이콘은 좌측 정렬, 텍스트는 중앙 정렬.
- */
 @Composable
 fun SocialLoginButton(
     text: String,
