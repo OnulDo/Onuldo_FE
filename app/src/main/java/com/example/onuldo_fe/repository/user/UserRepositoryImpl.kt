@@ -7,6 +7,7 @@ import com.example.onuldo_fe.data.network.safeApiCall
 import com.example.onuldo_fe.data.network.safeCursorApiCall
 import com.example.onuldo_fe.data.network.safeUnitApiCall
 import com.example.onuldo_fe.data.user.api.UserApi
+import com.example.onuldo_fe.data.user.CurrentProfileImageStore
 import com.example.onuldo_fe.data.user.dto.ChargePointRequestDto
 import com.example.onuldo_fe.data.notification.api.NotificationApi
 import com.example.onuldo_fe.data.notification.dto.NotificationSettingType
@@ -30,6 +31,9 @@ class UserRepositoryImpl(
 
     override suspend fun getMyPage(): ApiResult<MyPageSummary> =
         safeApiCall { userApi.getMyPage() }.map { dto ->
+            // 조회 성공 시 공유 상태를 최신 서버값으로 데워둔다(warm). 화면 진입 시 캐시된 캐릭터가
+            // 바로 떠서 기본 아바타 플래시(깜빡임)를 막고, 편집 시 PATCH가 같은 상태를 즉시 갱신한다.
+            CurrentProfileImageStore.update(dto.profileImageUrl)
             MyPageSummary(
                 nickname = dto.nickname.orEmpty(),
                 email = dto.email.orEmpty(),
@@ -41,6 +45,8 @@ class UserRepositoryImpl(
 
     override suspend fun getProfile(): ApiResult<UserProfile> =
         safeApiCall { userApi.getProfile() }.map { dto ->
+            // 조회 성공 시 공유 상태를 최신 서버값으로 데워둔다(warm) — getMyPage와 동일한 이유.
+            CurrentProfileImageStore.update(dto.profileImageUrl)
             UserProfile(
                 nickname = dto.nickname.orEmpty(),
                 email = dto.email.orEmpty(),
@@ -55,6 +61,8 @@ class UserRepositoryImpl(
         safeApiCall {
             userApi.updateProfile(UpdateProfileRequestDto(nickname, profileImageUrl))
         }.map { dto ->
+            // 이를 구독하는 홈/마이 화면이 재조회 없이 즉시 새 캐릭터를 반영한다.
+            CurrentProfileImageStore.update(dto.profileImageUrl)
             // PATCH 응답에는 email이 없을 수 있어 도메인 모델에서는 빈 문자열로 처리
             UserProfile(
                 nickname = dto.nickname.orEmpty(),

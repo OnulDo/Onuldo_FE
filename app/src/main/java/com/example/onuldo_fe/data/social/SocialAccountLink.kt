@@ -11,7 +11,7 @@ import com.example.onuldo_fe.data.auth.dto.SocialProvider
  * - [unlink] — 제공자 서버의 연동까지 끊는다. **회원 탈퇴에서만** 쓴다.
  *
  * 인터페이스로 분리한 이유는 [com.example.onuldo_fe.repository.auth.AuthRepositoryImpl]의
- * 단위 테스트가 JVM에서 도는데 카카오·네이버 SDK는 안드로이드 프레임워크를 필요로 해서,
+ * 단위 테스트가 JVM에서 도는데 카카오 SDK는 안드로이드 프레임워크를 필요로 해서,
  * 그대로 부르면 테스트가 깨지기 때문이다. 테스트는 [NoOp]를 쓴다.
  */
 interface SocialAccountLink {

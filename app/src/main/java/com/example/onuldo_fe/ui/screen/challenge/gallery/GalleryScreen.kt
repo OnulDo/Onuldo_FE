@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -229,7 +230,7 @@ private fun ChallengeCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                .heightIn(min = 50.dp)
                 .padding(
                     start = spacing.spacing12,
                     end = spacing.spacing10,
@@ -257,8 +258,7 @@ private fun ChallengeCard(
                     text = "%,d명".format(challenge.participantCount),
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.Medium,
-                        fontSize = 10.sp,
-                        lineHeight = 10.sp
+                        fontSize = 10.sp
                     ),
                     color = BlackBrown70,
                     maxLines = 1

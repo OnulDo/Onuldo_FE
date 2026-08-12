@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.data.notification.NotificationPermissionPrefs
 import com.example.onuldo_fe.model.home.notification.NotificationLandingBus
 import com.example.onuldo_fe.model.home.notification.toLanding
 import com.example.onuldo_fe.ui.component.PermissionDialogType
@@ -38,8 +39,25 @@ fun HomeRoute(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showNotification by rememberSaveable { mutableStateOf(false) }
-    var showNotificationPermissionDialog by remember { mutableStateOf(false) }
     var showCameraPermissionDialog by rememberSaveable { mutableStateOf(false) }
+    var showNotificationPermissionDialog by rememberSaveable { mutableStateOf(false) }
+
+    // 홈 최초 진입 시(기기별 1회) 알림 권한이 없으면 커스텀 안내 팝업
+    // 종 클릭과는 무관
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !NotificationPermissionPrefs.isRequested(context)
+        ) {
+            val granted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+            if (!granted) {
+                NotificationPermissionPrefs.markRequested(context)
+                showNotificationPermissionDialog = true
+            }
+        }
+    }
     var pendingChallengeId by rememberSaveable { mutableStateOf<Long?>(null) }
     var pendingCategory by rememberSaveable { mutableStateOf("") }
     var pendingTitle by rememberSaveable { mutableStateOf("") }
@@ -52,23 +70,9 @@ fun HomeRoute(
         }
     }
 
+        //권한x -> 알림 페이지는 열람 가능
     fun handleNotificationClick() {
-        // 알림 권한 있으면 알림 화면, 없으면 권한 안내 팝업 (API 33 미만은 런타임 권한 없음 → 바로 진입)
-        val isNotificationPermissionGranted =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
-            } else {
-                true
-            }
-
-        if (isNotificationPermissionGranted) {
-            showNotification = true
-        } else {
-            showNotificationPermissionDialog = true
-        }
+        showNotification = true
     }
 
     fun handleVerifyClick(challengeId: Long, category: String, title: String, deadline: String) {
@@ -128,9 +132,6 @@ fun HomeRoute(
         NotificationRoute(
             onBackClick = { showNotification = false },
             onItemClick = { item ->
-                // 리스트 클릭도 푸시 탭과 동일하게 랜딩 버스에 태운다. 실제 이동(챌린지 상세·파티
-                // 정산·파티 피드·기록 진행중/완료·홈)은 MainScreen의 소비자가 한 곳에서 수행한다
-                // → 리스트/푸시 랜딩 규칙이 갈라지지 않는다(NOTI-04 통일).
                 showNotification = false
                 NotificationLandingBus.post(item.toLanding())
             }
@@ -164,7 +165,7 @@ fun HomeRoute(
         )
     }
 
-    // 알림 권한 없을 때(최초) 안내 팝업 → "설정으로 이동"이면 시스템(폰) 알림설정으로
+    // 홈 진입 시 알림 권한 안내 팝업 → "설정으로 이동" 시 시스템 앱 알림설정으로
     if (showNotificationPermissionDialog) {
         PermissionSettingDialog(
             type = PermissionDialogType.NOTIFICATION,

@@ -18,7 +18,6 @@ firebaseBom = "33.7.0"
 retrofit = "3.0.0"
 okhttp = "4.12.0"
 kakaoSdk = "2.21.1"
-naverOauth = "5.10.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -53,7 +52,6 @@ retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 kakao-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakaoSdk" }
-naver-oauth = { group = "com.navercorp.nid", name = "oauth", version.ref = "naverOauth" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -3,7 +3,7 @@ package com.example.onuldo_fe.data.network
 import android.os.SystemClock
 import android.util.Log
 import com.google.gson.Gson
-import java.io.IOException
+import com.example.onuldo_fe.data.user.CurrentProfileImageStore
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
@@ -67,7 +67,8 @@ class TokenAuthenticator(
 
                 // 서버가 재발급을 거부했다 — 리프레시 토큰도 만료됐으므로 재로그인이 필요하다.
                 TokenRefreshOutcome.Rejected -> {
-                    expireSession()
+                    tokenStore.clear()
+                    CurrentProfileImageStore.update(null)
                     null
                 }
 

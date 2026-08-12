@@ -9,4 +9,3 @@ import androidx.compose.ui.graphics.Color
  */
 val KakaoYellow = Color(0xFFFEE500)
 val KakaoLabel = Color(0xFF191919)
-val NaverGreen = Color(0xFF03C75A)
