@@ -16,7 +16,11 @@ fun PartyNetworkImage(
     @DrawableRes fallbackImageRes: Int,
     contentDescription: String?,
     modifier: Modifier = Modifier,
-    contentScale: ContentScale = ContentScale.Crop
+    contentScale: ContentScale = ContentScale.Crop,
+    // 커스텀 업로드 URL(프리셋이 아닌 실제 사진)에 별도 스케일·크기가 필요할 때만 지정.
+    // 기본값은 프리셋과 동일해 기존 호출부 동작을 그대로 유지한다.
+    networkModifier: Modifier = modifier,
+    networkContentScale: ContentScale = contentScale
 ) {
     val presetRes = ProfileAsset.toCharacterIndex(imageUrl)?.let(ProfileCharacters::getOrNull)
     if (presetRes != null) {
@@ -33,8 +37,8 @@ fun PartyNetworkImage(
     AsyncImage(
         model = imageUrl?.takeIf(String::isNotBlank) ?: fallbackImageRes,
         contentDescription = contentDescription,
-        modifier = modifier,
-        contentScale = contentScale,
+        modifier = networkModifier,
+        contentScale = networkContentScale,
         placeholder = fallbackPainter,
         error = fallbackPainter,
         fallback = fallbackPainter

@@ -2,6 +2,7 @@ package com.example.onuldo_fe.repository.auth
 
 import com.example.onuldo_fe.data.auth.api.AuthApi
 import com.example.onuldo_fe.data.auth.DeviceInfoSource
+import com.example.onuldo_fe.data.user.CurrentProfileImageStore
 import com.example.onuldo_fe.data.auth.dto.DeviceRequest
 import com.example.onuldo_fe.data.auth.dto.EmailLoginRequest
 import com.example.onuldo_fe.data.auth.dto.EmailSignupRequest
@@ -117,6 +118,8 @@ class AuthRepositoryImpl(
         // 소셜 연동(동의)은 유지하고 로컬 세션만 정리한다. 연동 해제는 탈퇴 전용이다.
         socialAccountLink.logout()
         tokenStore.clear()
+        // 로그아웃 시 이전 사용자의 프로필 이미지가 남지 않도록 초기화
+        CurrentProfileImageStore.update(null)
     }
 
     override suspend fun unlinkSocialAccount() {
@@ -139,6 +142,7 @@ class AuthRepositoryImpl(
                     // 서버가 명시적으로 거부했다 — 리프레시 토큰도 만료됐으므로 재로그인이 필요하다.
                     TokenRefreshOutcome.Rejected -> {
                         tokenStore.clear()
+                        CurrentProfileImageStore.update(null)
                         false
                     }
 
