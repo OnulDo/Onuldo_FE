@@ -1,11 +1,17 @@
 package com.example.onuldo_fe.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.onuldo_fe.data.network.onError
+import com.example.onuldo_fe.data.network.onSuccess
+import com.example.onuldo_fe.repository.auth.AuthRepository
+import com.example.onuldo_fe.repository.auth.AuthRepositoryProvider
 import com.example.onuldo_fe.utils.Validators
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * 회원가입(계정 만들기 1/4) 상태. 실시간 유효성 결과를 함께 노출한다.
@@ -15,6 +21,9 @@ data class SignupUiState(
     val email: String = "",
     val password: String = "",
     val passwordConfirm: String = "",
+    val isCheckingEmail: Boolean = false,
+    val emailExists: Boolean = false,
+    val emailCheckError: String? = null,
 ) {
     private val emailValid get() = Validators.isValidEmail(email)
     // 비밀번호는 이메일 포함 여부까지 검사(설계서 규칙). 닉네임은 회원가입 폼에 없어 미전달.
@@ -25,11 +34,13 @@ data class SignupUiState(
     // 이메일: 형식이 맞으면 성공(초록), 입력이 있는데 형식이 틀리면 에러(빨강).
     // 서버에 이메일 중복확인 API가 없어 여기서는 형식만 검사한다. 중복 여부는 회원가입 호출 시점에
     // `DUPLICATE_EMAIL`로 판별된다(설계서의 실시간 중복 안내는 API 추가 전까지 구현 불가).
-    val emailSuccess get() = email.isNotEmpty() && emailValid
-    val emailError get() = email.isNotEmpty() && !emailValid
+    val emailSuccess get() = email.isNotEmpty() && emailValid && !emailExists && emailCheckError == null
+    val emailError get() = (email.isNotEmpty() && !emailValid) || emailExists || emailCheckError != null
     val emailSupport: String?
         get() = when {
             email.isEmpty() -> null
+            emailExists -> "이미 가입된 이메일입니다."
+            emailCheckError != null -> emailCheckError
             emailValid -> "사용 가능한 이메일입니다"
             else -> "올바른 이메일 형식이 아닙니다"
         }
@@ -43,15 +54,19 @@ data class SignupUiState(
 
     val isContinueEnabled: Boolean
         // 약관 동의는 다음 단계(TermsAgreementScreen)에서 받으므로 여기서는 입력값만 본다.
-        get() = emailValid && passwordValid && confirmMatched
+        get() = emailValid && passwordValid && confirmMatched && !isCheckingEmail
 }
 
-class SignupViewModel : ViewModel() {
+class SignupViewModel(
+    private val authRepository: AuthRepository = AuthRepositoryProvider.provide(),
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SignupUiState())
     val uiState: StateFlow<SignupUiState> = _uiState.asStateFlow()
 
-    fun onEmailChange(value: String) = _uiState.update { it.copy(email = value) }
+    fun onEmailChange(value: String) = _uiState.update {
+        it.copy(email = value, emailExists = false, emailCheckError = null)
+    }
 
     fun onPasswordChange(value: String) = _uiState.update { it.copy(password = value) }
 
@@ -68,12 +83,25 @@ class SignupViewModel : ViewModel() {
         val state = _uiState.value
         if (!state.isContinueEnabled) return
 
-        OnboardingDraft.saveCredentials(
-            email = state.email,
-            password = state.password,
-            // 동의 여부는 다음 화면에서 받아 OnboardingDraft에 다시 기록한다.
-            agreedRequiredTerms = false,
-        )
-        onNext()
+        _uiState.update { it.copy(isCheckingEmail = true, emailCheckError = null) }
+        viewModelScope.launch {
+            authRepository.emailExists(state.email)
+                .onSuccess { exists ->
+                    _uiState.update { it.copy(isCheckingEmail = false, emailExists = exists) }
+                    if (!exists) {
+                        OnboardingDraft.saveCredentials(
+                            email = state.email,
+                            password = state.password,
+                            agreedRequiredTerms = false,
+                        )
+                        onNext()
+                    }
+                }
+                .onError { _, message ->
+                    _uiState.update {
+                        it.copy(isCheckingEmail = false, emailCheckError = message)
+                    }
+                }
+        }
     }
 }

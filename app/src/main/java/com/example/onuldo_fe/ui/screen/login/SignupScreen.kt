@@ -132,7 +132,7 @@ fun SignupScreen(
         Spacer(Modifier.weight(1f))
 
         OnulDoButton(
-            text = "계속",
+            text = if (state.isCheckingEmail) "확인 중..." else "계속",
             onClick = { viewModel.submit(onNext) },
             enabled = state.isContinueEnabled,
         )
