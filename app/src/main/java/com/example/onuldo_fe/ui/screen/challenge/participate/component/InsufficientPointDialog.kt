@@ -35,6 +35,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -95,10 +96,7 @@ fun InsufficientPointDialog(
 
             Text(
                 text = "포인트가 부족해요",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                lineHeight = 20.sp,
+                style = OnulDoTypography.title2ExtraBold,
                 color = BlackBrown,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -108,10 +106,7 @@ fun InsufficientPointDialog(
 
             Text(
                 text = "챌린지 시작을 위해 도전금이 필요해요",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Normal,
-                fontSize = 13.sp,
-                lineHeight = 13.sp,
+                style = OnulDoTypography.caption1Regular,
                 color = DarkBrown,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -188,20 +183,14 @@ private fun PointColumn(
     ) {
         Text(
             text = label,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 10.sp,
-            lineHeight = 12.sp,
+            style = OnulDoTypography.caption4Medium,
             color = DarkBrown70,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(spacing.spacing8))
         Text(
             text = value,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
-            lineHeight = 14.sp,
+            style = OnulDoTypography.body4Bold,
             color = valueColor,
             textAlign = TextAlign.Center
         )
@@ -223,10 +212,7 @@ private fun OperatorColumn(
         Spacer(Modifier.height(spacing.spacing20))
         Text(
             text = symbol,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            lineHeight = 18.sp,
+            style = OnulDoTypography.body1Bold,
             color = DarkBrown70,
             textAlign = TextAlign.Center
         )
