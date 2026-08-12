@@ -142,6 +142,7 @@ class AuthRepositoryImpl(
                     // 서버가 명시적으로 거부했다 — 리프레시 토큰도 만료됐으므로 재로그인이 필요하다.
                     TokenRefreshOutcome.Rejected -> {
                         tokenStore.clear()
+                        CurrentProfileImageStore.update(null)
                         false
                     }
 

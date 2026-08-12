@@ -112,13 +112,20 @@ fun MyMainScreen(
         Spacer(Modifier.height(20.dp))
 
         // 프로필 카드 → 프로필 설정
-        // 서버가 배정한 캐릭터가 앱 목록에 있으면 그 캐릭터를, 없으면 기본 아바타.
-        val characterIndex = ProfileAsset.toCharacterIndex(sharedProfileUrl) ?: state.characterIndex
+        // 공유 프로필 이미지가 있으면 우선 사용하고, 없으면 서버 조회값을 사용
+        val characterIndex =
+            ProfileAsset.toCharacterIndex(sharedProfileUrl) ?: state.characterIndex
+
         val avatarRes = characterIndex
             ?.let { ProfileCharacters.getOrNull(it) }
             ?: R.drawable.img_avatar_running
-        ProfileCard(nickname = nickname, email = email, avatarRes = avatarRes, onClick = onProfileClick)
 
+        ProfileCard(
+            nickname = nickname,
+            email = email,
+            avatarRes = avatarRes,
+            onClick = onProfileClick,
+        )
         Spacer(Modifier.height(16.dp))
 
         // 포인트 지갑 요약
