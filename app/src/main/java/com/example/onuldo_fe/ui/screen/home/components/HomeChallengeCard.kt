@@ -54,8 +54,6 @@ fun HomeChallengeCard(
 ) {
     val spacing = LocalSpacing.current
     val actionColors = challenge.actionColors()
-    // TODO: 18sp Bold·12sp Medium·13sp Medium 글자 스타일과 2·6·14·35dp 여백 토큰 추가 후 교체
-
     Column(
         modifier = modifier
             .height(111.dp)
@@ -75,7 +73,6 @@ fun HomeChallengeCard(
                 modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Body1/Bold
                 Text(
                     text = challenge.title,
                     color = BlackBrown,
@@ -109,7 +106,6 @@ fun HomeChallengeCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Caption1/Medium
                 Text(
                     text = challenge.verifiedAt?.let {
                         stringResource(R.string.home_challenge_verified_at, it.toDisplayText())
@@ -136,9 +132,7 @@ fun HomeChallengeCard(
                     enabled = challenge.canVerify,
                     width = 78.dp,
                     height = 26.dp,
-                    iconSize = 12.dp,
-                    fontSize = 10.sp,
-                    lineHeight = 12.sp
+                    iconSize = 12.dp
                 )
             } else if (challenge.status != ChallengeStatus.NeedCertification) {
                 Box(
@@ -148,7 +142,6 @@ fun HomeChallengeCard(
                         .height(26.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Caption4/Bold
                     Text(
                         text = stringResource(challenge.status.actionTextRes()),
                         color = actionColors.text,
@@ -193,8 +186,7 @@ private fun HomeChallenge.actionColors(): ChallengeActionColors {
 private fun HomeChallenge.deadlineColor(): Color = when (status) {
     ChallengeStatus.NeedCertification -> Persimmon80
     ChallengeStatus.WaitingReview,
-    // TODO: Red80 색상 토큰 추가 후 교체
-    ChallengeStatus.Failed -> Red.copy(alpha = 0.8f)
+    ChallengeStatus.Failed -> Red
     ChallengeStatus.Success -> Green
 }
 

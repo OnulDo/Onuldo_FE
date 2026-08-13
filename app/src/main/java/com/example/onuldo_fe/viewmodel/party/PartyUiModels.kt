@@ -76,7 +76,7 @@ data class PartyFeedItemUi(
     val time: String,                          // 인증 시각 또는 미인증 상태 문구
     val profileImageUrl: String? = null,       // 파티원 프로필 이미지 URL
     val verificationImageUrl: String? = null,  // 서버에서 전달받은 인증 이미지 URL
-    @param:DrawableRes val imageRes: Int? = null, // fake 테스트용 로컬 인증 이미지
+    @param:DrawableRes val imageRes: Int? = null, // 이미지 URL이 없을 때 사용하는 로컬 대체 이미지
     val memberId: String = name                // 인증한 파티원의 고유 ID
 )
 
@@ -100,7 +100,7 @@ data class PartyWaitingRoomUi(
     val status: PartyStatus = PartyStatus.Recruiting // 폴링으로 갱신되는 현재 파티 상태
 )
 
-// 파티 목록 화면과 Preview에서 사용하는 fake 파티 카드 데이터
+// 파티 목록 Preview에 사용하는 샘플 카드 데이터
 val samplePartyCards = listOf(
     PartyCardUi("party-1", "새벽 러너 파티", "30분 러닝", "D-12", "7:00 마감", "45분 남음", 2, 5),
     PartyCardUi("party-2", "책상 공부 인증 파티", "5시간 집중", "D-20", "6:00 마감", "1시간 남음", 3, 5)

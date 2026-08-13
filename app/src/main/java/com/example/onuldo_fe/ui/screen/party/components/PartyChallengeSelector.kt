@@ -106,7 +106,6 @@ fun PartyChallengeSelector(
                 painter = painterResource(R.drawable.party_create_arrow_right),
                 contentDescription = null,
                 modifier = Modifier
-                    // TODO 디자인 시스템에 6dp 토큰이 추가되면 LocalSpacing으로 교체
                     .padding(start = 6.dp)
                     .size(width = 5.dp, height = 10.dp)
             )

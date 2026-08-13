@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomePartyChallenge
-import com.example.onuldo_fe.model.home.HomePartyMember
 import com.example.onuldo_fe.ui.screen.party.components.PartyMemberProfileImage
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
@@ -59,8 +58,6 @@ fun HomePartyCard(
     onVerifyClick: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
-    // TODO: 13sp Medium·11sp Bold 글자 스타일과 2·5·6·7·14·17dp 여백 토큰 추가 후 교체
-
     Column(
         modifier = modifier
             .height(140.dp)
@@ -74,7 +71,6 @@ fun HomePartyCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                // Body2/Bold
                 Text(
                     text = partyChallenge.title,
                     color = BlackBrown,
@@ -127,18 +123,7 @@ fun HomePartyCard(
         Spacer(Modifier.weight(1f))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                val members = partyChallenge.members.ifEmpty {
-                    // 실제 API 연결 전에도 현재 인원 수와 인증 상태를 확인할 수 있도록 임시 멤버 구성
-                    List(partyChallenge.totalMemberCount) { index ->
-                        HomePartyMember(
-                            memberId = "preview-member-$index",
-                            profileImageUrl = null,
-                            defaultCharacterId = (index % 9) + 1,
-                            isVerifiedToday = index < partyChallenge.completedMemberCount
-                        )
-                    }
-                }
-                members.forEach { member ->
+                partyChallenge.members.forEach { member ->
                     PartyMemberProfileImage(
                         profileImageUrl = member.profileImageUrl,
                         defaultCharacterId = member.defaultCharacterId,
@@ -165,11 +150,9 @@ private fun PartyAction(
         HomeVerifyButton(
             onClick = onVerifyClick,
             enabled = party.canVerify,
-            width = 96.dp,
-            height = 32.dp,
-            iconSize = 14.dp,
-            fontSize = 12.sp,
-            lineHeight = 22.sp
+            width = 78.dp,
+            height = 26.dp,
+            iconSize = 12.dp
         )
         return
     }

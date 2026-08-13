@@ -104,7 +104,7 @@ fun PartyListScreen(
             ),
             color = BlackBrown,
             style = OnulDoTypography.headline3Bold
-        )        // TODO 디자인 시스템에 21dp 토큰이 추가되면 LocalSpacing으로 교체
+        )
         Spacer(Modifier.height(21.dp))
         Row(Modifier.padding(horizontal = spacing.spacing20), horizontalArrangement = Arrangement.spacedBy(spacing.spacing10)) {
             Button(
@@ -122,7 +122,6 @@ fun PartyListScreen(
                     contentDescription = null,
                     modifier = Modifier.size(12.dp)
                 )
-                // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.width(3.dp))
                 Text("파티 만들기", style = OnulDoTypography.body4Bold)
             }
@@ -141,7 +140,6 @@ fun PartyListScreen(
             Spacer(Modifier.width(5.dp))
             Text("나의 파티", color = BlackBrown, style = OnulDoTypography.body2Bold)
         }
-        // TODO 디자인 시스템에 14dp 토큰이 추가되면 LocalSpacing으로 교체
         Spacer(Modifier.height(14.dp))
         if (isLoading) {
             Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
@@ -179,7 +177,6 @@ private fun PartyListEmptyContent(modifier: Modifier = Modifier) {
         iconRes = R.drawable.party_empty_character,
         title = "아직 시작한 파티가 없어요",
         description = "친구들과 함께 도전하여 더욱 즐겁게\n인증하세요!",
-        // TODO 디자인 시스템에 96dp 토큰이 추가되면 LocalSpacing으로 교체
         modifier = modifier.padding(top = 96.dp)
     )
 }

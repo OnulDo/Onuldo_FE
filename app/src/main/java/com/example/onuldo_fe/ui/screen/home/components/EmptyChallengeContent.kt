@@ -22,7 +22,6 @@ fun EmptyChallengeContent(
     modifier: Modifier = Modifier,
     onBrowseChallengesClick: () -> Unit = {}
 ) {
-    // TODO: 디자인 시스템에 없는 42dp 여백 토큰 추가 후 교체
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         EmptyStateContent(
             iconRes = R.drawable.home_question_icon,

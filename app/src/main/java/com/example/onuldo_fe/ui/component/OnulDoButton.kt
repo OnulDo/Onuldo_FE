@@ -30,6 +30,7 @@ fun OnulDoButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    textStyle: TextStyle = OnulDoTypography.body2Bold,
     enabled: Boolean = true,
     height: Dp = 56.dp,
     horizontalPadding: Dp = 20.dp,
@@ -38,7 +39,6 @@ fun OnulDoButton(
     disabledContainerColor: Color = BlackBrown.copy(alpha = 0.1f),
     disabledContentColor: Color = BlackBrown.copy(alpha = 0.2f),
     pressedContainerColor: Color = DarkBrown,
-    textStyle: TextStyle = OnulDoTypography.body2Bold,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()

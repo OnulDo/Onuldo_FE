@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.BlackBrown20
@@ -41,8 +40,6 @@ fun HomeVerifyButton(
     width: Dp,
     height: Dp,
     iconSize: Dp,
-    fontSize: TextUnit,
-    lineHeight: TextUnit,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }

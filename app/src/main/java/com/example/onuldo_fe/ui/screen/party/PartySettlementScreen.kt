@@ -29,18 +29,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.OnulDoButton
-import com.example.onuldo_fe.data.party.dummy.PartySettlementDummyData
 import com.example.onuldo_fe.model.party.PartySettlementMember
 import com.example.onuldo_fe.model.party.PartySettlementMemberStatus
 import com.example.onuldo_fe.model.party.PartySettlementResult
 import com.example.onuldo_fe.model.party.PartySettlementStatus
-import com.example.onuldo_fe.repository.party.toModel
 import com.example.onuldo_fe.ui.screen.party.components.PartyMemberCard
 import com.example.onuldo_fe.ui.screen.party.components.PartyTopBar
 import com.example.onuldo_fe.ui.theme.BlackBrown
@@ -49,7 +46,6 @@ import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDoTypography
-import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -79,7 +75,6 @@ fun PartySettlementScreen(
             contentPadding = PaddingValues(bottom = spacing.spacing16)
         ) {
             item {
-                // TODO 디자인 시스템에 47dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(47.dp))
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Box(
@@ -144,7 +139,6 @@ fun PartySettlementScreen(
                 text = "확인",
                 onClick = onConfirm,
                 modifier = Modifier
-                    // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
                     .padding(top = 40.dp),
                 height = 52.dp
             )
@@ -214,7 +208,6 @@ private fun SettlementAmount(
         )
         Text(
             text = amount,
-            // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
             modifier = Modifier.padding(top = 3.dp),
             color = amountColor,
             style = OnulDoTypography.body2Bold
@@ -343,28 +336,4 @@ private fun Int.toPointText(): String = "${pointFormatter.format(this)}P"
 private fun Int.toSignedPointText(): String = when {
     this > 0 -> "+${pointFormatter.format(this)}P"
     else -> "${pointFormatter.format(this)}P"
-}
-
-@Preview(name = "정산 - 전원 성공", showBackground = true, widthDp = 390, heightDp = 844)
-@Composable
-private fun PartySettlementAllSuccessPreview() {
-    OnulDo_FETheme {
-        PartySettlementScreen(onBack = {}, result = PartySettlementDummyData.allSuccess.toModel())
-    }
-}
-
-@Preview(name = "정산 - 일부 성공", showBackground = true, widthDp = 390, heightDp = 844)
-@Composable
-private fun PartySettlementPartialSuccessPreview() {
-    OnulDo_FETheme {
-        PartySettlementScreen(onBack = {}, result = PartySettlementDummyData.partialSuccess.toModel())
-    }
-}
-
-@Preview(name = "정산 - 전원 실패", showBackground = true, widthDp = 390, heightDp = 844)
-@Composable
-private fun PartySettlementAllFailedPreview() {
-    OnulDo_FETheme {
-        PartySettlementScreen(onBack = {}, result = PartySettlementDummyData.allFailed.toModel())
-    }
 }

@@ -34,7 +34,6 @@ fun PartyInviteCodeCard(inviteCode: String, onCopyClick: () -> Unit, modifier: M
             )
             Text(
                 inviteCode,
-                // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
                 Modifier.padding(top = 3.dp),
                 color = BlackBrown,
                 style = OnulDoTypography.headline2Bold

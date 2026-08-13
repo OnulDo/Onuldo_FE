@@ -48,7 +48,7 @@ class HomeViewModel(
         )
         loadJob = (coroutineScope ?: viewModelScope).launch {
             try {
-                // Repository가 Fake/Real 차이를 처리하므로 결과만 화면 상태로 변환한다.
+                // Repository 결과를 화면 상태로 변환한다.
                 val loadedState = repository.getHome().toUiState()
                 // 취소에 협조하지 않은 이전 요청의 늦은 응답도 무시한다.
                 if (generation != loadGeneration) return@launch

@@ -41,7 +41,7 @@ import com.example.onuldo_fe.ui.theme.SourCream
  */
 @Composable
 fun PartyLeaveConfirmDialog(
-    isLeader: Boolean = false,
+    isHost: Boolean,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
@@ -73,10 +73,10 @@ fun PartyLeaveConfirmDialog(
                         style = OnulDoTypography.body2Bold,
                         textAlign = TextAlign.Center
                     )
-                    Spacer(Modifier.height(spacing.spacing12))
+                    Spacer(Modifier.height(if (isHost) spacing.spacing12 else spacing.spacing18))
                     Text(
-                        text = if (isLeader) {
-                            "파티를 나가게 되면 파티원 중 \n1명이 방장을 이어받아요"
+                        text = if (isHost) {
+                            "파티를 나가게 되면 파티원 중\n1명이 방장을 이어받아요"
                         } else {
                             "정말 파티를 나가시겠습니까?"
                         },
@@ -135,10 +135,18 @@ private fun PartyLeaveDialogButton(
     }
 }
 
-@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Preview(name = "파티 이탈 - 파티장", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
-private fun PartyLeaveConfirmDialogPreview() {
+private fun PartyHostLeaveConfirmDialogPreview() {
     OnulDo_FETheme {
-        PartyLeaveConfirmDialog(onDismiss = {}, onConfirm = {})
+        PartyLeaveConfirmDialog(isHost = true, onDismiss = {}, onConfirm = {})
+    }
+}
+
+@Preview(name = "파티 이탈 - 파티원", showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun PartyMemberLeaveConfirmDialogPreview() {
+    OnulDo_FETheme {
+        PartyLeaveConfirmDialog(isHost = false, onDismiss = {}, onConfirm = {})
     }
 }

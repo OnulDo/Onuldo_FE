@@ -58,7 +58,6 @@ fun PartyNameTextField(
                     .height(56.dp)
                     .background(White, RoundedCornerShape(14.dp))
                     .border(1.dp, if (isError) Persimmon else DarkBrown40, RoundedCornerShape(14.dp))
-                    // TODO 디자인 시스템에 19dp 토큰이 추가되면 LocalSpacing으로 교체
                     .padding(horizontal = 19.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
