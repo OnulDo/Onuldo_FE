@@ -40,7 +40,7 @@ import com.example.onuldo_fe.ui.theme.White
 
 /**
  * 큰 금액 표시 박스 — 흰 배경 + Persimmon 2dp 테두리. 숫자·단위는 우측(오른쪽 30dp) 정렬.
- * [clearable]이면 왼쪽 안쪽 22dp에 지우기(X)를 띄우고, 누르면 [onClear]를 호출한다.
+ * [clearable]이면 왼쪽 안쪽 24dp에 지우기(X)를 띄우고, 누르면 [onClear]를 호출한다.
  */
 @Composable
 fun AmountInputBox(
@@ -61,14 +61,14 @@ fun AmountInputBox(
             .background(White)
             .border(2.dp, if (isError) Red else Persimmon, RoundedCornerShape(16.dp)),
     ) {
-        // 금액이 있을 때만 왼쪽 안쪽 22dp에 지우기(X).
+        // 금액이 있을 때만 왼쪽 안쪽 24dp에 지우기(X). (Figma 5154:3482 — 내용 프레임 22 + 그룹 오프셋 2)
         if (clearable) {
             Image(
                 painter = painterResource(R.drawable.mypage_x_icon),
                 contentDescription = "금액 지우기",
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(start = 22.dp)
+                    .padding(start = 24.dp)
                     .clickable(onClick = onClear)
                     .size(16.dp),
             )
