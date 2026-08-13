@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.util
+package com.example.onuldo_fe.utils
 
 import android.content.Context
 import android.content.Intent

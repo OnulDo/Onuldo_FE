@@ -29,9 +29,10 @@ import org.junit.Test
 import retrofit2.Response
 
 class PartyRepositoryImplTest {
+
     @Test
     fun `설정이 true이면 실제 API 응답 형식을 도메인 모델로 변환한다`() = runBlocking {
-        val repository = PartyRepositoryImpl(realApi = SuccessfulRealPartyApi)
+        val repository = PartyRepositoryImpl(SuccessfulRealPartyApi)
 
         val party = repository.getParties().single()
 
@@ -52,7 +53,7 @@ class PartyRepositoryImplTest {
 
     @Test
     fun `대기방 설정이 true이면 서버 권한과 시작 가능 여부를 전달한다`() = runBlocking {
-        val repository = PartyRepositoryImpl(realApi = SuccessfulWaitingRoomApi)
+        val repository = PartyRepositoryImpl(SuccessfulWaitingRoomApi)
 
         val room = repository.getWaitingRoom("101")
 
@@ -65,7 +66,7 @@ class PartyRepositoryImplTest {
 
     @Test
     fun `생성 설정이 true이면 POST 요청값을 변환하고 생성 결과를 전달한다`() = runBlocking {
-        val repository = PartyRepositoryImpl(realApi = SuccessfulCreateRealApi)
+        val repository = PartyRepositoryImpl(SuccessfulCreateRealApi)
 
         val created = repository.createParty(
             CreatePartyCommand("갓생팟", "12", "새벽 6시 기상", "4주", 30_000, 4)
@@ -77,7 +78,7 @@ class PartyRepositoryImplTest {
 
     @Test
     fun `준비 설정이 true이면 POST 성공 응답의 최신 대기방을 전달한다`() = runBlocking {
-        val repository = PartyRepositoryImpl(realApi = SuccessfulReadyRealApi)
+        val repository = PartyRepositoryImpl(SuccessfulReadyRealApi)
 
         val room = repository.readyParty("101", ready = true)
 
@@ -88,7 +89,7 @@ class PartyRepositoryImplTest {
 
     @Test
     fun `시작 설정이 true이면 실제 POST 성공 응답을 완료 처리한다`() = runBlocking {
-        val repository = PartyRepositoryImpl(realApi = SuccessfulReadyRealApi)
+        val repository = PartyRepositoryImpl(SuccessfulReadyRealApi)
 
         repository.startParty("101")
     }
@@ -97,7 +98,7 @@ class PartyRepositoryImplTest {
     fun `이탈 설정이 true이면 실제 POST 성공 응답을 완료 처리한다`() = runBlocking {
         // 다른 테스트가 먼저 실행돼 남아있을 수 있는 호출 기록을 초기화한다.
         SuccessfulReadyRealApi.leaveCalledWithPartyId = null
-        val repository = PartyRepositoryImpl(realApi = SuccessfulReadyRealApi)
+        val repository = PartyRepositoryImpl(SuccessfulReadyRealApi)
 
         repository.leaveParty("101")
 
@@ -106,7 +107,7 @@ class PartyRepositoryImplTest {
 
     @Test
     fun `정산 설정이 true이면 실제 응답의 금액과 파티원 상태를 변환한다`() = runBlocking {
-        val repository = PartyRepositoryImpl(realApi = SuccessfulReadyRealApi)
+        val repository = PartyRepositoryImpl(SuccessfulReadyRealApi)
 
         val result = repository.getSettlementResult(101)
 

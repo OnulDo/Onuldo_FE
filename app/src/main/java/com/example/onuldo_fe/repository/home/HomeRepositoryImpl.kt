@@ -2,6 +2,10 @@ package com.example.onuldo_fe.repository.home
 
 import android.util.Log
 import com.example.onuldo_fe.data.home.api.RealHomeApi
+import com.example.onuldo_fe.data.home.dto.HomeChallengeDto
+import com.example.onuldo_fe.data.home.dto.HomeCompletedChallengeDto
+import com.example.onuldo_fe.data.home.dto.HomePartyChallengeDto
+import com.example.onuldo_fe.data.home.dto.HomeResponseDto
 import com.example.onuldo_fe.data.home.dto.RealHomeDailyChallengeDto
 import com.example.onuldo_fe.data.challenge.dto.DailyCompletedResultDto
 import com.example.onuldo_fe.data.party.api.RealPartyApi
@@ -30,7 +34,7 @@ import retrofit2.HttpException
 class HomeRepositoryImpl(
     private val realApi: RealHomeApi,
     private val realPartyApi: RealPartyApi,
-    private val userApi: UserApi,
+    private val userApi: UserApi? = null,
     private val nowProvider: () -> LocalDateTime = LocalDateTime::now
 ) : HomeRepository {
     override suspend fun getHome(): HomeData {
@@ -74,7 +78,7 @@ class HomeRepositoryImpl(
 
     /** 프로필 실패는 홈 전체 오류로 처리하지 않는다. */
     private suspend fun getProfileOrEmpty(): HomeProfile = try {
-        val response = userApi.getProfile()
+        val response = userApi?.getProfile()
         if (response?.isSuccessful == true) {
             response.body()?.result?.let {
                 HomeProfile(it.nickname.orEmpty(), it.profileImageUrl)
@@ -92,7 +96,7 @@ class HomeRepositoryImpl(
     /** 완료 목록 실패 시 진행 중인 홈 카드는 그대로 표시한다. */
     private suspend fun getCompletedOrEmpty(): DailyCompletedResultDto = try {
         val response = realApi.getDailyCompleted()
-        if (response?.isSuccessful == true) {
+        if (response.isSuccessful) {
             response.body()?.result ?: DailyCompletedResultDto()
         } else {
             DailyCompletedResultDto()
@@ -123,16 +127,22 @@ internal fun List<RealHomeDailyChallengeDto>.toHomeData(
     // Daily API에서 내려온 개인 챌린지 중 아직 진행 중인 항목만 홈 카드로 변환한다.
     val personalChallenges = filter { it.shouldShowOnHome(now.toLocalDate()) }
         .map { it.toPersonalModel(now) }
-    // 파티 카드와 인증 상태는 파티 홈 응답을 기준으로 구성한다.
+    // 카드 표시 상태와 파티원 인증 현황, 인증하기에 필요한 challengeId까지 모두
+    // /parties/home 응답 하나로 구성한다. (예전에는 challengeId가 이 응답에 없어서
+    // /daily에서 같은 partyId를 찾아 끼워 맞추는 우회 로직이 있었는데, 그 매칭이
+    // 실패하면 "인증하기"가 조용히 무반응이 되는 문제가 있어 제거했다. 백엔드가
+    // challengeId를 이 응답에 내려주기 전까지는 인증하기가 동작하지 않는다.)
     val partyChallenges = partyHome.parties.map { it.toHomeModel(now = now) }
-    // 개인과 파티의 응답을 각각 집계해 히어로 진행률을 계산한다.
+    // 히어로의 분모/분자는 /daily 원본 리스트 크기에 기대지 않는다.
+    // /daily에 파티의 오늘 참여 기록이 아직 반영되지 않아도(생성/시작 직후 등)
+    // 개인은 /daily, 파티는 /parties/home을 각각의 출처로 삼아 항상 정확히 집계한다.
     val personalCompletedCount = personalChallenges.count { it.status == ChallengeStatus.Success }
     val partyCompletedCount = partyHome.parties.count { it.status == "SUCCESS" }
     val totalCount = personalChallenges.size + partyChallenges.size
     val completedCount = personalCompletedCount + partyCompletedCount
 
     return HomeData(
-        // 닉네임은 상위 조회에서 프로필 응답으로 채운다.
+        // /daily 응답에는 닉네임이 없으므로 다른 사용자 API가 연결되기 전까지 비워 둔다.
         userName = "",
         // 챌린지·파티 중 하나라도 있으면 히어로를 노출한다.
         todayChallenge = totalCount.takeIf { it > 0 }?.let {
@@ -311,4 +321,72 @@ private fun LocalTime.remainingMinutesFrom(now: LocalTime, verified: Boolean): I
     if (verified || now.isAfter(this)) return null
     // 인증 마감 시각과 현재 시각의 차이를 분으로 계산한다.
     return ChronoUnit.MINUTES.between(now, this).toInt()
+}
+
+internal fun HomeResponseDto.toModel(): HomeData {
+    val partyModels = partyChallenges.map { it.toModel() }
+    val challengeModels = challenges.map { it.toModel() }
+    val completedModels = completedChallenges.map { it.toModel() }
+
+    val todayModel = todayChallenge?.let { source ->
+        val progress = if (source.totalCount == 0) 0f
+        else source.completedCount.toFloat() / source.totalCount
+        TodayChallenge(source.date, progress, source.completedCount, source.totalCount)
+    }
+
+    return HomeData(
+        userName = userName,
+        todayChallenge = todayModel,
+        partyChallenges = partyModels,
+        challenges = challengeModels,
+        completedChallenges = completedModels,
+        settlementBanner = settlementBanner
+            ?.takeUnless { it.isChecked }
+            ?.let { SettlementBanner(it.partyName, it.partyId) }
+    )
+}
+
+private fun String.toChallengeStatus() = when (this) {
+    "WAITING_REVIEW" -> ChallengeStatus.WaitingReview
+    "FAILED" -> ChallengeStatus.Failed
+    "SUCCESS" -> ChallengeStatus.Success
+    else -> ChallengeStatus.NeedCertification
+}
+
+private fun HomeChallengeDto.toModel() = HomeChallenge(
+    title = title,
+    streakDays = streakDays,
+    remainingDays = remainingDays,
+    deadlineAt = LocalTime.parse(deadlineAt),
+    status = status.toChallengeStatus(),
+    verifiedAt = verifiedAt?.let { runCatching { LocalTime.parse(it) }.getOrNull() },
+    remainingMinutes = remainingMinutes,
+    canVerify = canVerify
+)
+
+private fun HomePartyChallengeDto.toModel() = HomePartyChallenge(
+    title = title,
+    subtitle = subtitle,
+    remainingDays = remainingDays,
+    deadlineAt = runCatching { LocalTime.parse(deadlineAt) }.getOrNull(),
+    completedMemberCount = completedMemberCount,
+    totalMemberCount = totalMemberCount,
+    status = status.toChallengeStatus(),
+    verifiedAt = verifiedAt?.let { runCatching { LocalTime.parse(it) }.getOrNull() },
+    remainingMinutes = remainingMinutes,
+    canVerify = canVerify,
+    members = members.map {
+        HomePartyMember(it.memberId, it.profileImageUrl, it.defaultCharacterId, it.isVerifiedToday)
+    }
+)
+
+private fun HomeCompletedChallengeDto.toModel(): HomeCompletedChallenge = when (type) {
+    "PARTY" -> HomeCompletedChallenge.Party(
+        time,
+        title,
+        requireNotNull(completedMemberCount),
+        requireNotNull(totalMemberCount)
+    )
+    "PERSONAL" -> HomeCompletedChallenge.Personal(time, title, requireNotNull(streakDays))
+    else -> error("Unsupported completed challenge type: $type")
 }

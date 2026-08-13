@@ -95,7 +95,10 @@ fun CameraScreen(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        val layoutDimensions = calculateCameraLayoutDimensions(maxWidth, maxHeight)
+        val layoutDimensions = calculateCameraLayoutDimensions(
+            maxWidth = this.maxWidth,
+            maxHeight = this.maxHeight
+        )
 
         // 카메라 프리뷰
         key(lensFacing) {

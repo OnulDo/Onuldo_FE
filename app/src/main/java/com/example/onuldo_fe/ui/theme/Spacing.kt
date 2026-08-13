@@ -16,9 +16,7 @@ data class Spacing(
     val spacing28: androidx.compose.ui.unit.Dp = 28.dp,
     val spacing30: androidx.compose.ui.unit.Dp = 30.dp,
     val spacing36: androidx.compose.ui.unit.Dp = 36.dp,
-    val spacing48: androidx.compose.ui.unit.Dp = 48.dp,
     val spacing50: androidx.compose.ui.unit.Dp = 50.dp,
-    val spacing76: androidx.compose.ui.unit.Dp = 76.dp,
     )
 
 val LocalSpacing = staticCompositionLocalOf { Spacing() }

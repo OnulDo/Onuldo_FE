@@ -56,6 +56,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.viewmodel.mypage.ProfileSettingsViewModel
 
 /** 아바타 원형 배경. Figma: Persimmon 15%. */
@@ -76,6 +77,7 @@ fun ProfileSettingsScreen(
     onNicknameClick: (String) -> Unit,
     viewModel: ProfileSettingsViewModel = viewModel(),
 ) {
+    val spacing = LocalSpacing.current
     val state by viewModel.uiState.collectAsState()
     val nickname = state.nickname
     val email = state.email
@@ -97,13 +99,14 @@ fun ProfileSettingsScreen(
     ) {
         MyPageTopBar(title = "프로필 설정", onBack = onBack)
 
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(spacing.spacing28))
 
         // 아바타 + 편집 배지
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 20.dp),
+                // 실기 실측(420dpi) 기준 보정. 20이면 닉네임이 Figma(8672:32176)보다 9dp 내려간다.
+                .padding(bottom = 11.dp),
             contentAlignment = Alignment.Center,
         ) {
             Box(contentAlignment = Alignment.BottomEnd) {
@@ -140,7 +143,7 @@ fun ProfileSettingsScreen(
         if (state.avatarErrorMessage != null) {
             AuthErrorBanner(
                 text = state.avatarErrorMessage.orEmpty(),
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = spacing.spacing20, vertical = spacing.spacing8),
             )
         }
 
@@ -151,7 +154,10 @@ fun ProfileSettingsScreen(
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )
-        Spacer(Modifier.height(8.dp))
+        // 최신 노드 `8672:32176` 기준(구 `4837:2412`는 폐기). 그쪽 렌더 잉크는 닉네임 242~261 · 이메일 275~287이다.
+        // 이메일 박스(17)와 body4Medium.lineHeight(22)가 달라 박스 대 박스로는 못 맞추므로 실기 실측으로 잡았다.
+        // 위에서 닉네임을 9dp 올렸기 때문에, 이메일을 제자리(275)에 두려면 같은 9dp를 여기서 돌려준다.
+        Spacer(Modifier.height(9.dp))
         Text(
             text = email,
             style = OnulDoTypography.body4Medium,
@@ -160,13 +166,15 @@ fun ProfileSettingsScreen(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(Modifier.height(32.dp))
+        // 실측 보정: 32이면 "기본 정보"·카드 첫 행이 Figma보다 12.6dp 올라온다.
+        Spacer(Modifier.height(39.dp))
 
         Text(
             text = "기본 정보",
             style = OnulDoTypography.caption2Medium,
             color = DarkBrown50,
-            modifier = Modifier.padding(start = 24.dp, bottom = 8.dp),
+            // Figma(8672:32176): "기본 정보" 박스 328~342 → 첫 행 352이므로 아래 간격은 10이다.
+            modifier = Modifier.padding(start = spacing.spacing24, bottom = 10.dp),
         )
 
         RowCard {
@@ -185,7 +193,7 @@ fun ProfileSettingsScreen(
                 valueEndPadding = 17.dp,
             )
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(spacing.spacing10))
         RowCard { MyPageMenuRow(title = "이메일", value = email, showChevron = false) }
     }
 
@@ -203,9 +211,10 @@ fun ProfileSettingsScreen(
 
 @Composable
 private fun RowCard(content: @Composable () -> Unit) {
+    val spacing = LocalSpacing.current
     Box(
         modifier = Modifier
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = spacing.spacing20)
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(White)

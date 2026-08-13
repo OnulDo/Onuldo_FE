@@ -22,7 +22,7 @@ import retrofit2.Response
 class PartyFeedRepositoryImplTest {
     @Test
     fun `피드 설정이 true이면 실제 응답을 도메인 모델로 변환한다`() = runBlocking {
-        val repository = PartyFeedRepositoryImpl(realApi = SuccessfulRealFeedApi)
+        val repository = PartyFeedRepositoryImpl(SuccessfulRealFeedApi)
 
         val feed = repository.getPartyFeed("101")
 

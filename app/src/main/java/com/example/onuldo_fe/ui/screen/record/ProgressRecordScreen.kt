@@ -20,7 +20,7 @@ fun ProgressRecordScreen(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
+        verticalArrangement = Arrangement.spacedBy(spacing.spacing10)
     ) {
         items(progressList, key = { it.participationId }) { record ->
             ProgressRecordCard(

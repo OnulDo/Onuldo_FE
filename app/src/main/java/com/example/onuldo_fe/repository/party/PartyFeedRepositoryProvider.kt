@@ -7,7 +7,5 @@ import com.example.onuldo_fe.data.network.NetworkModule
 object PartyFeedRepositoryProvider {
     fun provide(
         realApi: RealPartyApi = NetworkModule.create(RealPartyApi::class.java)
-    ): PartyFeedRepository = PartyFeedRepositoryImpl(
-        realApi = realApi
-    )
+    ): PartyFeedRepository = PartyFeedRepositoryImpl(realApi)
 }

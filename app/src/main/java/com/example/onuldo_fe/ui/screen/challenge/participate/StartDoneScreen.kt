@@ -113,7 +113,7 @@ fun StartDoneScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(spacing.spacing48))
+        Spacer(Modifier.height(48.dp))
 
         ChallengeInfoBox(
             height = 184.dp,

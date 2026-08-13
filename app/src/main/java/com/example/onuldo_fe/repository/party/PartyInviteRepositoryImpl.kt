@@ -16,10 +16,12 @@ class PartyInviteRepositoryImpl(
 ) : PartyInviteRepository {
     override suspend fun joinParty(inviteCode: String): PartyJoinResult = try {
         val request = PartyJoinRequestDto(inviteCode.trim().uppercase(Locale.ROOT))
-        val response = realApi.joinParty(request)
-        if (!response.isSuccessful) throw HttpException(response)
-        val body = response.body() ?: throw IOException("파티 참여 응답 본문이 비어 있습니다.")
-        val room = body.result.toModel()
+        val room = run {
+            val response = realApi.joinParty(request)
+            if (!response.isSuccessful) throw HttpException(response)
+            val body = response.body() ?: throw IOException("파티 참여 응답 본문이 비어 있습니다.")
+            body.result.toModel()
+        }
         // 참여 응답에 포함된 대기방 전체 정보를 추가 GET 없이 화면에 적용한다.
         PartyJoinResult.Success(room)
     } catch (error: HttpException) {

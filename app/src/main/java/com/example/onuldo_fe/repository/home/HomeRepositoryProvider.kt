@@ -11,7 +11,7 @@ object HomeRepositoryProvider {
         realApi: RealHomeApi = NetworkModule.create(RealHomeApi::class.java),
         realPartyApi: RealPartyApi = NetworkModule.create(RealPartyApi::class.java),
         // 기존 프로필 API를 재사용해 홈 상단 닉네임을 조회한다.
-        userApi: UserApi = NetworkModule.create(UserApi::class.java),
+        userApi: UserApi = NetworkModule.create(UserApi::class.java)
     ): HomeRepository = HomeRepositoryImpl(
         realApi = realApi,
         realPartyApi = realPartyApi,

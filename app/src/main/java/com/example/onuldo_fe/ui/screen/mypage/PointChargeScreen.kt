@@ -44,6 +44,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Pretendard
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.utils.formatPoint
 import com.example.onuldo_fe.viewmodel.mypage.PointChargeViewModel
 
@@ -61,6 +62,7 @@ fun PointChargeScreen(
     onBack: () -> Unit,
     viewModel: PointChargeViewModel = viewModel(),
 ) {
+    val spacing = LocalSpacing.current
     val state by viewModel.uiState.collectAsState()
     // 칩은 누를 때마다 금액을 더한다(Figma 5154:3439). 0에서 시작해 사용자가 쌓아 올린다.
     var amount by remember { mutableIntStateOf(0) }
@@ -81,22 +83,23 @@ fun PointChargeScreen(
                 .weight(1f)
                 .verticalScroll(rememberScrollState()),
         ) {
-            Spacer(Modifier.height(56.dp))
+            // Figma(5154:3439) 절대좌표 − 상태바 44 기준. 상단바 끝 56 → 제목 86
+            Spacer(Modifier.height(spacing.spacing30))
             Text(
                 text = "얼마 충전할까요?",
                 style = OnulDoTypography.headline3Bold,
                 color = BlackBrown,
-                modifier = Modifier.padding(horizontal = 20.dp),
+                modifier = Modifier.padding(horizontal = spacing.spacing20),
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(2.dp))
             Text(
                 text = "보유 ${formatPoint(state.balance)}",
                 style = OnulDoTypography.caption1Medium,
                 color = MySubText,
-                modifier = Modifier.padding(horizontal = 20.dp),
+                modifier = Modifier.padding(horizontal = spacing.spacing20),
             )
 
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(spacing.spacing14))
             AmountInputBox(
                 amount = amountText,
                 unit = "P",
@@ -109,8 +112,8 @@ fun PointChargeScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    .padding(horizontal = spacing.spacing20),
+                horizontalArrangement = Arrangement.spacedBy(spacing.spacing8),
             ) {
                 chargePresets.forEach { preset ->
                     AmountChip(
@@ -121,26 +124,26 @@ fun PointChargeScreen(
                 }
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(19.dp))
             Text(
                 text = "결제할 방법",
                 style = OnulDoTypography.body2Bold,
                 color = BlackBrown,
-                modifier = Modifier.padding(horizontal = 20.dp),
+                modifier = Modifier.padding(horizontal = spacing.spacing20),
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(15.dp))
             MyPageNoticeBox(
                 iconRes = R.drawable.mypage_coming_soon_icon,
                 text = "정식출시 이후 업데이트 예정이에요!",
                 // 충전은 350×250로 키운다(출금은 186). 내용은 세로 중앙 정렬.
                 modifier = Modifier
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = spacing.spacing20)
                     .height(250.dp),
             )
 
             state.errorMessage?.let { message ->
-                Spacer(Modifier.height(12.dp))
-                AuthErrorBanner(text = message, modifier = Modifier.padding(horizontal = 20.dp))
+                Spacer(Modifier.height(spacing.spacing12))
+                AuthErrorBanner(text = message, modifier = Modifier.padding(horizontal = spacing.spacing20))
             }
 
             // 안내 박스 아래로 90dp 띄운다.

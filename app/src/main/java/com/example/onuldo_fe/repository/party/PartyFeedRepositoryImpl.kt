@@ -15,6 +15,7 @@ class PartyFeedRepositoryImpl(
     private val realApi: RealPartyApi
 ) : PartyFeedRepository {
     override suspend fun getPartyFeed(partyId: String): PartyFeed {
+        // 피드 조회 API를 다른 파티 기능과 독립적으로 Real/Fake 전환한다.
         val response = realApi.getPartyFeed(partyId.toLong())
         if (!response.isSuccessful) throw HttpException(response)
         val body = response.body() ?: throw IOException("파티 피드 응답 본문이 비어 있습니다.")

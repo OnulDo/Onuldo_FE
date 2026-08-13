@@ -73,7 +73,7 @@ fun PartyLeaveConfirmDialog(
                         style = OnulDoTypography.body2Bold,
                         textAlign = TextAlign.Center
                     )
-                    Spacer(Modifier.height(if (isHost) spacing.spacing12 else spacing.spacing18))
+                    Spacer(Modifier.height(spacing.spacing12))
                     Text(
                         text = if (isHost) {
                             "파티를 나가게 되면 파티원 중\n1명이 방장을 이어받아요"
@@ -135,7 +135,7 @@ private fun PartyLeaveDialogButton(
     }
 }
 
-@Preview(name = "파티 이탈 - 파티장", showBackground = true, widthDp = 390, heightDp = 844)
+@Preview(name = "파티장 나가기", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 private fun PartyHostLeaveConfirmDialogPreview() {
     OnulDo_FETheme {
@@ -143,7 +143,7 @@ private fun PartyHostLeaveConfirmDialogPreview() {
     }
 }
 
-@Preview(name = "파티 이탈 - 파티원", showBackground = true, widthDp = 390, heightDp = 844)
+@Preview(name = "파티원 나가기", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 private fun PartyMemberLeaveConfirmDialogPreview() {
     OnulDo_FETheme {

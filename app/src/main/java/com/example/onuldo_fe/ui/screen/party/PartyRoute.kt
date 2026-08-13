@@ -32,7 +32,7 @@ import com.example.onuldo_fe.ui.screen.party.components.InviteCodeDialog
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryRoute
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
-import com.example.onuldo_fe.util.moveToAppSettings
+import com.example.onuldo_fe.utils.moveToAppSettings
 import com.example.onuldo_fe.viewmodel.party.PartyAction
 import com.example.onuldo_fe.viewmodel.party.PartyCardUi
 import com.example.onuldo_fe.viewmodel.party.PartyFeedViewModel

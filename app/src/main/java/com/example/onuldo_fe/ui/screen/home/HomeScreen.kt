@@ -27,10 +27,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.runBlocking
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.data.user.CurrentProfileImageStore
+import com.example.onuldo_fe.data.home.api.FakeHomeApi
+import com.example.onuldo_fe.data.home.dummy.FakeHomeScenario
+import com.example.onuldo_fe.repository.home.toModel
 import com.example.onuldo_fe.ui.component.OnulDoMediumButton
 import com.example.onuldo_fe.ui.screen.home.components.EmptyChallengeContent
 import com.example.onuldo_fe.ui.screen.home.components.HomeChallengeCard
@@ -40,8 +45,10 @@ import com.example.onuldo_fe.ui.screen.home.components.HomePartyCard
 import com.example.onuldo_fe.ui.screen.home.components.SettlementCompleteCard
 import com.example.onuldo_fe.ui.screen.home.components.TodayChallengeCard
 import com.example.onuldo_fe.viewmodel.home.HomeUiState
+import com.example.onuldo_fe.viewmodel.home.toUiState
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.SourCream
@@ -110,6 +117,7 @@ fun HomeScreen(
         }
     }
 }
+
 @Composable
 private fun HomeErrorContent(
     message: String,
@@ -142,6 +150,8 @@ private fun EmptyHomeContent(
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
+    // TODO: 디자인 시스템에 없는 34·56dp 여백 토큰 추가 후 교체
+
     Box(modifier = modifier) {
         HomeHeader(
             userName = userName,
@@ -174,6 +184,8 @@ private fun HomeContent(
     val spacing = LocalSpacing.current
     val isAllCompleted = uiState.isAllCompleted
     val scrollState = rememberScrollState()
+    // TODO: 디자인 시스템에 없는 17·34dp 여백 토큰 추가 후 교체
+
     LaunchedEffect(scrollToTopKey) {
         if (scrollToTopKey > 0) {
             // 파티 시작 후 홈으로 돌아오면 이전 스크롤 위치 대신 상단 표시
@@ -297,6 +309,8 @@ private fun ChallengeSection(
 ) {
     if (!visible) return
     val spacing = LocalSpacing.current
+    // TODO: 디자인 시스템에 없는 5·14dp 여백 토큰 추가 후 교체
+
     Spacer(modifier = Modifier.height(topSpacing))
     SectionTitle(text = title, modifier = Modifier.padding(horizontal = spacing.spacing20))
     Spacer(modifier = Modifier.height(14.dp))
@@ -323,4 +337,41 @@ private fun SectionTitle(text: String, modifier: Modifier = Modifier) {
             style = OnulDoTypography.body2Bold
         )
     }
+}
+
+@Preview(name = "Home With Content", showBackground = true, showSystemUi = true, widthDp = 390, heightDp = 938)
+@Composable
+private fun HomeScreenPreview() {
+    HomeScenarioPreview(FakeHomeScenario.Default)
+}
+
+@Preview(
+    name = "Home Party Integrated",
+    showBackground = true,
+    showSystemUi = true,
+    widthDp = 390,
+    heightDp = 1338
+)
+@Composable
+private fun HomeScreenPartyPreview() {
+    // Default 더미 데이터에 파티 챌린지와 정산 완료 배너가 포함되어 파티 통합 상태 확인
+    HomeScenarioPreview(FakeHomeScenario.Default)
+}
+
+@Preview(name = "Home Empty", showBackground = true, showSystemUi = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun HomeScreenEmptyPreview() {
+    HomeScenarioPreview(FakeHomeScenario.Empty)
+}
+
+@Preview(name = "Home All Completed", showBackground = true, showSystemUi = true, widthDp = 390, heightDp = 938)
+@Composable
+private fun HomeScreenAllCompletedPreview() {
+    HomeScenarioPreview(FakeHomeScenario.AllCompleted)
+}
+
+@Composable
+private fun HomeScenarioPreview(scenario: FakeHomeScenario) {
+    val uiState = runBlocking { FakeHomeApi(scenario).getHome().toModel().toUiState() }
+    OnulDo_FETheme { HomeScreen(uiState = uiState) }
 }
