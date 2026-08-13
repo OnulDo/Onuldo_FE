@@ -132,9 +132,7 @@ fun HomeChallengeCard(
                     enabled = challenge.canVerify,
                     width = 78.dp,
                     height = 26.dp,
-                    iconSize = 12.dp,
-                    fontSize = 10.sp,
-                    lineHeight = 12.sp
+                    iconSize = 12.dp
                 )
             } else if (challenge.status != ChallengeStatus.NeedCertification) {
                 Box(

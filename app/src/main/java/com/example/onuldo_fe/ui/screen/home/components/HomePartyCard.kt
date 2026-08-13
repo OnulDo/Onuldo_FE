@@ -150,11 +150,9 @@ private fun PartyAction(
         HomeVerifyButton(
             onClick = onVerifyClick,
             enabled = party.canVerify,
-            width = 96.dp,
-            height = 32.dp,
-            iconSize = 14.dp,
-            fontSize = 12.sp,
-            lineHeight = 22.sp
+            width = 78.dp,
+            height = 26.dp,
+            iconSize = 12.dp
         )
         return
     }
