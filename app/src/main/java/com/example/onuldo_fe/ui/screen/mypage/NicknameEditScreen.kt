@@ -31,6 +31,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Pretendard
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.utils.Validators
 import com.example.onuldo_fe.viewmodel.mypage.NicknameEditViewModel
 
@@ -48,6 +49,7 @@ fun NicknameEditScreen(
     currentNickname: String = "",
     viewModel: NicknameEditViewModel = viewModel(),
 ) {
+    val spacing = LocalSpacing.current
     val state by viewModel.uiState.collectAsState()
     var nickname by remember { mutableStateOf(currentNickname) }
     val isValid = Validators.isValidNickname(nickname)
@@ -65,22 +67,24 @@ fun NicknameEditScreen(
     ) {
         MyPageTopBar(title = "닉네임 변경", onBack = onBack)
 
-        Spacer(Modifier.height(28.dp))
+        // Figma(4837:2281) 절대좌표 − 상태바 44 기준. 제목 89 · 닉네임 라벨 176 · 입력 200
+        Spacer(Modifier.height(33.dp))
         Text(
             text = "새 닉네임을 입력해주세요",
             style = OnulDoTypography.title1Bold,
             color = BlackBrown,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = spacing.spacing20),
         )
-        Spacer(Modifier.height(8.dp))
+        // Figma는 제목 박스(lineHeight 40)와 부제를 겹쳐 배치했다. Compose는 줄 상자를 쌓으므로
+        // 간격 0이 최선이고, 그 아래 간격으로 다음 요소의 절대 위치를 맞춘다.
         Text(
             text = "다른 사람에게 보여지는 이름이에요",
             style = OnulDoTypography.body4Medium,
             color = DarkBrown70,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = spacing.spacing20),
         )
 
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(25.dp))
         OnuldoTextField(
             value = nickname,
             onValueChange = { newNickname ->
