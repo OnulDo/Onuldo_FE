@@ -1,6 +1,7 @@
 package com.example.onuldo_fe.ui.component
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -45,6 +46,7 @@ fun OnuldoBottomBar(
 
     Column {
         HorizontalDivider(thickness = 1.dp, color = DarkBrown20)
+        Spacer(modifier = Modifier.height(20.dp))
         NavigationBar(
             // Figma BottomNav는 상단 보더 포함 84. 기본값(80)을 쓰면 3dp 모자란다.
             modifier = Modifier.height(83.dp),
