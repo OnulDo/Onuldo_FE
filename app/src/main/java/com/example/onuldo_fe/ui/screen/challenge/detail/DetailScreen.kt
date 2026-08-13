@@ -46,7 +46,7 @@ import com.example.onuldo_fe.ui.theme.SourCream
 fun DetailScreen(
     challenge: Challenge = Challenge(id = 0L, title = "새벽 6시 기상", participantCount = 1234),
     category: String = "생활루틴",
-    // 상세 본문 블록. 실데이터는 DetailRoute에서 주입, 미전달 시(프리뷰/파티) 더미 사용.
+    // 상세 본문 블록. 실데이터는 DetailRoute에서 주입, 미전달 시(프리뷰/파티) 더미 사용
     content: List<ContentBlock> = dummyContentBlocks,
     verificationTitle: String = "이렇게 찍어주세요",
     verificationDescription: String = "침대와 개어진 이불 사진이 나오게 촬영하기",
@@ -72,7 +72,6 @@ fun DetailScreen(
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
     ) {
-        // 헤더 — 참여 화면과 같은 56dp 높이
         Box(
             modifier = Modifier
                 .fillMaxWidth()
