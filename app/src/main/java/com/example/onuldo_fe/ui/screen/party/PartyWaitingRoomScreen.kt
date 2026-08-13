@@ -163,6 +163,7 @@ fun PartyWaitingRoomScreen(
 
     if (showLeaveConfirmDialog) {
         PartyLeaveConfirmDialog(
+            isHost = isLeader,
             // 취소 또는 모달 바깥 영역 선택 시 대기방을 유지
             onDismiss = { showLeaveConfirmDialog = false },
             onConfirm = {
