@@ -47,6 +47,7 @@ import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.viewmodel.ProfileSetupViewModel
 
 
@@ -58,6 +59,7 @@ fun ProfileSetupScreen(
     onExistingAccount: (String) -> Unit = {},
     viewModel: ProfileSetupViewModel = viewModel(),
 ) {
+    val spacing = LocalSpacing.current
     val state by viewModel.uiState.collectAsState()
     var showCharacterPicker by remember { mutableStateOf(false) }
 
@@ -70,30 +72,33 @@ fun ProfileSetupScreen(
     ) {
         OnboardingBackHeader(onBack = onBack)
 
-        Spacer(Modifier.height(24.dp))
+        // Figma(5154:4417) 절대좌표 − 상태바 44 기준.
+        // 제목 92 · 부제 134 · "프로필" 184 · 아바타 216 · 닉네임 라벨 388 · 계속 버튼 702
+        Spacer(Modifier.height(spacing.spacing36))
         Text(
             text = "프로필을 설정해주세요",
             style = OnulDoTypography.headline1ExtraBold,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = spacing.spacing20),
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(2.dp))
         Text(
             text = "프로필과 닉네임을 정해주세요",
             style = OnulDoTypography.body4Regular,
             color = DarkBrown70,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = spacing.spacing20),
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(spacing.spacing28))
         Text(
             text = "프로필",
-            style = OnulDoTypography.caption2Bold,
+            // Figma는 이 라벨만 Medium 14다(입력칸 라벨은 Caption2/Bold 12).
+            style = OnulDoTypography.body4Medium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = spacing.spacing20),
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(spacing.spacing10))
         val selectedChar = state.selectedCharacterIndex
         // 캐릭터 아바타 — 탭하면 선택 시트를 연다.
         Box(
@@ -123,7 +128,8 @@ fun ProfileSetupScreen(
                         painter = painterResource(R.drawable.ic_plus),
                         contentDescription = "프로필 사진 선택",
                         colorFilter = ColorFilter.tint(Persimmon),
-                        modifier = Modifier.size(40.dp),
+                        // Figma(5154:4436) 28×28
+                        modifier = Modifier.size(28.dp),
                     )
                 }
             } else {
@@ -162,7 +168,8 @@ fun ProfileSetupScreen(
             }
         }
 
-        Spacer(Modifier.height(28.dp))
+        // 아바타 끝 336 → 닉네임 라벨 388
+        Spacer(Modifier.height(52.dp))
 
         OnuldoTextField(
             value = state.nickname,
@@ -185,9 +192,9 @@ fun ProfileSetupScreen(
                 } else {
                     message
                 },
-                modifier = Modifier.padding(horizontal = 20.dp),
+                modifier = Modifier.padding(horizontal = spacing.spacing20),
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(spacing.spacing12))
         }
 
         OnulDoButton(
@@ -195,7 +202,8 @@ fun ProfileSetupScreen(
             onClick = { viewModel.submit(onDone, onEmailChangeRequired, onExistingAccount) },
             enabled = state.isContinueEnabled,
         )
-        Spacer(Modifier.height(24.dp))
+        // 버튼 끝 758 → 화면 끝 800
+        Spacer(Modifier.height(42.dp))
     }
 
     if (showCharacterPicker) {

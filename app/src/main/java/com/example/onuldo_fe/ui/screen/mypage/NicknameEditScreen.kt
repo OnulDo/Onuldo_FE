@@ -31,12 +31,14 @@ import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Pretendard
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.utils.Validators
 import com.example.onuldo_fe.viewmodel.mypage.NicknameEditViewModel
 
 /**
- * 닉네임 변경 — Figma node `4019:4540`.
+ * 닉네임 변경 — Figma node `8672:32057`.
  * 설계서 규칙(2~8자 한글/영문/숫자, 특수문자 불가). 유효하고 기존과 다르면 '변경하기' 활성.
+ * (구 노드 `4837:2281`의 "2~10자" 안내는 낡은 값이고, 최신 노드는 2~8자로 코드와 일치한다.)
  *
  * [currentNickname]은 프로필 설정 화면이 이미 조회한 값을 라우트 인자로 넘겨받는다.
  * '변경하기'는 `PATCH /api/users/me/profile`로 nickname을 저장하고, **성공 응답에서만** [onBack]을 호출한다.
@@ -48,6 +50,7 @@ fun NicknameEditScreen(
     currentNickname: String = "",
     viewModel: NicknameEditViewModel = viewModel(),
 ) {
+    val spacing = LocalSpacing.current
     val state by viewModel.uiState.collectAsState()
     var nickname by remember { mutableStateOf(currentNickname) }
     val isValid = Validators.isValidNickname(nickname)
@@ -65,22 +68,24 @@ fun NicknameEditScreen(
     ) {
         MyPageTopBar(title = "닉네임 변경", onBack = onBack)
 
-        Spacer(Modifier.height(28.dp))
+        // Figma(4837:2281) 절대좌표 − 상태바 44 기준. 제목 89 · 닉네임 라벨 176 · 입력 200
+        Spacer(Modifier.height(33.dp))
         Text(
             text = "새 닉네임을 입력해주세요",
             style = OnulDoTypography.title1Bold,
             color = BlackBrown,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = spacing.spacing20),
         )
-        Spacer(Modifier.height(8.dp))
+        // Figma hero는 제목·부제를 간격 없이 세로로 쌓는다(h 50, gap 0).
         Text(
             text = "다른 사람에게 보여지는 이름이에요",
-            style = OnulDoTypography.body4Medium,
+            // 최신 노드(8672:32065)에 `Body3/Medium` 스타일이 새로 바인딩됐다(구 노드는 14 Medium).
+            style = OnulDoTypography.body3Medium,
             color = DarkBrown70,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = spacing.spacing20),
         )
 
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(25.dp))
         OnuldoTextField(
             value = nickname,
             onValueChange = { newNickname ->

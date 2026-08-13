@@ -13,8 +13,8 @@ data class AuthTokens(
  * refresh로 자동 재발급한다. 화면·Repository는 토큰을 직접 다루지 않고 이 저장소만 갱신하면 된다.
  *
  * 현재 구현([InMemoryTokenStore])은 메모리 보관이라 앱을 재시작하면 사라진다.
- * TODO: 자동 로그인 도입 시 DataStore 기반 구현으로 교체한다. 이 인터페이스만 유지하면
- *       호출부는 수정할 필요가 없다.
+ * 자동 로그인을 도입하면 DataStore 기반 구현으로 교체하면 되고, 이 인터페이스만 유지하면
+ * 호출부는 수정할 필요가 없다.
  */
 interface TokenStore {
     val accessToken: String?
