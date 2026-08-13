@@ -1,7 +1,6 @@
 package com.example.onuldo_fe.repository.party
 
 import com.example.onuldo_fe.data.common.ApiResponse
-import com.example.onuldo_fe.data.party.api.FakePartyApi
 import com.example.onuldo_fe.data.party.api.RealPartyApi
 import com.example.onuldo_fe.data.party.dto.RealPartySummaryDto
 import com.example.onuldo_fe.data.party.dto.RealPartyMemberDto
@@ -30,26 +29,10 @@ import org.junit.Test
 import retrofit2.Response
 
 class PartyRepositoryImplTest {
-    @Test
-    fun `설정이 false이면 기존 Fake 목록을 사용한다`() = runBlocking {
-        val repository = PartyRepositoryImpl(
-            fakeApi = FakePartyApi(),
-            realApi = ThrowingRealPartyApi,
-            useRealPartyListApi = false
-        )
-
-        val parties = repository.getParties()
-
-        assertEquals("새벽 러너 파티", parties.first().partyName)
-    }
 
     @Test
     fun `설정이 true이면 실제 API 응답 형식을 도메인 모델로 변환한다`() = runBlocking {
-        val repository = PartyRepositoryImpl(
-            fakeApi = FakePartyApi(),
-            realApi = SuccessfulRealPartyApi,
-            useRealPartyListApi = true
-        )
+        val repository = PartyRepositoryImpl(SuccessfulRealPartyApi)
 
         val party = repository.getParties().single()
 
@@ -70,12 +53,7 @@ class PartyRepositoryImplTest {
 
     @Test
     fun `대기방 설정이 true이면 서버 권한과 시작 가능 여부를 전달한다`() = runBlocking {
-        val repository = PartyRepositoryImpl(
-            fakeApi = FakePartyApi(),
-            realApi = SuccessfulWaitingRoomApi,
-            useRealPartyListApi = false,
-            useRealPartyWaitingRoomApi = true
-        )
+        val repository = PartyRepositoryImpl(SuccessfulWaitingRoomApi)
 
         val room = repository.getWaitingRoom("101")
 
@@ -88,12 +66,7 @@ class PartyRepositoryImplTest {
 
     @Test
     fun `생성 설정이 true이면 POST 요청값을 변환하고 생성 결과를 전달한다`() = runBlocking {
-        val repository = PartyRepositoryImpl(
-            fakeApi = FakePartyApi(),
-            realApi = SuccessfulCreateRealApi,
-            useRealPartyListApi = false,
-            useRealPartyCreateApi = true
-        )
+        val repository = PartyRepositoryImpl(SuccessfulCreateRealApi)
 
         val created = repository.createParty(
             CreatePartyCommand("갓생팟", "12", "새벽 6시 기상", "4주", 30_000, 4)
@@ -105,12 +78,7 @@ class PartyRepositoryImplTest {
 
     @Test
     fun `준비 설정이 true이면 POST 성공 응답의 최신 대기방을 전달한다`() = runBlocking {
-        val repository = PartyRepositoryImpl(
-            fakeApi = FakePartyApi(),
-            realApi = SuccessfulReadyRealApi,
-            useRealPartyListApi = false,
-            useRealPartyReadyApi = true
-        )
+        val repository = PartyRepositoryImpl(SuccessfulReadyRealApi)
 
         val room = repository.readyParty("101", ready = true)
 
@@ -121,12 +89,7 @@ class PartyRepositoryImplTest {
 
     @Test
     fun `시작 설정이 true이면 실제 POST 성공 응답을 완료 처리한다`() = runBlocking {
-        val repository = PartyRepositoryImpl(
-            fakeApi = FakePartyApi(),
-            realApi = SuccessfulReadyRealApi,
-            useRealPartyListApi = false,
-            useRealPartyStartApi = true
-        )
+        val repository = PartyRepositoryImpl(SuccessfulReadyRealApi)
 
         repository.startParty("101")
     }
@@ -135,12 +98,7 @@ class PartyRepositoryImplTest {
     fun `이탈 설정이 true이면 실제 POST 성공 응답을 완료 처리한다`() = runBlocking {
         // 다른 테스트가 먼저 실행돼 남아있을 수 있는 호출 기록을 초기화한다.
         SuccessfulReadyRealApi.leaveCalledWithPartyId = null
-        val repository = PartyRepositoryImpl(
-            fakeApi = FakePartyApi(),
-            realApi = SuccessfulReadyRealApi,
-            useRealPartyListApi = false,
-            useRealPartyLeaveApi = true
-        )
+        val repository = PartyRepositoryImpl(SuccessfulReadyRealApi)
 
         repository.leaveParty("101")
 
@@ -149,12 +107,7 @@ class PartyRepositoryImplTest {
 
     @Test
     fun `정산 설정이 true이면 실제 응답의 금액과 파티원 상태를 변환한다`() = runBlocking {
-        val repository = PartyRepositoryImpl(
-            fakeApi = FakePartyApi(),
-            realApi = SuccessfulReadyRealApi,
-            useRealPartyListApi = false,
-            useRealPartySettlementApi = true
-        )
+        val repository = PartyRepositoryImpl(SuccessfulReadyRealApi)
 
         val result = repository.getSettlementResult(101)
 

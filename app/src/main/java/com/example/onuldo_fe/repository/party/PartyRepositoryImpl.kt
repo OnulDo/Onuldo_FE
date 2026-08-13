@@ -1,6 +1,5 @@
 package com.example.onuldo_fe.repository.party
 
-import com.example.onuldo_fe.data.party.api.PartyApi
 import com.example.onuldo_fe.data.party.api.RealPartyApi
 import com.example.onuldo_fe.data.party.dto.CreatePartyRequestDto
 import com.example.onuldo_fe.data.party.dto.PartyMemberDto
@@ -33,36 +32,24 @@ import java.time.temporal.ChronoUnit
 
 // 파티 목록·생성·대기방·이탈·시작·정산 API와 도메인 변환 담당
 class PartyRepositoryImpl(
-    private val fakeApi: PartyApi,
-    private val realApi: RealPartyApi,
-    private val useRealPartyListApi: Boolean,
-    private val useRealPartyWaitingRoomApi: Boolean = false,
-    private val useRealPartyCreateApi: Boolean = false,
-    private val useRealPartyReadyApi: Boolean = false,
-    private val useRealPartyStartApi: Boolean = false,
-    private val useRealPartySettlementApi: Boolean = false,
-    private val useRealPartyLeaveApi: Boolean = false
+    private val realApi: RealPartyApi
 ) : PartyRepository {
     // 서버의 진행 중 파티 응답 목록을 도메인 요약 모델 목록으로 변환
-    override suspend fun getParties(): List<PartySummary> = if (useRealPartyListApi) {
+    override suspend fun getParties(): List<PartySummary> {
         // 현재 화면은 첫 페이지 10개를 표시하며, 이후 무한 스크롤 적용 시 nextCursor를 사용한다.
         val response = realApi.getParties(cursor = null, size = 10)
         if (!response.isSuccessful) throw HttpException(response)
         val body = response.body() ?: throw IOException("파티 목록 응답 본문이 비어 있습니다.")
-        body.result.map(RealPartySummaryDto::toModel)
-    } else {
-        fakeApi.getParties().map(PartySummaryDto::toModel)
+        return body.result.map(RealPartySummaryDto::toModel)
     }
 
     override suspend fun createParty(command: CreatePartyCommand): CreatedParty {
         // Fake와 Real이 동일한 JSON Body를 사용하도록 요청 변환은 한 번만 수행한다.
         val request = command.toCreateRequestDto()
-        val result = if (useRealPartyCreateApi) {
+        val result = run {
             val response = realApi.createParty(request)
             if (!response.isSuccessful) throw HttpException(response)
             response.body()?.result ?: throw IOException("파티 생성 응답 본문이 비어 있습니다.")
-        } else {
-            fakeApi.createParty(request)
         }
 
         // 이후 화면은 생성된 ID로 대기방을 다시 조회하므로 필요한 식별값만 전달한다.
@@ -71,10 +58,6 @@ class PartyRepositoryImpl(
 
     override suspend fun getWaitingRoom(partyId: String): PartyWaitingRoom {
         // 대기방 조회만 독립적으로 Real/Fake를 바꿔 다른 파티 기능에 영향을 주지 않는다.
-        if (!useRealPartyWaitingRoomApi) {
-            return fakeApi.getWaitingRoom(partyId.toLong()).toModel()
-        }
-
         val response = realApi.getWaitingRoom(partyId.toLong())
         if (!response.isSuccessful) throw HttpException(response)
         val body = response.body() ?: throw IOException("파티 대기방 응답 본문이 비어 있습니다.")
@@ -83,8 +66,6 @@ class PartyRepositoryImpl(
 
     override suspend fun readyParty(partyId: String, ready: Boolean): PartyWaitingRoom {
         // 준비 완료 API를 다른 파티 기능과 독립적으로 Real/Fake 전환한다.
-        if (!useRealPartyReadyApi) return fakeApi.readyParty(partyId.toLong(), ready).toModel()
-
         val response = realApi.readyParty(
             partyId = partyId.toLong(),
             request = PartyReadinessRequestDto(ready = ready)
@@ -95,11 +76,6 @@ class PartyRepositoryImpl(
     }
 
     override suspend fun leaveParty(partyId: String) {
-        if (!useRealPartyLeaveApi) {
-            fakeApi.leaveParty(partyId.toLong())
-            return
-        }
-
         // 실제 이탈 성공 응답을 확인한 후에만 ViewModel이 대기방을 닫도록 한다.
         val response = realApi.leaveParty(partyId.toLong())
         if (!response.isSuccessful) throw HttpException(response)
@@ -107,11 +83,6 @@ class PartyRepositoryImpl(
     }
 
     override suspend fun startParty(partyId: String) {
-        if (!useRealPartyStartApi) {
-            fakeApi.startParty(partyId.toLong())
-            return
-        }
-
         // 성공 응답 본문까지 확인한 뒤에만 ViewModel이 홈 화면으로 이동하도록 완료 처리한다.
         val response = realApi.startParty(partyId.toLong())
         if (!response.isSuccessful) throw HttpException(response)
@@ -120,8 +91,6 @@ class PartyRepositoryImpl(
     }
 
     override suspend fun getSettlementResult(partyId: Long): PartySettlementResult {
-        if (!useRealPartySettlementApi) return fakeApi.getSettlementResult(partyId).toModel()
-
         // 결과 조회 성공 시 서버가 홈 정산 배너도 확인 처리한다.
         val response = realApi.getSettlementResult(partyId)
         if (!response.isSuccessful) throw HttpException(response)

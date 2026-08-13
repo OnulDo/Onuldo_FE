@@ -1,7 +1,6 @@
 package com.example.onuldo_fe.repository.party
 
 import com.example.onuldo_fe.data.common.ApiResponse
-import com.example.onuldo_fe.data.party.api.PartyFeedApi
 import com.example.onuldo_fe.data.party.api.RealPartyApi
 import com.example.onuldo_fe.data.party.dto.PartyFeedDto
 import com.example.onuldo_fe.data.party.dto.PartyFeedItemDto
@@ -23,11 +22,7 @@ import retrofit2.Response
 class PartyFeedRepositoryImplTest {
     @Test
     fun `피드 설정이 true이면 실제 응답을 도메인 모델로 변환한다`() = runBlocking {
-        val repository = PartyFeedRepositoryImpl(
-            fakeApi = ThrowingFakeFeedApi,
-            realApi = SuccessfulRealFeedApi,
-            useRealPartyFeedApi = true
-        )
+        val repository = PartyFeedRepositoryImpl(SuccessfulRealFeedApi)
 
         val feed = repository.getPartyFeed("101")
 
@@ -36,11 +31,6 @@ class PartyFeedRepositoryImplTest {
         assertEquals(0.72, feed.progress.progressRate, 0.0)
         assertEquals(3, feed.progress.completedMemberCount)
         assertEquals(true, feed.items.single().isVerifiedToday)
-    }
-
-    private object ThrowingFakeFeedApi : PartyFeedApi {
-        override suspend fun getPartyFeed(partyId: Long): PartyFeedDto =
-            error("Real 피드 모드에서 Fake API가 호출되면 안 됩니다.")
     }
 
     private object SuccessfulRealFeedApi : RealPartyApi {

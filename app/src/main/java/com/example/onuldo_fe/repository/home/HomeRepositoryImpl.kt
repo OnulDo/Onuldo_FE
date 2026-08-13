@@ -1,7 +1,6 @@
 package com.example.onuldo_fe.repository.home
 
 import android.util.Log
-import com.example.onuldo_fe.data.home.api.HomeApi
 import com.example.onuldo_fe.data.home.api.RealHomeApi
 import com.example.onuldo_fe.data.home.dto.HomeChallengeDto
 import com.example.onuldo_fe.data.home.dto.HomeCompletedChallengeDto
@@ -33,22 +32,16 @@ import kotlinx.coroutines.coroutineScope
 import retrofit2.HttpException
 
 class HomeRepositoryImpl(
-    private val fakeApi: HomeApi,
-    private val realApi: RealHomeApi? = null,
-    private val realPartyApi: RealPartyApi? = null,
+    private val realApi: RealHomeApi,
+    private val realPartyApi: RealPartyApi,
     private val userApi: UserApi? = null,
-    private val useRealDailyApi: Boolean = false,
     private val nowProvider: () -> LocalDateTime = LocalDateTime::now
 ) : HomeRepository {
     override suspend fun getHome(): HomeData {
-        // 설정값이 false면 기존 Fake 홈을 사용한다.
-        if (!useRealDailyApi) return fakeApi.getHome().toModel()
-
         return coroutineScope {
             // 서로 독립적인 오늘 챌린지와 프로필을 동시에 조회한다.
             val dailyDeferred = async {
-                requireNotNull(realApi) { "Real 홈 API가 설정되지 않았습니다." }
-                    .getDailyChallenges()
+                realApi.getDailyChallenges()
             }
             val profileDeferred = async { getProfileOrEmpty() }
             val completedDeferred = async { getCompletedOrEmpty() }
@@ -77,8 +70,7 @@ class HomeRepositoryImpl(
 
     /** 홈 전용 API에서 진행 중 파티 카드와 미확인 정산 배너를 조회한다. */
     private suspend fun getPartyHome(): PartyHomeResultDto {
-        val api = requireNotNull(realPartyApi) { "Real 파티 API가 설정되지 않았습니다." }
-        val response = api.getHomeParties()
+        val response = realPartyApi.getHomeParties()
         if (!response.isSuccessful) throw HttpException(response)
         val body = response.body() ?: throw IOException("홈 파티 응답 본문이 비어 있습니다.")
         return body.result
@@ -103,8 +95,8 @@ class HomeRepositoryImpl(
 
     /** 완료 목록 실패 시 진행 중인 홈 카드는 그대로 표시한다. */
     private suspend fun getCompletedOrEmpty(): DailyCompletedResultDto = try {
-        val response = realApi?.getDailyCompleted()
-        if (response?.isSuccessful == true) {
+        val response = realApi.getDailyCompleted()
+        if (response.isSuccessful) {
             response.body()?.result ?: DailyCompletedResultDto()
         } else {
             DailyCompletedResultDto()

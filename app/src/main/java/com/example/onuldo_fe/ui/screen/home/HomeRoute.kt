@@ -25,7 +25,7 @@ import com.example.onuldo_fe.model.home.notification.NotificationLandingBus
 import com.example.onuldo_fe.model.home.notification.toLanding
 import com.example.onuldo_fe.ui.component.PermissionDialogType
 import com.example.onuldo_fe.ui.component.PermissionSettingDialog
-import com.example.onuldo_fe.util.moveToAppSettings
+import com.example.onuldo_fe.utils.moveToAppSettings
 import com.example.onuldo_fe.viewmodel.home.HomeViewModel
 
 @Composable
