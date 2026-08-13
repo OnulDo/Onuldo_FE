@@ -55,7 +55,6 @@ fun HomeHeader(
     onNotificationClick: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
-    // TODO: 8sp SemiBold·18sp ExtraBold 글자 스타일 토큰 추가 후 교체
     val notificationInteractionSource = remember { MutableInteractionSource() }
     val isNotificationPressed by notificationInteractionSource.collectIsPressedAsState()
     var isClickFeedbackActive by remember { mutableStateOf(false) }
@@ -68,7 +67,7 @@ fun HomeHeader(
                 .background(Persimmon20, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            // 프리셋 캐릭터는 Figma 규격(28x33 Fit)을 쓰고, 커스텀 업로드 사진은 원형을 꽉 채워 크롭한다.
+            // 기본 캐릭터는 지정 크기로 표시하고 프로필 이미지 URL은 원형 영역을 채운다.
             PartyNetworkImage(
                 imageUrl = profileImageUrl,
                 fallbackImageRes = R.drawable.home_run_light_icon,
@@ -82,7 +81,6 @@ fun HomeHeader(
 
         Spacer(modifier = Modifier.width(spacing.spacing10))
         Column(modifier = Modifier.weight(1f)) {
-            // Caption4/Bold
             Text(
                 text = "오늘두 함께 도전!",
                 color = BlackBrown70,

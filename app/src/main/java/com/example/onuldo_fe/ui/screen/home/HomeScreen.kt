@@ -142,8 +142,6 @@ private fun EmptyHomeContent(
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
-    // TODO: 디자인 시스템에 없는 34·56dp 여백 토큰 추가 후 교체
-
     Box(modifier = modifier) {
         HomeHeader(
             userName = userName,
@@ -176,8 +174,6 @@ private fun HomeContent(
     val spacing = LocalSpacing.current
     val isAllCompleted = uiState.isAllCompleted
     val scrollState = rememberScrollState()
-    // TODO: 디자인 시스템에 없는 17·34dp 여백 토큰 추가 후 교체
-
     LaunchedEffect(scrollToTopKey) {
         if (scrollToTopKey > 0) {
             // 파티 시작 후 홈으로 돌아오면 이전 스크롤 위치 대신 상단 표시
@@ -301,8 +297,6 @@ private fun ChallengeSection(
 ) {
     if (!visible) return
     val spacing = LocalSpacing.current
-    // TODO: 디자인 시스템에 없는 5·14dp 여백 토큰 추가 후 교체
-
     Spacer(modifier = Modifier.height(topSpacing))
     SectionTitle(text = title, modifier = Modifier.padding(horizontal = spacing.spacing20))
     Spacer(modifier = Modifier.height(14.dp))

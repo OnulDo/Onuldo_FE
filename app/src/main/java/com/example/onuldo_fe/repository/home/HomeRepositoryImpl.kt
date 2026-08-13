@@ -123,22 +123,16 @@ internal fun List<RealHomeDailyChallengeDto>.toHomeData(
     // Daily API에서 내려온 개인 챌린지 중 아직 진행 중인 항목만 홈 카드로 변환한다.
     val personalChallenges = filter { it.shouldShowOnHome(now.toLocalDate()) }
         .map { it.toPersonalModel(now) }
-    // 카드 표시 상태와 파티원 인증 현황, 인증하기에 필요한 challengeId까지 모두
-    // /parties/home 응답 하나로 구성한다. (예전에는 challengeId가 이 응답에 없어서
-    // /daily에서 같은 partyId를 찾아 끼워 맞추는 우회 로직이 있었는데, 그 매칭이
-    // 실패하면 "인증하기"가 조용히 무반응이 되는 문제가 있어 제거했다. 백엔드가
-    // challengeId를 이 응답에 내려주기 전까지는 인증하기가 동작하지 않는다.)
+    // 파티 카드와 인증 상태는 파티 홈 응답을 기준으로 구성한다.
     val partyChallenges = partyHome.parties.map { it.toHomeModel(now = now) }
-    // 히어로의 분모/분자는 /daily 원본 리스트 크기에 기대지 않는다.
-    // /daily에 파티의 오늘 참여 기록이 아직 반영되지 않아도(생성/시작 직후 등)
-    // 개인은 /daily, 파티는 /parties/home을 각각의 출처로 삼아 항상 정확히 집계한다.
+    // 개인과 파티의 응답을 각각 집계해 히어로 진행률을 계산한다.
     val personalCompletedCount = personalChallenges.count { it.status == ChallengeStatus.Success }
     val partyCompletedCount = partyHome.parties.count { it.status == "SUCCESS" }
     val totalCount = personalChallenges.size + partyChallenges.size
     val completedCount = personalCompletedCount + partyCompletedCount
 
     return HomeData(
-        // /daily 응답에는 닉네임이 없으므로 다른 사용자 API가 연결되기 전까지 비워 둔다.
+        // 닉네임은 상위 조회에서 프로필 응답으로 채운다.
         userName = "",
         // 챌린지·파티 중 하나라도 있으면 히어로를 노출한다.
         todayChallenge = totalCount.takeIf { it > 0 }?.let {

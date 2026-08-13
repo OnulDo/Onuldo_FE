@@ -44,8 +44,6 @@ fun TodayChallengeCard(
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
-    // TODO: 완료 수 조합 글자 스타일과 42dp 여백 토큰 추가 후 교체
-
     Column(
         modifier = modifier
             .background(
@@ -80,11 +78,9 @@ fun TodayChallengeCard(
             )
             Text(
                 text = buildAnnotatedString {
-                    // Caption2/Bold
                     withStyle(OnulDoTypography.caption2Bold.toSpanStyle().copy(color = Persimmon)) {
                         append(todayChallenge.completedCount.toString())
                     }
-                    // Caption2/Medium
                     withStyle(OnulDoTypography.caption2Medium.toSpanStyle().copy(color = BlackBrown)) {
                         append("/${todayChallenge.totalCount} 완료")
                     }

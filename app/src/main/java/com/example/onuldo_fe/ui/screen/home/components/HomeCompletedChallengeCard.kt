@@ -35,15 +35,12 @@ fun HomeCompletedChallengeCard(
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
-    // TODO: 10sp Regular·11sp Bold·12sp Medium 글자 스타일과 15·17·27dp 여백 토큰 추가 후 교체
-
     Box(
         modifier = modifier
             .height(56.dp)
             .background(White, RoundedCornerShape(14.dp))
             .border(BorderStroke(1.dp, DarkBrown40), RoundedCornerShape(14.dp))
     ) {
-        // Caption3/Regular
         Text(
             text = completedChallenge.time,
             color = DarkBrown50,
@@ -75,7 +72,6 @@ private fun BoxScope.CompletedChallengeResult(completedChallenge: HomeCompletedC
                 .background(Green2, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
-            // Caption3/Bold
             Text(
                 text = stringResource(
                     R.string.home_completed_party_result,
@@ -89,7 +85,6 @@ private fun BoxScope.CompletedChallengeResult(completedChallenge: HomeCompletedC
 
         is HomeCompletedChallenge.Personal -> {
             if (completedChallenge.streakDays <= 0) return
-            // Caption2/Medium
             Text(
                 text = stringResource(
                     R.string.home_completed_personal_streak,

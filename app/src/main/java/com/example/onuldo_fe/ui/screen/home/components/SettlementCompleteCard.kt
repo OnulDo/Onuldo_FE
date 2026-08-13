@@ -37,7 +37,6 @@ fun SettlementCompleteCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // TODO: 12sp Medium 글자 스타일 토큰 추가 후 교체
     val shape = RoundedCornerShape(14.dp)
 
     Box(
@@ -57,7 +56,6 @@ fun SettlementCompleteCard(
                 .offset(x = 17.dp, y = 20.dp)
                 .size(width = 22.dp, height = 21.17.dp)
         )
-        // Body4/Bold
         Text(
             text = stringResource(R.string.home_settlement_complete_title),
             color = BlackBrown,
@@ -67,7 +65,6 @@ fun SettlementCompleteCard(
                 .width(112.dp)
         )
         // API에서 긴 챌린지명이 들어오면 최대 69dp 안에서 한 줄 말줄임 처리
-        // Caption2/Medium
         Text(
             text = partyName,
             color = DarkBrown80,
