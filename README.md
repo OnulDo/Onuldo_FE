@@ -1,3 +1,5 @@
+# 최종 리드미
+
 ## **오늘두, 미루던 습관을 오늘 해내게 만드는, 도전금 기반 AI 인증 챌린지**
 
 ## 👥 팀원 소개
@@ -7,7 +9,7 @@
 | 하연탄 | Front-End | 카메라, 인증, 챌린지 참여 |
 | 시온 | Front-End | 챌린지페이지, 알림 |
 | 조나단 | Front-End | 로그인, 회원가입, 마이페이지 |
-| 구민 | Front-End | 홈, 파티|
+| 구민 | Front-End | 홈, 파티 |
 
 ## 🛠 기술 스택
 
@@ -21,22 +23,66 @@
 ## 📂 프로젝트 구조
 
 ```
-app
+## 📂 프로젝트 구조
+
+```text
+app/src/main/java/com/example/onuldo_fe
+├── data               # API, DTO, 네트워크 및 로컬 데이터 관리
+│   ├── auth
+│   ├── challenge
+│   ├── common
+│   ├── home
+│   ├── network
+│   ├── notification
+│   ├── party
+│   ├── record
+│   ├── social
+│   ├── term
+│   ├── user
+│   └── verification
+├── model              # 도메인 데이터 모델
+├── navigation         # 화면 이동 및 라우트 관리
+├── repository         # 데이터 접근 및 처리
+├── service            # Firebase 등 백그라운드 서비스
 ├── ui                 # 화면 및 UI 컴포넌트
-│   ├── screen
-│   ├── component
-│   └── theme
-├── viewmodel          # UI 상태 관리
-├── repository         # 데이터 처리
-├── model              # 데이터 모델
-├── navigation         # 화면 이동 관리
-├── camera             # CameraX 관련 기능
-└── utils              # 공통 유틸리티
+│   ├── component      # 공통 UI 컴포넌트
+│   ├── screen         # 기능별 화면
+│   │   └── camera     # CameraX 촬영 및 미리보기 화면
+│   └── theme          # 색상, 글꼴 및 디자인 테마
+├── util               # 권한 설정 관련 유틸리티
+├── utils              # 검증, 포맷팅 등 공통 유틸리티
+└── viewmodel          # UI 상태 및 사용자 이벤트 관리
 ```
 
 ## 빌드 및 실행 방법
 
-에뮬레이터 또는 Android 기기를 연결한 후 **Run** 버튼을 눌러 실행합니다.
+### 1. 프로젝트 실행 환경
+
+- Android Studio
+- JDK 11
+- Android SDK 36
+- Android 8.0(API 26) 이상의 에뮬레이터 또는 실제 기기
+
+### 2. 환경 설정 파일
+
+프로젝트 실행에 필요한 다음 설정 파일을 준비합니다.
+
+- `.env`
+- `local.properties`
+- `app/google-services.json`
+
+설정 파일과 필요한 값은 프로젝트 관리자에게 별도로 전달받아 지정된 위치에 추가합니다.
+
+> 환경 설정 파일에는 민감한 정보가 포함될 수 있으므로 Git에 커밋하지 않습니다.
+> 
+
+### 3. 실행
+
+1. Android Studio에서 프로젝트를 엽니다.
+2. 필요한 환경 설정 파일을 추가합니다.
+3. Gradle Sync를 실행합니다.
+4. 에뮬레이터 또는 Android 기기를 연결합니다.
+5. 상단의 **Run** 버튼을 눌러 앱을 실행합니다.
 
 ## 📖 Convention
 
@@ -66,11 +112,12 @@ app
 | 로그인 | LoginScreen | 조나단 |
 | 회원가입 | SignUpScreen | 조나단 |
 | 인증 메일 발송 | EmailScreen | 조나단 |
-| 홈  | HomeScreen | 구민 |
-| 챌린지  | ChallengeScreen | 시온 |
+| 홈 | HomeScreen | 구민 |
+| 챌린지 | ChallengeScreen | 시온 |
 | 인증 | ChallengeVerificationScreen | 하연탄 |
 | 마이페이지 | MyPageScreen | 조나단 |
 | 파티 | PartyScreen | 구민 |
+| 알림 | NotificationScreen | 시온 |
 
 ## 🔀 Pull Request
 
@@ -96,12 +143,45 @@ app
 ## 🔄 화면 플로우
 
 ```
-로그인
- ├── 회원가입
- │     └── 인증 메일 발송
- └── 홈
-       ├── 챌린지
-       │      └── 인증
-       ├── 마이페이지
-       └── 파티
+랜딩
+├── 로그인
+│   ├── 소셜 신규 가입
+│   │   └── 약관 동의
+│   └── 메인
+└── 회원가입
+    └── 약관 동의
+        └── 프로필 설정
+            └── 가입 완료
+                └── 메인
+
+메인
+├── 홈
+│   ├── 알림
+│   └── 챌린지 인증
+│       └── 카메라 촬영
+│           └── 사진 미리보기
+│               └── 인증 검토
+│                   ├── 인증 성공
+│                   ├── 인증 실패
+│                   └── 인증 대기
+├── 챌린지
+│   └── 챌린지 상세
+│       └── 챌린지 참여
+│           └── 참여 완료
+├── 파티
+│   ├── 파티 생성
+│   ├── 파티 대기방
+│   ├── 파티 피드
+│   └── 파티 정산
+├── 기록
+│   ├── 진행 중인 기록
+│   └── 완료된 기록
+└── 마이페이지
+    ├── 프로필 설정
+    │   └── 닉네임 변경
+    ├── 포인트 지갑
+    │   ├── 포인트 충전
+    │   └── 포인트 출금
+    ├── 알림 설정
+    └── 약관
 ```
