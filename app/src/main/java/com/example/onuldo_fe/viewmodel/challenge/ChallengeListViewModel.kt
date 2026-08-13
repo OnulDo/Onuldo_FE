@@ -126,8 +126,12 @@ class ChallengeListViewModel(
 
             logChallengeError("ch_ls", code, message)   // 서버 code/message - 개발자 확인용
 
-            // 에러 토스트를 보여준다 — 재시도는 별도 버튼 없이 기존 당겨서 새로고침 제스처로 한다.
-            val shouldShowError = mode != LoadMode.SILENT && uiState.challenges.isEmpty()
+    // FULL은 최초 조회나 조건 변경 후 조회이므로 실패 시 에러를 표시한다.
+    // 이전 목록이 남아 있어도 새 조건의 결과가 아니므로 조용히 유지하면 혼동을 줄 수 있다.
+    // REFRESH는 목록이 비어 있을 때만 표시하고, 목록이 있으면 기존 목록을 유지한다.
+    // SILENT는 백그라운드 갱신이므로 실패를 표시하지 않는다.
+            val shouldShowError = mode == LoadMode.FULL ||
+                (mode == LoadMode.REFRESH && uiState.challenges.isEmpty())
             uiState = uiState.copy(
                 isLoading = false,
                 isRefreshing = false,
