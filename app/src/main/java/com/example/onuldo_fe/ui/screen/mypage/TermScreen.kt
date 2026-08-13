@@ -24,11 +24,13 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onuldo_fe.data.auth.dto.TermType
 import com.example.onuldo_fe.model.term.TermContentBlock
+import com.example.onuldo_fe.model.term.Term
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.BlackBrown50
@@ -36,9 +38,11 @@ import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDoTypography
+import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.viewmodel.mypage.TermViewModel
+import com.example.onuldo_fe.viewmodel.mypage.TermUiState
 
 /**
  * 서버가 내려주는 본문 블록 종류(실측): `h2` 소제목 · `paragraph` 문단 · `linebreak` 빈 줄.
@@ -64,6 +68,21 @@ fun TermScreen(
     val spacing = LocalSpacing.current
 
     LaunchedEffect(termType) { viewModel.load(termType) }
+
+    TermScreenContent(
+        state = state,
+        fallbackTitle = fallbackTitle,
+        onBack = onBack,
+    )
+}
+
+@Composable
+private fun TermScreenContent(
+    state: TermUiState,
+    fallbackTitle: String,
+    onBack: () -> Unit,
+) {
+    val spacing = LocalSpacing.current
 
     Column(
         modifier = Modifier
@@ -119,6 +138,38 @@ fun TermScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun TermScreenPreview() {
+    OnulDo_FETheme {
+        TermScreenContent(
+            state = TermUiState(
+                isLoading = false,
+                term = Term(
+                    termType = TermType.SERVICE,
+                    title = "서비스 이용약관",
+                    effectiveDate = "2026.08.13",
+                    content = listOf(
+                        TermContentBlock("h2", "제1조 (목적)"),
+                        TermContentBlock(
+                            "paragraph",
+                            "본 약관은 오늘DO가 제공하는 서비스의 이용 조건과 절차를 규정합니다.",
+                        ),
+                        TermContentBlock("linebreak", ""),
+                        TermContentBlock("h2", "제2조 (서비스 이용)"),
+                        TermContentBlock(
+                            "paragraph",
+                            "사용자는 본 약관과 서비스 운영 정책을 준수하여야 합니다.",
+                        ),
+                    ),
+                ),
+            ),
+            fallbackTitle = "서비스 이용약관",
+            onBack = {},
+        )
     }
 }
 

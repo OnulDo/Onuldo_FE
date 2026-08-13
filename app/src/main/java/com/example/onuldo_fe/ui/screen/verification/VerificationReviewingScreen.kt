@@ -29,6 +29,7 @@ import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.screen.verification.VerificationStepCard.component.VerificationStepCard
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import kotlinx.coroutines.delay
@@ -37,6 +38,8 @@ import kotlinx.coroutines.delay
 fun VerificationReviewingScreen(
     isResultReady: Boolean = false
 ) {
+    val spacing = LocalSpacing.current
+
     val steps = listOf(
         "사진 메타데이터 검증",
         "AI 이미지 전송",
@@ -77,17 +80,19 @@ fun VerificationReviewingScreen(
                     textAlign = TextAlign.Center
                 )
             }
-
+            Spacer(Modifier.height(56.dp))
             Image(
                 painter = painterResource(id = R.drawable.verification_reviewing_icon),
                 contentDescription = "인증 검증 중",
-                modifier = Modifier.padding(top = 57.dp).size(120.dp)
+                modifier = Modifier.size(120.dp)
             )
+            Spacer(modifier = Modifier.height(spacing.spacing16))
+
             Text(
                 text = "AI가 인증 사진을 확인하고 있어요",
                 color = BlackBrown,
                 style = OnulDoTypography.body1Bold,
-                modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+                modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
             Text(

@@ -10,14 +10,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -82,10 +79,6 @@ fun PartyListScreen(
 ) {
     val spacing = LocalSpacing.current
     val pullToRefreshState = rememberPullToRefreshState()
-    // Scaffold가 상태바 인셋을 이미 소비했는지 여부와 무관하게, 그 시점에 남아있는 실제
-    // 인셋 값을 읽어 화면 맨 위 기준 60dp(Figma 실측)가 되도록 나머지 여백만 채운다.
-    val statusBarInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val partyTitleTopPadding = (60.dp - statusBarInset).coerceAtLeast(0.dp)
     // 챌린지 목록과 동일하게 당길 때 상단에 실제 인디케이터를 보여준다.
     // 탭 재진입 시의 조용한 재조회(SILENT)는 isRefreshing을 건드리지 않으므로 노출되지 않는다.
     PullToRefreshBox(
@@ -107,7 +100,7 @@ fun PartyListScreen(
             text = "파티",
             modifier = Modifier.padding(
                 start = spacing.spacing24,
-                top = partyTitleTopPadding
+                top = 34.dp
             ),
             color = BlackBrown,
             style = OnulDoTypography.headline3Bold

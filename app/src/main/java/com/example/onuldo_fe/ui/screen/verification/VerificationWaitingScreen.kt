@@ -60,8 +60,8 @@ fun VerificationWaitingScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 27.dp)
-                    .height(48.dp)
+                    .padding(top = 28.dp)
+                    .height(20.dp)
             ) {
                 OnulDoBackButton(
                     modifier = Modifier.align(Alignment.CenterStart)
@@ -74,7 +74,7 @@ fun VerificationWaitingScreen(
                     textAlign = TextAlign.Center
                 )
             }
-            Spacer(modifier = Modifier.height(spacing.spacing48))
+            Spacer(modifier = Modifier.height(48.dp))
 
             Image(
                 painter = painterResource(id = R.drawable.verification_waiting_icon),
@@ -82,8 +82,7 @@ fun VerificationWaitingScreen(
                 modifier = Modifier
                     .size(120.dp)
             )
-            Spacer(modifier = Modifier.height(spacing.spacing8))
-
+            Spacer(Modifier.height(6.dp))
             Text(
                 text = "인증 검토 중이에요",
                 color = BlackBrown,
@@ -92,19 +91,18 @@ fun VerificationWaitingScreen(
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(spacing.spacing10))
-
+            Spacer(Modifier.height(4.dp))
             Text(
                 text = "AI가 판단하기 어려운 사진이라\n운영팀에서 직접 확인하고 있어요.",
                 color = DarkBrown70,
                 style = OnulDoTypography.caption1Regular,
                 textAlign = TextAlign.Center
             )
+            Spacer(Modifier.height(56.dp))
 
             Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 59.dp), // 디자인시스템 미적용 (추후 다시 적용)
+                    .fillMaxWidth(),
                 shape = RoundedCornerShape(size = 14.dp),
                 color = Persimmon10,
                 border = BorderStroke(
@@ -124,27 +122,27 @@ fun VerificationWaitingScreen(
                             style = OnulDoTypography.caption2Bold,
                         )
                     }
-                    Spacer(modifier = Modifier.height(11.dp))
+                    Spacer(modifier = Modifier.height(spacing.spacing8))
 
                     Text(
                         text = "검토는 최대 24시간 이내 완료됩니다.",
                         color = DarkBrown,
                         style = OnulDoTypography.caption3Regular,
-                        modifier = Modifier.padding(bottom = 9.dp)
+                        modifier = Modifier.padding(bottom = 4.dp)
                     )
 
                     Text(
                         text = "검토 중에도 챌린지는 계속 진행됩니다.",
                         color = DarkBrown,
                         style = OnulDoTypography.caption3Regular,
-                        modifier = Modifier.padding(bottom = 9.dp)
+                        modifier = Modifier.padding(bottom = 4.dp)
                     )
 
                     Text(
                         text = "결과는 알림으로 즉시 안내드려요.",
                         color = DarkBrown,
                         style = OnulDoTypography.caption3Regular,
-                        modifier = Modifier.padding(bottom = 9.dp)
+                        modifier = Modifier.padding(bottom = 4.dp)
                     )
 
                     Text(

@@ -32,6 +32,7 @@ import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
@@ -54,6 +55,7 @@ fun VerificationFailureScreen(
     onManualReviewClick: () -> Unit = {},
     onManualReviewErrorConfirm: () -> Unit = {}
 ) {
+    val spacing = LocalSpacing.current
     val remainingTimeText by produceState(
         initialValue = verificationDeadline.toRemainingTimeText(),
         key1 = verificationDeadline
@@ -86,24 +88,22 @@ fun VerificationFailureScreen(
                     textAlign = TextAlign.Center
                 )
             }
-
+            Spacer(Modifier.height(48.dp))
             Image(
                 painter = painterResource(
                     id = R.drawable.verification_failure_icon
                 ),
                 contentDescription = "인증 실패 아이콘",
-                modifier = Modifier
-                    .padding(top = 57.dp)
-                    .size(120.dp)
+                modifier = Modifier.size(120.dp)
             )
+            Spacer(modifier = Modifier.height(spacing.spacing8))
 
             Text(
                 text = "인증에 실패했어요",
                 color = BlackBrown,
                 style = OnulDoTypography.title1Bold,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 24.dp),
+                    .fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
 
@@ -114,10 +114,11 @@ fun VerificationFailureScreen(
                 modifier = Modifier.padding(top = 8.dp),
                 textAlign = TextAlign.Center
             )
+            Spacer(modifier = Modifier.height(spacing.spacing30))
+
             Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 37.dp),
+                    .fillMaxWidth(),
                 shape = RoundedCornerShape(size = 14.dp),
                 color = Red2
             ) {
@@ -176,18 +177,20 @@ fun VerificationFailureScreen(
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(spacing.spacing30))
+
             Text(
                 text = "AI 판정에 동의하지 않으시나요?",
                 color = DarkBrown70,
                 style = OnulDoTypography.caption3Regular,
-                modifier = Modifier.padding(top = 28.dp)
             )
+            Spacer(modifier = Modifier.height(spacing.spacing8))
+
             Text(
                 text = if (isManualReviewLoading) "재검토 요청 중..." else "직접검토 요청하기",
                 color = Persimmon,
                 style = OnulDoTypography.caption2Bold,
                 modifier = Modifier
-                    .padding(top = 7.dp)
                     .clickable(
                         enabled = !isManualReviewLoading,
                         onClick = onManualReviewClick

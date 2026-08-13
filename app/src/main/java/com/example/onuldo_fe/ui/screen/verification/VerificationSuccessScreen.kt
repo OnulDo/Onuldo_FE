@@ -3,6 +3,7 @@ package com.example.onuldo_fe.ui.screen.verification
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,12 +23,15 @@ import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 
 
 @Composable
 fun VerificationSuccessScreen(onConfirmClick: () -> Unit = {}) {
+    val spacing = LocalSpacing.current
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -49,14 +53,13 @@ fun VerificationSuccessScreen(onConfirmClick: () -> Unit = {}) {
                     textAlign = TextAlign.Center
                 )
             }
-
+            Spacer(Modifier.height(232.dp))
             Image(
                 painter = painterResource(
                     id = R.drawable.verification_success_icon
                 ),
                 contentDescription = "인증 성공 아이콘",
                 modifier = Modifier
-                    .padding(top = 243.dp)
                     .size(135.dp)
             )
 
@@ -66,7 +69,7 @@ fun VerificationSuccessScreen(onConfirmClick: () -> Unit = {}) {
                 style = OnulDoTypography.title1Bold,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 14.dp),
+                    .padding(top = 16.dp),
                 textAlign = TextAlign.Center
             )
 
@@ -74,7 +77,7 @@ fun VerificationSuccessScreen(onConfirmClick: () -> Unit = {}) {
                 text = "AI 검증을 모두 통과했어요",
                 color = DarkBrown70,
                 style = OnulDoTypography.body4Regular,
-                modifier = Modifier.padding(top = 11.dp),
+                modifier = Modifier.padding(top = 4.dp),
                 textAlign = TextAlign.Center
             )
         }

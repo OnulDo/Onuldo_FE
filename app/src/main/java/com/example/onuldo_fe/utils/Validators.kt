@@ -46,7 +46,7 @@ object Validators {
     }
 
     // --- 닉네임 (ONBD_PROFILE_001) ---
-    // 한글·영문·숫자 2~8자, 특수문자 불가. (욕설·차별 표현 감지는 서버 연동 시 TODO.)
+    // 한글·영문·숫자 2~8자, 특수문자 불가. (욕설·차별 표현 감지는 서버가 담당하며 앱에서는 검사하지 않는다.)
     /** 닉네임 규칙 위반 시 에러 문구, 통과 시 null. 빈 문자열도 null(미입력 상태). */
     fun nicknameErrorMessage(nickname: String): String? {
         val n = nickname.trim()
