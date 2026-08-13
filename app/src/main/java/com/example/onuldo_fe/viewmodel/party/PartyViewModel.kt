@@ -557,7 +557,7 @@ private fun PartyWaitingRoom.toUi() = PartyWaitingRoomUi(
     deposit = deposit,
     capacity = capacity,
     members = members.map(PartyMember::toUi),
-    // Repository가 Fake/Real 차이를 통일했으므로 ViewModel은 응답값만 전달한다.
+    // Repository 응답을 화면 상태로 전달한다.
     isHost = isHost,
     canStart = canStart,
     status = when (status) {

@@ -97,7 +97,7 @@ fun HomeHeader(
             modifier = Modifier
                 .size(30.dp)
                 .background(White, CircleShape)
-                .border(BorderStroke(1.dp, DarkBrown20), CircleShape)
+                .border(BorderStroke(0.5.dp, DarkBrown20), CircleShape)
                 .clickable(
                     interactionSource = notificationInteractionSource,
                     indication = null,
