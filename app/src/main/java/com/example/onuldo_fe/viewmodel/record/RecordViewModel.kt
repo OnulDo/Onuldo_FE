@@ -74,7 +74,7 @@ class RecordViewModel(
                             dDay = item.daysUntilEnd,
                             progress = item.achievementRate,
                             depositAmount = item.depositAmount,
-                            isTodayVerified = item.isVerifiedToday
+                            dailyStatus = item.dailyStatus
                         )
                     },
                     completedRecords = completed.challenges.map { item ->

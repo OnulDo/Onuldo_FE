@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.ui.theme.BlackBrown
@@ -34,8 +35,10 @@ import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
+import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.model.record.OngoingDailyStatus
 
 @Composable
 fun ProgressRecordCard(
@@ -44,10 +47,10 @@ fun ProgressRecordCard(
     dDay: Int,
     progress: Int,
     depositAmount: Int,
-    isTodayVerified: Boolean
+    dailyStatus: OngoingDailyStatus
 ) {
     val spacing = LocalSpacing.current
-    val statusColor = if (isTodayVerified) Green else Persimmon
+    val statusStyle = dailyStatus.toRecordStatusStyle()
     Surface(
         shape = RoundedCornerShape(20.dp),
         border = BorderStroke(1.dp, DarkBrown40),
@@ -63,22 +66,22 @@ fun ProgressRecordCard(
             Text(title, style = OnulDoTypography.body2Bold, color = BlackBrown)
             Spacer(Modifier.height(spacing.spacing8))
             Text(
-                if (isTodayVerified) "오늘 인증 완료" else "오늘 인증 필요",
+                statusStyle.label,
                 style = OnulDoTypography.caption3Bold,
-                color = statusColor
+                color = statusStyle.contentColor
             )
             Spacer(Modifier.height(spacing.spacing12))
             Column() {
                 Surface(
                     modifier = Modifier.width(96.dp).height(22.dp),
                     shape = RoundedCornerShape(11.dp),
-                    color = if (isTodayVerified) Green2 else Red2
+                    color = statusStyle.chipBackgroundColor
                 ) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             "달성률 $progress%",
                             style = OnulDoTypography.caption3Bold,
-                            color = statusColor
+                            color = statusStyle.contentColor
                         )
                     }
                 }
@@ -90,8 +93,8 @@ fun ProgressRecordCard(
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(RoundedCornerShape(3.dp)),
-                color = statusColor,
-                trackColor = Persimmon10,
+                color = statusStyle.contentColor,
+                trackColor = statusStyle.trackColor,
                 strokeCap = StrokeCap.Butt,
                 gapSize = 0.dp,
                 drawStopIndicator = {}
@@ -110,6 +113,47 @@ fun ProgressRecordCard(
 @Composable
 private fun ProgressRecordCardPreview() {
     OnulDo_FETheme {
-        ProgressRecordCard("개인 챌린지", "매일 6시 기상", 13, 72, 30000, false)
+        ProgressRecordCard(
+            "개인 챌린지",
+            "매일 6시 기상",
+            13,
+            72,
+            30000,
+            OngoingDailyStatus.NEED_CERTIFICATION
+        )
     }
+}
+
+private data class RecordStatusStyle(
+    val label: String,
+    val contentColor: Color,
+    val chipBackgroundColor: Color,
+    val trackColor: Color
+)
+
+private fun OngoingDailyStatus.toRecordStatusStyle(): RecordStatusStyle = when (this) {
+    OngoingDailyStatus.SUCCESS -> RecordStatusStyle(
+        label = "오늘 인증 완료",
+        contentColor = Green,
+        chipBackgroundColor = Green2,
+        trackColor = Green2
+    )
+    OngoingDailyStatus.FAILURE -> RecordStatusStyle(
+        label = "오늘 인증 실패",
+        contentColor = Red,
+        chipBackgroundColor = Red2,
+        trackColor = Red2
+    )
+    OngoingDailyStatus.REVIEW_PENDING -> RecordStatusStyle(
+        label = "검토 대기 중",
+        contentColor = DarkBrown,
+        chipBackgroundColor = com.example.onuldo_fe.ui.theme.DarkBrown10,
+        trackColor = com.example.onuldo_fe.ui.theme.DarkBrown10
+    )
+    OngoingDailyStatus.NEED_CERTIFICATION -> RecordStatusStyle(
+        label = "오늘 인증 필요",
+        contentColor = Persimmon,
+        chipBackgroundColor = Persimmon10,
+        trackColor = Persimmon10
+    )
 }
