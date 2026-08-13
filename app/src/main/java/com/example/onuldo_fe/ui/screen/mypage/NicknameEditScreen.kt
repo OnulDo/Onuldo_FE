@@ -28,6 +28,7 @@ import com.example.onuldo_fe.ui.component.OnuldoTextField
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageTopBar
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.figmaLineBox
 import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -72,15 +73,18 @@ fun NicknameEditScreen(
         Spacer(Modifier.height(33.dp))
         Text(
             text = "새 닉네임을 입력해주세요",
-            style = OnulDoTypography.title1Bold,
+            // Figma hero(9018:805)의 제목 박스가 40 = title1Bold.lineHeight라 트림을 꺼서 그대로 쓴다.
+            // 끄지 않으면 27.1로 줄어 아래 전체가 12.9dp 위로 올라온다.
+            style = OnulDoTypography.title1Bold.figmaLineBox(),
             color = BlackBrown,
             modifier = Modifier.padding(horizontal = spacing.spacing20),
         )
-        // Figma hero는 제목·부제를 간격 없이 세로로 쌓는다(h 50, gap 0).
+        // Figma hero는 제목·부제를 간격 없이 세로로 쌓는다(제목 0~40, 부제 40~).
         Text(
             text = "다른 사람에게 보여지는 이름이에요",
             // 최신 노드(8672:32065)에 `Body3/Medium` 스타일이 새로 바인딩됐다(구 노드는 14 Medium).
-            style = OnulDoTypography.body3Medium,
+            // 부제 박스 22(=body3Medium.lineHeight) + 아래 Spacer 25로 닉네임 라벨이 176에 맞는다.
+            style = OnulDoTypography.body3Medium.figmaLineBox(),
             color = DarkBrown70,
             modifier = Modifier.padding(horizontal = spacing.spacing20),
         )
