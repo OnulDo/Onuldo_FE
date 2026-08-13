@@ -18,8 +18,8 @@ import retrofit2.http.Query
 
 //챌린지 목록 조회
 interface ChallengeApi {
-    // 목록은 최상위 content/nextCursor/hasNext 커서 응답(지갑 거래내역과 동일) → CursorPageResponse.
-    // 상세/참여는 공통 래퍼(BaseResponse). safeApiCall/safeCursorApiCall이 성공/실패/네트워크오류를 구분한다.
+    // 목록은 최상위 content/nextCursor/hasNext 커서 응답(지갑 거래내역과 동일) → CursorPageResponse
+    // 상세/참여는 공통 래퍼(BaseResponse)
     @GET("api/challenges")
     suspend fun getChallenges(
         @Query("size") size: Int,

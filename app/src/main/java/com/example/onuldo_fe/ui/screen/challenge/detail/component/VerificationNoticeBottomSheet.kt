@@ -53,7 +53,7 @@ fun VerificationNoticeBottomSheet(
     challengeTitle: String,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    // 성공/실패 조건. 비어 있으면(미전달/서버 데이터 없음) 아래에서 기본 조건으로 폴백한다.
+    // 성공/실패 조건. 비어 있으면(미전달/서버 데이터 없음) 아래에서 기본 조건으로 폴백
     successConditions: List<String> = emptyList(),
     failureConditions: List<String> = emptyList()
 ) {
@@ -137,7 +137,7 @@ fun VerificationNoticeBottomSheet(
 
         Spacer(Modifier.height(spacing.spacing36))   // 빨간 박스 ↔ 확인 버튼 36
 
-        // 확인 — 내려가는 애니메이션 후 닫기 (클로드 추천)
+        // 확인 — 내려가는 애니메이션 후 닫기
         OnulDoButton(
             text = "확인",
             onClick = {

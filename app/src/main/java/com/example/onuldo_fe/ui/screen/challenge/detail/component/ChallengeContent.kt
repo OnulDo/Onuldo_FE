@@ -42,8 +42,10 @@ fun ChallengeContent(
             // 블록 사이 세로 간격
             val topPadding = when {
                 index == 0 -> 0.dp
-                block.type == BlockType.H2 -> 18.dp   // 앞 linebreak(12)와 합쳐 섹션 간격 30
+                block.type == BlockType.H2 -> 18.dp
                 block.type == BlockType.H3 -> 12.dp
+                // BLOCKQUOTE가 연속되는 경우(단독 항목 나열)만 8dp
+                prevType == BlockType.BLOCKQUOTE && block.type == BlockType.BLOCKQUOTE -> 8.dp
                 prevType == BlockType.H2 && block.type == BlockType.PARAGRAPH -> 12.dp
                 // 제목→첫 항목: 제목형 항목(뒤에 설명 붙음)이면 10, 단독 항목(추천 등)이면 14
                 prevType == BlockType.H2 && block.type == BlockType.BLOCKQUOTE ->
@@ -93,13 +95,14 @@ fun ChallengeContent(
                         // 일반 문단 — 기존 benefit 설명 스타일 (13/400/19)
                         Text(
                             text = block.content,
+                            modifier = Modifier.padding(top = topPadding),
                             style = OnulDoTypography.caption1Regular,
                             color = BlackBrown
                         )
                     }
                 }
 
-                // blockquote는 두 용도(타입 동일). 뒤에 설명(paragraph)이 붙으면 강조 제목(Body3 14/700/22),
+                // blockquote는 두 용도(타입 동일). 뒤에 설명(paragraph)이 붙으면 강조 제목(Body4 14/700/22),
                 // 아니면 단독 항목(추천 등, 14/400/20). 둘 다 DarkBrown.
                 BlockType.BLOCKQUOTE -> {
                     val isTitle = blocks.getOrNull(index + 1)?.type == BlockType.PARAGRAPH
@@ -107,12 +110,13 @@ fun ChallengeContent(
                         Text(
                             text = block.content,
                             modifier = Modifier.padding(top = topPadding),
-                            style = OnulDoTypography.title1Bold,
+                            style = OnulDoTypography.body4Bold,
                             color = DarkBrown
                         )
                     } else {
                         Text(
                             text = block.content,
+                            modifier = Modifier.padding(top = topPadding),
                             style = OnulDoTypography.body4Regular,
                             color = DarkBrown
                         )

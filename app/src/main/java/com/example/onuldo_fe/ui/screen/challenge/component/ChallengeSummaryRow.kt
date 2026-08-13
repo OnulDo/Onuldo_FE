@@ -19,7 +19,7 @@ import com.example.onuldo_fe.ui.theme.Pretendard
 
 /**
  * 요약 한 줄 (라벨 왼쪽 / 값 오른쪽).
- * 챌릱지 참여 화면 & 시작 완료 화면이 동일해서 공통으로 분리
+ * 챌린지 참여 화면 & 시작 완료 화면이 동일해서 공통으로 분리
  */
 @Composable
 fun ChallengeSummaryRow(

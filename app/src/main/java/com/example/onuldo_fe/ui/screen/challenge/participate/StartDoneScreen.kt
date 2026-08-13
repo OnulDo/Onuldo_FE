@@ -205,8 +205,8 @@ private fun formatMonthDay(date: String): String = runCatching {
     "${parts[1].toInt()}/${parts[2].toInt()}"
 }.getOrDefault(date)
 
-// 범위 표기: 24시간제. withAmPm=true면 시작에만 오전/오후를 붙인다(끝은 항상 시간만).
-// 시각 미설정(둘 중 하나라도 빈 값)이면 종일 표기로 폴백해, 호출부에서 별도 null/빈값 처리를 하지 않아도 된다.
+// 범위 표기: 24시간제. withAmPm=true면 시작에만 오전/오후를 붙임
+// default: 시각 미설정(둘 중 하나라도 빈 값)이면 종일 표기로 폴백, 호출부에서 별도 null/빈값 처리를 하지 않아도 됨
 fun formatTimeRange(start: String, end: String, withAmPm: Boolean = true): String {
     if (start.isBlank() || end.isBlank()) return if (withAmPm) "오전 00:00 ~ 23:00" else "00:00 ~ 23:00"
     return runCatching {

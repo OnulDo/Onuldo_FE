@@ -95,7 +95,6 @@ fun ParticipateScreen(
         ) {
             OnulDoBackButton(
                 onClick = onBackClick,
-                // 패딩 없이 정렬만 — IconButton 중앙정렬로 화살표가 가로 20에 맞음(본문과 정렬)
                 modifier = Modifier.align(Alignment.CenterStart)
             )
             Text(
@@ -161,7 +160,7 @@ fun ParticipateScreen(
 
         Spacer(Modifier.height(32.dp))
 
-        // 인증 시간대는 상세에서 받은 timeStart/timeEnd로 구성 / 미설정 시 00:00 ~ 23:00.
+        // 인증 시간대는 상세에서 받은 timeStart/timeEnd로 구성 default: 미설정 시 00:00 ~ 23:00.
         val verifyTimeLine = "위 챌린지는 ${formatTimeRange(timeStart, timeEnd, withAmPm = false)}내에 인증을 진행해주세요"
 
         NoticeBox(
@@ -222,10 +221,10 @@ fun ParticipateScreen(
 
         Spacer(Modifier.height(spacing.spacing30))
 
-        // 요약 박스 — 선택한 진행 기간/도전금이 그대로 반영된다(미선택 시 "-")
+        // 요약 박스 — 선택한 진행 기간/도전금이 그대로 반영된다(default: 미선택 시 "-")
         val summaryItems = listOf(
             "진행 기간" to (selectedWeeks?.let { "${it}주 (${it * 7}일)" } ?: "-"),
-            //시각 미설정 시 "00:00 ~ 23:00"으로 폴백(QA 피드백)
+            //default: 시각 미설정 시 "00:00 ~ 23:00"으로 폴백
             "인증 방식" to "${formatTimeRange(timeStart, timeEnd, withAmPm = false)}내에 인증",
             "예치 도전금" to (selectedPoint ?: "-")
         )

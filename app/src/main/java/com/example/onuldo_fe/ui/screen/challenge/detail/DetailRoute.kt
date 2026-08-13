@@ -32,7 +32,7 @@ fun DetailRoute(
     // CTA 라벨 — 챌린지 탭은 "참여하기", 파티 생성 흐름은 "파티 만들기"로 재사용
     actionText: String = "참여하기",
     // challengeId를 key로 줘, 같은 ViewModelStoreOwner에서 챌린지가 바뀌면 새 상세를 조회
-    // (파티 생성 흐름은 nav 목적지가 아니라 화면 상태 전환이라 key가 없으면 이전 챌린지 VM이 재사용된다.) - 클로드 설명
+    // (파티 생성 흐름은 nav 목적지가 아니라 화면 상태 전환이라 key가 없으면 이전 챌린지 VM이 재사용된다.)
     viewModel: ChallengeDetailViewModel = viewModel(
         key = challengeId.toString(),
         factory = ChallengeDetailViewModel.factory(challengeId)
@@ -41,7 +41,7 @@ fun DetailRoute(
     val uiState = viewModel.uiState
     val context = LocalContext.current
 
-    // 예외: 상세 데이터 로드 실패 시 토스트로 안내하고 챌린지 목록(갤러리)으로 되돌린다.
+    // 예외: 상세 데이터 로드 실패 시 토스트로 안내하고 챌린지 목록(갤러리)으로 되돌림
     LaunchedEffect(uiState.isError) {
         if (uiState.isError) {
             Toast.makeText(
