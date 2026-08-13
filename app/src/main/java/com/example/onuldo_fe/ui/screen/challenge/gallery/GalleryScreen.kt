@@ -74,7 +74,7 @@ data class Challenge(
     @DrawableRes val imageRes: Int = R.drawable.challenge_sample_1
 )
 
-// 상태 없는 순수 UI — 데이터/이벤트는 GalleryRoute에서 주입한다. (파티 생성 흐름에서도 재사용)
+// 데이터/이벤트는 GalleryRoute에서 주입 (파티 생성 흐름에서도 재사용)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GalleryScreen(
@@ -88,7 +88,7 @@ fun GalleryScreen(
     val focusManager = LocalFocusManager.current
     val spacing = LocalSpacing.current
     val pullToRefreshState = rememberPullToRefreshState()
-    // 화면 재생성 후에도 선택된 카테고리가 있으면 필터 칩을 펼쳐 활성 필터가 보이게(코드 래빗)
+    // 화면 재생성 후에도 선택된 카테고리가 있으면 필터 칩을 펼쳐 활성 필터가 보이게
     var filterSelected by remember {
         mutableStateOf(uiState.selectedCategory != null)
     }
@@ -99,11 +99,10 @@ fun GalleryScreen(
         }
     }
 
-    // 카테고리 칩은 ChallengeCategory
+    // 카테고리 칩 = ChallengeCategory
     val categories = remember { ChallengeCategory.entries.map { it.displayName } }
 
-    // 화면 전체를 감싸 당김 인디케이터가 헤더 위(화면 맨 위)에 뜨게 한다.
-    // 위에서 당길 때만 노출(pull-to-refresh)되고, 화면 복귀 자동 갱신(silentRefresh)은 표시되지 않는다.
+    // 위에서 당길 때만 노출(pull-to-refresh)되고, 화면 복귀 자동 갱신(silentRefresh)은 표시되지 않는다
     PullToRefreshBox(
         isRefreshing = uiState.isRefreshing,
         onRefresh = onRefresh,
@@ -127,7 +126,6 @@ fun GalleryScreen(
             // 빈 곳 터치 시 검색창 포커스·키보드 해제
             .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
     ) {
-        // 고정 헤더: 제목·서브카피·검색창·필터칩
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             Text(
                 text = "챌린지",
@@ -188,7 +186,8 @@ fun GalleryScreen(
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
-                // 실패/결과없음은 별도 문구 없이 빈 화면. 실패는 위 토스트로만 안내.
+                // 실패/결과없음은 별도 문구 없이 빈 화면. 실패는 위 토스트로 안내하고,
+                // 재시도는 화면을 감싸는 당겨서 새로고침(pull-to-refresh) 제스처로 한다.
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize(),
