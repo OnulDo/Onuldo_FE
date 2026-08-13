@@ -28,6 +28,7 @@ import com.example.onuldo_fe.ui.theme.Pretendard
 
 // [OnulDoButton]과 동일한 규격(높이 56dp, 라운드 14dp, 좌우 20dp 여백).
 private val AuthButtonShape = RoundedCornerShape(14.dp)
+private val SocialButtonShape = RoundedCornerShape(8.dp)
 private const val AuthButtonHeight = 56
 
 @Composable
@@ -45,7 +46,8 @@ fun SecondaryButton(
             .height(AuthButtonHeight.dp),
         enabled = enabled,
         shape = AuthButtonShape,
-        border = BorderStroke(1.dp, Persimmon),
+        // Figma 랜딩(4771:375) btn/primary 외곽선은 2px다.
+        border = BorderStroke(2.dp, Persimmon),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = Persimmon),
     ) {
         Text(
@@ -71,7 +73,8 @@ fun SocialLoginButton(
             .padding(horizontal = 20.dp)
             .fillMaxWidth()
             .height(AuthButtonHeight.dp),
-        shape = AuthButtonShape,
+        // 소셜 버튼만 radius 8이다(Figma `5446:7969`의 --radius-s). 일반 버튼은 14.
+        shape = SocialButtonShape,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = contentColor,
@@ -89,7 +92,9 @@ fun SocialLoginButton(
             }
             Text(
                 text = text,
-                style = OnulDoTypography.body3Medium,
+                // Figma는 카카오 전용 폰트(Kakao Small Sans) 18px을 쓴다. 앱에는 그 폰트가 없어
+                // 크기만 맞춘 Pretendard 18sp로 대체한다.
+                style = OnulDoTypography.body1Bold,
                 modifier = Modifier.align(Alignment.Center),
             )
         }
