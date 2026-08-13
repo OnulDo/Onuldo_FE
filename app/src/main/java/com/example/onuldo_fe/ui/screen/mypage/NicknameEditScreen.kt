@@ -107,8 +107,10 @@ fun NicknameEditScreen(
                 serverError != null -> serverError
                 else -> "2~8자 한글 · 영문 · 숫자"
             },
-            // 이 화면 Figma(8672:32057)는 입력 80 → 헬퍼 90으로 10dp다(기본값 4는 회원가입 기준).
-            supportingTopPadding = 10.dp,
+            // Figma 잉크 실측 기준. 입력칸 하단에서 헬퍼 글자까지 회원가입(5154:4505)은 6dp,
+            // 이 화면(8672:32057)은 14dp다. 잉크 오프셋 2를 빼면 12가 된다.
+            // (박스 산술로는 10이 나오지만 Figma 텍스트 박스 높이가 두 화면에서 12/20으로 달라 맞지 않는다.)
+            supportingTopPadding = 12.dp,
         )
 
         Spacer(Modifier.weight(1f))
