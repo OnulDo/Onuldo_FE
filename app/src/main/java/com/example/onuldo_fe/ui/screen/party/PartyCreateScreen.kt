@@ -83,10 +83,8 @@ fun PartyCreateScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = spacing.spacing20)
         ) {
-            // TODO 디자인 시스템에 53dp 토큰이 추가되면 LocalSpacing으로 교체
             Spacer(Modifier.height(53.dp))
             SectionTitle("파티 이름", OnulDoTypography.caption2Bold)
-            // TODO 디자인 시스템에 7dp 토큰이 추가되면 LocalSpacing으로 교체
             Spacer(Modifier.height(7.dp))
             PartyNameTextField(
                 value = partyName,
@@ -100,7 +98,6 @@ fun PartyCreateScreen(
             if (isPartyNameError) {
                 Text(
                     "한글, 영문, 숫자, 공백을 포함해 2~10자로 입력해주세요.",
-                    // TODO 디자인 시스템에 4dp·6dp 토큰이 추가되면 LocalSpacing으로 교체
                     modifier = Modifier.padding(start = 4.dp, top = 6.dp),
                     color = Persimmon,
                     style = OnulDoTypography.caption3Regular
@@ -115,26 +112,21 @@ fun PartyCreateScreen(
                 onClick = onChallengeClick
             )
             if (selectedChallenge != null) {
-                // TODO 디자인 시스템에 22dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(22.dp))
                 SectionTitle("진행 기간", OnulDoTypography.body4Bold)
-                // TODO 디자인 시스템에 7dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(7.dp))
                 PartyOptionSelector(periods, selectedPeriod, onSelect = {
                     onFormChange()
                     selectedPeriod = it
                 }, textStyle = OnulDoTypography.body4Bold)
-                // TODO 디자인 시스템에 23dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(23.dp))
                 SectionTitle("도전금", OnulDoTypography.body4Bold)
-                // TODO 디자인 시스템에 7dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(7.dp))
                 PartyOptionSelector(deposits.map { "%,dP".format(it) }, selectedDeposit, onSelect = {
                     onFormChange()
                     selectedDeposit = it
                 }, textStyle = OnulDoTypography.caption2Bold)
             }
-            // TODO 디자인 시스템에 22dp 토큰이 추가되면 LocalSpacing으로 교체
             Spacer(Modifier.height(if (selectedChallenge == null) spacing.spacing26 else 22.dp))
             SectionTitle("모집 인원 (2~5명)", OnulDoTypography.caption2Bold)
             Spacer(Modifier.height(spacing.spacing8))
@@ -148,7 +140,6 @@ fun PartyCreateScreen(
             errorMessage?.let {
                 Text(
                     text = it,
-                    // TODO 디자인 시스템에 14dp 토큰이 추가되면 LocalSpacing으로 교체
                     modifier = Modifier.padding(top = 14.dp),
                     color = Persimmon,
                     style = OnulDoTypography.caption3Regular
@@ -162,8 +153,6 @@ fun PartyCreateScreen(
                     } else {
                         onPartyNameChange(normalizedPartyName)
                         val requiredDeposit = deposits[selectedDeposit]
-                        // Fake API에서는 화면에 설정된 테스트 포인트로 검증한다.
-                        // Real API는 ViewModel이 요청 직전에 최신 지갑 잔액을 다시 조회한다.
                         if (checkPointBeforeRequest && availablePoint != null && availablePoint < requiredDeposit) {
                             showPointDialog = true
                         } else {
@@ -172,7 +161,6 @@ fun PartyCreateScreen(
                     }
                 },
                 enabled = enabled && !isSubmitting,
-                // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
                 modifier = Modifier.padding(top = 40.dp),
                 height = 52.dp
             )
@@ -199,7 +187,6 @@ fun PartyCreateScreen(
 @Composable
 private fun SectionTitle(text: String, style: TextStyle) = Text(
     text = text,
-    // TODO 디자인 시스템에 4dp 토큰이 추가되면 LocalSpacing으로 교체
     modifier = Modifier.padding(start = 4.dp),
     color = BlackBrown,
     style = style

@@ -394,7 +394,7 @@ class PartyViewModel(
 
     fun leaveParty(onSuccess: () -> Unit) {
         // 탈퇴 요청 성공 시에만 대기방 상태 제거 후 목록 화면으로 이동
-        // 방장 승계와 마지막 인원 이탈에 따른 해체 처리는 서버 또는 fake store가 담당
+        // 방장 승계와 마지막 인원 이탈에 따른 파티 해체는 서버에서 처리한다.
         val partyId = uiState.waitingRoom?.partyId ?: return
         attemptOrQueueLeave(partyId, onSuccess)
     }

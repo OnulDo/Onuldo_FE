@@ -70,7 +70,6 @@ fun InviteCodeDialog(
                 .background(SourCream, RoundedCornerShape(20.dp)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // TODO 디자인 시스템에 52dp 토큰이 추가되면 LocalSpacing으로 교체
             Spacer(Modifier.height(52.dp))
             Text(
                 text = "초대코드 입력",

@@ -76,7 +76,6 @@ fun PartySettlementScreen(
             contentPadding = PaddingValues(bottom = spacing.spacing16)
         ) {
             item {
-                // TODO 디자인 시스템에 47dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.height(47.dp))
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Box(
@@ -141,7 +140,6 @@ fun PartySettlementScreen(
                 text = "확인",
                 onClick = onConfirm,
                 modifier = Modifier
-                    // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
                     .padding(top = 40.dp),
                 height = 52.dp
             )
@@ -211,7 +209,6 @@ private fun SettlementAmount(
         )
         Text(
             text = amount,
-            // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
             modifier = Modifier.padding(top = 3.dp),
             color = amountColor,
             style = OnulDoTypography.body2Bold

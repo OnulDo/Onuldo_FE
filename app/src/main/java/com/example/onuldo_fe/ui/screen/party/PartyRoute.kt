@@ -41,7 +41,7 @@ import com.example.onuldo_fe.viewmodel.party.PartyStatus
 import com.example.onuldo_fe.viewmodel.party.PartyViewModel
 import java.text.Normalizer
 
-// Navigation 라이브러리 연동 전 파티 내부 화면 전환을 구분하는 테스트용 화면 상태
+// 파티 탭 내부 화면 전환 상태
 private enum class PartyScreen {
     List,
     Create,

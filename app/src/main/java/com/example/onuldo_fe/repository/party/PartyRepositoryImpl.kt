@@ -79,7 +79,6 @@ class PartyRepositoryImpl(
         val response = realApi.startParty(partyId.toLong())
         if (!response.isSuccessful) throw HttpException(response)
         response.body()?.result ?: throw IOException("파티 시작 응답 본문이 비어 있습니다.")
-        // TODO: 도전금 차감 실패 code가 명세되면 포인트 부족 오류로 변환한다.
     }
 
     override suspend fun getSettlementResult(partyId: Long): PartySettlementResult {

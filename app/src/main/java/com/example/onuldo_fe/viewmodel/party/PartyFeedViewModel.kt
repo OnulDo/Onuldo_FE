@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import com.example.onuldo_fe.model.party.PartyProgress
 import com.example.onuldo_fe.model.party.PartyFeedItem
-import com.example.onuldo_fe.R
 import com.example.onuldo_fe.repository.party.PartyFeedRepository
 import com.example.onuldo_fe.repository.party.PartyFeedRepositoryProvider
 import kotlin.math.roundToInt
@@ -75,18 +74,7 @@ private fun PartyFeedItem.toUiState() = PartyFeedItemUi(
     time = if (isVerifiedToday) verifiedElapsedMinutes?.toElapsedTimeText() ?: "인증 완료" else "미인증",
     profileImageUrl = profileImageUrl,
     verificationImageUrl = verificationImageUrl,
-    // 실제 API 이미지가 존재하는 항목에 fake 로컬 이미지를 대응시켜 UI 테스트
-    imageRes = if (verificationImageUrl == null) {
-        null
-    } else {
-        when (memberId) {
-            "member-1" -> R.drawable.party_feed_minji
-            "member-2" -> R.drawable.party_feed_seoyeon
-            "member-3" -> R.drawable.party_feed_jiho
-            "member-4" -> R.drawable.party_feed_sua
-            else -> null
-        }
-    }
+    imageRes = null
 )
 
 // 서버가 전달한 인증 후 경과 분을 사용자용 상대 시간 문구로 변환
