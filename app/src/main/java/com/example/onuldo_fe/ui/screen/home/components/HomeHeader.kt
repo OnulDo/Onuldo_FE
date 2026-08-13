@@ -30,10 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.BlackBrown70
@@ -42,10 +40,10 @@ import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon20
-import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.ui.screen.party.components.PartyNetworkImage
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -57,7 +55,6 @@ fun HomeHeader(
     onNotificationClick: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
-    // TODO: 8sp SemiBold·18sp ExtraBold 글자 스타일 토큰 추가 후 교체
     val notificationInteractionSource = remember { MutableInteractionSource() }
     val isNotificationPressed by notificationInteractionSource.collectIsPressedAsState()
     var isClickFeedbackActive by remember { mutableStateOf(false) }
@@ -70,7 +67,7 @@ fun HomeHeader(
                 .background(Persimmon20, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            // 프리셋 캐릭터는 Figma 규격(28x33 Fit)을 쓰고, 커스텀 업로드 사진은 원형을 꽉 채워 크롭한다.
+            // 기본 캐릭터는 지정 크기로 표시하고 프로필 이미지 URL은 원형 영역을 채운다.
             PartyNetworkImage(
                 imageUrl = profileImageUrl,
                 fallbackImageRes = R.drawable.home_run_light_icon,
@@ -87,18 +84,12 @@ fun HomeHeader(
             Text(
                 text = "오늘두 함께 도전!",
                 color = BlackBrown70,
-                fontFamily = Pretendard,
-                fontSize = 8.sp,
-                lineHeight = 8.sp,
-                fontWeight = FontWeight.SemiBold
+                style = OnulDoTypography.caption4Bold
             )
             Text(
                 text = userName,
                 color = BlackBrown,
-                fontFamily = Pretendard,
-                fontSize = 18.sp,
-                lineHeight = 21.sp,
-                fontWeight = FontWeight.ExtraBold
+                style = OnulDoTypography.body1ExtraBold
             )
         }
 
@@ -106,7 +97,7 @@ fun HomeHeader(
             modifier = Modifier
                 .size(30.dp)
                 .background(White, CircleShape)
-                .border(BorderStroke(1.dp, DarkBrown20), CircleShape)
+                .border(BorderStroke(0.5.dp, DarkBrown20), CircleShape)
                 .clickable(
                     interactionSource = notificationInteractionSource,
                     indication = null,

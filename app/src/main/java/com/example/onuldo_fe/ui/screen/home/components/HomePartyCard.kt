@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,7 +30,6 @@ import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomePartyChallenge
-import com.example.onuldo_fe.model.home.HomePartyMember
 import com.example.onuldo_fe.ui.screen.party.components.PartyMemberProfileImage
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
@@ -40,6 +40,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown80
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon80
@@ -57,8 +58,6 @@ fun HomePartyCard(
     onVerifyClick: () -> Unit = {}
 ) {
     val spacing = LocalSpacing.current
-    // TODO: 13sp Medium·11sp Bold 글자 스타일과 2·5·6·7·14·17dp 여백 토큰 추가 후 교체
-
     Column(
         modifier = modifier
             .height(140.dp)
@@ -75,8 +74,7 @@ fun HomePartyCard(
                 Text(
                     text = partyChallenge.title,
                     color = BlackBrown,
-                    style = MaterialTheme.typography.bodyLarge,
-                    lineHeight = 20.sp,
+                    style = OnulDoTypography.body2Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -84,21 +82,17 @@ fun HomePartyCard(
                 Text(
                     text = partyChallenge.subtitle,
                     color = DarkBrown50,
-                    fontFamily = Pretendard,
-                    fontSize = 13.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.Medium,
+                    style = OnulDoTypography.caption1Medium,
                     maxLines = 1
                 )
             }
             Text(
                 text = stringResource(R.string.home_challenge_d_day, partyChallenge.remainingDays),
                 color = DarkBrown80,
-                modifier = Modifier.padding(end = 6.dp),
-                fontFamily = Pretendard,
-                fontSize = 11.sp,
-                lineHeight = 13.sp,
-                fontWeight = FontWeight.Bold
+                modifier = Modifier
+                    .padding(end = 6.dp)
+                    .offset(y = (-3).dp),
+                style = OnulDoTypography.caption2Bold
             )
         }
 
@@ -112,10 +106,7 @@ fun HomePartyCard(
             Text(
                 text = deadlineText,
                 color = partyChallenge.status.statusColor(),
-                fontFamily = Pretendard,
-                fontSize = 13.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.Medium
+                style = OnulDoTypography.caption1Medium
             )
             partyChallenge.remainingMinutes
                 ?.takeIf {
@@ -132,18 +123,7 @@ fun HomePartyCard(
         Spacer(Modifier.weight(1f))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                val members = partyChallenge.members.ifEmpty {
-                    // 실제 API 연결 전에도 현재 인원 수와 인증 상태를 확인할 수 있도록 임시 멤버 구성
-                    List(partyChallenge.totalMemberCount) { index ->
-                        HomePartyMember(
-                            memberId = "preview-member-$index",
-                            profileImageUrl = null,
-                            defaultCharacterId = (index % 9) + 1,
-                            isVerifiedToday = index < partyChallenge.completedMemberCount
-                        )
-                    }
-                }
-                members.forEach { member ->
+                partyChallenge.members.forEach { member ->
                     PartyMemberProfileImage(
                         profileImageUrl = member.profileImageUrl,
                         defaultCharacterId = member.defaultCharacterId,
@@ -170,11 +150,9 @@ private fun PartyAction(
         HomeVerifyButton(
             onClick = onVerifyClick,
             enabled = party.canVerify,
-            width = 96.dp,
-            height = 32.dp,
-            iconSize = 14.dp,
-            fontSize = 12.sp,
-            lineHeight = 22.sp
+            width = 78.dp,
+            height = 26.dp,
+            iconSize = 12.dp
         )
         return
     }
@@ -193,10 +171,7 @@ private fun PartyAction(
             Text(
                 text = stringResource(party.status.actionTextRes()),
                 color = textColor,
-                fontFamily = Pretendard,
-                fontSize = 10.sp,
-                lineHeight = 12.sp,
-                fontWeight = FontWeight.Bold
+                style = OnulDoTypography.caption4Bold
             )
         }
     }

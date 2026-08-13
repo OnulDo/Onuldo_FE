@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
@@ -54,10 +55,7 @@ fun OptionChip(
     ) {
         Text(
             text = text,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp,
-            lineHeight = 13.sp,
+            style = OnulDoTypography.body4Bold,
             color = if (selected) White else BlackBrown
         )
     }

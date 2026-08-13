@@ -44,27 +44,20 @@ fun PartyFeedScreen(
             OnulDoBackButton(
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    // TODO 디자인 시스템에 13dp 토큰이 추가되면 LocalSpacing으로 교체
                     .offset(y = 13.dp),
                 onClick = onBack
             )
             Text(
                 text = partyName,
-                // TODO 디자인 시스템에 47dp 토큰이 추가되면 LocalSpacing으로 교체
                 modifier = Modifier.offset(x = spacing.spacing20, y = 47.dp),
                 color = BlackBrown,
-                fontFamily = Pretendard,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
+                style = OnulDoTypography.headline3Bold
             )
             Text(
                 text = challengeName,
-                // TODO 디자인 시스템에 79dp 토큰이 추가되면 LocalSpacing으로 교체
                 modifier = Modifier.offset(x = spacing.spacing20, y = 79.dp),
                 color = DarkBrown70,
-                fontFamily = Pretendard,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Medium
+                style = OnulDoTypography.caption4Medium
             )
         }
         TeamProgressCard(
@@ -86,13 +79,12 @@ fun PartyFeedScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(errorMessage, color = DarkBrown, fontFamily = Pretendard, fontSize = 13.sp)
+                Text(errorMessage, color = DarkBrown, style = OnulDoTypography.caption1Regular)
                 TextButton(onClick = onRetry) { Text("다시 시도", color = Persimmon) }
             }
             else -> LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier.weight(1f),
-                // TODO 디자인 시스템에 4dp 토큰이 추가되면 LocalSpacing으로 교체
                 contentPadding = PaddingValues(horizontal = spacing.spacing20, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(spacing.spacing12),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -119,33 +111,27 @@ private fun TeamProgressCard(
             .height(88.dp)
             .background(Persimmon10, RoundedCornerShape(14.dp))
             .border(1.dp, Persimmon.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
-            // TODO 디자인 시스템에 14dp 토큰이 추가되면 LocalSpacing으로 교체
             .padding(horizontal = LocalSpacing.current.spacing20, vertical = 14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 "팀 진행률",
                 color = Persimmon,
-                fontFamily = Pretendard,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
+                style = OnulDoTypography.caption3Bold,
                 letterSpacing = 0.44.sp
             )
+            // Caption4/Regular
             Text(
                 "${totalMemberCount}명 중 ${completedMemberCount}명 오늘 인증 완료",
                 modifier = Modifier.padding(start = 8.dp),
                 color = DarkBrown50,
-                fontFamily = Pretendard,
-                fontSize = 8.sp
+                style = OnulDoTypography.caption4Regular
             )
         }
         Text(
             "$progressPercent%",
             color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 24.sp,
-            lineHeight = 28.sp,
-            fontWeight = FontWeight.Bold,
+            style = OnulDoTypography.headline3Bold,
             letterSpacing = (-0.48).sp
         )
         Spacer(Modifier.height(10.dp))

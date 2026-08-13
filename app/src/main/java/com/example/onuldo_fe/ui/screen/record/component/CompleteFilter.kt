@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
@@ -89,7 +90,7 @@ private fun CompleteFilterChip(
                 horizontal = 16.dp,
                 vertical = 8.dp
             ),
-            style = MaterialTheme.typography.bodySmall,
+            style = OnulDoTypography.caption2Bold,
             color = if (selected) White else BlackBrown
         )
     }

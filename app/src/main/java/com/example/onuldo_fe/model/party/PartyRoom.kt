@@ -1,5 +1,7 @@
 package com.example.onuldo_fe.model.party
 
+import java.text.Normalizer
+
 // 파티 대기방에서 사용하는 참여자 권한
 enum class PartyRole {
     Leader,
@@ -89,6 +91,15 @@ data class CreatePartyCommand(
     val deposit: Int,
     val capacity: Int
 )
+
+private val partyNamePattern = Regex("^[가-힣A-Za-z0-9 ]{2,10}$")
+
+// 화면과 ViewModel이 동일한 파티 이름 정책을 사용하도록 입력을 정규화한다.
+fun normalizePartyName(name: String): String =
+    Normalizer.normalize(name.trim(), Normalizer.Form.NFC)
+
+fun isValidPartyName(name: String): Boolean =
+    partyNamePattern.matches(normalizePartyName(name))
 
 // 파티 생성 성공 후 화면 이동에 사용하는 발급 정보
 data class CreatedParty(

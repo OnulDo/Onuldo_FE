@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.Green
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.Red
@@ -57,12 +58,9 @@ fun OnuldoTextField(
             .padding(horizontal = 20.dp)
             .fillMaxWidth()
     ) {
-        // Figma input 라벨 = Pretendard Bold 13px.
         Text(
             text = label,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp,
+           style = OnulDoTypography.caption2Bold,
             color = MaterialTheme.colorScheme.onBackground,
         )
         OutlinedTextField(
@@ -71,15 +69,12 @@ fun OnuldoTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
-            // Figma input 텍스트/placeholder = 14px Regular.
-            // typography.bodyMedium은 Bold라 여기서 굵기만 내린다
-            // (공용 스타일을 바꾸면 다른 화면까지 영향을 준다).
-            textStyle = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
+            textStyle = OnulDoTypography.body4Regular,
             placeholder = {
                 Text(
                     placeholder,
                     color = DarkBrown40,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
+                    style = OnulDoTypography.body4Regular,
                 )
             },
             singleLine = true,
@@ -90,7 +85,6 @@ fun OnuldoTextField(
             shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = if (isSuccess) Green else Persimmon,
-                // Figma input/default 테두리 = DarkBrown40(5C2C03 40%).
                 unfocusedBorderColor = if (isSuccess) Green else DarkBrown40,
                 errorBorderColor = Red,
                 focusedContainerColor = White,
@@ -101,7 +95,7 @@ fun OnuldoTextField(
         if (supportingText != null) {
             Text(
                 text = supportingText,
-                style = MaterialTheme.typography.labelMedium,
+                style = OnulDoTypography.caption3Regular,
                 color = supportingColor,
                 modifier = Modifier.padding(PaddingValues(start = 4.dp, top = 4.dp)),
             )

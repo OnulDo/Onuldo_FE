@@ -28,6 +28,7 @@ import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown20
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon20
 import com.example.onuldo_fe.ui.theme.SourCream
@@ -61,12 +62,7 @@ fun PermissionSettingDialog(
     )
 }
 
-/**
- * "취소 | 확인" 2버튼 공통 다이얼로그. 권한 안내·로그아웃·회원 탈퇴 등이 재사용한다.
- *
- * @param confirmText 오른쪽(강조) 버튼 문구
- * @param confirmColor 오른쪽 버튼 글자색 — 파괴적 동작이면 호출부에서 경고색으로 바꾼다
- */
+
 @Composable
 fun ConfirmDialog(
     title: String,
@@ -98,7 +94,7 @@ fun ConfirmDialog(
                 ) {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = OnulDoTypography.body2Bold,
                         color = BlackBrown
                     )
 
@@ -106,7 +102,7 @@ fun ConfirmDialog(
 
                     Text(
                         text = description,
-                        style = MaterialTheme.typography.labelLarge,
+                        style = OnulDoTypography.caption1Medium,
                         color = DarkBrown50,
                         textAlign = TextAlign.Center
                     )
@@ -128,7 +124,7 @@ fun ConfirmDialog(
                     ) {
                         Text(
                             text = dismissText,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = OnulDoTypography.body4Bold,
                             color = DarkBrown50
                         )
                     }
@@ -144,7 +140,7 @@ fun ConfirmDialog(
                     ) {
                         Text(
                             text = confirmText,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = OnulDoTypography.body4Bold,
                             color = confirmColor
                         )
                     }

@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Pretendard
 
 /**
@@ -36,19 +37,13 @@ fun ChallengeSummaryRow(
         //읜쪽
         Text(
             text = label,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 12.sp,
-            lineHeight = 12.sp,
+            style = OnulDoTypography.caption2Medium,
             color = DarkBrown
         )
         //오른쪽
         Text(
             text = value,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp,
-            lineHeight = 13.sp,
+            style = OnulDoTypography.caption2Bold,
             color = BlackBrown,
             textAlign = TextAlign.Right
         )

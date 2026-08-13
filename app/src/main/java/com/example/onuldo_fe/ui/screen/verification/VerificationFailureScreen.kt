@@ -32,6 +32,7 @@ import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
@@ -80,7 +81,7 @@ fun VerificationFailureScreen(
                 Text(
                     text = "인증 결과",
                     color = BlackBrown,
-                    fontSize = 16.sp,
+                    style = OnulDoTypography.body2Bold,
                     modifier = Modifier.align(Alignment.Center),
                     textAlign = TextAlign.Center
                 )
@@ -99,7 +100,7 @@ fun VerificationFailureScreen(
             Text(
                 text = "인증에 실패했어요",
                 color = BlackBrown,
-                style = MaterialTheme.typography.titleLarge,
+                style = OnulDoTypography.title1Bold,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 24.dp),
@@ -109,7 +110,7 @@ fun VerificationFailureScreen(
             Text(
                 text = "AI 검증에서 미션 조건을 확인하지 못했어요",
                 color = DarkBrown70,
-                style = MaterialTheme.typography.labelLarge,
+                style = OnulDoTypography.caption1Regular,
                 modifier = Modifier.padding(top = 8.dp),
                 textAlign = TextAlign.Center
             )
@@ -129,15 +130,14 @@ fun VerificationFailureScreen(
                         Text(
                             text = "실패 사유",
                             color = Red,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = OnulDoTypography.body4Bold,
                         )
                     }
                     Spacer(modifier = Modifier.height(11.dp))
-                    //실패사유 목데이터 연결하기.
                     Text(
                         text = failureReason.ifBlank { "사진이 챌린지 인증 조건을 충족하지 못했어요." },
                         color = BlackBrown,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = OnulDoTypography.caption2Medium,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
@@ -163,7 +163,7 @@ fun VerificationFailureScreen(
                         Text(
                             text = "남은 인증 시간",
                             color = Persimmon,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = OnulDoTypography.body4Bold
                         )
                     }
                     Spacer(modifier = Modifier.height(9.dp))
@@ -171,7 +171,7 @@ fun VerificationFailureScreen(
                     Text(
                         text = remainingTimeText,
                         color = BlackBrown,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = OnulDoTypography.caption2Medium,
                         modifier = Modifier.padding(bottom = 22.dp)
                     )
                 }
@@ -179,13 +179,13 @@ fun VerificationFailureScreen(
             Text(
                 text = "AI 판정에 동의하지 않으시나요?",
                 color = DarkBrown70,
-                style = MaterialTheme.typography.labelMedium,
+                style = OnulDoTypography.caption3Regular,
                 modifier = Modifier.padding(top = 28.dp)
             )
             Text(
                 text = if (isManualReviewLoading) "재검토 요청 중..." else "직접검토 요청하기",
                 color = Persimmon,
-                style = MaterialTheme.typography.labelMedium,
+                style = OnulDoTypography.caption2Bold,
                 modifier = Modifier
                     .padding(top = 7.dp)
                     .clickable(

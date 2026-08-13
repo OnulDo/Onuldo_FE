@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.camera.component
+package com.example.onuldo_fe.ui.screen.camera.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.White
 
 @Composable
@@ -38,7 +39,6 @@ fun CameraBottomBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        //추후 촬영 버튼 외 기능 추가 예정
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -54,7 +54,7 @@ fun CameraBottomBar(
 
             Text(
                 text = "유의사항",
-                style = MaterialTheme.typography.labelSmall,
+                style = OnulDoTypography.caption4Medium,
                 color = White
             )
         }
@@ -85,8 +85,8 @@ fun CameraBottomBar(
             }
 
             Text(
-                text = "카메라 전환",
-                style = MaterialTheme.typography.labelSmall,
+                text = "전/후면",
+                style = OnulDoTypography.caption4Medium,
                 color = White
             )
         }

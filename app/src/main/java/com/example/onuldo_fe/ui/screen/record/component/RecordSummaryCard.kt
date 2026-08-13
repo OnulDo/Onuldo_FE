@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.Green
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
@@ -38,7 +39,7 @@ private fun SummaryItem(
     ){
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall,
+            style = OnulDoTypography.caption3Bold,
             color = DarkBrown70
         )
 
@@ -46,7 +47,7 @@ private fun SummaryItem(
 
         Text(
             text = value,
-            style = MaterialTheme.typography.titleMedium,
+            style = OnulDoTypography.title2ExtraBold,
             color = valueColor
         )
     }

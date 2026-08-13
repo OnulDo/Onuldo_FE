@@ -29,6 +29,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown20
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
@@ -40,6 +41,7 @@ import com.example.onuldo_fe.ui.theme.SourCream
  */
 @Composable
 fun PartyLeaveConfirmDialog(
+    isHost: Boolean,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
@@ -68,21 +70,19 @@ fun PartyLeaveConfirmDialog(
                         text = "파티를 나가시겠습니까?",
                         modifier = Modifier.fillMaxWidth(),
                         color = BlackBrown,
-                        fontFamily = Pretendard,
-                        fontSize = 17.sp,
-                        lineHeight = 20.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = OnulDoTypography.body2Bold,
                         textAlign = TextAlign.Center
                     )
-                    Spacer(Modifier.height(spacing.spacing12))
+                    Spacer(Modifier.height(if (isHost) spacing.spacing12 else spacing.spacing18))
                     Text(
-                        text = "정말 파티를 나가시겠습니까?",
+                        text = if (isHost) {
+                            "파티를 나가게 되면 파티원 중\n1명이 방장을 이어받아요"
+                        } else {
+                            "정말 파티를 나가시겠습니까?"
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         color = DarkBrown70,
-                        fontFamily = Pretendard,
-                        fontSize = 13.sp,
-                        lineHeight = 20.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = OnulDoTypography.caption1Medium,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -97,9 +97,6 @@ fun PartyLeaveConfirmDialog(
                     PartyLeaveDialogButton(
                         text = "취소",
                         color = DarkBrown50,
-                        fontSize = 15,
-                        lineHeight = 18,
-                        fontWeight = FontWeight.Medium,
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     )
@@ -107,9 +104,6 @@ fun PartyLeaveConfirmDialog(
                     PartyLeaveDialogButton(
                         text = "나가기",
                         color = Persimmon,
-                        fontSize = 14,
-                        lineHeight = 22,
-                        fontWeight = FontWeight.Bold,
                         onClick = onConfirm,
                         modifier = Modifier.weight(1f)
                     )
@@ -123,9 +117,6 @@ fun PartyLeaveConfirmDialog(
 private fun PartyLeaveDialogButton(
     text: String,
     color: androidx.compose.ui.graphics.Color,
-    fontSize: Int,
-    lineHeight: Int,
-    fontWeight: FontWeight,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -138,19 +129,24 @@ private fun PartyLeaveDialogButton(
         Text(
             text = text,
             color = color,
-            fontFamily = Pretendard,
-            fontSize = fontSize.sp,
-            lineHeight = lineHeight.sp,
-            fontWeight = fontWeight,
+            style = OnulDoTypography.body4Bold,
             textAlign = TextAlign.Center
         )
     }
 }
 
-@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Preview(name = "파티 이탈 - 파티장", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
-private fun PartyLeaveConfirmDialogPreview() {
+private fun PartyHostLeaveConfirmDialogPreview() {
     OnulDo_FETheme {
-        PartyLeaveConfirmDialog(onDismiss = {}, onConfirm = {})
+        PartyLeaveConfirmDialog(isHost = true, onDismiss = {}, onConfirm = {})
+    }
+}
+
+@Preview(name = "파티 이탈 - 파티원", showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun PartyMemberLeaveConfirmDialogPreview() {
+    OnulDo_FETheme {
+        PartyLeaveConfirmDialog(isHost = false, onDismiss = {}, onConfirm = {})
     }
 }

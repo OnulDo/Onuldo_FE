@@ -39,6 +39,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.SourCream
 import kotlinx.coroutines.delay
@@ -57,7 +58,6 @@ fun PartyCapacitySelector(
             .height(60.dp)
             .background(White, RoundedCornerShape(14.dp))
             .border(1.dp, DarkBrown40, RoundedCornerShape(14.dp))
-            // TODO 디자인 시스템에 19dp 토큰이 추가되면 LocalSpacing으로 교체
             .padding(horizontal = 19.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -68,10 +68,7 @@ fun PartyCapacitySelector(
             "$capacity 명",
             Modifier.weight(1f),
             color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 17.sp,
-            lineHeight = 20.sp,
-            fontWeight = FontWeight.Bold,
+            style = OnulDoTypography.body2Bold,
             textAlign = TextAlign.Center
         )
         CapacityControlIcon(

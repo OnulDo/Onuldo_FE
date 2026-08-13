@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 
@@ -29,9 +30,6 @@ import com.example.onuldo_fe.ui.theme.Pretendard
 private val AuthButtonShape = RoundedCornerShape(14.dp)
 private const val AuthButtonHeight = 56
 
-/**
- * 외곽선 보조 버튼 (회원가입 등). primary 채움 버튼은 [OnulDoButton] 사용.
- */
 @Composable
 fun SecondaryButton(
     text: String,
@@ -52,16 +50,11 @@ fun SecondaryButton(
     ) {
         Text(
             text = text,
-            fontSize = 16.sp,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.ExtraBold,
+            style = OnulDoTypography.body2Bold
         )
     }
 }
 
-/**
- * 소셜 로그인 버튼 (카카오). 아이콘은 좌측 정렬, 텍스트는 중앙 정렬.
- */
 @Composable
 fun SocialLoginButton(
     text: String,
@@ -94,12 +87,9 @@ fun SocialLoginButton(
                         .align(Alignment.CenterStart),
                 )
             }
-            // Figma(RFD) 소셜 버튼 텍스트 = Pretendard Bold 15px.
             Text(
                 text = text,
-                fontSize = 15.sp,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
+                style = OnulDoTypography.body3Medium,
                 modifier = Modifier.align(Alignment.Center),
             )
         }

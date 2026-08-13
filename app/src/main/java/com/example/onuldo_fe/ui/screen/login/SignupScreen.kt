@@ -42,17 +42,14 @@ import com.example.onuldo_fe.ui.component.OnulDoButton
 import com.example.onuldo_fe.ui.component.OnuldoTextField
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.viewmodel.SignupViewModel
 
-/**
- * 회원가입(계정 만들기) — Figma Ready-for-Dev (node 5154:4298).
- * 뒤로가기 헤더 → 이메일/비밀번호/비밀번호 확인(실시간 유효성) → 환영 보너스 안내
- *  → 전체 약관 동의 카드 → "계속". 완료 시 프로필 설정으로 진행.
- */
+
 @Composable
 fun SignupScreen(
     onBack: () -> Unit,
@@ -77,7 +74,7 @@ fun SignupScreen(
         // Figma(RFD) 타이틀 = Pretendard ExtraBold 28px (headlineLarge 토큰과 동일).
         Text(
             text = "계정 만들기",
-            style = MaterialTheme.typography.headlineLarge,
+            style = OnulDoTypography.headline1ExtraBold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = gutter,
         )

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.HeaderCream
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Pretendard
 
@@ -56,10 +57,7 @@ fun PartyTopBar(
             text = title,
             modifier = Modifier.offset(x = 48.dp, y = 28.dp),
             color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 17.sp,
-            lineHeight = 20.sp,
-            fontWeight = FontWeight.Bold
+            style = OnulDoTypography.body2Bold
         )
     }
 }

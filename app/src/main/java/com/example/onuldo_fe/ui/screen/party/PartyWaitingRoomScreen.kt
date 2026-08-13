@@ -72,7 +72,6 @@ fun PartyWaitingRoomScreen(
                 .weight(1f)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
                 .padding(
                     start = spacing.spacing20,
                     top = 40.dp,
@@ -89,13 +88,9 @@ fun PartyWaitingRoomScreen(
             Spacer(Modifier.height(spacing.spacing24))
             Text(
                 "파티원",
-                // TODO 디자인 시스템에 4dp 토큰이 추가되면 LocalSpacing으로 교체
                 Modifier.padding(start = 4.dp),
                 color = BlackBrown,
-                fontFamily = Pretendard,
-                fontSize = 12.sp,
-                lineHeight = 22.sp,
-                fontWeight = FontWeight.Bold
+                style = OnulDoTypography.caption2Bold
             )
             Spacer(Modifier.height(spacing.spacing12))
 
@@ -113,16 +108,13 @@ fun PartyWaitingRoomScreen(
 
         Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
             Text(
-                text = errorMessage ?: "전원이 모이면 파티장이 시작할 수 있어요",
+                text = errorMessage ?: "모두 준비완료 시 파티장이 시작할 수 있어요",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = spacing.spacing20)
-                    // TODO 디자인 시스템에 6dp 토큰이 추가되면 LocalSpacing으로 교체
                     .offset(y = 6.dp),
                 color = if (errorMessage == null) DarkBrown50 else Persimmon,
-                fontFamily = Pretendard,
-                fontSize = 11.sp,
-                lineHeight = 13.sp,
+                style = OnulDoTypography.caption3Regular,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
             OnulDoButton(
@@ -135,8 +127,6 @@ fun PartyWaitingRoomScreen(
                 onClick = {
                     when {
                         isLeader -> onStartClick()
-                        // Fake API에서는 화면에 설정된 테스트 포인트로 검증한다.
-                        // Real API는 ViewModel이 준비 요청 직전에 최신 지갑 잔액을 다시 조회한다.
                         !isReadySubmitted && checkPointBeforeRequest &&
                             availablePoint != null && availablePoint < ui.deposit -> showPointDialog = true
                         else -> onReadyClick()
@@ -144,11 +134,8 @@ fun PartyWaitingRoomScreen(
                 },
                 // 준비 상태에서도 버튼을 활성화해 다시 대기 상태로 전환할 수 있다.
                 enabled = !isActionInProgress && if (isLeader) ui.canStart else true,
-                // TODO 디자인 시스템에 40dp 토큰이 추가되면 LocalSpacing으로 교체
                 modifier = Modifier.padding(top = 40.dp),
                 height = 52.dp,
-                fontSize = 17.sp,
-                lineHeight = 20.sp,
                 // 파티원 준비 상태는 회색, 대기 상태는 주황색 버튼으로 구분한다.
                 containerColor = if (!isLeader && isReadySubmitted) BlackBrown10 else Persimmon,
                 contentColor = if (!isLeader && isReadySubmitted) DarkBrown40 else SourCream,
@@ -176,6 +163,7 @@ fun PartyWaitingRoomScreen(
 
     if (showLeaveConfirmDialog) {
         PartyLeaveConfirmDialog(
+            isHost = isLeader,
             // 취소 또는 모달 바깥 영역 선택 시 대기방을 유지
             onDismiss = { showLeaveConfirmDialog = false },
             onConfirm = {
@@ -201,20 +189,13 @@ private fun PartyWaitingRoomInfoCard(ui: PartyWaitingRoomUi, modifier: Modifier 
         Text(
             ui.partyName,
             color = BlackBrown,
-            fontFamily = Pretendard,
-            fontSize = 14.sp,
-            lineHeight = 22.sp,
-            fontWeight = FontWeight.Bold
+            style = OnulDoTypography.body4Bold
         )
         Text(
             "모집중 · ${ui.members.size}/${ui.capacity}명 · ${ui.period} · 1인 ${"%,d".format(ui.deposit)}P",
-            // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
             Modifier.padding(top = 3.dp),
             color = DarkBrown,
-            fontFamily = Pretendard,
-            fontSize = 11.sp,
-            lineHeight = 13.sp,
-            fontWeight = FontWeight.Bold
+            style = OnulDoTypography.caption3Bold
         )
     }
 }

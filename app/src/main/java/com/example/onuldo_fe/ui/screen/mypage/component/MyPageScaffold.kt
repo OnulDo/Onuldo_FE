@@ -22,6 +22,7 @@ import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.component.OnulDoBackButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Pretendard
 
 /**
@@ -44,10 +45,7 @@ fun MyPageTopBar(
     ) {
         Text(
             text = title,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 17.sp,
-            lineHeight = 20.sp,
+            style = OnulDoTypography.body2Bold,
             color = BlackBrown,
         )
         OnulDoBackButton(
@@ -83,17 +81,12 @@ fun MyPageMenuRow(
     ) {
         Text(
             text = title,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
-            lineHeight = 22.sp,
+            style = OnulDoTypography.body4Bold,
             color = BlackBrown,
         )
         Text(
             text = value.orEmpty(),
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
+            style = OnulDoTypography.caption1Medium,
             color = DarkBrown50,
             textAlign = TextAlign.End,
             modifier = Modifier

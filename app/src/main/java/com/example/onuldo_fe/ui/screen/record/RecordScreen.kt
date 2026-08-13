@@ -27,6 +27,7 @@ import com.example.onuldo_fe.ui.screen.record.data.ProgressRecord
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 
 @Composable
@@ -46,9 +47,9 @@ fun RecordScreen(
     var selectedTab by remember(initialTab) { mutableStateOf(initialTab) }
 
     Column(Modifier.fillMaxSize().padding(top = 40.dp, start = 20.dp, end = 20.dp)) {
-        Text("기록", color = BlackBrown, style = MaterialTheme.typography.headlineMedium)
+        Text("기록", color = BlackBrown,style = OnulDoTypography.headline3Bold,)
         Spacer(Modifier.height(spacing.spacing8))
-        Text("내 챌린지 기록을 확인하세요", color = DarkBrown, style = MaterialTheme.typography.labelMedium)
+        Text("내 챌린지 기록을 확인하세요", color = DarkBrown, style = OnulDoTypography.caption1Regular)
         Spacer(Modifier.height(spacing.spacing24))
         RecordTabRow(selectedTab = selectedTab, onTabSelected = { selectedTab = it })
         Spacer(Modifier.height(spacing.spacing16))
@@ -58,7 +59,7 @@ fun RecordScreen(
             errorMessage != null -> CenteredContent {
                 Text(
                     text = errorMessage,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = OnulDoTypography.title1Bold,
                     color = BlackBrown,
                     textAlign = TextAlign.Center
                 )

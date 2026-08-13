@@ -1,4 +1,4 @@
-package com.example.onuldo_fe.camera
+package com.example.onuldo_fe.ui.screen.camera
 
 import android.net.Uri
 import android.util.Size
@@ -32,9 +32,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
-import com.example.onuldo_fe.camera.component.CameraBottomBar
-import com.example.onuldo_fe.camera.component.CameraPreview
-import com.example.onuldo_fe.camera.component.CameraTopBar
+import com.example.onuldo_fe.ui.screen.camera.component.CameraBottomBar
+import com.example.onuldo_fe.ui.screen.camera.component.CameraPreview
+import com.example.onuldo_fe.ui.screen.camera.component.CameraTopBar
 import com.example.onuldo_fe.ui.screen.challenge.detail.component.VerificationNoticeBottomSheet
 import com.example.onuldo_fe.ui.component.OnulDoErrorDialog
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme

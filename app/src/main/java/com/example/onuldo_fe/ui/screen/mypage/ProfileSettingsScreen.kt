@@ -54,6 +54,7 @@ import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.viewmodel.mypage.ProfileSettingsViewModel
 
@@ -145,9 +146,7 @@ fun ProfileSettingsScreen(
 
         Text(
             text = nickname,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
+            style = OnulDoTypography.title1Bold,
             color = BlackBrown,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
@@ -155,9 +154,7 @@ fun ProfileSettingsScreen(
         Spacer(Modifier.height(8.dp))
         Text(
             text = email,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
+            style = OnulDoTypography.body4Medium,
             color = DarkBrown70,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
@@ -167,9 +164,7 @@ fun ProfileSettingsScreen(
 
         Text(
             text = "기본 정보",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 12.sp,
+            style = OnulDoTypography.caption2Medium,
             color = DarkBrown50,
             modifier = Modifier.padding(start = 24.dp, bottom = 8.dp),
         )

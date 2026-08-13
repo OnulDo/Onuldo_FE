@@ -20,6 +20,7 @@ import com.example.onuldo_fe.ui.component.OnulDoMediumButton
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 
 @Composable
@@ -49,7 +50,7 @@ fun EmptyRecordView(
 
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
+            style = OnulDoTypography.title1Bold,
             color = BlackBrown
         )
 
@@ -57,7 +58,7 @@ fun EmptyRecordView(
 
         Text(
             text = description,
-            style = MaterialTheme.typography.labelLarge,
+            style = OnulDoTypography.caption1Medium,
             color = DarkBrown,
             textAlign = TextAlign.Center
         )

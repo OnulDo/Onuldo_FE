@@ -50,9 +50,11 @@ import com.example.onuldo_fe.ui.component.RefreshOnResume
 import com.example.onuldo_fe.ui.screen.login.ProfileCharacters
 import com.example.onuldo_fe.ui.screen.mypage.component.MyPageMenuRow
 import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.BlackBrown70
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
@@ -160,9 +162,7 @@ fun MyMainScreen(
 
         Text(
             text = "로그아웃",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
+            style = OnulDoTypography.body4Bold,
             color = Persimmon,
             textAlign = TextAlign.Center,
             modifier = Modifier
@@ -172,9 +172,7 @@ fun MyMainScreen(
         Spacer(Modifier.height(8.dp))
         Text(
             text = "서비스 탈퇴",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 10.sp,
+            style = OnulDoTypography.caption4Medium,
             color = DarkBrown50,
             textAlign = TextAlign.Center,
             textDecoration = TextDecoration.Underline,
@@ -244,17 +242,13 @@ private fun ProfileCard(nickname: String, email: String, avatarRes: Int, onClick
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = nickname,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
+                style = OnulDoTypography.body1Bold,
                 color = BlackBrown,
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 text = email,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Normal,
-                fontSize = 12.sp,
+                style = OnulDoTypography.caption2Regular,
                 color = DarkBrown70,
             )
         }
@@ -292,19 +286,13 @@ private fun WalletSummary(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "내 포인트 지갑",
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 11.sp,
-                    letterSpacing = 0.44.sp,
-                    color = BlackBrown.copy(alpha = 0.7f),
+                    style = OnulDoTypography.caption3Bold,
+                    color = BlackBrown70,
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
                     text = point,
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp,
-                    letterSpacing = (-0.56).sp,
+                    style = OnulDoTypography.headline1Bold,
                     color = Persimmon,
                 )
             }
@@ -352,9 +340,7 @@ private fun WalletActionButton(
     ) {
         Text(
             text = text,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp,
+            style = OnulDoTypography.caption2Bold,
             color = if (filled) White else Persimmon,
         )
     }
@@ -364,9 +350,7 @@ private fun WalletActionButton(
 private fun SectionLabel(text: String) {
     Text(
         text = text,
-        fontFamily = Pretendard,
-        fontWeight = FontWeight.Medium,
-        fontSize = 12.sp,
+        style = OnulDoTypography.caption2Medium,
         color = DarkBrown50,
         modifier = Modifier.padding(start = 24.dp, bottom = 8.dp),
     )

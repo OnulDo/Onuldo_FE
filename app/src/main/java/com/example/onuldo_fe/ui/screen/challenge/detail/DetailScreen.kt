@@ -36,6 +36,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 
@@ -94,10 +95,7 @@ fun DetailScreen(
         ) {
             Text(
                 text = challenge.title,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 26.sp,
-                lineHeight = 30.sp,
+                style = OnulDoTypography.headline2Bold,
                 color = BlackBrown
             )
             Row(
@@ -106,19 +104,13 @@ fun DetailScreen(
             ) {
                 Text(
                     text = "$category 챌린지",
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
-                    lineHeight = 22.sp,
+                    style = OnulDoTypography.caption2Bold,
                     color = DarkBrown
                 )
                 Text(
                     text = "참여자 %,d명".format(challenge.participantCount),
                     modifier = Modifier.padding(start = 8.dp),
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 12.sp,
-                    lineHeight = 20.sp,
+                    style = OnulDoTypography.caption2Regular,
                     color = DarkBrown
                 )
             }

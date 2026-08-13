@@ -30,26 +30,20 @@ fun PartyInviteCodeCard(inviteCode: String, onCopyClick: () -> Unit, modifier: M
             Text(
                 "초대코드",
                 color = DarkBrown70,
-                fontFamily = Pretendard,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium
+                style = OnulDoTypography.caption2Medium
             )
             Text(
                 inviteCode,
-                // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
                 Modifier.padding(top = 3.dp),
                 color = BlackBrown,
-                fontFamily = Pretendard,
-                fontSize = 26.sp,
-                lineHeight = 30.sp,
-                fontWeight = FontWeight.Bold
+                style = OnulDoTypography.headline2Bold
             )
         }
         Box(
             Modifier.width(64.dp).height(36.dp).background(DarkBrown10, RoundedCornerShape(18.dp)).clickable(onClick = onCopyClick),
             contentAlignment = Alignment.Center
         ) {
-            Text("복사", color = DarkBrown, fontFamily = Pretendard, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+            Text("복사", color = DarkBrown, style = OnulDoTypography.caption2Medium)
         }
     }
 }

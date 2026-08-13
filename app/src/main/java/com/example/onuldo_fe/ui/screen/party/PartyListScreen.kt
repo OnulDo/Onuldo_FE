@@ -36,10 +36,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.model.home.ChallengeStatus
 import com.example.onuldo_fe.model.home.HomePartyChallenge
@@ -49,9 +47,9 @@ import com.example.onuldo_fe.ui.screen.home.components.HomePartyCard
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.LocalSpacing
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
-import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.SourCream
 import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.viewmodel.party.PartyCardUi
@@ -105,8 +103,15 @@ fun PartyListScreen(
         }
     ) {
     Column(Modifier.fillMaxSize().background(SourCream)) {
-        Text("파티", modifier = Modifier.padding(start = spacing.spacing24, top = partyTitleTopPadding), color = BlackBrown, fontFamily = Pretendard, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        // TODO 디자인 시스템에 21dp 토큰이 추가되면 LocalSpacing으로 교체
+        Text(
+            text = "파티",
+            modifier = Modifier.padding(
+                start = spacing.spacing24,
+                top = partyTitleTopPadding
+            ),
+            color = BlackBrown,
+            style = OnulDoTypography.headline3Bold
+        )
         Spacer(Modifier.height(21.dp))
         Row(Modifier.padding(horizontal = spacing.spacing20), horizontalArrangement = Arrangement.spacedBy(spacing.spacing10)) {
             Button(
@@ -124,9 +129,8 @@ fun PartyListScreen(
                     contentDescription = null,
                     modifier = Modifier.size(12.dp)
                 )
-                // TODO 디자인 시스템에 3dp 토큰이 추가되면 LocalSpacing으로 교체
                 Spacer(Modifier.width(3.dp))
-                Text("파티 만들기", fontFamily = Pretendard, fontSize = 14.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold)
+                Text("파티 만들기", style = OnulDoTypography.body4Bold)
             }
             OutlinedButton(
                 onClick = onInviteCodeClick,
@@ -135,15 +139,14 @@ fun PartyListScreen(
                 border = BorderStroke(1.5.dp, Persimmon),
                 colors = ButtonDefaults.outlinedButtonColors(containerColor = White),
                 contentPadding = PaddingValues(0.dp)
-            ) { Text("초대코드 입력", color = Persimmon, fontFamily = Pretendard, fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold) }
+            ) { Text("초대코드 입력", color = Persimmon, style = OnulDoTypography.caption2Bold) }
         }
         Spacer(Modifier.height(spacing.spacing24))
         Row(Modifier.padding(horizontal = spacing.spacing20), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(width = 4.dp, height = 19.dp).background(Persimmon, RoundedCornerShape(4.dp)))
             Spacer(Modifier.width(5.dp))
-            Text("나의 파티", color = BlackBrown, fontFamily = Pretendard, fontSize = 17.sp, lineHeight = 20.sp, fontWeight = FontWeight.Bold)
+            Text("나의 파티", color = BlackBrown, style = OnulDoTypography.body2Bold)
         }
-        // TODO 디자인 시스템에 14dp 토큰이 추가되면 LocalSpacing으로 교체
         Spacer(Modifier.height(14.dp))
         if (isLoading) {
             Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
@@ -155,7 +158,7 @@ fun PartyListScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(errorMessage, color = DarkBrown50, fontFamily = Pretendard, fontSize = 13.sp)
+                Text(errorMessage, color = DarkBrown50, style = OnulDoTypography.caption1Regular)
                 TextButton(onClick = onRetry) { Text("다시 시도", color = Persimmon) }
             }
         } else if (parties.isEmpty()) {
@@ -181,7 +184,6 @@ private fun PartyListEmptyContent(modifier: Modifier = Modifier) {
         iconRes = R.drawable.party_empty_character,
         title = "아직 시작한 파티가 없어요",
         description = "친구들과 함께 도전하여 더욱 즐겁게\n인증하세요!",
-        // TODO 디자인 시스템에 96dp 토큰이 추가되면 LocalSpacing으로 교체
         modifier = modifier.padding(top = 96.dp)
     )
 }

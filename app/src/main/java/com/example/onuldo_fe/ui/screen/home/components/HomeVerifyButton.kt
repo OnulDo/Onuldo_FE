@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.R
 import com.example.onuldo_fe.ui.theme.BlackBrown20
@@ -32,6 +31,7 @@ import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Pretendard
 import com.example.onuldo_fe.ui.theme.White
 import androidx.compose.ui.text.font.FontWeight
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 
 @Composable
 fun HomeVerifyButton(
@@ -40,8 +40,6 @@ fun HomeVerifyButton(
     width: Dp,
     height: Dp,
     iconSize: Dp,
-    fontSize: TextUnit,
-    lineHeight: TextUnit,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -83,10 +81,7 @@ fun HomeVerifyButton(
         Text(
             text = stringResource(R.string.home_challenge_action_verify),
             color = contentColor,
-            fontFamily = Pretendard,
-            fontSize = fontSize,
-            lineHeight = lineHeight,
-            fontWeight = FontWeight.Bold
+            style = OnulDoTypography.caption4Bold
         )
     }
 }

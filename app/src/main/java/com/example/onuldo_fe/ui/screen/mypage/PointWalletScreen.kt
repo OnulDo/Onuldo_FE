@@ -50,8 +50,10 @@ import com.example.onuldo_fe.viewmodel.mypage.WalletFilter
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown40
 import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
 import com.example.onuldo_fe.ui.theme.Persimmon10
@@ -207,9 +209,7 @@ fun PointWalletScreen(
             item {
                 Text(
                     text = "거래 내역",
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
+                    style = OnulDoTypography.body4Bold,
                     color = BlackBrown,
                     modifier = Modifier.padding(start = 24.dp),
                 )
@@ -261,28 +261,20 @@ private fun BalanceCard(summary: WalletSummary) {
     ) {
         Text(
             text = "보유 포인트",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 11.sp,
-            letterSpacing = 0.44.sp,
+            style = OnulDoTypography.caption3Bold,
             color = Color(0xFFC7430B),
         )
         Spacer(Modifier.height(4.dp))
         Text(
             text = "${formatAmount(summary.balance)} P",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 30.sp,
-            letterSpacing = (-0.6).sp,
+            style = OnulDoTypography.displayBold,
             color = Persimmon,
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = "진행 중 예치 ${formatPoint(summary.pendingPoints)}",
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Normal,
-            fontSize = 11.sp,
-            color = Color(0xFF6E5B49),
+            style = OnulDoTypography.caption3Regular,
+            color = DarkBrown70,
         )
     }
 }
@@ -300,9 +292,7 @@ private fun ActionButton(text: String, filled: Boolean, onClick: () -> Unit, mod
     ) {
         Text(
             text = text,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
+            style = OnulDoTypography.body4Bold,
             color = if (filled) White else BlackBrown,
         )
     }
@@ -323,25 +313,19 @@ private fun SettlementCard(summary: WalletSummary) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = "누적 정산 내역",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp,
+                 style = OnulDoTypography.body4Bold,
                 color = BlackBrown,
             )
             Spacer(Modifier.width(10.dp))
             Text(
                 text = "평균 환급률",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Medium,
-                fontSize = 11.sp,
+                style = OnulDoTypography.caption2Regular,
                 color = DarkBrown50,
             )
             Spacer(Modifier.width(4.dp))
             Text(
                 text = "${summary.averageReturnRate}%",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 11.sp,
+                style = OnulDoTypography.caption2Bold,
                 color = Persimmon,
             )
         }
@@ -372,17 +356,13 @@ private fun SettlementItem(label: String, value: String, valueColor: Color, modi
     ) {
         Text(
             text = label,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Medium,
-            fontSize = 10.sp,
-            color = Color(0xFF6E5B49),
+            style = OnulDoTypography.caption2Regular,
+            color = DarkBrown70
         )
         Spacer(Modifier.height(6.dp))
         Text(
             text = value,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp,
+            style = OnulDoTypography.caption2Bold,
             color = valueColor,
         )
     }
@@ -402,9 +382,7 @@ private fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit, mod
     ) {
         Text(
             text = text,
-            fontFamily = Pretendard,
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
+            style = OnulDoTypography.caption2Bold,
             color = if (selected) White else BlackBrown,
         )
     }
@@ -432,9 +410,7 @@ private fun TxRow(tx: Tx) {
         ) {
             Text(
                 text = tx.category.label,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp,
+                style = OnulDoTypography.caption1Bold,
                 color = tx.category.accent,
             )
         }
@@ -442,27 +418,21 @@ private fun TxRow(tx: Tx) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = tx.title,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+                style = OnulDoTypography.body4Bold,
                 color = TxDark,
                 maxLines = 1,
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 text = "${tx.category.label} · ${tx.date}",
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Medium,
-                fontSize = 11.sp,
+                style = OnulDoTypography.caption3Medium,
                 color = TxSubText,
             )
         }
         Column(horizontalAlignment = Alignment.End) {
             Text(
                 text = tx.amount,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+                style = OnulDoTypography.body4Bold,
                 color = tx.category.amountColor,
             )
             // 환급 breakdown("예치금 · 조정액")은 값이 있을 때만 표시.
@@ -470,17 +440,13 @@ private fun TxRow(tx: Tx) {
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = tx.breakdown,
-                    fontFamily = Pretendard,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
+                    style = OnulDoTypography.caption2Bold
                 )
             }
             Spacer(Modifier.height(4.dp))
             Text(
                 text = tx.balance,
-                fontFamily = Pretendard,
-                fontWeight = FontWeight.Normal,
-                fontSize = 10.sp,
+                style = OnulDoTypography.caption3Regular,
                 color = TxBalance,
             )
         }
