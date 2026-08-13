@@ -102,7 +102,7 @@ fun TermScreen(
                             style = OnulDoTypography.caption2Medium,
                             color = DarkBrown50,
                         )
-                        Spacer(Modifier.height(spacing.spacing48))
+                        Spacer(Modifier.height(48.dp))
                     }
 
                     term.content.forEach { block ->

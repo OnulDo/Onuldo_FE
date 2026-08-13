@@ -39,7 +39,10 @@ fun PhotoPreviewScreen(
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize().background(Color.Black)
     ) {
-        val layoutDimensions = calculateCameraLayoutDimensions(maxWidth, maxHeight)
+        val layoutDimensions = calculateCameraLayoutDimensions(
+            maxWidth = this.maxWidth,
+            maxHeight = this.maxHeight
+        )
 
         AsyncImage(
             model = imageUri,

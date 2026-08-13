@@ -28,6 +28,7 @@ import com.example.onuldo_fe.ui.theme.DarkBrown50
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.Green
 import com.example.onuldo_fe.ui.theme.Green2
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Red
@@ -43,6 +44,7 @@ fun CompleteRecordCard(
     depositAmount: Int,
     point: Int
 ) {
+    val spacing = LocalSpacing.current
     val statusColor = if (isSuccess) Green else Red
     Surface(
         shape = RoundedCornerShape(14.dp),
@@ -66,14 +68,14 @@ fun CompleteRecordCard(
             }
             Spacer(Modifier.height(4.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(title, style = MaterialTheme.typography.bodyMedium, color = BlackBrown)
+                Text(title, style = OnulDoTypography.body4Bold, color = BlackBrown)
                 Text(
                     text = if (isSuccess) "보너스" else "차감",
                     style = OnulDoTypography.caption2Bold,
                     color = Black
                 )
             }
-            Spacer(Modifier.height(3.dp))
+            Spacer(Modifier.height(4.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("달성률 $progress%", style = OnulDoTypography.caption3Regular, color = DarkBrown)
                 Text(
@@ -82,7 +84,7 @@ fun CompleteRecordCard(
                     color = statusColor
                 )
             }
-            Spacer(Modifier.height(2.dp))
+            Spacer(Modifier.height(3.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                 Text(
                     "$completeDate ${if (isSuccess) "완료" else "실패"}",

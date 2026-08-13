@@ -74,8 +74,7 @@ fun VerificationWaitingScreen(
                     textAlign = TextAlign.Center
                 )
             }
-            Spacer(modifier = Modifier.height(spacing.spacing48))
-
+            Spacer(Modifier.height(48.dp))
             Image(
                 painter = painterResource(id = R.drawable.verification_waiting_icon),
                 contentDescription = "인증 대기 아이콘",
