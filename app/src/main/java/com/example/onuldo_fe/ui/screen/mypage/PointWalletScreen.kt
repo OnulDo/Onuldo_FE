@@ -30,8 +30,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -307,6 +309,20 @@ private fun ActionButton(text: String, filled: Boolean, onClick: () -> Unit, mod
     }
 }
 
+/**
+ * Figma 텍스트 박스 높이를 그대로 재현하기 위해 lineHeight 트림을 끈다.
+ *
+ * Compose의 `LineHeightStyle` 기본값은 `Trim.Both`라, **한 줄짜리 Text는 위아래 여유 leading이
+ * 모두 잘려** `lineHeight` 지정이 무시되고 폰트 실측 높이(Pretendard ≈ 1.23em)로 그려진다.
+ * 그래서 Figma 좌표로 맞춘 카드가 실제로는 더 납작하게 나온다(누적 정산 카드 108 → 91.8dp).
+ */
+private fun TextStyle.figmaLineBox(): TextStyle = copy(
+    lineHeightStyle = LineHeightStyle(
+        alignment = LineHeightStyle.Alignment.Center,
+        trim = LineHeightStyle.Trim.None,
+    ),
+)
+
 @Composable
 private fun SettlementCard(summary: WalletSummary) {
     val spacing = LocalSpacing.current
@@ -325,19 +341,19 @@ private fun SettlementCard(summary: WalletSummary) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = "누적 정산 내역",
-                 style = OnulDoTypography.body4Bold,
+                style = OnulDoTypography.body4Bold.figmaLineBox(),
                 color = BlackBrown,
             )
             Spacer(Modifier.width(spacing.spacing10))
             Text(
                 text = "평균 환급률",
-                style = OnulDoTypography.caption2Regular,
+                style = OnulDoTypography.caption2Regular.figmaLineBox(),
                 color = DarkBrown70,
             )
             Spacer(Modifier.width(4.dp))
             Text(
                 text = "${summary.averageReturnRate}%",
-                style = OnulDoTypography.caption2Bold,
+                style = OnulDoTypography.caption2Bold.figmaLineBox(),
                 color = Persimmon70,
             )
         }
@@ -368,13 +384,13 @@ private fun SettlementItem(label: String, value: String, valueColor: Color, modi
     ) {
         Text(
             text = label,
-            style = OnulDoTypography.caption2Regular,
+            style = OnulDoTypography.caption2Regular.figmaLineBox(),
             color = DarkBrown70
         )
         // Figma 라벨 top 361 → 값 top 380. 라벨 lineHeight가 20이라 별도 간격이 없다.
         Text(
             text = value,
-            style = OnulDoTypography.caption2Bold,
+            style = OnulDoTypography.caption2Bold.figmaLineBox(),
             color = valueColor,
         )
     }
