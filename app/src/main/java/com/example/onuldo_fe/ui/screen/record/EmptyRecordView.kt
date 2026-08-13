@@ -36,8 +36,7 @@ fun EmptyRecordView(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(spacing.spacing76))
-
+        Spacer(Modifier.height(76.dp))
         Image(
             modifier = Modifier
                 .width(120.dp)
@@ -63,7 +62,7 @@ fun EmptyRecordView(
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(spacing.spacing48))
+        Spacer(Modifier.height(48.dp))
 
         OnulDoMediumButton(
             text = "챌린지 둘러보기",
