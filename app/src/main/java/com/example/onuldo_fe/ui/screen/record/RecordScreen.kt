@@ -48,7 +48,7 @@ fun RecordScreen(
 
     Column(Modifier.fillMaxSize().padding(top = 40.dp, start = 20.dp, end = 20.dp)) {
         Text("기록", color = BlackBrown,style = OnulDoTypography.headline3Bold,)
-        Spacer(Modifier.height(spacing.spacing8))
+        Spacer(Modifier.height(6.dp))
         Text("내 챌린지 기록을 확인하세요", color = DarkBrown, style = OnulDoTypography.caption1Regular)
         Spacer(Modifier.height(spacing.spacing24))
         RecordTabRow(selectedTab = selectedTab, onTabSelected = { selectedTab = it })

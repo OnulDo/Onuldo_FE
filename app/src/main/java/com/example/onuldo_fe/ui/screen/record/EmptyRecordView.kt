@@ -45,7 +45,7 @@ fun EmptyRecordView(
             contentDescription = null
         )
 
-        Spacer(modifier = Modifier.height(spacing.spacing16))
+        Spacer(modifier = Modifier.height(spacing.spacing8))
 
         Text(
             text = title,
@@ -53,7 +53,6 @@ fun EmptyRecordView(
             color = BlackBrown
         )
 
-        Spacer(modifier = Modifier.height(spacing.spacing8))
 
         Text(
             text = description,

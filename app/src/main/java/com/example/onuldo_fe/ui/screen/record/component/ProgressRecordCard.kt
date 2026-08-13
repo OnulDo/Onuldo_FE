@@ -39,6 +39,7 @@ import com.example.onuldo_fe.ui.theme.Red
 import com.example.onuldo_fe.ui.theme.Red2
 import com.example.onuldo_fe.ui.theme.White
 import com.example.onuldo_fe.model.record.OngoingDailyStatus
+import com.example.onuldo_fe.ui.theme.DarkBrown70
 
 @Composable
 fun ProgressRecordCard(
@@ -70,7 +71,7 @@ fun ProgressRecordCard(
                 style = OnulDoTypography.caption3Bold,
                 color = statusStyle.contentColor
             )
-            Spacer(Modifier.height(spacing.spacing12))
+            Spacer(Modifier.height(spacing.spacing14))
             Column() {
                 Surface(
                     modifier = Modifier.width(96.dp).height(22.dp),
@@ -99,11 +100,11 @@ fun ProgressRecordCard(
                 gapSize = 0.dp,
                 drawStopIndicator = {}
             )
-            Spacer(Modifier.height(spacing.spacing10))
+            Spacer(Modifier.height(spacing.spacing8))
             Text(
                 "예치 ${"%,d".format(depositAmount)}P",
                 style = OnulDoTypography.caption3Regular,
-                color = DarkBrown50
+                color = DarkBrown70
             )
         }
     }

@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.example.onuldo_fe.ui.theme.BlackBrown
 import com.example.onuldo_fe.ui.theme.DarkBrown70
 import com.example.onuldo_fe.ui.theme.Green
+import com.example.onuldo_fe.ui.theme.LocalSpacing
 import com.example.onuldo_fe.ui.theme.OnulDoTypography
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
 import com.example.onuldo_fe.ui.theme.Persimmon
@@ -37,13 +38,15 @@ private fun SummaryItem(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ){
+        val spacing = LocalSpacing.current
+
         Text(
             text = title,
             style = OnulDoTypography.caption3Bold,
             color = DarkBrown70
         )
 
-        Spacer(modifier = Modifier.height(7.dp))
+        Spacer(modifier = Modifier.height(spacing.spacing8))
 
         Text(
             text = value,
@@ -59,7 +62,6 @@ fun RecordSummaryCard(
     successRate: Int,
     totalPoint: Int,
 ) {
-
     //총적립 텍스트 +/- 조건 처리
     val pointText = when {
         totalPoint > 0 -> "+${String.format("%,d", totalPoint)}P"

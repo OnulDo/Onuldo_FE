@@ -45,7 +45,7 @@ fun CompleteRecordScreen(
             successRate = successRate,
             totalPoint = totalSavedAmount
         )
-        Spacer(Modifier.height(spacing.spacing24))
+        Spacer(Modifier.height(spacing.spacing28))
         CompleteFilterRow(
             selectedFilter = selectedFilter,
             allCount = completeList.size,
@@ -53,7 +53,7 @@ fun CompleteRecordScreen(
             failCount = failCount,
             onFilterSelected = { selectedFilter = it }
         )
-        Spacer(Modifier.height(spacing.spacing16))
+        Spacer(Modifier.height(spacing.spacing24))
         LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(spacing.spacing12)
