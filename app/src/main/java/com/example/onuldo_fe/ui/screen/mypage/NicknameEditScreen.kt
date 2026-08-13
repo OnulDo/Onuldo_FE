@@ -107,6 +107,8 @@ fun NicknameEditScreen(
                 serverError != null -> serverError
                 else -> "2~8자 한글 · 영문 · 숫자"
             },
+            // 이 화면 Figma(8672:32057)는 입력 80 → 헬퍼 90으로 10dp다(기본값 4는 회원가입 기준).
+            supportingTopPadding = 10.dp,
         )
 
         Spacer(Modifier.weight(1f))

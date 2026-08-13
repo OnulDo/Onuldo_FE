@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onuldo_fe.ui.theme.DarkBrown40
@@ -33,6 +34,10 @@ import com.example.onuldo_fe.ui.theme.White
  * 좌우 20dp 여백은 [OnulDoButton]과 동일하게 컴포넌트 내부에서 적용한다.
  *
  * 상태 우선순위: [isError](빨강) > [isSuccess](초록) > 기본. 헬퍼 텍스트 색도 동일하게 따라간다.
+ *
+ * [supportingTopPadding]은 입력칸과 헬퍼 문구 사이 간격이다. **Figma가 화면마다 다르다** —
+ * 회원가입 오류(`5154:4505`)는 입력 286 → 헬퍼 290으로 4dp, 닉네임 변경(`8672:32057`)은
+ * 입력 80 → 헬퍼 90으로 10dp다. 기본값은 기존 동작(4dp)을 유지하고, 다른 화면은 값을 넘겨 쓴다.
  */
 @Composable
 fun OnuldoTextField(
@@ -45,6 +50,7 @@ fun OnuldoTextField(
     isError: Boolean = false,
     isSuccess: Boolean = false,
     supportingText: String? = null,
+    supportingTopPadding: Dp = 4.dp,
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Next,
 ) {
@@ -97,7 +103,7 @@ fun OnuldoTextField(
                 text = supportingText,
                 style = OnulDoTypography.caption3Regular,
                 color = supportingColor,
-                modifier = Modifier.padding(PaddingValues(start = 4.dp, top = 4.dp)),
+                modifier = Modifier.padding(PaddingValues(start = 4.dp, top = supportingTopPadding)),
             )
         }
     }
