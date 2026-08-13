@@ -1,5 +1,6 @@
 package com.example.onuldo_fe.data.network
 
+import com.example.onuldo_fe.data.auth.dto.DeviceRequest
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -7,6 +8,7 @@ import retrofit2.http.POST
 /** `POST /api/auth/refresh` 요청 본문. */
 data class RefreshTokenRequest(
     val refreshToken: String,
+    val device: DeviceRequest,
 )
 
 /**

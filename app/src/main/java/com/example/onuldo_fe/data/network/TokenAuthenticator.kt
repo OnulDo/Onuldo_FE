@@ -4,6 +4,7 @@ import android.os.SystemClock
 import android.util.Log
 import com.google.gson.Gson
 import com.example.onuldo_fe.data.user.CurrentProfileImageStore
+import com.example.onuldo_fe.data.auth.dto.DeviceRequest
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
@@ -24,6 +25,7 @@ import okhttp3.Route
 class TokenAuthenticator(
     private val tokenStore: TokenStore,
     private val refreshApiProvider: () -> TokenRefreshApi,
+    private val deviceProvider: () -> DeviceRequest,
 ) : Authenticator {
 
     override fun authenticate(route: Route?, response: Response): Request? {
@@ -59,7 +61,7 @@ class TokenAuthenticator(
             }
 
             // 3. 재발급 시도.
-            return when (val outcome = refreshApiProvider().executeRefresh(refreshToken)) {
+            return when (val outcome = refreshApiProvider().executeRefresh(refreshToken, deviceProvider())) {
                 is TokenRefreshOutcome.Success -> {
                     tokenStore.update(outcome.tokens)
                     response.request.withToken(outcome.tokens.accessToken)

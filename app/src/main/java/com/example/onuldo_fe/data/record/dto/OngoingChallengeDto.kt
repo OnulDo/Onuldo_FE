@@ -8,5 +8,6 @@ data class OngoingChallengeDto(
     val daysUntilEnd: Int?,
     val achievementRate: Int?,
     val depositAmount: Int?,
-    val type: String?
+    val type: String?,
+    val dailyStatus: String?
 )
