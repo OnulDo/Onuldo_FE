@@ -73,7 +73,7 @@ fun PartyLeaveConfirmDialog(
                         style = OnulDoTypography.body2Bold,
                         textAlign = TextAlign.Center
                     )
-                    Spacer(Modifier.height(spacing.spacing12))
+                    Spacer(Modifier.height(if (isHost) spacing.spacing12 else spacing.spacing18))
                     Text(
                         text = if (isHost) {
                             "파티를 나가게 되면 파티원 중\n1명이 방장을 이어받아요"
