@@ -41,6 +41,7 @@ import com.example.onuldo_fe.ui.theme.SourCream
  */
 @Composable
 fun PartyLeaveConfirmDialog(
+    isLeader: Boolean = false,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
@@ -74,7 +75,11 @@ fun PartyLeaveConfirmDialog(
                     )
                     Spacer(Modifier.height(spacing.spacing12))
                     Text(
-                        text = "정말 파티를 나가시겠습니까?",
+                        text = if (isLeader) {
+                            "파티를 나가게 되면 파티원 중 \n1명이 방장을 이어받아요"
+                        } else {
+                            "정말 파티를 나가시겠습니까?"
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         color = DarkBrown70,
                         style = OnulDoTypography.caption1Medium,
