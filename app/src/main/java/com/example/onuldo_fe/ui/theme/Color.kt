@@ -8,6 +8,7 @@ val White = Color(0xFFFFFFFF)
 val BlackBrown = Color(0xFF1B130C)
 val BlackBrown70 = BlackBrown.copy(alpha = 0.7f)
 val BlackBrown50 = BlackBrown.copy(alpha = 0.5f)
+val BlackBrown40 = BlackBrown.copy(alpha = 0.4f)
 val BlackBrown20 = BlackBrown.copy(alpha = 0.2f)
 val BlackBrown10 = BlackBrown.copy(alpha = 0.1f)
 
@@ -21,6 +22,7 @@ val DarkBrown = Color(0xFF5C2C03)
 
 //SubColor1
 val Persimmon80 = Persimmon.copy(alpha = 0.8f)
+val Persimmon70 = Persimmon.copy(alpha = 0.7f)
 val Persimmon50 = Persimmon.copy(alpha = 0.5f)
 val Persimmon20 = Persimmon.copy(alpha = 0.2f)
 val Persimmon10 = Persimmon.copy(alpha = 0.1f)
