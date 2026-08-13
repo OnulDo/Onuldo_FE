@@ -3,10 +3,9 @@ package com.example.onuldo_fe.model.notification
 /**
  * 알림 설정 상태.
  *
- * [allEnabled]는 개별 항목과 독립적인 마스터 스위치다. 다만 `PATCH /notification-settings`의
- * type enum에 `ALL`이 없어 마스터 자체는 서버에 저장되지 않으므로(조회 응답만 담음), 화면은
- * 개별 항목에서 마스터 상태를 파생한다(`NotificationSettingsViewModel`의 변환 참고).
- * 서버에 `ALL` 타입이 추가되면 이 값을 그대로 쓰도록 되돌릴 수 있다.
+ * [allEnabled]는 개별 항목과 독립적인 마스터 스위치다. `PATCH /notification-settings`에
+ * `type=ALL_ENABLED`로 저장하며, true면 개별 6종 전부, false면 [settlementComplete]를
+ * 제외한 나머지가 서버에서 꺼진다(정산/환급은 필수 알림 정책이라 항상 유지).
  */
 data class NotificationSettings(
     val allEnabled: Boolean,

@@ -157,7 +157,7 @@ fun NotificationScreen(
                     items(notifications) { item ->
                         NotificationItemCard(item, onClick = { onItemClick(item) })
                     }
-                    // 목록 끝 도달 → 다음 페이지(커서 페이징)
+                    // 목록 끝 도달 → 다음 페이지(커서 페이징). 실패 안내는 Toast로만(Route에서 처리) — 로딩 스피너만
                     if (uiState.hasNext) {
                         item {
                             LaunchedEffect(notifications.size) { onLoadMore() }

@@ -21,11 +21,10 @@ import kotlinx.coroutines.sync.withLock
 /**
  * 마이 - 알림 설정.
  *
- * 서버 `PATCH`는 개별 항목 하나씩만 받고 "전체" 타입이 없다. 그래서 "전체 알림 수신" 토글은
- * 6종을 모두 같은 값으로 바꾸는 것으로 구현한다("모든 알림을 한 번에 끄거나 켤 수 있어요" 문구와 일치).
- * 개별 항목을 바꿀 때는 마스터 스위치를 건드리지 않는다(화면이 마스터로 개별 토글을 잠그기 때문).
- *
- * ⚠️ 마스터 스위치를 끈 상태는 서버에 저장되지 않는다 — [NotificationSettings] 주석 참고.
+ * "전체 알림 수신" 토글은 서버 `PATCH`에 `type=ALL_ENABLED` 한 건만 보낸다 — true면 서버가
+ * 개별 6종을 전부 켜고, false면 [SETTLEMENT_COMPLETE](정산/환급, 필수 알림 정책)를 제외한
+ * 나머지를 끈다. 개별 항목을 바꿀 때는 마스터 스위치를 건드리지 않는다(화면이 마스터로
+ * 개별 토글을 잠그기 때문).
  *
  * 화면은 기존 [NotificationSettingsState]를 그대로 쓰고, 여기서 서버 모델과 상호 변환한다.
  */
@@ -108,8 +107,7 @@ class NotificationSettingsViewModel(
 
         val changes: List<Pair<NotificationSettingType, Boolean>> =
             if (previous.all != newState.all) {
-                // 전체 토글: 개별 6종을 모두 같은 값으로 맞춘다.
-                NotificationSettingType.entries.map { it to newState.all }
+                listOf(NotificationSettingType.ALL_ENABLED to newState.all)
             } else {
                 buildList {
                     if (previous.challengeStart != newState.challengeStart) {
@@ -146,9 +144,6 @@ class NotificationSettingsViewModel(
                 for ((type, enabled) in changes) {
                     failure = userRepository.updateNotificationSetting(type, enabled)
                         .errorMessageOrNull()
-                    // 첫 실패에서 멈춘다. 그대로 밀어붙이면 화면은 실패로 처리했는데 남은 항목은
-                    // 새 값으로 저장돼 화면과 서버가 어긋난다. 전체 토글은 한 번에 6건을 보내므로
-                    // 중간에 실패하면 이 어긋남이 그대로 남는다.
                     if (failure != null) break
                 }
 
@@ -175,8 +170,6 @@ class NotificationSettingsViewModel(
  * 서버 값을 화면 상태로 옮긴다.
  *
  * 마스터 스위치는 서버 `allEnabled` 값을 그대로 표시한다.
- * (저장 쪽은 `PATCH`에 `ALL` 타입이 없어, 마스터 토글 시 [apply]에서 개별 6종을 일괄로 바꾼다.
- *  서버가 그에 맞춰 `allEnabled`를 재계산해 내려주지 않으면 재진입 시 표시가 어긋날 수 있다.)
  */
 private fun NotificationSettings.toUiState() = NotificationSettingsState(
     all = allEnabled,

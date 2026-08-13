@@ -133,9 +133,7 @@ class MyMainViewModel(
         }
     }
 
-    /** 탈퇴 실패 안내를 화면이 노출한 뒤 호출해 한 번만 뜨도록 비운다.
-     TODO: 추후 토스트 추가 부탁
-     */
+    /** 탈퇴 실패 안내를 화면이 노출한 뒤 호출해 한 번만 뜨도록 비운다.*/
     fun onDeleteFailedShown() {
         _uiState.update { it.copy(deleteFailedMessage = null) }
     }
