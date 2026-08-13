@@ -32,6 +32,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -88,8 +89,14 @@ fun GalleryScreen(
     val spacing = LocalSpacing.current
     val pullToRefreshState = rememberPullToRefreshState()
     // 화면 재생성 후에도 선택된 카테고리가 있으면 필터 칩을 펼쳐 활성 필터가 보이게(코드 래빗)
-    var filterSelected by remember(uiState.selectedCategory) {
+    var filterSelected by remember {
         mutableStateOf(uiState.selectedCategory != null)
+    }
+    // 초기값으로 리셋되어 필터 패널이 닫혀버림 → key 없이 유지하고, 외부에서 카테고리가 채워질 때만 열어줌
+    LaunchedEffect(uiState.selectedCategory) {
+        if (uiState.selectedCategory != null) {
+            filterSelected = true
+        }
     }
 
     // 카테고리 칩은 ChallengeCategory
@@ -224,7 +231,7 @@ private fun ChallengeCard(
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(130.dp)            // 디자인 스펙: 이미지 높이 130
+                .height(130.dp)
                 .background(DarkBrown10)   // 로딩/여백 대비 회색 배경 유지
         )
 
