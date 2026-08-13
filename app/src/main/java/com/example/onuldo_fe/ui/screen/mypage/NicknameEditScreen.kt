@@ -36,8 +36,9 @@ import com.example.onuldo_fe.utils.Validators
 import com.example.onuldo_fe.viewmodel.mypage.NicknameEditViewModel
 
 /**
- * 닉네임 변경 — Figma node `4019:4540`.
+ * 닉네임 변경 — Figma node `8672:32057`.
  * 설계서 규칙(2~8자 한글/영문/숫자, 특수문자 불가). 유효하고 기존과 다르면 '변경하기' 활성.
+ * (구 노드 `4837:2281`의 "2~10자" 안내는 낡은 값이고, 최신 노드는 2~8자로 코드와 일치한다.)
  *
  * [currentNickname]은 프로필 설정 화면이 이미 조회한 값을 라우트 인자로 넘겨받는다.
  * '변경하기'는 `PATCH /api/users/me/profile`로 nickname을 저장하고, **성공 응답에서만** [onBack]을 호출한다.
@@ -75,11 +76,11 @@ fun NicknameEditScreen(
             color = BlackBrown,
             modifier = Modifier.padding(horizontal = spacing.spacing20),
         )
-        // Figma는 제목 박스(lineHeight 40)와 부제를 겹쳐 배치했다. Compose는 줄 상자를 쌓으므로
-        // 간격 0이 최선이고, 그 아래 간격으로 다음 요소의 절대 위치를 맞춘다.
+        // Figma hero는 제목·부제를 간격 없이 세로로 쌓는다(h 50, gap 0).
         Text(
             text = "다른 사람에게 보여지는 이름이에요",
-            style = OnulDoTypography.body4Medium,
+            // 최신 노드(8672:32065)에 `Body3/Medium` 스타일이 새로 바인딩됐다(구 노드는 14 Medium).
+            style = OnulDoTypography.body3Medium,
             color = DarkBrown70,
             modifier = Modifier.padding(horizontal = spacing.spacing20),
         )
