@@ -35,7 +35,7 @@ import com.example.onuldo_fe.R
 import com.example.onuldo_fe.data.user.CurrentProfileImageStore
 import com.example.onuldo_fe.data.home.api.FakeHomeApi
 import com.example.onuldo_fe.data.home.dummy.FakeHomeScenario
-import com.example.onuldo_fe.repository.home.HomeRepositoryImpl
+import com.example.onuldo_fe.repository.home.toModel
 import com.example.onuldo_fe.ui.component.OnulDoMediumButton
 import com.example.onuldo_fe.ui.screen.home.components.EmptyChallengeContent
 import com.example.onuldo_fe.ui.screen.home.components.HomeChallengeCard
@@ -372,7 +372,6 @@ private fun HomeScreenAllCompletedPreview() {
 
 @Composable
 private fun HomeScenarioPreview(scenario: FakeHomeScenario) {
-    val repository = HomeRepositoryImpl(FakeHomeApi(scenario))
-    val uiState = runBlocking { repository.getHome().toUiState() }
+    val uiState = runBlocking { FakeHomeApi(scenario).getHome().toModel().toUiState() }
     OnulDo_FETheme { HomeScreen(uiState = uiState) }
 }

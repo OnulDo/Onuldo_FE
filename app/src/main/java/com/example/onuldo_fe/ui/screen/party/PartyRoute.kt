@@ -24,8 +24,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.onuldo_fe.data.party.dummy.PartyTestConfig
-import com.example.onuldo_fe.data.party.config.PartyApiConfig
 import com.example.onuldo_fe.model.party.CreatePartyCommand
 import com.example.onuldo_fe.ui.screen.challenge.detail.DetailRoute
 import com.example.onuldo_fe.ui.component.PermissionDialogType
@@ -34,7 +32,7 @@ import com.example.onuldo_fe.ui.screen.party.components.InviteCodeDialog
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.screen.challenge.gallery.GalleryRoute
 import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
-import com.example.onuldo_fe.util.moveToAppSettings
+import com.example.onuldo_fe.utils.moveToAppSettings
 import com.example.onuldo_fe.viewmodel.party.PartyAction
 import com.example.onuldo_fe.viewmodel.party.PartyCardUi
 import com.example.onuldo_fe.viewmodel.party.PartyFeedViewModel
@@ -394,17 +392,11 @@ fun PartyRoute(
             isSubmitting = partyState.action == PartyAction.Creating,
             errorMessage = partyState.errorMessage,
             onFormChange = partyViewModel::clearError,
-            // fake 포인트 부족 테스트 시 PartyTestConfig.AVAILABLE_POINT를 5_000으로 변경
-            // Real 생성에서는 서버가 보유 포인트를 최종 검증하므로 Fake 포인트로 요청을 막지 않는다.
-            availablePoint = if (PartyApiConfig.USE_REAL_CREATE) {
-                partyState.availablePoint
-            } else {
-                PartyTestConfig.AVAILABLE_POINT
-            },
+            availablePoint = partyState.availablePoint,
             showPointShortageFromServer = partyState.isCreatePointInsufficient,
             onPointShortageDismiss = partyViewModel::dismissCreatePointDialog,
             onChargePoint = onChargePoint,
-            checkPointBeforeRequest = !PartyApiConfig.USE_REAL_CREATE,
+            checkPointBeforeRequest = false,
             onCreate = { period, deposit ->
                 // 필수 선택값이 모두 준비된 경우에만 ViewModel에 생성 명령 전달
                 val challenge = selectedChallenge ?: return@PartyCreateScreen
@@ -475,19 +467,14 @@ fun PartyRoute(
             } else {
                 PartyWaitingRoomScreen(
                     ui = waitingRoom,
-                    // Real 준비 완료에서는 서버가 포인트를 검증하므로 Fake 포인트로 요청을 막지 않는다.
-                    availablePoint = if (PartyApiConfig.USE_REAL_READY) {
-                        partyState.availablePoint
-                    } else {
-                        PartyTestConfig.AVAILABLE_POINT
-                    },
+                    availablePoint = partyState.availablePoint,
                     isReadySubmitted = partyState.isReadySubmitted,
                     isActionInProgress = partyState.action != PartyAction.Idle,
                     errorMessage = partyState.errorMessage,
                     showPointShortageFromServer = partyState.isReadyPointInsufficient,
                     onPointShortageDismiss = partyViewModel::dismissReadyPointDialog,
                     onChargePoint = onChargePoint,
-                    checkPointBeforeRequest = !PartyApiConfig.USE_REAL_READY,
+                    checkPointBeforeRequest = false,
                     onBack = {
                         // 뒤로가기도 파티 탈퇴 요청으로 처리하고 성공 시에만 목록으로 이동
                         partyViewModel.leaveParty { screen = PartyScreen.List }
