@@ -39,7 +39,6 @@ import com.example.onuldo_fe.viewmodel.party.PartyFeedViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyInviteViewModel
 import com.example.onuldo_fe.viewmodel.party.PartyStatus
 import com.example.onuldo_fe.viewmodel.party.PartyViewModel
-import java.text.Normalizer
 
 // 파티 탭 내부 화면 전환 상태
 private enum class PartyScreen {
@@ -343,7 +342,7 @@ fun PartyRoute(
     when (screen) {
         PartyScreen.List -> PartyListScreen(
             // 정책상 파티 홈에는 모집 중 파티를 제외하고 진행 중 파티만 노출
-            parties = partyState.parties.filter { it.status == PartyStatus.InProgress },
+            parties = partyState.inProgressParties,
             onVerifyClick = ::handleVerifyClick,
             isLoading = partyState.isListLoading,
             errorMessage = partyState.errorMessage,
@@ -403,7 +402,7 @@ fun PartyRoute(
                 partyViewModel.createParty(
                     command = CreatePartyCommand(
                         // 화면 검증과 동일하게 정규화된 파티 이름을 생성 요청에 전달
-                        name = Normalizer.normalize(partyName.trim(), Normalizer.Form.NFC),
+                        name = partyName,
                         challengeId = challenge.id.toString(),
                         challengeName = challenge.title,
                         period = period,

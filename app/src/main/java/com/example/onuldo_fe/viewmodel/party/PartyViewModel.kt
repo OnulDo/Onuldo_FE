@@ -16,6 +16,8 @@ import com.example.onuldo_fe.model.party.PartyRole
 import com.example.onuldo_fe.model.party.PartySummary
 import com.example.onuldo_fe.model.party.PartyVerificationStatus
 import com.example.onuldo_fe.model.party.PartyWaitingRoom
+import com.example.onuldo_fe.model.party.isValidPartyName
+import com.example.onuldo_fe.model.party.normalizePartyName
 import com.example.onuldo_fe.repository.party.PartyRepository
 import com.example.onuldo_fe.repository.party.PartyRepositoryProvider
 import com.example.onuldo_fe.repository.user.UserRepository
@@ -52,7 +54,10 @@ data class PartyUiState(
     val availablePoint: Int? = null,                     // 실제 지갑 API에서 조회한 보유 포인트
     val isCreatePointInsufficient: Boolean = false,      // 생성 요청에서 서버가 판정한 포인트 부족 여부
     val isReadyPointInsufficient: Boolean = false        // 준비 요청에서 서버가 판정한 포인트 부족 여부
-)
+) {
+    val inProgressParties: List<PartyCardUi>
+        get() = parties.filter { it.status == PartyStatus.InProgress }
+}
 
 // 파티 생성부터 대기방 시작·이탈까지 파티의 핵심 상태 변경 관리
 class PartyViewModel(
@@ -192,6 +197,12 @@ class PartyViewModel(
     }
 
     fun createParty(command: CreatePartyCommand, onSuccess: (String) -> Unit) {
+        val normalizedCommand = command.copy(name = normalizePartyName(command.name))
+        if (!isValidPartyName(normalizedCommand.name)) {
+            uiState = uiState.copy(errorMessage = "파티 이름을 2~10자로 입력해 주세요.")
+            return
+        }
+
         // 생성 성공과 대기방 조회를 분리해 조회 실패 시 파티를 다시 생성하지 않도록 처리
         // action이 Idle이 아니면 연속 클릭에 따른 동일 파티 중복 생성 방지
         if (uiState.action != PartyAction.Idle) return
@@ -205,7 +216,7 @@ class PartyViewModel(
             fetchAvailablePoint()?.let { point ->
                 val availablePoint = point.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
                 uiState = uiState.copy(availablePoint = availablePoint)
-                if (availablePoint < command.deposit) {
+                if (availablePoint < normalizedCommand.deposit) {
                     uiState = uiState.copy(
                         action = PartyAction.Idle,
                         isCreatePointInsufficient = true
@@ -215,7 +226,7 @@ class PartyViewModel(
             }
 
             try {
-                val created = repository.createParty(command)
+                val created = repository.createParty(normalizedCommand)
                 uiState = uiState.copy(
                     waitingRoom = null,
                     isReadySubmitted = false,

@@ -28,7 +28,8 @@ import com.example.onuldo_fe.ui.screen.party.components.PartyOptionSelector
 import com.example.onuldo_fe.ui.screen.party.components.PartyTopBar
 import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
 import com.example.onuldo_fe.ui.theme.*
-import java.text.Normalizer
+import com.example.onuldo_fe.model.party.isValidPartyName
+import com.example.onuldo_fe.model.party.normalizePartyName
 
 @Composable
 fun PartyCreateScreen(
@@ -64,10 +65,9 @@ fun PartyCreateScreen(
         if (showPointShortageFromServer) showPointDialog = true
     }
     // 단어 사이 공백은 허용하고, 앞뒤 공백은 아래 정규화 과정에서 제거한다.
-    val partyNamePattern = remember { Regex("^[가-힣A-Za-z0-9 ]{2,10}$") }
     val normalizedPartyName = remember(partyName) {
         // 한글 입력기에서 조합형 자모로 전달된 이름을 완성형 한글로 변환
-        Normalizer.normalize(partyName.trim(), Normalizer.Form.NFC)
+        normalizePartyName(partyName)
     }
     val enabled = normalizedPartyName.isNotBlank() &&
         selectedChallenge != null &&
@@ -148,7 +148,7 @@ fun PartyCreateScreen(
             OnulDoButton(
                 text = if (isSubmitting) "만드는 중..." else "파티 만들기",
                 onClick = {
-                    if (!partyNamePattern.matches(normalizedPartyName)) {
+                    if (!isValidPartyName(normalizedPartyName)) {
                         isPartyNameError = true
                     } else {
                         onPartyNameChange(normalizedPartyName)

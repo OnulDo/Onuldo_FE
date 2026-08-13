@@ -38,7 +38,6 @@ import com.example.onuldo_fe.model.party.PartySettlementMember
 import com.example.onuldo_fe.model.party.PartySettlementMemberStatus
 import com.example.onuldo_fe.model.party.PartySettlementResult
 import com.example.onuldo_fe.model.party.PartySettlementStatus
-import com.example.onuldo_fe.repository.party.toModel
 import com.example.onuldo_fe.ui.screen.party.components.PartyMemberCard
 import com.example.onuldo_fe.ui.screen.party.components.PartyTopBar
 import com.example.onuldo_fe.ui.theme.BlackBrown
