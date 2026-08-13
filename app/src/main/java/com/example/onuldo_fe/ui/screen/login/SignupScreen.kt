@@ -1,0 +1,172 @@
+package com.example.onuldo_fe.ui.screen.login
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.ui.component.OnboardingBackHeader
+import com.example.onuldo_fe.ui.component.OnulDoButton
+import com.example.onuldo_fe.ui.component.OnuldoTextField
+import com.example.onuldo_fe.ui.theme.DarkBrown40
+import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
+import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.Persimmon10
+import com.example.onuldo_fe.ui.theme.Pretendard
+import com.example.onuldo_fe.ui.theme.White
+import com.example.onuldo_fe.viewmodel.SignupViewModel
+
+
+@Composable
+fun SignupScreen(
+    onBack: () -> Unit,
+    onNext: () -> Unit,
+    serverEmailError: String? = null,
+    onEmailEdited: () -> Unit = {},
+    viewModel: SignupViewModel = viewModel(),
+) {
+    val state by viewModel.uiState.collectAsState()
+    val gutter = Modifier.padding(horizontal = 20.dp)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .navigationBarsPadding(),
+    ) {
+        OnboardingBackHeader(onBack = onBack)
+
+        Spacer(Modifier.height(24.dp))
+        // Figma(RFD) 타이틀 = Pretendard ExtraBold 28px (headlineLarge 토큰과 동일).
+        Text(
+            text = "계정 만들기",
+            style = OnulDoTypography.headline1ExtraBold,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = gutter,
+        )
+
+        Spacer(Modifier.height(28.dp))
+
+        OnuldoTextField(
+            value = state.email,
+            onValueChange = {
+                onEmailEdited()
+                viewModel.onEmailChange(it)
+            },
+            label = "이메일",
+            placeholder = "example@email.com",
+            isSuccess = state.emailSuccess,
+            isError = state.emailError || serverEmailError != null,
+            supportingText = serverEmailError ?: state.emailSupport,
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next,
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        OnuldoTextField(
+            value = state.password,
+            onValueChange = viewModel::onPasswordChange,
+            label = "비밀번호",
+            placeholder = "영문·숫자·특수문자 8~20자",
+            isPassword = true,
+            isError = state.passwordError,
+            supportingText = state.passwordSupport,
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Next,
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        OnuldoTextField(
+            value = state.passwordConfirm,
+            onValueChange = viewModel::onPasswordConfirmChange,
+            label = "비밀번호 확인",
+            placeholder = "비밀번호를 다시 입력해주세요",
+            isPassword = true,
+            isError = state.confirmError,
+            supportingText = state.confirmSupport,
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done,
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        Spacer(Modifier.weight(1f))
+
+        OnulDoButton(
+            text = if (state.isCheckingEmail) "확인 중..." else "계속",
+            onClick = { viewModel.submit(onNext) },
+            enabled = state.isContinueEnabled,
+        )
+        Spacer(Modifier.height(24.dp))
+    }
+}
+
+/** 아이콘 의존성 없이 Canvas로 그린 체크박스. */
+@Composable
+// 소셜 가입 약관 화면([SocialTermsScreen])에서도 같은 체크박스를 쓴다.
+internal fun AgreeCheckbox(checked: Boolean) {
+    val shape = RoundedCornerShape(7.dp)
+    if (checked) {
+        Canvas(
+            modifier = Modifier
+                .size(24.dp)
+                .background(Persimmon, shape),
+        ) {
+            val w = size.width
+            val h = size.height
+            val path = Path().apply {
+                moveTo(w * 0.24f, h * 0.52f)
+                lineTo(w * 0.42f, h * 0.70f)
+                lineTo(w * 0.76f, h * 0.32f)
+            }
+            drawPath(
+                path = path,
+                color = White,
+                style = Stroke(width = 2.4.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+            )
+        }
+    } else {
+        Spacer(
+            modifier = Modifier
+                .size(24.dp)
+                .background(White, shape)
+                .border(1.5.dp, DarkBrown40, shape),
+        )
+    }
+}

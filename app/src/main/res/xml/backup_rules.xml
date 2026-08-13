@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- 기기별 식별자와 인증 토큰은 다른 기기로 복원하면 안 된다. -->
+    <exclude domain="sharedpref" path="auth_device.xml" />
+    <exclude domain="sharedpref" path="onuldo_auth_tokens.xml" />
+</full-backup-content>

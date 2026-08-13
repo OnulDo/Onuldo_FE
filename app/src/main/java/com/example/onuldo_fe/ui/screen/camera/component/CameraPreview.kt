@@ -1,0 +1,73 @@
+package com.example.onuldo_fe.ui.screen.camera.component
+
+import android.annotation.SuppressLint
+import androidx.camera.core.AspectRatio
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import androidx.camera.core.ImageCapture
+import androidx.compose.runtime.remember
+
+@SuppressLint("UnsafeOptInUsageError")
+@Composable
+fun CameraPreview(
+    imageCapture: ImageCapture,
+    lensFacing: Int,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    AndroidView(
+        modifier = modifier,
+        factory = { ctx ->
+
+            val previewView = PreviewView(ctx).apply {
+                implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                scaleType = PreviewView.ScaleType.FILL_CENTER
+            }
+
+            val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
+
+            cameraProviderFuture.addListener({
+
+                val cameraProvider = cameraProviderFuture.get()
+
+                val preview = Preview.Builder()
+                    .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                    .build()
+                    .also {
+                    it.surfaceProvider = previewView.surfaceProvider
+                }
+
+                val cameraSelector = CameraSelector.Builder()
+                    .requireLensFacing(lensFacing)
+                    .build()
+
+                try {
+                    cameraProvider.unbindAll()
+
+                    cameraProvider.bindToLifecycle(
+                        lifecycleOwner,
+                        cameraSelector,
+                        preview,
+                        imageCapture
+                    )
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+            }, ContextCompat.getMainExecutor(ctx))
+
+            previewView
+        }
+    )
+}

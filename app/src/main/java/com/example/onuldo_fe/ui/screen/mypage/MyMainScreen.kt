@@ -1,0 +1,392 @@
+package com.example.onuldo_fe.ui.screen.mypage
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import android.widget.Toast
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onuldo_fe.data.auth.dto.TermType
+import com.example.onuldo_fe.data.user.CurrentProfileImageStore
+import com.example.onuldo_fe.utils.ProfileAsset
+import com.example.onuldo_fe.ui.component.ConfirmDialog
+import com.example.onuldo_fe.viewmodel.mypage.MyMainViewModel
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.R
+import com.example.onuldo_fe.ui.component.RefreshOnResume
+import com.example.onuldo_fe.ui.screen.login.ProfileCharacters
+import com.example.onuldo_fe.ui.screen.mypage.component.MyPageMenuRow
+import com.example.onuldo_fe.ui.theme.BlackBrown
+import com.example.onuldo_fe.ui.theme.BlackBrown70
+import com.example.onuldo_fe.ui.theme.DarkBrown40
+import com.example.onuldo_fe.ui.theme.DarkBrown50
+import com.example.onuldo_fe.ui.theme.DarkBrown70
+import com.example.onuldo_fe.ui.theme.OnulDoTypography
+import com.example.onuldo_fe.ui.theme.OnulDo_FETheme
+import com.example.onuldo_fe.ui.theme.Persimmon
+import com.example.onuldo_fe.ui.theme.Persimmon10
+import com.example.onuldo_fe.ui.theme.Persimmon20
+import com.example.onuldo_fe.ui.theme.Pretendard
+import com.example.onuldo_fe.ui.theme.White
+
+/**
+ * 마이 - 메인 (Figma node `4310:2206`). 하단 5탭 스캐폴드의 '마이' 탭 콘텐츠.
+ * 프로필 카드 · 포인트 지갑 요약 · 설정/약관/정보 메뉴 리스트.
+ *
+ * 닉네임·이메일·보유 포인트는 `GET /api/users/me`로 채운다.
+ * 서비스 탈퇴는 서버 API가 없어 아직 동작하지 않는다.
+ */
+@Composable
+fun MyMainScreen(
+    onProfileClick: () -> Unit,
+    onWalletClick: () -> Unit,
+    onChargeClick: () -> Unit,
+    onWithdrawClick: () -> Unit,
+    onNotificationClick: () -> Unit,
+    onTermClick: (TermType) -> Unit = {},
+    onLoggedOut: () -> Unit = {},
+    viewModel: MyMainViewModel = viewModel(),
+) {
+    val state by viewModel.uiState.collectAsState()
+    val nickname = state.nickname
+    val email = state.email
+    val point = state.pointText
+    // 프로필 편집(PATCH) 직후 공유된 최신 이미지가 있으면 우선 사용하고, 없으면 조회값
+    val sharedProfileUrl by CurrentProfileImageStore.profileImageUrl.collectAsState()
+
+    // 로그아웃·회원 탈퇴는 팝업으로 검토
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    var showWithdrawDialog by remember { mutableStateOf(false) }
+
+    // 탈퇴 실패 시 무반응으로 보이지 않도록 안내 토스트를 한 번 띄운다.
+    val context = LocalContext.current
+    LaunchedEffect(state.deleteFailedMessage) {
+        state.deleteFailedMessage?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            viewModel.onDeleteFailedShown()
+        }
+    }
+
+    // 충전·챌린지 참여 등으로 보유 포인트가 바뀐 뒤 이 탭으로 돌아올 수 있다. ViewModel은
+    // 백스택에 살아 있어 한 번 조회한 값이 그대로 남으므로, 화면이 보일 때마다 새로 읽는다.
+    RefreshOnResume { viewModel.load() }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .statusBarsPadding()
+            .padding(bottom = 24.dp),
+    ) {
+        Spacer(Modifier.height(20.dp))
+
+        // 프로필 카드 → 프로필 설정
+        // 공유 프로필 이미지가 있으면 우선 사용하고, 없으면 서버 조회값을 사용
+        val characterIndex =
+            ProfileAsset.toCharacterIndex(sharedProfileUrl) ?: state.characterIndex
+
+        val avatarRes = characterIndex
+            ?.let { ProfileCharacters.getOrNull(it) }
+            ?: R.drawable.img_avatar_running
+
+        ProfileCard(
+            nickname = nickname,
+            email = email,
+            avatarRes = avatarRes,
+            onClick = onProfileClick,
+        )
+        Spacer(Modifier.height(16.dp))
+
+        // 포인트 지갑 요약
+        WalletSummary(
+            point = point,
+            onWalletClick = onWalletClick,
+            onChargeClick = onChargeClick,
+            onWithdrawClick = onWithdrawClick,
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        SectionLabel("설정")
+        //알림 이동 추가 (시온)
+        MenuCard(title = "알림 설정", onClick = onNotificationClick)
+
+        Spacer(Modifier.height(20.dp))
+
+        SectionLabel("약관 및 정책")
+        MenuCard(title = "서비스 이용약관", onClick = { onTermClick(TermType.SERVICE) })
+        Spacer(Modifier.height(10.dp))
+        MenuCard(title = "개인정보 처리방침", onClick = { onTermClick(TermType.PRIVACY) })
+        Spacer(Modifier.height(10.dp))
+        MenuCard(title = "환급 정책", onClick = { onTermClick(TermType.REFUND) })
+
+        Spacer(Modifier.height(20.dp))
+
+        SectionLabel("정보")
+        MenuCard(title = "앱 버전", value = "1.0.0 (Beta)", showChevron = false)
+
+        Spacer(Modifier.height(40.dp))
+
+        Text(
+            text = "로그아웃",
+            style = OnulDoTypography.body4Bold,
+            color = Persimmon,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showLogoutDialog = true },
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "서비스 탈퇴",
+            style = OnulDoTypography.caption4Medium,
+            color = DarkBrown50,
+            textAlign = TextAlign.Center,
+            textDecoration = TextDecoration.Underline,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showWithdrawDialog = true },
+        )
+    }
+
+    // 로그아웃 확인 — 확정 시 토큰 폐기 후 진입 화면으로
+    if (showLogoutDialog) {
+        ConfirmDialog(
+            title = "로그아웃",
+            description = "정말로 로그아웃 할까요?",
+            confirmText = "로그아웃",
+            onDismiss = { showLogoutDialog = false },
+            onConfirm = {
+                showLogoutDialog = false
+                viewModel.logout(onLoggedOut)
+            },
+        )
+    }
+
+    // 회원 탈퇴 확인 — 확정 시 DELETE /api/users/me (서버가 보관 사진 등도 함께 파기)
+    if (showWithdrawDialog) {
+        ConfirmDialog(
+            title = "회원탈퇴",
+            description = "정말로 회원탈퇴 할까요?",
+            confirmText = "회원탈퇴",
+            onDismiss = { showWithdrawDialog = false },
+            onConfirm = {
+                showWithdrawDialog = false
+                viewModel.deleteAccount(onLoggedOut)
+            },
+        )
+    }
+}
+
+@Composable
+private fun ProfileCard(nickname: String, email: String, avatarRes: Int, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .padding(horizontal = 20.dp)
+            .fillMaxWidth()
+            .height(100.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(White)
+            .border(1.dp, DarkBrown40, RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clip(CircleShape)
+                .background(Persimmon20),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                painter = painterResource(avatarRes),
+                contentDescription = null,
+                modifier = Modifier.size(57.dp),
+            )
+        }
+        Spacer(Modifier.size(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = nickname,
+                style = OnulDoTypography.body1Bold,
+                color = BlackBrown,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = email,
+                style = OnulDoTypography.caption2Regular,
+                color = DarkBrown70,
+            )
+        }
+        // 화살표는 Figma 에셋으로 통일한다(문자 '›'는 화면마다 크기가 달라짐).
+        Image(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,
+            modifier = Modifier.size(width = 9.dp, height = 17.dp),
+        )
+    }
+}
+
+@Composable
+private fun WalletSummary(
+    point: String,
+    onWalletClick: () -> Unit,
+    onChargeClick: () -> Unit,
+    onWithdrawClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 20.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Persimmon10)
+            .border(1.dp, Persimmon20, RoundedCornerShape(14.dp))
+            .padding(20.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onWalletClick),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "내 포인트 지갑",
+                    style = OnulDoTypography.caption3Bold,
+                    color = BlackBrown70,
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = point,
+                    style = OnulDoTypography.headline1Bold,
+                    color = Persimmon,
+                )
+            }
+            // 프로필 카드와 같은 화살표 에셋을 주황(Persimmon)으로 틴트.
+            Image(
+                painter = painterResource(R.drawable.ic_chevron_right),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(Persimmon),
+                modifier = Modifier.size(width = 9.dp, height = 17.dp),
+            )
+        }
+        Spacer(Modifier.height(14.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+            WalletActionButton(
+                text = "충전",
+                filled = true,
+                onClick = onChargeClick,
+                modifier = Modifier.weight(1f),
+            )
+            WalletActionButton(
+                text = "출금",
+                filled = false,
+                onClick = onWithdrawClick,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun WalletActionButton(
+    text: String,
+    filled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .height(38.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(if (filled) Persimmon else White)
+            .then(if (filled) Modifier else Modifier.border(1.5.dp, Persimmon20, RoundedCornerShape(14.dp)))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            style = OnulDoTypography.caption2Bold,
+            color = if (filled) White else Persimmon,
+        )
+    }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text = text,
+        style = OnulDoTypography.caption2Medium,
+        color = DarkBrown50,
+        modifier = Modifier.padding(start = 24.dp, bottom = 8.dp),
+    )
+}
+
+@Composable
+private fun MenuCard(
+    title: String,
+    value: String? = null,
+    showChevron: Boolean = true,
+    onClick: (() -> Unit)? = null,
+) {
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 20.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(White)
+            .border(1.dp, DarkBrown40, RoundedCornerShape(14.dp)),
+    ) {
+        MyPageMenuRow(
+            title = title,
+            value = value,
+            showChevron = showChevron,
+            onClick = onClick,
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 390, heightDp = 900)
+@Composable
+private fun MyMainScreenPreview() {
+    OnulDo_FETheme {
+        MyMainScreen(
+            onProfileClick = {}, onWalletClick = {}, onChargeClick = {},
+            onWithdrawClick = {}, onNotificationClick = {},
+        )
+    }
+}

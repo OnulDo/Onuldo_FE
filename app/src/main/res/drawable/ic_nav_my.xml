@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma BottomNav 아이콘(node 4353:73393)에서 추출. 색은 런타임 틴트로 처리하므로 fillColor는 기준색만 둔다. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="56"
+    android:viewportHeight="56">
+        <!-- 원본 뷰포트 53x56를 정사각 56x56로 맞추고 중앙 정렬 (24dp 박스에서 비율 유지) -->
+    <group android:translateX="1.5" android:translateY="0">
+    <path
+            android:fillColor="#FC6B2B"
+            android:pathData="M35.1394 12.5714C35.1394 7.83756 31.2706 4 26.4981 4C21.7257 4 17.8568 7.83756 17.8568 12.5714C17.8568 17.3053 21.7257 21.1429 26.4981 21.1429V25.1429C19.4985 25.1429 13.8242 19.5144 13.8242 12.5714C13.8242 5.62842 19.4985 0 26.4981 0C33.4977 0 39.172 5.62842 39.172 12.5714C39.172 19.5144 33.4977 25.1429 26.4981 25.1429V21.1429C31.2706 21.1429 35.1394 17.3053 35.1394 12.5714Z" />
+        <path
+            android:fillColor="#FC6B2B"
+            android:pathData="M26.5 29.7148C41.1355 29.7148 53 41.4834 53 56.0006H0C0 41.4834 11.8645 29.7148 26.5 29.7148ZM26.5 33.7148C15.4682 33.7148 6.29378 41.6014 4.39379 52.0006H48.6062C46.7062 41.6014 37.5318 33.7148 26.5 33.7148Z" />
+    </group>
+</vector>

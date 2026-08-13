@@ -1,0 +1,199 @@
+package com.example.onuldo_fe.ui.screen.party
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.onuldo_fe.ui.component.OnulDoButton
+import com.example.onuldo_fe.ui.screen.challenge.participate.component.InsufficientPointDialog
+import com.example.onuldo_fe.ui.screen.party.components.PartyCapacitySelector
+import com.example.onuldo_fe.ui.screen.party.components.PartyChallengeSelector
+import com.example.onuldo_fe.ui.screen.party.components.PartyNameTextField
+import com.example.onuldo_fe.ui.screen.party.components.PartyOptionSelector
+import com.example.onuldo_fe.ui.screen.party.components.PartyTopBar
+import com.example.onuldo_fe.ui.screen.challenge.gallery.Challenge
+import com.example.onuldo_fe.ui.theme.*
+import com.example.onuldo_fe.model.party.isValidPartyName
+import com.example.onuldo_fe.model.party.normalizePartyName
+
+@Composable
+fun PartyCreateScreen(
+    partyName: String,
+    onPartyNameChange: (String) -> Unit,
+    capacity: Int,
+    onCapacityChange: (Int) -> Unit,
+    selectedChallenge: Challenge?,
+    onChallengeClick: () -> Unit,
+    onBack: () -> Unit,
+    onCreate: (period: String, deposit: Int) -> Unit,
+    availablePoint: Int? = 50_000,
+    onChargePoint: () -> Unit = {},
+    isSubmitting: Boolean = false,
+    errorMessage: String? = null,
+    onFormChange: () -> Unit = {},
+    showPointShortageFromServer: Boolean = false,
+    onPointShortageDismiss: () -> Unit = {},
+    checkPointBeforeRequest: Boolean = false,
+    selectedChallengeCategoryLabel: String? = null
+) {
+    val spacing = LocalSpacing.current
+    val periods = listOf("2주", "4주", "8주", "12주")
+    val deposits = listOf(10_000, 20_000, 30_000, 50_000)
+    // 포인트 부족 → 충전 화면 왕복에도 유지되도록 rememberSaveable을 쓰되, 챌린지가 바뀌면
+    // (id가 바뀌면) 이전 선택을 초기화하는 기존 동작은 key로 그대로 유지한다.
+    var selectedPeriod by rememberSaveable(selectedChallenge?.id) { mutableIntStateOf(-1) }
+    var selectedDeposit by rememberSaveable(selectedChallenge?.id) { mutableIntStateOf(-1) }
+    var showPointDialog by remember { mutableStateOf(false) }
+    var isPartyNameError by remember { mutableStateOf(false) }
+
+    LaunchedEffect(showPointShortageFromServer) {
+        if (showPointShortageFromServer) showPointDialog = true
+    }
+    // 단어 사이 공백은 허용하고, 앞뒤 공백은 아래 정규화 과정에서 제거한다.
+    val normalizedPartyName = remember(partyName) {
+        // 한글 입력기에서 조합형 자모로 전달된 이름을 완성형 한글로 변환
+        normalizePartyName(partyName)
+    }
+    val enabled = normalizedPartyName.isNotBlank() &&
+        selectedChallenge != null &&
+        selectedPeriod >= 0 &&
+        selectedDeposit >= 0
+
+    Column(Modifier.fillMaxSize().background(SourCream)) {
+        PartyTopBar(title = "파티 만들기", onBack = onBack)
+        Column(
+            Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = spacing.spacing20)
+        ) {
+            Spacer(Modifier.height(53.dp))
+            SectionTitle("파티 이름", OnulDoTypography.caption2Bold)
+            Spacer(Modifier.height(7.dp))
+            PartyNameTextField(
+                value = partyName,
+                onValueChange = {
+                    isPartyNameError = false
+                    onFormChange()
+                    onPartyNameChange(it)
+                },
+                isError = isPartyNameError
+            )
+            if (isPartyNameError) {
+                Text(
+                    "한글, 영문, 숫자, 공백을 포함해 2~10자로 입력해주세요.",
+                    modifier = Modifier.padding(start = 4.dp, top = 6.dp),
+                    color = Persimmon,
+                    style = OnulDoTypography.caption3Regular
+                )
+            }
+            Spacer(Modifier.height(spacing.spacing26))
+            SectionTitle("함께할 챌린지", OnulDoTypography.caption2Bold)
+            Spacer(Modifier.height(spacing.spacing8))
+            PartyChallengeSelector(
+                challenge = selectedChallenge,
+                categoryLabel = selectedChallengeCategoryLabel,
+                onClick = onChallengeClick
+            )
+            if (selectedChallenge != null) {
+                Spacer(Modifier.height(22.dp))
+                SectionTitle("진행 기간", OnulDoTypography.body4Bold)
+                Spacer(Modifier.height(7.dp))
+                PartyOptionSelector(periods, selectedPeriod, onSelect = {
+                    onFormChange()
+                    selectedPeriod = it
+                }, textStyle = OnulDoTypography.body4Bold)
+                Spacer(Modifier.height(23.dp))
+                SectionTitle("도전금", OnulDoTypography.body4Bold)
+                Spacer(Modifier.height(7.dp))
+                PartyOptionSelector(deposits.map { "%,dP".format(it) }, selectedDeposit, onSelect = {
+                    onFormChange()
+                    selectedDeposit = it
+                }, textStyle = OnulDoTypography.caption2Bold)
+            }
+            Spacer(Modifier.height(if (selectedChallenge == null) spacing.spacing26 else 22.dp))
+            SectionTitle("모집 인원 (2~5명)", OnulDoTypography.caption2Bold)
+            Spacer(Modifier.height(spacing.spacing8))
+            PartyCapacitySelector(capacity = capacity, onCapacityChange = {
+                onFormChange()
+                onCapacityChange(it)
+            })
+            Spacer(Modifier.height(spacing.spacing16))
+        }
+        Box(Modifier.fillMaxWidth().height(138.dp).background(SourCream), contentAlignment = Alignment.TopCenter) {
+            errorMessage?.let {
+                Text(
+                    text = it,
+                    modifier = Modifier.padding(top = 14.dp),
+                    color = Persimmon,
+                    style = OnulDoTypography.caption3Regular
+                )
+            }
+            OnulDoButton(
+                text = if (isSubmitting) "만드는 중..." else "파티 만들기",
+                onClick = {
+                    if (!isValidPartyName(normalizedPartyName)) {
+                        isPartyNameError = true
+                    } else {
+                        onPartyNameChange(normalizedPartyName)
+                        val requiredDeposit = deposits[selectedDeposit]
+                        if (checkPointBeforeRequest && availablePoint != null && availablePoint < requiredDeposit) {
+                            showPointDialog = true
+                        } else {
+                            onCreate(periods[selectedPeriod], requiredDeposit)
+                        }
+                    }
+                },
+                enabled = enabled && !isSubmitting,
+                modifier = Modifier.padding(top = 40.dp),
+                height = 52.dp
+            )
+        }
+    }
+
+    if (showPointDialog) {
+        InsufficientPointDialog(
+            ownedPoint = availablePoint?.toLong(),
+            requiredPoint = deposits[selectedDeposit],
+            onDismiss = {
+                showPointDialog = false
+                onPointShortageDismiss()
+            },
+            onCharge = {
+                showPointDialog = false
+                onPointShortageDismiss()
+                onChargePoint()
+            }
+        )
+    }
+}
+
+@Composable
+private fun SectionTitle(text: String, style: TextStyle) = Text(
+    text = text,
+    modifier = Modifier.padding(start = 4.dp),
+    color = BlackBrown,
+    style = style
+)
+
+@Preview(name = "파티 생성 - 챌린지 미선택", showBackground = true, widthDp = 390, heightDp = 844)
+@Composable private fun PartyCreateEmptyPreview() { OnulDo_FETheme { PartyCreateScreen("", {}, 5, {}, null, {}, {}, { _, _ -> }) } }
+
+@Preview(name = "파티 생성 - 챌린지 선택", showBackground = true, widthDp = 390, heightDp = 844)
+@Composable private fun PartyCreateSelectedPreview() { OnulDo_FETheme { PartyCreateScreen("갓생팟", {}, 5, {}, Challenge(1L, "30일 헬스 챌린지", 0), {}, {}, { _, _ -> }) } }
